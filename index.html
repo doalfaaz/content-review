@@ -2133,8 +2133,9 @@
 <link rel="stylesheet" href="./native-saved.css" />
 <link rel="stylesheet" href="./native-studio.css" />
 <style id="ce-share-trim">
-#sidebar-nav button[data-tab="plan"], #sidebar-nav button[data-tab="saved"],
-#sidebar-nav button[data-tab="write"], #sidebar-nav button[data-tab="grow"] { display: none !important; }
+/* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
+html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
+html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
 <link rel="stylesheet" href="./ce-mobile.css" />
 <script src="./ce-touch-edit.js"></script>
@@ -2144,6 +2145,11 @@
    A physical screen is unambiguous — key the phone layer off it so the UI
    never depends on viewport-meta cooperation. */
 (function () {
+  try {
+    var isOwner = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge);
+    if (!isOwner) { try { isOwner = !!localStorage.getItem('ce_sync_key'); } catch (_) {} }
+    if (!isOwner) document.documentElement.classList.add('ce-share');
+  } catch (_) {}
   var apply = function () {
     var physicalSmall = Math.min(window.screen.width, window.screen.height) <= 820;
     var narrowLayout = window.innerWidth <= 700;
@@ -12698,10 +12704,11 @@
 
       var sectionDefs = [];
       if (activeType === 'all') {
+        // Owner 2026-09-10: poems lead the Saved Bank (our core format first).
         sectionDefs = [
-          { type: 'carousel', icon: 'books', title: 'Carousels', badge: 'Ranked by Score' },
+          { type: 'poem', icon: 'camera', title: 'Poems', badge: 'Oldest first' },
           { type: 'post', icon: 'pencil', title: 'Winning Posts', badge: 'Ranked by Score' },
-          { type: 'poem', icon: 'camera', title: 'Poems', badge: 'Oldest first' }
+          { type: 'carousel', icon: 'books', title: 'Carousels', badge: 'Ranked by Score' }
         ];
       } else if (activeType === 'carousel') {
         sectionDefs = [{ type: 'carousel', icon: 'books', title: 'Carousels', badge: 'Ranked by Score' }];

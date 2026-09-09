@@ -1,23 +1,27 @@
 /* ==========================================================================
-   CE phone layer — GitHub Pages / iPhone viewing (owner 2026-09-09)
+   CE phone layer — OWNED BY THE APP SOURCE (Resources/ce-mobile.css; merged by web/build_pages_merge.py). Never edit the pages copy directly. Owner 2026-09-10.
    The app chrome was built for the Mac window. On a phone: the sidebar
    becomes a slim icon rail, the dock columns stack, the studio topbar
    wraps cleanly, library cards go single-column, and every control keeps
    a 44px touch target. Desktop rules above stay untouched.
    ========================================================================== */
 
-/* ---------- Shell: keep the icon rail usable, drop text labels ---------- */
+/* ---------- Shell: the OWNER drawer is the 2026-09-03 touch drawer
+   (min(78vw,300px), labels, scrim, tap-outside) — app CSS owns it, this
+   layer must never shrink it. The compact 64px icon rail exists ONLY for
+   share visitors (html.ce-share, set by the boot script when there is no
+   bridge and no stored write key). ---------- */
 @media (max-width: 700px) {
-  #sidebar {
+  html.ce-share #sidebar {
     width: 64px !important;
     min-width: 64px !important;
     max-width: 64px !important;
   }
-  #sidebar .sidebar-label,
-  #sidebar-nav button span:not([class*="icon"]) {
+  html.ce-share #sidebar .sidebar-label,
+  html.ce-share #sidebar-nav button span:not([class*="icon"]) {
     display: none !important;
   }
-  #sidebar-nav button {
+  html.ce-share #sidebar-nav button {
     min-width: 44px !important;
     min-height: 44px !important;
     justify-content: center !important;
@@ -267,18 +271,18 @@
 
 /* ===== phone hard-gate twins (html.ce-phone) ===== */
 /* class twin of @media (max-width: 700px) { */
-html.ce-phone {
+html.ce-share {
 
   #sidebar {
     width: 64px !important;
     min-width: 64px !important;
     max-width: 64px !important;
   }
-  #sidebar .sidebar-label,
-  #sidebar-nav button span:not([class*="icon"]) {
+  html.ce-share #sidebar .sidebar-label,
+  html.ce-share #sidebar-nav button span:not([class*="icon"]) {
     display: none !important;
   }
-  #sidebar-nav button {
+  html.ce-share #sidebar-nav button {
     min-width: 44px !important;
     min-height: 44px !important;
     justify-content: center !important;
