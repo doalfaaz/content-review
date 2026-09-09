@@ -301,6 +301,8 @@
         healEndpointIfDead();
       });
   }
+  // test/probe hook (final refinement): deterministic pull for E2E checks
+  window.__CE_PULL_REMOTE_EDITS__ = pullRemoteEdits;
   setTimeout(pullRemoteEdits, 1200);
   setInterval(pullRemoteEdits, 60000);
 
