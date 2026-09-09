@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CE Studio" />
+    <meta name="theme-color" content="#121016" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: file: ce-still:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: file: ce-still:; connect-src 'self' https://tushars-macbook-air.tail697d80.ts.net http://192.168.1.35:4145 http://localhost:4145 http://127.0.0.1:4145; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <title>Content Engine Studio</title>
 <style>
@@ -1136,7 +1142,7 @@
   .main-content {
     flex: 1;
     overflow-y: auto;
-    padding: 66px 24px 24px; /* top bar floats above; content scrolls under it */
+    padding: var(--topbar-h, 66px) 24px 24px; /* top bar floats above; --topbar-h is measured live (W3) */
     background: var(--bg);
     color: var(--ink);
     transition: background 0.2s ease, color 0.2s ease;
@@ -2150,6 +2156,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (!isOwner) { try { isOwner = !!localStorage.getItem('ce_sync_key'); } catch (_) {} }
     if (!isOwner) document.documentElement.classList.add('ce-share');
   } catch (_) {}
+  var syncTopbar = function () {
+    var tb = document.querySelector('.topbar, .app-topbar');
+    if (tb) document.documentElement.style.setProperty('--topbar-h', Math.ceil(tb.getBoundingClientRect().height) + 'px');
+  };
+  syncTopbar();
+  addEventListener('resize', syncTopbar);
+  setInterval(syncTopbar, 2000);
   var apply = function () {
     var physicalSmall = Math.min(window.screen.width, window.screen.height) <= 820;
     var narrowLayout = window.innerWidth <= 700;

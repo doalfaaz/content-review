@@ -119,6 +119,21 @@
      Every save POSTs the deck there; the Mac app reads the same store, so both
      sides show ONE version (last-write-wins per deck by updatedAt). */
   var SYNC_PATH = '/39c4ee5650102ee027bd87bcc4e9a2ea';
+  // W7: honest degradation — when the Mac is unreachable (in-app Chromium
+  // webviews deny Local-Network-Access, Mac asleep, cellular), never leave a
+  // silent dead button. Surface the manual route once and record the mode.
+  window.__CE_SYNC_UNREACHABLE__ = false;
+  function markUnreachable(mode) {
+    if (window.__CE_SYNC_UNREACHABLE__) return;
+    window.__CE_SYNC_UNREACHABLE__ = true;
+    try { localStorage.setItem('ce_last_sync_error', mode + ' @ ' + new Date().toISOString()); } catch (_) {}
+    if (window.showAppToast) window.showAppToast('Mac unreachable — open in Safari or use Download-for-phone');
+    console.warn('[ce-sync] unreachable:', mode);
+  }
+  function markReachable() {
+    window.__CE_SYNC_UNREACHABLE__ = false;
+    try { localStorage.removeItem('ce_last_sync_error'); } catch (_) {}
+  }
   function findSyncEndpoint(cb) {
     function discover() {
       var cands = [];
@@ -130,7 +145,7 @@
       }
       var i = 0;
       var tryNext = function () {
-        if (i >= cands.length) { cb(null); return; }
+        if (i >= cands.length) { markUnreachable('discovery-failed'); cb(null); return; }
         var base = cands[i++];
         fetch(base + '/health', { mode: 'cors' })
           .then(function (r) { return r.ok ? base : null; })
@@ -232,7 +247,9 @@
         return res;
       });
     }
-    attempt(getWriteKey(), false).catch(function () {});
+    attempt(getWriteKey(), false).then(function (res) {
+      if (!res) markUnreachable('write-failed'); else markReachable();
+    }).catch(function () { markUnreachable('write-failed'); });
   };
 
   // Boot: re-apply locally-edited decks over the static payload so the site
@@ -268,8 +285,9 @@
     fetch(base + '/decks')
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
-        if (!data || !data.decks) { pullFailures++; healEndpointIfDead(); return; }
+        if (!data || !data.decks) { pullFailures++; healEndpointIfDead(); if (pullFailures === 0) markReachable(); else markUnreachable('pull-' + pullFailures); return; }
         pullFailures = 0;
+        markReachable();
         var local = {};
         try { local = JSON.parse(localStorage.getItem('ce_deck_edits') || '{}'); } catch (_) {}
         Object.keys(data.decks).forEach(function (id) {
@@ -298,6 +316,7 @@
       })
       .catch(function () {
         pullFailures++;
+        markUnreachable('pull-network');
         healEndpointIfDead();
       });
   }
@@ -361,6 +380,7 @@
       var unixMs = new Date(date + 'T' + time + ':00' + SYNC_IST).getTime();
       var payload = { deckId: deck.id, platform: platform, caption: caption, scheduleUnixMs: unixMs, slidesCount: slides };
       var btn = sheet.querySelector('#ce-sched-go');
+      if (window.__CE_SYNC_UNREACHABLE__) { status.textContent = 'Mac unreachable — open in Safari or use Download-for-phone.'; return; }
       btn.disabled = true; status.textContent = 'Sending to your Mac\u2026';
       function submit(key) {
         var ep = window.__CE_SYNC_ENDPOINT__;
