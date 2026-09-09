@@ -613,6 +613,11 @@ html.ce-phone .studio-workspace {
   .ce-rail-nav-btn::before, .ce-rail-toggle-btn::before {
     content: ''; position: absolute; inset: -9px; border-radius: 16px;
   }
+  /* Studio Back / icon actions too (measured 29px tall on phone). */
+  .studio-topbar button { position: relative; }
+  .studio-topbar button::before {
+    content: ''; position: absolute; inset: -8px; border-radius: 14px;
+  }
   /* Rail titles are pillar metadata — the same internal strings that were
      truncated on card chips. Let long ones ellipsize instead of pushing
      the count chip and arrows off-row. */
