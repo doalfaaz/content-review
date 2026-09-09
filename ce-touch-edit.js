@@ -307,6 +307,110 @@
   setInterval(pullRemoteEdits, 60000);
 
 
+  /* ---- Schedule from phone (owner 2026-09-09) ----------------------------
+     The phone queues a schedule request to the Mac's engine via the sync
+     server. Laws enforced in three layers: this UI (date min = today+7),
+     the sync server (server-side week-out + IG-cap checks), and the Mac
+     scheduling engine (the only token holder). Schedule-only — there is no
+     publish-now anywhere in this path. */
+  var SYNC_IST = '+05:30';
+  function istFloorPlus7DateStr() {
+    var now = new Date(Date.now() + 7 * 864e5 + 5.5 * 3600 * 1000);
+    return new Date(now.getTime() + now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  }
+  window.__CE_PHONE_SCHEDULE__ = function () {
+    var deck = window.studioDeck ? window.studioDeck() : null;
+    if (!deck || !deck.slides || !deck.slides.length) { if (window.showAppToast) window.showAppToast('Open a deck first'); return; }
+    var old = document.getElementById('ce-sched-sheet');
+    if (old) old.remove();
+    var sheet = document.createElement('div');
+    sheet.id = 'ce-sched-sheet';
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;';
+    var slides = deck.slides.length;
+    sheet.innerHTML =
+      '<div style="width:100%;background:#1c1a24;color:#fff;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));font-family:-apple-system,system-ui,sans-serif;">' +
+      '<div style="font-weight:800;font-size:15px;margin-bottom:10px">Schedule \u201C' + String(deck.title || deck.id).slice(0, 40) + '\u201D on Meta\u2019s clock</div>' +
+      '<label style="font-size:12px;opacity:.75">Platform</label>' +
+      '<select id="ce-sched-platform" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
+      '<option value="facebook">Facebook — fully automatic, holds on Meta\u2019s clock</option>' +
+      '<option value="instagram">Instagram — fires from the Mac at its minute (\u226410 slides)</option></select>' +
+      '<label style="font-size:12px;opacity:.75">Date (a week+ out — owner law)</label>' +
+      '<input id="ce-sched-date" type="date" min="' + istFloorPlus7DateStr() + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
+      '<label style="font-size:12px;opacity:.75">Time (IST)</label>' +
+      '<input id="ce-sched-time" type="time" value="11:30" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
+      '<label style="font-size:12px;opacity:.75">Caption</label>' +
+      '<textarea id="ce-sched-caption" rows="3" style="width:100%;padding:10px;margin:4px 0 12px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444;box-sizing:border-box"></textarea>' +
+      '<div style="display:flex;gap:8px">' +
+      '<button id="ce-sched-go" style="flex:1;padding:12px;border:0;border-radius:10px;font-weight:800;background:#d4576b;color:#fff;font-size:14px">Schedule (week+ out)</button>' +
+      '<button id="ce-sched-cancel" style="padding:12px 18px;border:1px solid #555;border-radius:10px;background:transparent;color:#fff;font-weight:700">Cancel</button></div>' +
+      '<div id="ce-sched-status" style="font-size:12px;opacity:.8;margin-top:8px;min-height:16px"></div></div>';
+    document.body.appendChild(sheet);
+    var cap = '';
+    try { cap = ((window.state && window.state.igCaption) || (deck.slides[0] && (deck.slides[0].html || deck.slides[0].text)) || '').replace(/<[^>]+>/g, ''); } catch (_) {}
+    sheet.querySelector('#ce-sched-caption').value = cap;
+    sheet.querySelector('#ce-sched-cancel').onclick = function () { sheet.remove(); };
+    sheet.querySelector('#ce-sched-go').onclick = function () {
+      var platform = sheet.querySelector('#ce-sched-platform').value;
+      var date = sheet.querySelector('#ce-sched-date').value;
+      var time = sheet.querySelector('#ce-sched-time').value || '11:30';
+      var caption = sheet.querySelector('#ce-sched-caption').value.trim();
+      var status = sheet.querySelector('#ce-sched-status');
+      if (!date) { status.textContent = 'Pick a date first.'; return; }
+      if (platform === 'instagram' && slides > 10) { status.textContent = 'IG carousels cap at 10 slides (Meta API). Use Download-for-phone + manual posting.'; return; }
+      if (!caption) { status.textContent = 'Add a caption.'; return; }
+      var unixMs = new Date(date + 'T' + time + ':00' + SYNC_IST).getTime();
+      var payload = { deckId: deck.id, platform: platform, caption: caption, scheduleUnixMs: unixMs, slidesCount: slides };
+      var btn = sheet.querySelector('#ce-sched-go');
+      btn.disabled = true; status.textContent = 'Sending to your Mac\u2026';
+      function submit(key) {
+        var ep = window.__CE_SYNC_ENDPOINT__;
+        if (!ep) { status.textContent = 'Sync endpoint not discovered yet — check the Mac is reachable.'; btn.disabled = false; return Promise.resolve(null); }
+        return fetch(ep + '/schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key },
+          body: JSON.stringify(payload)
+        }).then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); });
+      }
+      ensureWriteKey(function (key) {
+        if (!key) { status.textContent = 'Write key needed for scheduling.'; btn.disabled = false; return; }
+        submit(key).then(function (res) {
+          if (res && res.status === 403) {
+            try { localStorage.removeItem('ce_sync_key'); } catch (_) {}
+            ensureWriteKey(function (k2) {
+              if (!k2) { status.textContent = 'Write key needed.'; btn.disabled = false; return; }
+              submit(k2).then(function (r2) { finish(r2); }, function () { status.textContent = 'Network failed.'; btn.disabled = false; });
+            });
+            return;
+          }
+          finish(res);
+        });
+      });
+      function finish(res) {
+        btn.disabled = false;
+        if (res && res.status === 200 && res.body && res.body.ok) {
+          status.textContent = 'Queued. Your Mac schedules it on Meta\u2019s clock within ~30s (must be running).';
+          if (window.showAppToast) window.showAppToast('Schedule queued to your Mac');
+          setTimeout(function () { sheet.remove(); }, 2600);
+        } else {
+          status.textContent = (res && res.body && res.body.error) ? res.body.error : 'Could not queue the schedule.';
+        }
+      }
+    };
+  };
+  // Inject the Schedule button next to the pack button inside the studio topbar.
+  function armScheduleButton() {
+    var home = document.querySelector('.studio-primary-actions');
+    if (!home || document.getElementById('studio-schedule-btn')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'studio-schedule-btn';
+    btn.textContent = 'Schedule';
+    btn.title = 'Queue this piece on Meta\u2019s clock (a week+ out)';
+    btn.style.cssText = 'order:-1 !important; display:inline-flex !important; align-items:center; min-height:40px !important; padding:8px 14px !important; font-weight:800 !important; border-radius:10px !important; color:#fff !important; background:#2e6f5e !important; border:1px solid rgba(255,255,255,0.14) !important; cursor:pointer;';
+    btn.onclick = function () { try { window.__CE_PHONE_SCHEDULE__(); } catch (e) { if (window.showAppToast) window.showAppToast('Schedule failed: ' + e.message); } };
+    home.insertBefore(btn, home.firstChild);
+  }
+  window.__CE_SCHEDULE_BUTTON__ = armScheduleButton;
   var origOpen = window.openStudio;
   if (typeof origOpen === 'function') {
     window.openStudio = function () {
@@ -325,6 +429,7 @@
     var studio = document.getElementById('studio');
     if (!studio) return;
     armTouchEditing(studio);
+    armScheduleButton();
   }
   var mo = new MutationObserver(function () { setTimeout(armSweep, 120); });
   mo.observe(document.documentElement, { childList: true, subtree: true });
