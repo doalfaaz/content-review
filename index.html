@@ -2985,17 +2985,19 @@
       stage.innerHTML = window.CarouselCore.slideHTML(slides[i], i, slides.length, look);
       holder.appendChild(stage);
       document.body.appendChild(holder);
-      try { await delay(120); } catch (_w) {}
+      try { await delay(220); } catch (_w) {}
       try {
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, W, H);
         var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '"><foreignObject width="100%" height="100%">' +
           '<div xmlns="http://www.w3.org/1999/xhtml" style="width:' + W + 'px;height:' + H + 'px;">' + holder.innerHTML + '</div></foreignObject></svg>';
         var img = new Image();
+        var src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
         await new Promise(function (resolve, reject) {
+          var tries = 0;
           img.onload = resolve;
-          img.onerror = reject;
-          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+          img.onerror = function () { if (tries++ < 2) { setTimeout(function () { img.src = src; }, 260); } else reject(new Error('svg render failed after retries')); };
+          img.src = src;
         });
         ctx.drawImage(img, 0, 0, W, H);
         var dataUrl = canvas.toDataURL('image/png');
