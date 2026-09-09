@@ -113,9 +113,23 @@
     max-width: 82vw !important;
   }
 
-  /* Filmstrip: swipe track stays, cards shrink to fit 1.6 per view. */
+  /* Filmstrip: swipe track stays, cards shrink to fit 1.6 per view.
+     Phone fix 2026-09-10: the desktop track height (~186px) starved the
+     slide fitter — a 289px-wide card showed a 100px slide in dead space.
+     The track height must follow the card width's 4:5 paper: the fitter
+     reads the TRACK clientHeight as its only honest height budget. */
   .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
     width: min(58vw, 300px) !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+    height: calc(min(58vw, 300px) * 1.25 + 64px) !important;
+    min-height: 300px !important;
+  }
+  /* The html.ce-phone twins below re-widen the card to 72vw — the track
+     height must follow the SAME box or the fitter starves the paper again. */
+  html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+    height: calc(min(72vw, 320px) * 1.25 + 64px) !important;
+    min-height: 300px !important;
   }
 
   /* The workbench (360px on desktop) would eat the screen: collapse to
