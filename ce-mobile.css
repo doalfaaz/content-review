@@ -122,9 +122,13 @@
   .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
     width: min(58vw, 300px) !important;
   }
-  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery {
     flex: 0 0 auto !important;
     height: 48vh !important;
+    min-height: 340px !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+    flex: 1 1 auto !important;
     min-height: 300px !important;
   }
   /* The dock (inspector) keeps its default shrink — it takes the remaining
