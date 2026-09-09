@@ -3007,8 +3007,14 @@
         var dataUrl = canvas.toDataURL('image/png');
         var num = String(i + 1).padStart(2, '0');
         if (isIOS && navigator.share) {
-          var blob = await (await fetch(dataUrl)).blob();
-          var file = new File([blob], slug + '-slide-' + num + '.png', { type: 'image/png' });
+          var fileBytes = (function () {
+            var b64 = dataUrl.split(',')[1];
+            var bin = atob(b64);
+            var arr = new Uint8Array(bin.length);
+            for (var k = 0; k < bin.length; k++) arr[k] = bin.charCodeAt(k);
+            return arr;
+          })();
+          var file = new File([fileBytes], slug + '-slide-' + num + '.png', { type: 'image/png' });
           var navAny = navigator;
           if (navAny.canShare && navAny.canShare({ files: [file] })) {
             try {
