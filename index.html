@@ -4094,6 +4094,10 @@
   // stay readable instead of being force-fitted over faces.
   function poemCanvasRatioFor(text, intensity, pos, preferredRatio) {
     var lines = cePoemLineCount(text);
+    // Graduated growth to 9/16 (1920 on a 1080 canvas) for very long poems so
+    // the 30px floor never has to fight the box (P2-02).
+    var total = String(text == null ? '' : text).length;
+    if (lines >= 12 || total > 480) return '9/16';
     if (lines >= 8) return '2/3';
     if (lines >= 5) return '4/5';
     if (lines >= 3) return '1/1';
@@ -4140,7 +4144,9 @@
     // This is only a last-resort readability guard. The user-facing A− floor
     // is higher, but fit may go below it for unusually dense authored text so
     // clipping never wins over fidelity.
-    var minFloor = Math.max(8, Math.round(POEM_TYPOGRAPHY.fitFloorDensity * scaleFactor));
+    // 30px-on-1080 law (P2-02): the readability floor is proportional to the
+    // canvas, so previews/covers and the 1080 export obey one visual law.
+    var minFloor = Math.max(Math.round(30 * w / 1080), Math.round(POEM_TYPOGRAPHY.fitFloorDensity * scaleFactor));
     var px = Math.max(minFloor, boundedFit);
     if (noWrapLines >= 8) px = Math.min(px, Math.round(16 * scaleFactor));
     else if (noWrapLines >= 5) px = Math.min(px, Math.round(18 * scaleFactor));
@@ -6145,7 +6151,7 @@
         <div style="position:absolute; inset:0; background-color:#1c1a24; background-image:url('${photoUrl}'); background-size:cover; background-position:center; filter:grayscale(1) contrast(1.06) brightness(0.85);"></div>
         <div style="position:absolute; inset:0; background:${shade}; z-index:1;"></div>
         <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(5,5,6,0.78) 0%, rgba(5,5,6,0.30) 30%, rgba(5,5,6,0) 52%); z-index:1;"></div>
-        <div class="ce-poem-text-block" data-ce-font-start="${fontSize}" data-ce-font-floor="${Math.max(8, POEM_TYPOGRAPHY.fitFloorDensity)}" style="position:absolute; z-index:2; left:${previewInset}px; right:${previewInset}px; ${topStyle} font-family:${fontFamily}; font-size:${fontSize}px; line-height:${lineHeight}; font-weight:${fontWeight}; color:${customColor}; text-align:${align}; text-shadow:${shadowEnabled ? '0 2px 14px rgba(0,0,0,0.9)' : 'none'}; max-width:100%; max-height:calc(100% - 64px); overflow:hidden;">
+        <div class="ce-poem-text-block" data-ce-font-start="${fontSize}" data-ce-font-floor="${Math.round(30 * canvasW / 1080)}" style="position:absolute; z-index:2; left:${previewInset}px; right:${previewInset}px; ${topStyle} font-family:${fontFamily}; font-size:${fontSize}px; line-height:${lineHeight}; font-weight:${fontWeight}; color:${customColor}; text-align:${align}; text-shadow:${shadowEnabled ? '0 2px 14px rgba(0,0,0,0.9)' : 'none'}; max-width:100%; max-height:calc(100% - 64px); overflow:hidden;">
           ${formattedLines}
         </div>
         <div style="position:absolute; z-index:2; left:${previewInset}px; right:${align === 'center' ? '0' : previewInset + 'px'}; bottom:28px; font-family:'Noto Sans Devanagari', system-ui; font-size:14px; font-weight:500; color:rgba(255,255,255,0.75); text-align:${align};">
@@ -6215,7 +6221,7 @@
         ${preset.hasMarginLine ? `
           <div style="position:absolute; left:32px; top:0; bottom:0; width:2px; background:#d4a58c; opacity:0.8; z-index:1;"></div>
         ` : ''}
-        <div class="ce-poem-text-block" data-ce-font-start="${fontSize}" data-ce-font-floor="${Math.max(8, POEM_TYPOGRAPHY.fitFloorDensity)}" style="position:absolute; z-index:2; left:${leftPad}px; right:${previewInset}px; ${topStyle} font-family:${fontFamily}; font-size:${fontSize}px; line-height:${lineHeight}; font-weight:${fontWeight}; color:${customColor}; text-align:${align}; text-shadow:${shadowEnabled ? '0 1px 4px rgba(0,0,0,0.2)' : 'none'}; max-width:100%;">
+        <div class="ce-poem-text-block" data-ce-font-start="${fontSize}" data-ce-font-floor="${Math.round(30 * canvasW / 1080)}" style="position:absolute; z-index:2; left:${leftPad}px; right:${previewInset}px; ${topStyle} font-family:${fontFamily}; font-size:${fontSize}px; line-height:${lineHeight}; font-weight:${fontWeight}; color:${customColor}; text-align:${align}; text-shadow:${shadowEnabled ? '0 1px 4px rgba(0,0,0,0.2)' : 'none'}; max-width:100%;">
           ${formattedLines}
         </div>
         <div style="position:absolute; z-index:2; left:${leftPad}px; right:${align === 'center' ? '0' : previewInset + 'px'}; bottom:28px; font-family:'Noto Sans Devanagari', system-ui; font-size:14px; font-weight:500; color:${preset.sig}; text-align:${align === 'center' ? 'center' : (preset.hasMarginLine ? 'right' : align)};">
@@ -13960,7 +13966,7 @@
           <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:10px;">
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
               <h3 class="ce-plan-heading" style="margin:0; font-size:17px; font-weight:700; color:var(--ink);">Plan & Queue</h3>
-              <button id="plan-schedule-all-ready-btn" type="button" title="Place all Ready pieces on the week ahead with human-ish times between 9am and 9pm." style="background:var(--accent); color:#fff; border:1px solid transparent; padding:5px 14px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer;">Schedule all ready</button>
+              <button id="plan-schedule-all-ready-btn" type="button" title="Place all Ready pieces a week+ out (owner law — Meta refuses sooner) with human-ish times between 9am and 9pm." style="background:var(--accent); color:#fff; border:1px solid transparent; padding:5px 14px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer;">Schedule all ready</button>
               ${planFailedMeta > 0 ? `<button id="ce-plan-batch-meta-btn" type="button" title="Re-send the ${planFailedMeta} failed Ready piece${planFailedMeta === 1 ? '' : 's'} to Meta's clock (same confirm as Schedule)." style="background:rgba(196,59,78,0.16); color:#ff8fa0; border:1px solid rgba(196,59,78,0.4); padding:5px 12px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer;">Retry failed (${planFailedMeta})</button>` : ''}
               <button id="plan-select-all-ready-btn" type="button" title="Tick every staged piece as Ready" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer;">Select all</button>
               <button id="plan-auto-schedule-btn" type="button" title="Pull from Saved Bank / library into empty day slots." style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer;">Fill week</button>
@@ -14529,10 +14535,10 @@
           <div class="ce-grow-colhead"><span class="ce-grow-stepnum">Observe</span></div>
         </section>
         <section class="ce-readiness-row" aria-label="Your content at a glance">
-          <div><span>Ready to publish</span><strong>${__growReady.toLocaleString()}</strong><small>saved on this Mac</small></div>
-          <div><span>Designed carousels</span><strong>${__growDecks.toLocaleString()}</strong><small>open in Studio</small></div>
-          <div><span>Unedited poems</span><strong>${__growPoems.toLocaleString()}</strong><small>visible in Library</small></div>
-          <div><span>Authored posts</span><strong>${__growPosts.toLocaleString()}</strong><small>ready to shape</small></div>
+          <div><span>Ready to publish</span><strong>${__growReady.toLocaleString()}</strong><small>of ${(state.queueItems || []).length} queued pieces on this Mac</small></div>
+          <div><span>Designed carousels</span><strong>${__growDecks.toLocaleString()}</strong><small>decks openable in Studio</small></div>
+          <div><span>Unedited poems</span><strong>${__growPoems.toLocaleString()}</strong><small>of ${(state.poems || []).length || '—'} poems in Library</small></div>
+          <div><span>Authored posts</span><strong>${__growPosts.toLocaleString()}</strong><small>posts ready to shape</small></div>
         </section>
         <section class="ce-ops-panel ce-inventory-panel">
           <div class="ce-section-heading">
@@ -15487,13 +15493,26 @@
       showQueueToast('Tick Ready on the pieces you want on the calendar first', true);
       return 0;
     }
+    // P2-01 (zero-dead-ends law): the week-out gate refuses anything sooner
+    // than 7 days out, so spreading Ready pieces across the VISIBLE week
+    // (which contains tomorrow) staged guaranteed refusals. Clamp the spread
+    // to the week-out floor: qualifying visible days if any, else synthetic
+    // floor..floor+6 days (those render in the Plan 'Later' bucket).
+    var floorMs = (function () { var t = new Date(); t.setHours(0, 0, 0, 0); return t.getTime() + 7 * 864e5; })();
+    var keyOf = function (ms) { var d = new Date(ms); var m = d.getMonth() + 1, dd = d.getDate(); return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (dd < 10 ? '0' : '') + dd; };
+    var qual = days.filter(function (d) { return ceIstUnix(d.dateKey, '11:30 AM') >= floorMs; });
+    var spread = qual.length ? qual : (function () {
+      var out = [], n = Math.min(ready.length, 7);
+      for (var i = 0; i < n; i++) out.push({ id: 'floor-' + i, dateKey: keyOf(floorMs + i * 864e5), label: 'Week+ out' });
+      return out;
+    })();
     var byDay = {};
-    days.forEach(function (d) { byDay[d.id] = []; });
+    spread.forEach(function (d) { byDay[d.id] = []; });
     ready.forEach(function (q, idx) {
-      byDay[days[idx % days.length].id].push(q);
+      byDay[spread[idx % spread.length].id].push(q);
     });
     var scheduled = 0;
-    days.forEach(function (day) {
+    spread.forEach(function (day) {
       var batch = byDay[day.id] || [];
       if (!batch.length) return;
       var seed = parseInt(String(day.dateKey || day.id).replace(/\D/g, ''), 10) || 20260831;
@@ -15509,7 +15528,7 @@
     });
     try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
     if (typeof updateTopbarQueueBadge === 'function') updateTopbarQueueBadge();
-    showQueueToast('Placed ' + scheduled + ' piece' + (scheduled === 1 ? '' : 's') + ' on your week (local dates, 9am–9pm human-ish times)');
+    showQueueToast('Placed ' + scheduled + ' piece' + (scheduled === 1 ? '' : 's') + ' a week+ out (owner law — 9am–9pm human-ish times)');
     if (state.activeTab === 'plan' && typeof renderMain === 'function') renderMain();
     return scheduled;
   }
