@@ -405,12 +405,12 @@
     var pack = document.getElementById('studio-download-pack-btn');
     var home = (pack && pack.parentElement) || document.querySelector('.studio-primary-actions');
     if (!home) return;
-    var btn = document.getElementById('studio-schedule-btn');
+    var btn = document.getElementById('ce-web-schedule-btn');
     var justCreated = false;
     if (!btn) {
       btn = document.createElement('button');
       btn.type = 'button';
-      btn.id = 'studio-schedule-btn';
+      btn.id = 'ce-web-schedule-btn';
       btn.textContent = 'Schedule';
       btn.title = 'Queue this piece on Meta\u2019s clock (a week+ out)';
       btn.style.cssText = 'display:inline-flex; align-items:center; min-height:40px; padding:8px 14px; font-weight:800; border-radius:10px; color:#fff; background:#2e6f5e; border:1px solid rgba(255,255,255,0.14); cursor:pointer;';
