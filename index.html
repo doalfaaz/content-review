@@ -520,8 +520,32 @@
   body.bright-theme .ce-sidebar-scrim { background: rgba(22, 17, 26, 0.38); }
   .ce-sidebar-scrim.visible { opacity: 1; pointer-events: auto; }
   .ce-sidebar-scrim[hidden] { display: none; }
+  /* Drawer-under-the-bar fix (owner screenshot 2026-09-10): the collapsed
+     drawer is position:fixed top:0 z-index:120 — same z as the topbar, which
+     paints LATER, so the open drawer slid UNDER the translucent bar and the
+     app title was sliced in half. The drawer and scrim sit below the bar
+     (z 115 < topbar 120) and start below it (top = measured --topbar-h,
+     kept live by the web boot script; the calc() fallback matches the phone
+     bar height incl. the Dynamic Island inset). */
+  #sidebar.collapsed,
+  .ce-sidebar-scrim {
+    top: var(--topbar-h, 42px) !important;
+    z-index: 115 !important;
+  }
+  /* The scrim must stay UNDER the drawer it dims (drawer z 115). */
+  .ce-sidebar-scrim { z-index: 114 !important; }
+  /* The drawer now starts BELOW the bar, so its old 38px top padding (which
+     existed to dodge the bar) becomes dead space — trim it. */
+  #sidebar.collapsed { padding-top: 14px !important; }
   @media (pointer: coarse), (max-width: 640px) {
     .sidebar, .sidebar.collapsed { width: min(78vw, 300px) !important; min-width: 0 !important; }
+    /* Touch cards: the desktop hover affordances are dead weight on a
+       phone (owner screenshot 2026-09-10: ✓ + checkbox stamped on every
+       rail face). The action cluster never gets :hover on touch, so it
+       must not hold space; selection is a desktop bulk-edit affordance. */
+    .ce-card-select-toggle { display: none !important; }
+    .ce-card-action-cluster { display: none !important; }
+    .ce-card-status-chip { display: none !important; }
   }
 
   .app-title {
@@ -12041,6 +12065,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // suppress the chip.
       var hay = String(faceHtml || '').toLowerCase();
       if (hay && hay.indexOf(k.toLowerCase()) >= 0) return '';
+      // Owner phone audit 2026-09-10: pillar strings like
+      // "Mirror / One-Liner / Shareable Truth" are INTERNAL metadata; painted
+      // raw they overflow the chip and collide with the @DOALFAAZ brand mark
+      // ("MIRROR / ONE-LINER / SHAREAB"). The chip shows the family word —
+      // the first segment — which is exactly the rail vocabulary.
+      k = k.split(/\s*\/\s*/)[0].trim() || k;
       return k.slice(0, 28);
     } catch (_e) { return ''; }
   }
@@ -12178,7 +12208,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     track.classList.remove('ce-rail-pending');
     track.classList.remove('ce-rail-pending');
     track.__ceMounted = true;
+    ceLiftBootVeil();
     return true;
+  }
+  /* Boot veil lift (owner 2026-09-10: "it flickers a lot, then opens"): the
+     phone layer's veil must lift when the FIRST real faces are mounted and
+     painted — not on the blind 2.5s timer, which pops the veil mid-render.
+     No-op on surfaces without the veil (native app). */
+  function ceLiftBootVeil() {
+    try {
+      if (window.__CE_VEIL_LIFTED__) return;
+      window.__CE_VEIL_LIFTED__ = true;
+      requestAnimationFrame(function () { setTimeout(function () { try { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); } catch (_e) {} }, 60); });
+    } catch (_e) {}
   }
   window.__CE_MOUNT_CAROUSEL_TRACK__ = mountCarouselTrack;
   window.__CE_MOUNT_CAROUSEL__ = mountCarouselTrack;
@@ -12196,6 +12238,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (items.length && !mounted) return false;
     track.classList.remove('ce-rail-pending');
     track.__ceMounted = true;
+    ceLiftBootVeil();
     return true;
   }
   window.__CE_MOUNT_POST_TRACK__ = mountPostTrack;
@@ -12788,6 +12831,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function renderMain() {
     try { __ceRenderMainImpl(); } catch (_renderErr) { console.error('RENDER_MAIN_ERROR:', _renderErr); }
     try { if (typeof updateLibraryNestCounts === 'function') updateLibraryNestCounts(); } catch (_uc) {}
+    // Boot veil: the first render that actually paints content (rails mount
+    // synchronously inside __ceRenderMainImpl for visible tracks; poem/post
+    // grids paint directly) is the honest reveal moment.
+    try { if (!window.__CE_VEIL_LIFTED__) requestAnimationFrame(ceLiftBootVeil); } catch (_vl) {}
   }
   /* Native save hook (AppDelegate saveDeck): the Swift side patches
      window.__NATIVE_DECK_INDEX__ in place after every design save. If the

@@ -145,7 +145,13 @@
         el.style.opacity = '0';
         setTimeout(function () { el.remove(); var st = document.getElementById('ce-boot-veil-style'); st && st.remove(); }, 300);
       };
-      setTimeout(function () { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); }, 2500); // safety lift
+      /* Lift sources: the app source calls __CE_LIFT_VEIL__ the moment the
+         first real rail faces mount + paint (ceLiftBootVeil). The timers
+         here are only safety nets — long enough that the data-driven lift
+         wins on a healthy boot, short enough that a broken boot still
+         reveals the app. */
+      setTimeout(function () { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); }, 6000);
+      window.addEventListener('load', function () { setTimeout(function () { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); }, 3500); });
     }
   } catch (_) {}
   /* Edge-swipe: swipe in from the LEFT edge opens the nav drawer (owner:

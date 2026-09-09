@@ -32,22 +32,36 @@
   #sidebar > * { min-width: 0 !important; }
 
   /* Topbar: ONE 52px row (W3). Controls compact instead of wrapping — the
-     wrapped second row slid 21px of content under the bar. */
+     wrapped second row slid 21px of content under the bar.
+     Drawer-under-the-bar law (owner 2026-09-10): the bar must be FULLY
+     OPAQUE — the drawer (z 115) now slides beneath it (z 120); with the old
+     translucent blur the drawer text ghosted through as a broken overlap.
+     Height grows with the Dynamic Island inset: a fixed 52px row cannot
+     hold 52px of content under a ~59px status bar. */
   .topbar, .app-topbar {
     flex-wrap: nowrap !important;
-    height: 52px !important;
-    min-height: 52px !important;
-    max-height: 52px !important;
+    height: calc(52px + env(safe-area-inset-top, 0px)) !important;
+    min-height: calc(52px + env(safe-area-inset-top, 0px)) !important;
+    max-height: none !important;
     gap: 6px !important;
-    padding: 4px 8px !important;
+    padding: calc(4px + env(safe-area-inset-top, 0px)) 8px 4px !important;
     align-items: center !important;
     overflow: hidden !important;
+    background: var(--sidebar-bg) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
   }
   .topbar > *, .app-topbar > * { flex-shrink: 0 !important; min-width: 0 !important; }
   .topbar input[type="search"], .topbar input[class*="search"], .topbar .search-input {
     flex: 1 1 auto !important; min-width: 0 !important; width: auto !important;
   }
   .topbar select { max-width: 92px !important; font-size: 12px !important; }
+  /* 44px touch law for the bar controls: expand the hit area with an
+     invisible overlay — the visual stays the premium 28px chip. */
+  .topbar .sidebar-toggle-btn, .topbar .theme-toggle-btn { position: relative !important; }
+  .topbar .sidebar-toggle-btn::before, .topbar .theme-toggle-btn::before {
+    content: ''; position: absolute; inset: -8px; border-radius: 14px;
+  }
 
   /* Library LISTS go single column; HORIZONTAL SHELF RAILS stay rails —
      forcing 1fr here crushed the carousels into one huge face (owner report
@@ -284,6 +298,12 @@
 
 /* ===== phone hard-gate twins (html.ce-phone) ===== */
 /* class twin of @media (max-width: 700px) { */
+/* F-13 FLATTEN FIX 2026-09-10: the first twin block was mislabeled
+   html.ce-share — the phone topbar/grid/shelf rules only applied to SHARE
+   visitors, so in-app webviews (which ignore viewport meta and lay out at
+   980px+, where the max-width media never matches) got the desktop chrome.
+   The share-only rules (64px rail) keep html.ce-share; everything else is
+   the phone gate. */
 
 html.ce-share #sidebar { width: 64px !important;
     min-width: 64px !important;
@@ -297,37 +317,47 @@ html.ce-share #sidebar-nav button { min-width: 44px !important;
     justify-content: center !important;
     padding: 0 !important; }
 
-html.ce-share /* The share build hides Plan/Saved/Write/Grow; make sure the rail
-     bottom (theme toggle, settings) stays reachable. */
-  #sidebar > * { min-width: 0 !important; }
+html.ce-phone #sidebar > * { min-width: 0 !important; }
 
-html.ce-share /* Topbar: ONE 52px row (W3). Controls compact instead of wrapping — the
-     wrapped second row slid 21px of content under the bar. */
-  .topbar, .app-topbar { flex-wrap: nowrap !important;
-    height: 52px !important;
-    min-height: 52px !important;
-    max-height: 52px !important;
+html.ce-phone .topbar, html.ce-phone .app-topbar { flex-wrap: nowrap !important;
+    height: calc(52px + env(safe-area-inset-top, 0px)) !important;
+    min-height: calc(52px + env(safe-area-inset-top, 0px)) !important;
+    max-height: none !important;
     gap: 6px !important;
-    padding: 4px 8px !important;
+    padding: calc(4px + env(safe-area-inset-top, 0px)) 8px 4px !important;
     align-items: center !important;
-    overflow: hidden !important; }
+    overflow: hidden !important;
+    background: var(--sidebar-bg) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important; }
 
-html.ce-share .topbar > *, .app-topbar > * { flex-shrink: 0 !important; min-width: 0 !important; }
+html.ce-phone .topbar > *, html.ce-phone .app-topbar > * { flex-shrink: 0 !important; min-width: 0 !important; }
 
-html.ce-share .topbar input[type="search"], .topbar input[class*="search"], .topbar .search-input { flex: 1 1 auto !important; min-width: 0 !important; width: auto !important; }
+html.ce-phone .topbar input[type="search"], html.ce-phone .topbar input[class*="search"], html.ce-phone .topbar .search-input { flex: 1 1 auto !important; min-width: 0 !important; width: auto !important; }
 
-html.ce-share .topbar select { max-width: 92px !important; font-size: 12px !important; }
+html.ce-phone .topbar select { max-width: 92px !important; font-size: 12px !important; }
 
-html.ce-share /* Library grids: honest single column with readable cards. */
-  .library-grid, .poem-grid, .posts-grid { grid-template-columns: 1fr !important;
+html.ce-phone .library-grid, html.ce-phone .poem-grid, html.ce-phone .posts-grid { grid-template-columns: 1fr !important;
     gap: 12px !important;
     padding: 12px !important; }
 
-html.ce-share .card-title, .ce-card-title { font-size: 15px !important; }
+html.ce-phone .card-title, html.ce-phone .ce-card-title { font-size: 15px !important; }
 
-html.ce-share /* Horizontal shelves scroll instead of crushing. */
-  .ce-shelf-track, .ce-library-shelf { overflow-x: auto !important;
+html.ce-phone .ce-shelf-track, html.ce-phone .ce-library-shelf { overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important; }
+
+/* Touch cards: the desktop hover affordances are dead weight on a phone
+   (owner screenshot 2026-09-10: ✓ + checkbox stamped on every rail face).
+   The action cluster never gets :hover on touch; selection is a desktop
+   bulk-edit affordance. */
+@media (pointer: coarse), (max-width: 640px) {
+  .ce-card-select-toggle { display: none !important; }
+  .ce-card-action-cluster { display: none !important; }
+  .ce-card-status-chip { display: none !important; }
+}
+html.ce-phone .ce-card-select-toggle,
+html.ce-phone .ce-card-action-cluster,
+html.ce-phone .ce-card-status-chip { display: none !important; }
 
 
 /* class twin of @media (max-width: 700px) { */
@@ -577,6 +607,17 @@ html.ce-phone .studio-workspace {
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
   }
+  /* 44px touch law for rail nav controls (‹ › All): expand the hit area
+     with an invisible overlay; the visual chip stays slim and premium. */
+  .ce-rail-nav-btn, .ce-rail-toggle-btn { position: relative; }
+  .ce-rail-nav-btn::before, .ce-rail-toggle-btn::before {
+    content: ''; position: absolute; inset: -9px; border-radius: 16px;
+  }
+  /* Rail titles are pillar metadata — the same internal strings that were
+     truncated on card chips. Let long ones ellipsize instead of pushing
+     the count chip and arrows off-row. */
+  .ce-rail-head > div:first-child { min-width: 0; }
+  .ce-rail-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46vw; }
 }
 
 /* F-05: standalone/PWA topbar must clear the status bar + Dynamic Island.
