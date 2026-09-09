@@ -49,8 +49,10 @@
   }
   .topbar select { max-width: 92px !important; font-size: 12px !important; }
 
-  /* Library grids: honest single column with readable cards. */
-  .library-grid, .poem-grid, .posts-grid, .ce-shelf-grid {
+  /* Library LISTS go single column; HORIZONTAL SHELF RAILS stay rails —
+     forcing 1fr here crushed the carousels into one huge face (owner report
+     2026-09-10). Rail UX is owned by the W5 rules below. */
+  .library-grid, .poem-grid, .posts-grid {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
     padding: 12px !important;
@@ -160,11 +162,13 @@
     font-size: 16px !important;
   }
 
-  /* Dock buttons: comfortable touch targets, same visual language. */
+  /* Dock buttons: 38px visual + padding => >=44px hit area (F-14). */
   .studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row .ce-icon-action,
   .ce-compact-tool {
     min-width: 38px !important;
     min-height: 38px !important;
+    padding: 3px !important;
+    box-sizing: content-box !important;
   }
 
   /* Look-picker grid: 3-up instead of the desktop 4-up squeeze. */
@@ -315,7 +319,7 @@ html.ce-share .topbar input[type="search"], .topbar input[class*="search"], .top
 html.ce-share .topbar select { max-width: 92px !important; font-size: 12px !important; }
 
 html.ce-share /* Library grids: honest single column with readable cards. */
-  .library-grid, .poem-grid, .posts-grid, .ce-shelf-grid { grid-template-columns: 1fr !important;
+  .library-grid, .poem-grid, .posts-grid { grid-template-columns: 1fr !important;
     gap: 12px !important;
     padding: 12px !important; }
 

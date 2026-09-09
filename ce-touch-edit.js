@@ -119,6 +119,57 @@
      Every save POSTs the deck there; the Mac app reads the same store, so both
      sides show ONE version (last-write-wins per deck by updatedAt). */
   var SYNC_PATH = '/39c4ee5650102ee027bd87bcc4e9a2ea';
+  /* Share mode is URL-marked ONLY (Atlas MC-2 root fix, 2026-09-10): the
+     owner's root URL is ALWAYS the full app. Manager links carry #share
+     (?share=1 also accepted) and get the trimmed read-only view + icon rail.
+     Keying this on the stored write key locked the OWNER out — never again. */
+  try {
+    if (/(#|\?|&)share(=1)?\b/.test(location.hash + ' ' + location.search)) {
+      document.documentElement.classList.add('ce-share');
+    }
+  } catch (_) {}
+  /* Anti-flicker veil: paint the app background instantly, lift after the
+     first library render settles (owner: "when I open it first it flickers"). */
+  try {
+    if (!document.getElementById('ce-boot-veil')) {
+      var v = document.createElement('style');
+      v.id = 'ce-boot-veil-style';
+      v.textContent = '#ce-boot-veil{position:fixed;inset:0;z-index:100000;background:#121016;transition:opacity .25s ease}';
+      document.documentElement.appendChild(v);
+      var veil = document.createElement('div');
+      veil.id = 'ce-boot-veil';
+      document.body ? document.body.appendChild(veil) : document.addEventListener('DOMContentLoaded', function () { document.body.appendChild(veil); });
+      window.__CE_LIFT_VEIL__ = function () {
+        var el = document.getElementById('ce-boot-veil');
+        if (!el) return;
+        el.style.opacity = '0';
+        setTimeout(function () { el.remove(); var st = document.getElementById('ce-boot-veil-style'); st && st.remove(); }, 300);
+      };
+      setTimeout(function () { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); }, 2500); // safety lift
+    }
+  } catch (_) {}
+  /* Edge-swipe: swipe in from the LEFT edge opens the nav drawer (owner:
+     "swipe left and see the tabs"), with the app's own scrim + tap-outside. */
+  try {
+    var edgeStart = null;
+    document.addEventListener('touchstart', function (e) {
+      var t = e.touches[0];
+      if (t && t.clientX <= 28) edgeStart = { x: t.clientX, y: t.clientY };
+      else edgeStart = null;
+    }, { passive: true });
+    document.addEventListener('touchmove', function (e) {
+      if (!edgeStart) return;
+      var t = e.touches[0];
+      if (t.clientX - edgeStart.x > 48 && Math.abs(t.clientY - edgeStart.y) < 60) {
+        edgeStart = null;
+        var sb = document.querySelector('.sidebar');
+        if (sb && sb.classList.contains('collapsed')) {
+          var tg = document.getElementById('sidebar-toggle');
+          tg && tg.click();
+        }
+      }
+    }, { passive: true });
+  } catch (_) {}
   // W7: honest degradation — when the Mac is unreachable (in-app Chromium
   // webviews deny Local-Network-Access, Mac asleep, cellular), never leave a
   // silent dead button. Surface the manual route once and record the mode.
@@ -480,6 +531,13 @@
   }
   var mo = new MutationObserver(function () { setTimeout(armSweep, 120); });
   mo.observe(document.documentElement, { childList: true, subtree: true });
+  var veilPoll = setInterval(function () {
+    if (document.querySelector('.pure-card.deck-card, .ce-rail-track .pure-card')) {
+      clearInterval(veilPoll);
+      window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__();
+    }
+  }, 200);
+  setTimeout(function () { clearInterval(veilPoll); }, 6000);
   setTimeout(armSweep, 800);
   setInterval(armSweep, 2500); // safety net for replaced nodes
 })();

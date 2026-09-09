@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-title" content="CE Studio" />
     <meta name="theme-color" content="#121016" />
     <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="./favicon.png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: file: ce-still:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: file: ce-still:; connect-src 'self' https://tushars-macbook-air.tail697d80.ts.net http://192.168.1.35:4145 http://localhost:4145 http://127.0.0.1:4145; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <title>Content Engine Studio</title>
@@ -2151,11 +2152,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
    A physical screen is unambiguous — key the phone layer off it so the UI
    never depends on viewport-meta cooperation. */
 (function () {
-  try {
-    var isOwner = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge);
-    if (!isOwner) { try { isOwner = !!localStorage.getItem('ce_sync_key'); } catch (_) {} }
-    if (!isOwner) document.documentElement.classList.add('ce-share');
-  } catch (_) {}
   var syncTopbar = function () {
     var tb = document.querySelector('.topbar, .app-topbar');
     if (tb) document.documentElement.style.setProperty('--topbar-h', Math.ceil(tb.getBoundingClientRect().height) + 'px');
@@ -11648,9 +11644,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       document.querySelectorAll('#sidebar-nav button[data-tab]').forEach(function (button) {
         button.classList.toggle('active', button.getAttribute('data-tab') === state.activeTab);
       });
-      document.querySelectorAll('#library-tabs button[data-lib]').forEach(function (button) {
-        button.classList.toggle('active', state.activeTab === 'library' && button.getAttribute('data-lib') === state.libraryType);
-      });
       document.querySelectorAll('#library-filters > button[data-lib]').forEach(function (button) {
         button.classList.toggle('active', state.activeTab === 'library' && button.getAttribute('data-lib') === state.libraryType);
       });
@@ -13931,6 +13924,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                   ${kanbanDays.map(d => `<option value="${d.id}" ${currentDay === d.id ? 'selected' : ''}>${escapeHtml(d.label)}</option>`).join('')}
                 </select>
                 ${currentTime ? `<span class="queue-time-chip" style="flex:1; min-width:0; font-size:11px; font-weight:700; color:var(--ink); text-align:center; padding:4px 6px; border:1px dashed rgba(120,120,150,0.25); border-radius:6px;">${escapeHtml(currentTime)}</span>` : ''}
+                ${q.scheduleDate ? `<select class="kanban-time-select" data-idx="${idx}" title="Change this card's time" style="flex:1; min-width:0; font-size:11px; padding:4px 4px; border:1px solid var(--border); border-radius:6px; background:rgba(255,255,255,0.06); color:var(--ink); cursor:pointer;">
+                  ${['9:00 AM','10:30 AM','11:30 AM','1:00 PM','3:00 PM','5:00 PM','6:30 PM','8:00 PM','9:00 PM'].map(function(t){ return '<option' + (t === (q.scheduleTime || '11:30 AM') ? ' selected' : '') + '>' + t + '</option>'; }).join('')}
+                </select>` : ''}
               </div>
 
               <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; padding-top:4px;">
@@ -16778,8 +16774,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         showAppToast('Nothing to save, this draft has no persisted deck yet.', { icon: 'info' });
       }
     };
-    var studioSaveTopBtn = document.getElementById('studio-save-top-btn');
-    if (studioSaveTopBtn) studioSaveTopBtn.onclick = window.studioSaveActiveDesign;
     const studioExportBtn = document.getElementById('studio-export-btn');
     if (studioExportBtn) studioExportBtn.onclick = studioExport;
 
