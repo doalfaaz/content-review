@@ -130,7 +130,14 @@
     if (window.showAppToast) window.showAppToast('Mac unreachable — open in Safari or use Download-for-phone');
     console.warn('[ce-sync] unreachable:', mode);
   }
+  var reachFlapGuard = 0;
   function markReachable() {
+    // flap guard (audit 9.14): only clear when actually flagged, and not
+    // more than once a minute.
+    if (!window.__CE_SYNC_UNREACHABLE__) return;
+    var now = Date.now();
+    if (now - reachFlapGuard < 60000) return;
+    reachFlapGuard = now;
     window.__CE_SYNC_UNREACHABLE__ = false;
     try { localStorage.removeItem('ce_last_sync_error'); } catch (_) {}
   }
