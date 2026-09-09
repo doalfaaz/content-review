@@ -124,7 +124,7 @@
   }
   .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
     flex: 0 0 auto !important;
-    height: 44vh !important;
+    height: 48vh !important;
     min-height: 300px !important;
   }
   /* The dock (inspector) keeps its default shrink — it takes the remaining
@@ -644,14 +644,20 @@ html.ce-phone .studio-workspace {
   padding-top: calc(4px + env(safe-area-inset-top, 0px)) !important;
 }
 
-/* Phone studio column law (2026-09-10, last so it beats the specificity-2
-   twins above): track 48vh + header 28px + dock must fit the 100% column —
-   cap the dock at 44vh so nothing clips below the fold. */
+/* Phone studio column law (2026-09-10, last so it beats the twins above):
+   the filmstrip gets a fixed 48vh band (the fitter's honest height budget),
+   the dock takes the REMAINDER and scrolls internally — a fixed cap here
+   overflowed the column on short viewports. Single-chain selector: the
+   double-chain twins never matched (no nested .studio-workspace exists). */
 @media (max-width: 700px) {
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector {
-    max-height: 44vh !important;
+  .studio-workspace.is-carousel-mode .ce-studio-inspector {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
   }
 }
-html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector {
-  max-height: 44vh !important;
+html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
 }
