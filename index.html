@@ -3011,7 +3011,14 @@
           var file = new File([blob], slug + '-slide-' + num + '.png', { type: 'image/png' });
           var navAny = navigator;
           if (navAny.canShare && navAny.canShare({ files: [file] })) {
-            await navAny.share({ files: [file] });
+            try {
+              await navAny.share({ files: [file] });
+            } catch (shareError) {
+              if (shareError && shareError.name === 'AbortError') throw shareError;
+              var af = document.createElement('a');
+              af.href = dataUrl; af.download = slug + '-slide-' + num + '.png';
+              document.body.appendChild(af); af.click(); af.remove();
+            }
           } else {
             var a = document.createElement('a');
             a.href = dataUrl; a.download = slug + '-slide-' + num + '.png';
