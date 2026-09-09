@@ -2955,18 +2955,19 @@
      the caption. On iOS Safari each PNG lands in Files (or the share sheet);
      the caption lands on the clipboard. No native bridge required. */
   window.__CE_PHONE_PACK__ = async function () {
-    var deck = studioDeck();
+    var say = window.__CE_PACK_SAY__ = function (m) { try { if (window.showAppToast) window.showAppToast(m); else console.log("[phone-pack] " + m); } catch (_) {} };
+    var deck = (window.studioDeck ? window.studioDeck() : null);
     if (!deck || !Array.isArray(deck.slides) || !deck.slides.length) {
-      studioSetMessage('Open a carousel or post first.');
+      window.__CE_PACK_SAY__('Open a carousel or post first.');
       return;
     }
     if (!window.CarouselCore || typeof window.CarouselCore.slideHTML !== 'function') {
-      studioSetMessage('Slide renderer not loaded yet — try again in a second.');
+      window.__CE_PACK_SAY__('Slide renderer not loaded yet — try again in a second.');
       return;
     }
     var slides = deck.slides;
     var look = deck.look || 'midnight';
-    studioSetMessage('Rendering ' + slides.length + ' slides at full resolution…');
+    window.__CE_PACK_SAY__('Rendering ' + slides.length + ' slides at full resolution…');
     var W = 1080, H = 1350;
     var canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
@@ -3023,10 +3024,10 @@
       try { await delay(60); } catch (_b) {}
     }
     var caption = '';
-    try { caption = (state.igCaption || (deck.slides && deck.slides[0] && (deck.slides[0].html || deck.slides[0].text)) || '').replace(/<[^>]+>/g, ''); } catch (_c) {}
+    try { caption = ((window.state && window.state.igCaption) || (deck.slides && deck.slides[0] && (deck.slides[0].html || deck.slides[0].text)) || '').replace(/<[^>]+>/g, ''); } catch (_c) {}
     var captionCopied = false;
     try { await navigator.clipboard.writeText(caption); captionCopied = true; } catch (_cp) { captionCopied = false; }
-    studioSetMessage(count === slides.length
+    window.__CE_PACK_SAY__(count === slides.length
       ? ('Downloaded ' + count + ' slides' + (captionCopied ? ' — caption copied. Post them in order on your phone.' : ' — copy the caption from the dock and post them in order.'))
       : ('Rendered ' + count + '/' + slides.length + ' slides — check console for failures.'));
   };
@@ -16788,7 +16789,7 @@
       function bindPhonePackButton() {
     var btn = document.getElementById('studio-download-pack-btn');
     if (!btn) return;
-    btn.onclick = function () { try { window.__CE_PHONE_PACK__(); } catch (e) { studioSetMessage('Phone pack failed: ' + e.message); } };
+    btn.onclick = function () { try { window.__CE_PHONE_PACK__(); } catch (e) { window.__CE_PACK_SAY__('Phone pack failed: ' + e.message); } };
   }
   bindPhonePackButton();
 
