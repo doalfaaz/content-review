@@ -399,8 +399,12 @@
   };
   // Inject the Schedule button next to the pack button inside the studio topbar.
   function armScheduleButton() {
-    var home = document.querySelector('.studio-primary-actions');
-    if (!home || document.getElementById('studio-schedule-btn')) return;
+    if (document.getElementById('studio-schedule-btn')) return;
+    // Sit beside the pack button: on phone the reparent logic moves the pack
+    // into the topbar cluster, so prefer the pack's actual parent.
+    var pack = document.getElementById('studio-download-pack-btn');
+    var home = (pack && pack.parentElement) || document.querySelector('.studio-primary-actions');
+    if (!home) return;
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.id = 'studio-schedule-btn';
@@ -408,7 +412,8 @@
     btn.title = 'Queue this piece on Meta\u2019s clock (a week+ out)';
     btn.style.cssText = 'order:-1 !important; display:inline-flex !important; align-items:center; min-height:40px !important; padding:8px 14px !important; font-weight:800 !important; border-radius:10px !important; color:#fff !important; background:#2e6f5e !important; border:1px solid rgba(255,255,255,0.14) !important; cursor:pointer;';
     btn.onclick = function () { try { window.__CE_PHONE_SCHEDULE__(); } catch (e) { if (window.showAppToast) window.showAppToast('Schedule failed: ' + e.message); } };
-    home.insertBefore(btn, home.firstChild);
+    if (pack && pack.parentElement === home) home.insertBefore(btn, pack);
+    else home.insertBefore(btn, home.firstChild);
   }
   window.__CE_SCHEDULE_BUTTON__ = armScheduleButton;
   var origOpen = window.openStudio;
