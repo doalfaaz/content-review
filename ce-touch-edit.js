@@ -113,39 +113,57 @@
   /* ---- Persistence + sync -------------------------------------------------
      ce_deck_edits: { deckId: { look, slides, updatedAt } } in localStorage —
      the offline copy the site boots with (your edits survive reload).
-     Sync endpoint discovery: same-Wi-Fi Mac runs the sync server on :4145 —
-     candidates are probed once; the first that answers wins. Every save POSTs
-     the deck there; the Mac app reads the same store, so both sides show ONE
-     version (last-write-wins per deck by updatedAt). */
+     Sync endpoint: the Mac runs the sync server behind a Tailscale Funnel
+     capability path (server 404s anything without the secret prefix — audited
+     2026-09-09: the store must never be publicly writable at the bare host).
+     Every save POSTs the deck there; the Mac app reads the same store, so both
+     sides show ONE version (last-write-wins per deck by updatedAt). */
+  var SYNC_PATH = '/39c4ee5650102ee027bd87bcc4e9a2ea';
   function findSyncEndpoint(cb) {
-    // Endpoint sticks across reloads once discovered (localStorage cache).
+    function discover() {
+      var cands = [];
+      if (location.hostname === 'doalfaaz.github.io' || location.protocol === 'file:') {
+        // Tailscale Funnel HTTPS (valid cert, works on cellular + any browser).
+        cands = ['https://tushars-macbook-air.tail697d80.ts.net' + SYNC_PATH];
+      } else if (/^https?:\/\/(localhost|127\.|192\.168\.|10\.)/.test(location.origin)) {
+        cands = [location.origin.replace(/:\d+$/, ':4145') + SYNC_PATH];
+      }
+      var i = 0;
+      var tryNext = function () {
+        if (i >= cands.length) { cb(null); return; }
+        var base = cands[i++];
+        fetch(base + '/health', { mode: 'cors' })
+          .then(function (r) { return r.ok ? base : null; })
+          .then(function (ok) {
+            if (ok) {
+              try { localStorage.setItem('ce_sync_endpoint', ok); } catch (_) {}
+              cb(ok);
+            } else tryNext();
+          })
+          .catch(function () { tryNext(); });
+      };
+      tryNext();
+    }
+    // Endpoint sticks across reloads once discovered — but revalidate the
+    // cached value once per boot so a dead endpoint never wedges sync.
     try {
       var cached = localStorage.getItem('ce_sync_endpoint');
-      if (cached) { window.__CE_SYNC_ENDPOINT__ = cached; cb(cached); return; }
+      if (cached && !findSyncEndpoint.revalidated) {
+        findSyncEndpoint.revalidated = true;
+        fetch(cached + '/health', { mode: 'cors' })
+          .then(function (r) {
+            if (r.ok) { window.__CE_SYNC_ENDPOINT__ = cached; cb(cached); }
+            else { try { localStorage.removeItem('ce_sync_endpoint'); } catch (_) {} discover(); }
+          })
+          .catch(function () {
+            try { localStorage.removeItem('ce_sync_endpoint'); } catch (_) {}
+            discover();
+          });
+        return;
+      }
     } catch (_) {}
     if (window.__CE_SYNC_ENDPOINT__) { cb(window.__CE_SYNC_ENDPOINT__); return; }
-    var cands = [];
-    if (location.hostname === 'doalfaaz.github.io' || location.protocol === 'file:') {
-      // Tailscale HTTPS first (valid cert, works on cellular too), then LAN.
-      cands = ['https://tushars-macbook-air.tail697d80.ts.net', 'http://192.168.1.35:4145'];
-    } else if (/^https?:\/\/(localhost|127\.|192\.168\.|10\.)/.test(location.origin)) {
-      cands = [location.origin.replace(/:\d+$/, ':4145')];
-    }
-    var i = 0;
-    var tryNext = function () {
-      if (i >= cands.length) { cb(null); return; }
-      var base = cands[i++];
-      fetch(base + '/health', { mode: 'cors' })
-        .then(function (r) { return r.ok ? base : null; })
-        .then(function (ok) {
-          if (ok) {
-            try { localStorage.setItem('ce_sync_endpoint', ok); } catch (_) {}
-            cb(ok);
-          } else tryNext();
-        })
-        .catch(function () { tryNext(); });
-    };
-    tryNext();
+    discover();
   }
   findSyncEndpoint(function (base) { if (base) window.__CE_SYNC_ENDPOINT__ = base; });
 
