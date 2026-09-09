@@ -114,23 +114,21 @@
   }
 
   /* Filmstrip: swipe track stays, cards shrink to fit 1.6 per view.
-     Phone fix 2026-09-10: the desktop track height (~186px) starved the
-     slide fitter — a 289px-wide card showed a 100px slide in dead space.
-     The track height must follow the card width's 4:5 paper: the fitter
-     reads the TRACK clientHeight as its only honest height budget. */
+     Phone fix 2026-09-10: the desktop layout gave the track ~186px, so the
+     fitter (whose ONLY honest height budget is the track clientHeight)
+     shrank every slide to a 100px stamp inside a 289px card. On a phone the
+     canvas column is ~779px: give the filmstrip a fixed 48vh band and cap
+     the dock at 40vh — the paper then fills its card at ~293x366. */
   .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
     width: min(58vw, 300px) !important;
   }
   .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
-    height: calc(min(58vw, 300px) * 1.25 + 64px) !important;
+    flex: 0 0 auto !important;
+    height: 44vh !important;
     min-height: 300px !important;
   }
-  /* The html.ce-phone twins below re-widen the card to 72vw — the track
-     height must follow the SAME box or the fitter starves the paper again. */
-  html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
-    height: calc(min(72vw, 320px) * 1.25 + 64px) !important;
-    min-height: 300px !important;
-  }
+  /* The dock (inspector) keeps its default shrink — it takes the remaining
+     column and scrolls internally; do NOT pin it or it fights the track. */
 
   /* The workbench (360px on desktop) would eat the screen: collapse to
      a vertical stack under the canvas with its own scroll. */
@@ -644,4 +642,16 @@ html.ce-phone .studio-workspace {
    on device where the inset is real. */
 .topbar, .app-topbar {
   padding-top: calc(4px + env(safe-area-inset-top, 0px)) !important;
+}
+
+/* Phone studio column law (2026-09-10, last so it beats the specificity-2
+   twins above): track 48vh + header 28px + dock must fit the 100% column —
+   cap the dock at 44vh so nothing clips below the fold. */
+@media (max-width: 700px) {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector {
+    max-height: 44vh !important;
+  }
+}
+html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector {
+  max-height: 44vh !important;
 }
