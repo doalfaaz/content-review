@@ -280,9 +280,13 @@
     findSyncEndpoint(function (b) { if (b) window.__CE_SYNC_ENDPOINT__ = b; });
   }
   function pullRemoteEdits() {
+    // F-02: reads are key-gated. Share visitors (no key) skip silently —
+    // they read the static share-decks payload, never the private store.
     if (!window.__CE_SYNC_ENDPOINT__ || document.hidden) return;
+    var key = getWriteKey();
+    if (!key) return;
     var base = window.__CE_SYNC_ENDPOINT__;
-    fetch(base + '/decks')
+    fetch(base + '/decks', { headers: { 'X-CE-Sync-Key': key } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
         if (!data || !data.decks) { pullFailures++; healEndpointIfDead(); if (pullFailures === 0) markReachable(); else markUnreachable('pull-' + pullFailures); return; }
