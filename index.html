@@ -7,7 +7,7 @@
 #sidebar-nav button[data-tab="plan"], #sidebar-nav button[data-tab="saved"],
 #sidebar-nav button[data-tab="write"], #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: file: ce-still:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: file: ce-still:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: file: ce-still:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: file: ce-still:; connect-src 'self' https://tushars-macbook-air.tail697d80.ts.net http://192.168.1.35:4145 http://localhost:4145 http://127.0.0.1:4145; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <title>Content Engine Studio</title>
 <style>
   :root {
@@ -2173,6 +2173,7 @@
 <link rel="stylesheet" href="./native-saved.css" />
 <link rel="stylesheet" href="./native-studio.css" />
 <link rel="stylesheet" href="./ce-mobile.css" />
+<script src="./ce-touch-edit.js"></script>
 <script src="./native-ideas.js"></script>
 <script src="./ce-insights.js"></script>
 <script src="./legacy-renderers/renderers.js"></script>
@@ -17067,6 +17068,7 @@
   window.__CE_UPDATE_LIBRARY_NEST_COUNTS__ = updateLibraryNestCounts;
   window.openStudio = openStudio;
   window.closeStudio = closeStudio;
+  window.studioDeck = studioDeck; // touch-edit layer (phone web) reads the live deck
   window.__CE_UPDATE_STUDIO__ = updateStudioCanvas;
   window.addToSavedBank = addToSavedBank;
   window.rejectToSavedBank = rejectToSavedBank;
