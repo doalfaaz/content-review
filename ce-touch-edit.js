@@ -167,6 +167,24 @@
   }
   findSyncEndpoint(function (base) { if (base) window.__CE_SYNC_ENDPOINT__ = base; });
 
+  /* ---- Write key (P0-2) ---------------------------------------------------
+     Writes on the sync server require the shared write key (X-CE-Sync-Key
+     header / ?k= param). The owner pastes it ONCE via prompt(); it lives in
+     localStorage `ce_sync_key`. Reads stay key-free — the manager read-view
+     never triggers this. */
+  function getWriteKey() {
+    try { return localStorage.getItem('ce_sync_key') || ''; } catch (_) { return ''; }
+  }
+  function ensureWriteKey(cb) {
+    var k = getWriteKey();
+    if (k) { cb(k); return; }
+    var entered = '';
+    try { entered = window.prompt('Paste your CE sync write key (one time):', '') || ''; } catch (_) {}
+    if (!entered) { cb(''); return; }
+    try { localStorage.setItem('ce_sync_key', entered.trim()); } catch (_) {}
+    cb(entered.trim());
+  }
+
   window.__CE_PERSIST_DECK_EDIT__ = function (deck) {
     if (!deck || !deck.id) return;
     var store = {};
@@ -178,20 +196,43 @@
       updatedAt: Date.now()
     };
     try { localStorage.setItem('ce_deck_edits', JSON.stringify(store)); } catch (_) {}
-    if (window.__CE_SYNC_ENDPOINT__) {
-      var payload = { deckId: deck.id, deck: store[deck.id] };
-      var url = window.__CE_SYNC_ENDPOINT__ + '/decks';
-      fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).catch(function () {
-        // WebKit/Safari: public->private POST bodies are blocked; simple GET
-        // write still passes. GET /set?d=<b64> applies the same payload.
-        var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-        return fetch(window.__CE_SYNC_ENDPOINT__ + '/set?d=' + encodeURIComponent(b64));
-      }).catch(function () {});
+    if (!window.__CE_SYNC_ENDPOINT__) return;
+    var payload = { deckId: deck.id, deck: store[deck.id] };
+    var base = window.__CE_SYNC_ENDPOINT__;
+    function send(key, viaGet) {
+      // Resolves {status} on any HTTP response, null on network failure
+      // (WebKit/Safari blocks public->private POST bodies at the network
+      // level — that is a rejection, so the GET /set?d= fallback exists).
+      var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+      var req = viaGet
+        ? fetch(base + '/set?d=' + encodeURIComponent(b64) + (key ? '&k=' + encodeURIComponent(key) : ''))
+        : fetch(base + '/decks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key },
+            body: JSON.stringify(payload)
+          });
+      return req.then(
+        function (r) { return { status: r.status }; },
+        function () { return null; }
+      );
     }
+    function attempt(key, viaGet) {
+      return send(key, viaGet).then(function (res) {
+        if (res && res.status === 403) {
+          // Wrong/missing write key — clear it, prompt once, retry same verb.
+          try { localStorage.removeItem('ce_sync_key'); } catch (_) {}
+          return new Promise(function (resolve) {
+            ensureWriteKey(function (newKey) {
+              if (!newKey) { resolve(null); return; }
+              attempt(newKey, viaGet).then(resolve);
+            });
+          });
+        }
+        if (!res && !viaGet) return attempt(key || getWriteKey(), true); // POST blocked → GET write
+        return res;
+      });
+    }
+    attempt(getWriteKey(), false).catch(function () {});
   };
 
   // Boot: re-apply locally-edited decks over the static payload so the site
@@ -210,13 +251,25 @@
   applyLocalEdits();
 
   // Pull remote edits (from the Mac app) so the phone shows the app's version.
-  // Runs on boot and every 60s while the page is visible.
+  // Runs on boot and every 60s while the page is visible. Three consecutive
+  // failed pulls (P0-3) clear the cached endpoint and re-run discovery — a
+  // stale endpoint can never wedge sync permanently.
+  var pullFailures = 0;
+  function healEndpointIfDead() {
+    if (pullFailures < 3) return;
+    try { localStorage.removeItem('ce_sync_endpoint'); } catch (_) {}
+    window.__CE_SYNC_ENDPOINT__ = null;
+    pullFailures = 0;
+    findSyncEndpoint(function (b) { if (b) window.__CE_SYNC_ENDPOINT__ = b; });
+  }
   function pullRemoteEdits() {
     if (!window.__CE_SYNC_ENDPOINT__ || document.hidden) return;
-    fetch(window.__CE_SYNC_ENDPOINT__ + '/decks')
+    var base = window.__CE_SYNC_ENDPOINT__;
+    fetch(base + '/decks')
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
-        if (!data || !data.decks) return;
+        if (!data || !data.decks) { pullFailures++; healEndpointIfDead(); return; }
+        pullFailures = 0;
         var local = {};
         try { local = JSON.parse(localStorage.getItem('ce_deck_edits') || '{}'); } catch (_) {}
         Object.keys(data.decks).forEach(function (id) {
@@ -227,12 +280,26 @@
               local[id] = remote;
               window.__CE_DECKS_FULL__ = window.__CE_DECKS_FULL__ || {};
               window.__CE_DECKS_FULL__[id] = Object.assign({}, window.__CE_DECKS_FULL__[id] || {}, remote, { id: id });
+              // P1: tell the owner when the OPEN deck just changed underneath
+              // him (one version everywhere). Reopening the deck serves the
+              // fresh version; a dirty canvas is never touched mid-edit.
+              try {
+                var st = window.state;
+                var openId = st && st.currentItem && String(st.currentItem.id || '');
+                if (openId && openId === id && !st.studioDirty &&
+                    typeof window.showAppToast === 'function') {
+                  window.showAppToast('Updated from your Mac/phone');
+                }
+              } catch (_) {}
             }
           }
         });
-        localStorage.setItem('ce_deck_edits', JSON.stringify(local));
+        try { localStorage.setItem('ce_deck_edits', JSON.stringify(local)); } catch (_) {}
       })
-      .catch(function () {});
+      .catch(function () {
+        pullFailures++;
+        healEndpointIfDead();
+      });
   }
   setTimeout(pullRemoteEdits, 1200);
   setInterval(pullRemoteEdits, 60000);

@@ -15622,14 +15622,12 @@
     var nowSec = Math.floor(Date.now() / 1000);
     // Meta's Graph schedule floor (~15 min) applies to the Facebook clock only.
     // Instagram-only pieces ride the local app clock — a one-minute lead is
-    // enough there. The 7-day visibility cap applies to both.
+    // enough there. The structural week-out gate (owner law 2026-09-09) lives
+    // in Swift (CEMetaPublisher) where the CE_ALLOW_SOON_SCHEDULE override is
+    // knowable — the JS layer does not duplicate it, and the old 7-day JS max
+    // is gone (a week+ floor replaced it).
     var minLead = platform === 'instagram' ? 60 : 900;
     if (t < nowSec + minLead) return true; // Meta API requires at least 10-15 mins in future
-    // Owner law 2026-09-07: nothing may be scheduled beyond one week — every
-    // scheduled piece must stay inside the visible Plan week so it can be
-    // deleted/edited before it ever goes near live. Meta's API allows 75 days;
-    // our dispatch deliberately caps tighter than the API.
-    if (t > nowSec + 7 * 86400) return true;
     return false;
   }
   function ceQueueContentId(q) {
