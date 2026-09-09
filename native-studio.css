@@ -1,8 +1,20 @@
-/* Transitions.dev & Beautiful UI Craft Tokens */
+/* Transitions.dev, Beautiful UI & Emil Kowalski Physics Tokens */
 :root {
   --ease-spring: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --spring-bouncy: linear(
+    0, 0.04 0.9%, 0.151 2.1%, 0.316 3.5%, 0.525 5.1%, 0.763 6.9%, 1.011 8.9%,
+    1.127 10.1%, 1.229 11.4%, 1.314 12.8%, 1.378 14.3%, 1.417 16%, 1.427 17.9%,
+    1.408 20.1%, 1.362 22.4%, 1.139 30.1%, 1.026 34.6%, 0.957 39%, 0.925 43.6%,
+    0.916 48.4%, 0.931 53.3%, 0.985 64.1%, 1.013 75.3%, 1.002 87.2%, 1
+  );
+  --spring-snappy: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Devanagari Typography Protection Tokens */
+  --deva-lh-tight: 1.45;
+  --deva-lh-loose: 1.6;
+  --deva-matra-padding: 0.15em;
 }
 
 /* Never cross-fade the whole editor over Library pixels. The old opacity
@@ -257,7 +269,7 @@
 .studio-more-actions { position: relative; }
 .studio-more-actions > summary {
   list-style: none; display: grid; place-items: center; width: 32px; height: 32px;
-  border: 1px solid var(--border); border-radius: 9px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
   color: var(--ink); font-size: 13px; font-weight: 800; letter-spacing: 1px; cursor: pointer;
 }
 .studio-more-actions > summary::-webkit-details-marker { display: none; }
@@ -275,7 +287,7 @@
   display: grid;
   place-items: center;
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: 10px;
   color: var(--ink);
   background: var(--surface);
   font: 700 17px/1 system-ui, sans-serif;
@@ -288,7 +300,9 @@
 }
 
 .studio-icon-btn:disabled {
-  opacity: .32;
+  /* Manager deep audit 2026-09-07: .32 crossed into illegibility — the undo/
+     redo cluster read as a render bug, not a disabled state. */
+  opacity: .45;
   cursor: default;
 }
 
@@ -370,7 +384,7 @@
   place-items: center;
   padding: 0;
   border: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   color: rgba(255, 255, 255, 0.66);
   background: transparent;
   cursor: pointer;
@@ -488,7 +502,8 @@
   flex-direction: column;
   gap: 6px;
   color: var(--faint);
-  font-size: 9px;
+  /* Type floor 10px (law: a945bd1 "zero sub-10px fonts remain"). */
+  font-size: 10px;
   font-weight: 760;
   letter-spacing: .055em;
   text-transform: uppercase;
@@ -505,7 +520,7 @@
   height: 32px;
   padding: 0 9px;
   border: 1px solid rgba(255, 255, 255, .1);
-  border-radius: 7px;
+  border-radius: 8px;
   color: var(--ink);
   background: var(--card);
   font: 620 11px/1 system-ui, sans-serif;
@@ -527,7 +542,7 @@
   min-height: 28px;
   padding: 0 9px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   color: var(--muted);
   background: transparent;
   font: 650 10px/1 system-ui, sans-serif;
@@ -550,7 +565,7 @@
   height: 32px;
   padding: 3px;
   border: 1px solid rgba(255, 255, 255, .1);
-  border-radius: 7px;
+  border-radius: 8px;
   background: var(--card);
   cursor: pointer;
 }
@@ -573,7 +588,7 @@
   padding: 0;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9px;
+  border-radius: 10px;
   color: inherit;
   background: #0b0b0d;
   box-shadow: none;
@@ -595,7 +610,7 @@
   position: absolute;
   inset: 3px;
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: 8px;
   pointer-events: none;
 }
 
@@ -655,7 +670,7 @@
   height: 100%;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 12px;
   background: #111;
   display: flex;
   align-items: center;
@@ -670,7 +685,7 @@
   overflow: hidden;
   box-shadow: none;
   border: 0;
-  border-radius: 20px;
+  border-radius: 16px;
   background: var(--surface);
   box-shadow: 0 18px 55px rgba(17, 20, 28, .12), 0 0 0 1px color-mix(in srgb, var(--border) 82%, transparent);
 }
@@ -693,7 +708,7 @@
   padding: 8px 14px;
   border: 1px solid var(--border);
   border-bottom: 0;
-  border-radius: 20px 20px 0 0;
+  border-radius: 16px 16px 0 0;
   background: color-mix(in srgb, var(--surface) 96%, var(--ink) 4%);
 }
 
@@ -748,7 +763,7 @@
   scroll-snap-type: x proximity;
   scrollbar-width: thin;
   border: 1px solid var(--border);
-  border-radius: 0 0 20px 20px;
+  border-radius: 0 0 16px 16px;
   background: color-mix(in srgb, var(--bg) 88%, #9aa0aa 12%);
 }
 
@@ -761,7 +776,7 @@
   width: auto;
   padding: 0;
   border: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   background: transparent;
   box-shadow: 0 10px 30px rgba(30, 28, 46, .12);
   scroll-snap-align: center;
@@ -913,7 +928,7 @@
 .ce-typography-toolbar button {
   height: 28px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   color: var(--ink);
   background: transparent;
   font: 650 11px/1 system-ui, sans-serif;
@@ -947,7 +962,7 @@
   height: 28px;
   padding: 4px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   background: transparent;
   cursor: pointer;
 }
@@ -970,7 +985,13 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.ce-look-choice {
+/* Legacy TEXT-CHIP sizing — must NEVER touch --visual face cards. The old
+   block set font-size/line-height:0 + color:transparent + fixed 60x75 on
+   .ce-look-choice itself; --visual cards inherit the same class, so every
+   mini design face hydrated with line-height:0 → brand/kicker/footer painted
+   0px tall ("designs are not the real designs", owner 2026-09-08 15:05).
+   Root fix: chip geometry + text-suppression now scoped to non-visual cards. */
+.ce-look-choice:not(.ce-look-choice--visual) {
   flex: 0 0 60px;
   width: 60px;
   min-width: 60px;
@@ -990,6 +1011,9 @@
   line-height: 0 !important;
   color: transparent !important;
   text-align: center;
+}
+
+.ce-look-choice {
   cursor: pointer;
   transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
   box-sizing: border-box;
@@ -1023,7 +1047,7 @@
   box-shadow: 0 4px 16px var(--accent-glow) !important;
 }
 
-.ce-look-choice > *:not(.ce-look-preview) {
+.ce-look-choice:not(.ce-look-choice--visual) > *:not(.ce-look-preview) {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -1034,13 +1058,17 @@
   pointer-events: none !important;
 }
 
+/* Visual cards paint the authored face; only the Active badge overlays it. */
+.ce-look-choice--visual > * { pointer-events: none !important; }
+.ce-look-choice--visual > .ce-post-template-active-badge { pointer-events: auto !important; }
+
 .ce-look-preview {
   position: relative !important;
   width: 100% !important;
   height: 100% !important;
   aspect-ratio: 4 / 5 !important;
   overflow: hidden !important;
-  border-radius: 7px !important;
+  border-radius: 8px!important;
   background: #111;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
   box-sizing: border-box !important;
@@ -1121,8 +1149,8 @@
   align-items: center;
   gap: 4px;
   padding: 2px 6px;
-  border-radius: 5px;
-  font-size: 8.5px;
+  border-radius: 4px;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -1131,7 +1159,7 @@
 }
 
 .ce-hook-text-preview {
-  font-size: 11.5px;
+  font-size: 12px;
   line-height: 1.35;
   font-weight: 500;
   color: var(--ink);
@@ -1221,7 +1249,7 @@
   align-items: center;
   gap: 6px;
   padding: 0 10px;
-  font: 650 11.5px/1 system-ui, sans-serif;
+  font-weight: 650; font-size: 12px; line-height: 1; font-family: system-ui, sans-serif;
 }
 .studio-history-btn[disabled] .studio-history-label {
   color: var(--faint);
@@ -1286,7 +1314,7 @@
 .ce-typography-toolbar {
   gap: 3px;
   padding: 4px;
-  border-radius: 11px;
+  border-radius: 10px;
 }
 .ce-typography-toolbar select,
 .ce-typography-toolbar button {
@@ -1496,7 +1524,7 @@
   width: 6px !important;
   height: 520px !important;
   background: #c93628 !important;
-  border-radius: 3px !important;
+  border-radius: 4px!important;
 }
 .pc-softredline .para {
   position: relative !important;
@@ -1543,7 +1571,7 @@
   width: 992px !important;
   height: 1262px !important;
   border: 2px solid rgba(185, 145, 75, 0.45) !important;
-  border-radius: 4px !important;
+  border-radius: 4px!important;
 }
 .pc-diwanpost .fr-inner {
   position: absolute !important;
@@ -1669,7 +1697,7 @@
   flex: 0 0 34px !important;
   padding: 0 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 7px !important;
+  border-radius: 8px!important;
   color: rgba(255, 255, 255, 0.68) !important;
   background: rgba(255, 255, 255, 0.035) !important;
   box-sizing: border-box !important;
@@ -1739,14 +1767,15 @@
 }
 
 .studio-workspace.is-carousel-mode .studio-stage {
-  flex: 1 1 0% !important;
-  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
   width: 100% !important;
-  height: auto !important;
-  max-height: none !important;
+  height: 100% !important;
+  max-height: 100% !important;
   padding: 0 !important;
   overflow: hidden !important;
   display: flex !important;
+  flex-direction: column !important;
   align-items: stretch !important;
   justify-content: stretch !important;
 }
@@ -1758,6 +1787,9 @@
   display: flex !important;
   flex-direction: column !important;
   border-radius: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
   overflow: hidden !important;
 }
 
@@ -1771,57 +1803,82 @@
 }
 
 .studio-workspace.is-carousel-mode .ce-carousel-main {
-  flex: 1 1 0% !important;
+  /* Owner law 2026-09-03 evening: filmstrip TOP, hero middle, tool dock BOTTOM. */
+  flex: 1 1 auto !important;
   min-height: 0 !important;
   display: flex !important;
-  flex-direction: row !important;
+  flex-direction: column !important;
   overflow: hidden !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-carousel-hero-zone {
-  flex: 1 1 0% !important;
+  flex: 1 1 auto !important;
   min-width: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 12px !important;
-  padding: 16px 20px !important;
+  gap: 20px !important;
+  padding: 24px !important;
   box-sizing: border-box !important;
+  position: relative !important;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.025) 0%, rgba(0, 0, 0, 0.35) 100%), #0c0d12 !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-carousel-ghost-nav {
   flex: 0 0 44px !important;
   width: 44px !important;
   height: 44px !important;
-  border: 1px solid var(--border) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 50% !important;
-  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
-  color: var(--text) !important;
-  font-size: 22px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(12px) !important;
+  color: #fff !important;
+  font-size: 24px !important;
+  display: grid !important;
+  place-items: center !important;
   cursor: pointer !important;
-  opacity: 0.55 !important;
+  transition: transform 150ms var(--ease-spring), opacity 150ms ease, background-color 150ms ease, border-color 150ms ease !important;
+  z-index: 5 !important;
+  opacity: 0.7 !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-carousel-ghost-nav:hover:not(:disabled) {
   opacity: 1 !important;
-  border-color: var(--accent) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  transform: scale(1.06) !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-carousel-ghost-nav:disabled {
+  opacity: 0.15 !important;
+  cursor: default !important;
+  transform: none !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-carousel-hero-card {
   flex: 0 1 auto !important;
-  max-height: calc(100% - 8px) !important;
+  height: 100% !important;
+  max-height: calc(100% - 16px) !important;
   aspect-ratio: 4 / 5 !important;
-  height: min(640px, 100%) !important;
   width: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-carousel-hero-frame {
   width: 100% !important;
   height: 100% !important;
+  aspect-ratio: 4 / 5 !important;
   position: relative !important;
   overflow: hidden !important;
-  border-radius: 12px !important;
-  border: 1px solid var(--border) !important;
+  border-radius: 16px!important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+  background: #111 !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-carousel-slide-stage {
@@ -1833,42 +1890,270 @@
   left: 0 !important;
 }
 
+/* Apple-style Studio: Canvas dominates stage, 340px right inspector rail, scrollable drawer on bottom */
+.studio-workspace.is-carousel-mode {
+  /* Gallery owns the stage: column so the swipe rail fills height and the
+     tool dock sits underneath — never a side inspector crushing the canvas. */
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+.studio-workspace.is-carousel-mode .studio-dock {
+  display: none !important;
+}
+
 .studio-workspace.is-carousel-mode .ce-studio-inspector {
-  flex: 0 0 320px !important;
-  width: 320px !important;
-  min-width: 320px !important;
-  max-width: 320px !important;
-  border-left: 1px solid var(--border) !important;
-  background: var(--surface) !important;
+  /* Owner law 2026-09-03 (repeat order 11:50, "move toolbar to bottom"): the
+     tool dock is a horizontal bottom bar — NOT a 320/350px side column.
+     Gallery mode: dock stays readable; design chips are swatches, not slides.
+     FIX 2026-09-03 night (owner screenshot: dock crushed to a 320px stump,
+     sections clipped both axes): the base side-rail rule pins
+     min/max-width:320px — without resetting them here, width:100% clamps to
+     320px. Every section now gets its own vertical scroll as a safety net. */
+  position: relative !important;
+  z-index: 10 !important;
+  flex: 0 0 248px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 248px !important;
+  max-height: 248px !important;
+  min-height: 248px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+  padding: 10px 16px !important;
+  gap: 16px !important;
+  box-sizing: border-box !important;
+  border-top: 1px solid var(--border) !important;
+  border-left: 0 !important;
+  background: color-mix(in srgb, var(--surface) 94%, #000) !important;
+}
+.studio-workspace.is-carousel-mode .ce-studio-inspector .ce-inspector-scroll,
+.studio-workspace.is-carousel-mode .ce-studio-inspector-scroll {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: 16px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 0 4px 0 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+}
+.studio-workspace.is-carousel-mode .ce-inspector-section {
+  flex: 0 0 auto !important;
+  max-width: 300px;
+  min-width: 168px;
   display: flex !important;
   flex-direction: column !important;
+  gap: 8px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
   min-height: 0 !important;
+  max-height: 100% !important;
+  scrollbar-width: thin !important;
+  padding-bottom: 4px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-hooks {
+  max-width: 460px !important;
+  min-width: 300px !important;
+}
+.studio-workspace.is-carousel-mode .ce-inspector-pinned {
+  flex: 0 0 280px !important;
+  min-width: 240px !important;
+  border-top: 0 !important;
+  border-left: 1px solid var(--border) !important;
+  padding: 0 0 0 14px !important;
+  background: transparent !important;
+  align-self: stretch !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  scrollbar-width: thin !important;
+}
+
+/* Design chips — never a second slide filmstrip */
+.ce-look-choice--chip {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 10px !important;
+  min-width: 0 !important;
+  border-radius: 10px!important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  background: rgba(255,255,255,0.04) !important;
+}
+.ce-look-choice--chip.active {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 1px var(--accent) !important;
+}
+.ce-look-swatch {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 8px!important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  flex: 0 0 24px !important;
+}
+.ce-look-choice--chip .ce-look-choice-name {
+  font-size: 11px !important;
+  white-space: nowrap !important;
+}
+/* Hook chips: one quiet scrollable row of compact chips — never stacked bars */
+.studio-workspace.is-carousel-mode .ce-hook-chip-row,
+.ce-studio-inspector .ce-hook-chip-row {
+  flex-wrap: nowrap !important;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 2px;
+}
+.ce-studio-inspector .ce-hook-chip-row .ce-hook-chip {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 160px;
+}
+
+/* Hook sweep: same language as the slide filmstrip — swipe/select options */
+.ce-hook-sweep,
+.studio-workspace.is-carousel-mode .ce-hook-sweep {
+  display: flex !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 280px !important;
+  max-width: 100% !important;
+  min-height: 88px !important;
+}
+.ce-hook-sweep-nav {
+  flex: 0 0 32px !important;
+  width: 32px !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  border-radius: 10px!important;
+  background: rgba(255,255,255,0.06) !important;
+  color: #fff !important;
+  font-size: 20px !important;
+  cursor: pointer !important;
+}
+.ce-hook-sweep-nav:disabled {
+  opacity: 0.25 !important;
+  cursor: default !important;
+}
+.ce-hook-sweep-track {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  gap: 10px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-snap-type: x mandatory !important;
+  padding: 2px 2px 6px !important;
+  scrollbar-width: thin !important;
+}
+.ce-hook-card {
+  flex: 0 0 210px !important;
+  width: 210px !important;
+  min-height: 84px !important;
+  scroll-snap-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding: 10px 12px !important;
+  border-radius: 12px!important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  background: rgba(255,255,255,0.04) !important;
+  color: var(--text) !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+.ce-hook-card.is-active {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 1px var(--accent), 0 8px 24px rgba(0,0,0,0.35) !important;
+  background: color-mix(in srgb, var(--accent) 12%, rgba(255,255,255,0.05)) !important;
+}
+.ce-hook-card-angle {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  color: var(--muted) !important;
+}
+.ce-hook-card.is-active .ce-hook-card-angle { color: var(--accent) !important; }
+.ce-hook-card-preview {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  color: var(--text) !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
   overflow: hidden !important;
+}
+.ce-hook-card-index {
+  margin-top: auto !important;
+  font-size: 10px !important;
+  color: var(--muted) !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-studio-inspector-scroll,
 .studio-workspace.is-carousel-mode .ce-inspector-scroll {
   flex: 1 1 auto !important;
-  min-height: 0 !important;   /* flex child must shrink to rail height and scroll */
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  padding: 12px 14px 8px !important;
+  min-width: 0 !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: 16px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 0 4px 0 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
   display: flex !important;
-  flex-direction: column !important;
-  gap: 14px !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-inspector-pinned {
-  flex: 0 0 auto !important;
-  border-top: 1px solid var(--border) !important;
-  padding: 10px 14px 12px !important;
-  background: var(--surface) !important;
+  flex: 0 0 280px !important;
+  min-width: 240px !important;
+  border-top: 0 !important;
+  border-left: 1px solid var(--border) !important;
+  padding: 0 0 0 14px !important;
+  background: transparent !important;
+  align-self: stretch !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  scrollbar-width: thin !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-inspector-section {
+  flex: 0 0 auto !important;
+  max-width: 300px;
+  min-width: 168px;
   display: flex !important;
   flex-direction: column !important;
   gap: 8px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  scrollbar-width: thin !important;
+  padding-bottom: 4px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-hooks {
+  max-width: 460px !important;
+  min-width: 300px !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-inspector-label {
@@ -1886,73 +2171,28 @@
   color: var(--text) !important;
 }
 
-.studio-workspace.is-carousel-mode .ce-look-picker-grid {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 8px !important;
-}
+/* 2026-09-07 cleanup: stale single-row chip-rail rule from the pre-A1 dock.
+   The design grid is a 2-column card grid (A1 rule below) — this nowrap rail
+   fought it and is removed. */
 
 .studio-workspace.is-carousel-mode .ce-look-choice-name {
-  display: block !important;
-  font-size: 10px !important;
-  text-align: center !important;
-  margin-top: 4px !important;
+  display: inline !important;
+  font-size: 11px !important;
+  text-align: left !important;
+  margin-top: 0 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
 
-.studio-workspace.is-carousel-mode .ce-text-tools-grid {
-  display: grid !important;
-  grid-template-columns: repeat(5, 1fr) !important;
-  gap: 6px !important;
-}
 
-.studio-workspace.is-carousel-mode .ce-text-tool-btn,
-.studio-workspace.is-carousel-mode .ce-typography-toolbar .ce-compact-tool {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  gap: 2px !important;
-  padding: 6px 4px !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
-  background: var(--card) !important;
-  font-size: 10px !important;
-  cursor: pointer !important;
-}
+/* 2026-09-07 cleanup: visibility owned by the base
+   .ce-add-slide-disclosure[open] toggle (display none → flex). The old
+   display:flex !important here defeated the Add-slide disclosure. */
 
-.studio-workspace.is-carousel-mode .ce-typography-toolbar {
-  display: grid !important;
-  grid-template-columns: repeat(5, 1fr) !important;
-  gap: 6px !important;
-}
-
-.studio-workspace.is-carousel-mode .ce-typography-toolbar select {
-  grid-column: 1 / -1 !important;
-}
-
-.studio-workspace.is-carousel-mode .ce-text-tool-caption {
-  font-size: 10px !important;
-  line-height: 1.1 !important;
-  color: var(--muted) !important;
-}
-
-.studio-workspace.is-carousel-mode .ce-add-slide-pills {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 6px !important;
-}
-
-.studio-workspace.is-carousel-mode .ce-add-slide-pills button,
-.studio-workspace.is-carousel-mode .ce-slide-action-row button {
-  font-size: 11px !important;
-  padding: 5px 10px !important;
-  border-radius: 999px !important;
-  border: 1px solid var(--border) !important;
-  background: var(--card) !important;
-  cursor: pointer !important;
-}
+/* 2026-09-07 cleanup: superseded by SECTION 7 (slide-action unification).
+   This block still carried the old 999px pill radius + var(--card) fill —
+   the exact "separate, weirdly colored" button look the owner flagged. */
 
 .studio-workspace.is-carousel-mode .ce-slide-action-row {
   display: flex !important;
@@ -1966,7 +2206,7 @@
   min-height: 72px !important;
   resize: vertical !important;
   border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
+  border-radius: 8px!important;
   padding: 8px 10px !important;
   font-size: 12px !important;
   box-sizing: border-box !important;
@@ -1979,27 +2219,97 @@
   margin-top: 4px !important;
 }
 
-.studio-workspace.is-carousel-mode .ce-filmstrip {
-  flex: 0 0 190px !important;
-  height: 190px !important;
-  min-height: 190px !important;
-  max-height: 190px !important;
-  border-top: 1px solid var(--border) !important;
-  background: var(--surface) !important;
+.studio-workspace.is-carousel-mode .ce-filmstrip,
+.studio-workspace.is-carousel-mode .ce-filmstrip--top,
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery {
+  /* Owner 2026-09-03 hard correction: the gallery IS the canvas. No center
+     hero. One expanded swipe track of all slides; tools stay in the dock. */
+  flex: 1 1 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  border-top: 0 !important;
+  border-bottom: 1px solid var(--border) !important;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.45) 100%), #0c0d12 !important;
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
+  z-index: 5 !important;
+  order: 0 !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-carousel-editor--gallery {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-header {
+  flex: 0 0 28px !important;
+  height: 28px !important;
+  padding: 0 18px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.06em !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+  flex: 1 1 auto !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 12px 24px 20px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-snap-type: x mandatory !important;
+  scrollbar-width: thin !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
+  flex: 0 0 auto !important;
+  scroll-snap-align: center !important;
+  padding: 10px !important;
+  border-radius: 12px!important;
+  background: rgba(255,255,255,0.03) !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card .ce-carousel-slide-frame {
+  border-radius: 10px!important;
+  box-shadow: 0 18px 48px rgba(0,0,0,0.45) !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-role {
+  font-size: 12px !important;
+  margin-top: 8px !important;
+  text-align: center !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-add {
+  flex: 0 0 56px !important;
+  width: 56px !important;
+  min-height: 180px !important;
+  align-self: center !important;
+  font-size: 28px !important;
+}
+
+/* Hide leftover hero zone if any stale markup remains */
+.studio-workspace.is-carousel-mode .ce-carousel-hero-zone,
+.studio-workspace.is-carousel-mode .ce-carousel-main {
+  display: none !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-filmstrip-header {
-  flex: 0 0 24px !important;
-  height: 24px !important;
+  flex: 0 0 22px !important;
+  height: 22px !important;
   padding: 0 16px !important;
   font-size: 11px !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
   color: var(--muted) !important;
   display: flex !important;
   align-items: center !important;
+  justify-content: space-between !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .studio-workspace.is-carousel-mode #ce-carousel-slide-scroll,
@@ -2007,11 +2317,17 @@
   flex: 1 1 auto !important;
   display: flex !important;
   flex-direction: row !important;
-  align-items: flex-start !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
   gap: 8px !important;
-  padding: 8px 12px 8px 12px !important;
-  overflow-x: hidden !important;
+  padding: 4px 12px 6px 12px !important;
+  /* Owner law 2026-09-03 (repeat order 11:50): the slide drawer is a clean
+     scrollable rail — minis keep a readable size and the rail scrolls when a
+     deck has more slides than fit. Zero-overflow is no longer the law;
+     every-card-reachable + selected-card-in-view is. */
+  overflow-x: auto !important;
   overflow-y: hidden !important;
+  scrollbar-width: thin !important;
   box-sizing: border-box !important;
 }
 
@@ -2019,30 +2335,46 @@
   flex: 0 0 auto !important;
   position: relative !important;
   padding: 0 !important;
-  border: 1px solid rgba(0, 0, 0, 0.12) !important;
-  border-radius: 6px !important;
+  border: 0 !important;
+  border-radius: 16px!important;
   background: var(--card) !important;
   cursor: pointer !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 2px !important;
   pointer-events: auto !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-filmstrip-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.09) inset, 0 14px 36px rgba(0, 0, 0, 0.45) !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-filmstrip-card.is-selected {
-  border: 2px solid var(--accent) !important;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent) !important;
+  border: 0 !important;
+  outline: 0 !important;
+  /* E-011 fix 2026-09-05: selection was a 1px near-white hairline that read the
+     same as unselected dark separators. 2px accent ring inset 2px + 4% white
+     ground, per the audit spec. */
+  box-shadow: 0 0 0 2px var(--accent, #c43b4e) inset, 0 16px 40px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.04) inset !important;
+  transform: translateY(-3px) scale(1.015) !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-filmstrip-card .ce-carousel-slide-frame {
-  pointer-events: none !important;
+  /* Owner 2026-09-05 root cause: pointer-events:none here made every slide
+     click land on the card, so in-place editing never armed. Blocks must
+     receive input; card selection survives via stopPropagation + forwarding. */
+  pointer-events: auto !important;
   overflow: hidden !important;
-  border-radius: 4px !important;
+  border-radius: 12px!important;
 }
 
 .studio-workspace.is-carousel-mode .ce-filmstrip-card .ce-carousel-slide-stage {
-  pointer-events: none !important;
+  pointer-events: auto !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-filmstrip-num {
@@ -2064,7 +2396,7 @@
   color: #fff !important;
 }
 
-.studio-workspace.is-carousel-mode .ce-filmstrip-fit-dot {
+.studio-workspace.is-carousel-mode .ce-filmstrip-fit-dot:not([hidden]) {
   position: absolute !important;
   top: 4px !important;
   right: 4px !important;
@@ -2079,6 +2411,10 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-filmstrip-fit-dot[hidden] {
+  display: none !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-filmstrip-role {
@@ -2096,7 +2432,7 @@
   width: 36px !important;
   min-height: 80px !important;
   border: 1px dashed var(--border) !important;
-  border-radius: 6px !important;
+  border-radius: 8px!important;
   background: transparent !important;
   font-size: 20px !important;
   cursor: pointer !important;
@@ -2124,7 +2460,7 @@
 }
 
 .ce-hook-select-wrap > span {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -2137,7 +2473,7 @@
   border: 1px solid var(--card-border, var(--border));
   background: var(--card);
   color: var(--ink);
-  border-radius: 9px;
+  border-radius: 10px;
   padding: 6px 8px;
   font-size: 12px;
   font-weight: 650;
@@ -2164,7 +2500,8 @@
   gap: 8px !important;
 }
 
-.studio-workspace.is-carousel-mode .ce-look-choice {
+/* Legacy mini-slide look thumbs (pre-chip). Chips override below. */
+.studio-workspace.is-carousel-mode .ce-look-choice:not(.ce-look-choice--chip):not(.ce-look-choice--visual) {
   flex: 0 0 60px !important;
   width: 60px !important;
   min-width: 60px !important;
@@ -2173,6 +2510,67 @@
   min-height: 75px !important;
   max-height: 75px !important;
   aspect-ratio: 4 / 5 !important;
+}
+
+/* Owner 2026-09-07 polish: minis are FLUID — they fill their grid cell
+   (3-per-row in the design section) instead of pinning 96x120, which
+   overflowed the ~90px cells and read as crammed. The fit pass zooms each
+   stage to its cell's real clientWidth (browse branch), so art always fits. */
+.studio-workspace:is(.is-carousel-mode,.is-post-mode) .ce-look-choice--visual {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: auto !important;
+  aspect-ratio: 4 / 5 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+/* Design chips must beat the mini-slide look rules (font-size:0 + hide children). */
+.studio-workspace.is-carousel-mode .ce-look-choice.ce-look-choice--chip,
+.ce-look-choice.ce-look-choice--chip {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  padding: 6px 10px !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  color: var(--ink) !important;
+  overflow: visible !important;
+}
+.studio-workspace.is-carousel-mode .ce-look-choice.ce-look-choice--chip > *,
+.ce-look-choice.ce-look-choice--chip > * {
+  display: initial !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: auto !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  color: inherit !important;
+}
+.studio-workspace.is-carousel-mode .ce-look-choice.ce-look-choice--chip .ce-look-swatch,
+.ce-look-choice.ce-look-choice--chip .ce-look-swatch {
+  display: grid !important;
+  width: 24px !important;
+  height: 24px !important;
+  flex: 0 0 24px !important;
+  place-items: center !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
 }
 
 .ce-dock-content-switch {
@@ -2187,23 +2585,29 @@
   gap: 6px;
 }
 .ce-content-switch-chip {
-  max-width: 220px;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 11px !important;
+  font-size: 12px !important;
   line-height: 1.3 !important;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--ink) !important;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 5px 10px !important;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 7px 12px !important;
   cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+  transition: transform 150ms var(--ease-snappy), background-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 .ce-content-switch-chip:hover {
-  border-color: var(--accent-border);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent);
   color: var(--accent) !important;
+  transform: translateY(-1px);
 }
 
 /* ==========================================================================
@@ -2228,7 +2632,7 @@
 
 .ce-post-caption-content {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.6;
   color: var(--ink);
   opacity: 0.92;
@@ -2348,11 +2752,11 @@
   padding: 2px 10px;
   background: var(--surface, #1e1e24);
   border: 1px solid var(--border, #333);
-  border-radius: 6px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 750;
   color: var(--muted, #999);
   cursor: grab;
@@ -2389,7 +2793,7 @@
   padding: 4px 10px;
   background: var(--card, rgba(255, 255, 255, 0.05));
   border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 11px;
   font-weight: 600;
   color: var(--muted, #aaa);
@@ -2425,7 +2829,7 @@
   font-weight: 650;
   border-radius: 8px;
   padding: 5px 12px;
-  font-size: 11.5px;
+  font-size: 12px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -2446,7 +2850,7 @@
   padding: 4px 10px;
   font-size: 11px;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--muted);
@@ -2509,7 +2913,7 @@
 }
 
 .studio-workspace:not(.is-carousel-mode) .ce-dock-group-label {
-  font-size: 10.5px !important;
+  font-size: 10px !important;
   font-weight: 750 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.08em !important;
@@ -2527,7 +2931,7 @@
   background: rgba(0, 0, 0, 0.4) !important;
   color: #f1f2f6 !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 8px !important;
+  border-radius: 8px!important;
   font-size: 12px !important;
   line-height: 1.45 !important;
   font-family: inherit !important;
@@ -2550,13 +2954,15 @@
 }
 
 .studio-workspace:not(.is-carousel-mode) .ce-dock-caption #ce-full-caption-editor {
-  min-height: 140px !important;
-  max-height: 280px !important;
+  min-height: 240px !important;
+  max-height: 420px !important;
+  height: 260px !important;
   resize: vertical !important;
-  padding: 12px 14px !important;
-  font-size: 12.5px !important;
-  line-height: 1.58 !important;
-  border-radius: 10px !important;
+  padding: 14px 16px !important;
+  font-size: 13px !important;
+  line-height: 1.62 !important;
+  border-radius: 10px!important;
+  background: rgba(0, 0, 0, 0.45) !important;
 }
 
 /* Carousel Mode Caption Inspector (Horizontal Bottom Dock) */
@@ -2576,7 +2982,7 @@
   margin: 0 !important;
   background: rgba(255, 255, 255, 0.035) !important;
   border: 1px solid rgba(255, 255, 255, 0.09) !important;
-  border-radius: 10px !important;
+  border-radius: 10px!important;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
@@ -2600,9 +3006,9 @@
   max-height: 26px !important;
   resize: none !important;
   padding: 4px 8px !important;
-  font-size: 11.5px !important;
+  font-size: 12px !important;
   line-height: 1.35 !important;
-  border-radius: 6px !important;
+  border-radius: 8px!important;
   box-sizing: border-box !important;
   overflow-y: auto !important;
   margin: 0 !important;
@@ -2627,7 +3033,7 @@
 .ce-copy-caption-btn {
   background: rgba(255, 255, 255, 0.06) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 6px !important;
+  border-radius: 8px!important;
   padding: 3px 9px !important;
   font-size: 11px !important;
   font-weight: 650 !important;
@@ -2654,16 +3060,16 @@
   align-items: center !important;
   background: rgba(0, 0, 0, 0.2) !important;
   border: 1px solid rgba(255, 255, 255, 0.07) !important;
-  border-radius: 9px !important;
+  border-radius: 10px!important;
   padding: 6px 8px !important;
 }
 
 .studio-workspace:not(.is-carousel-mode) .ce-typography-toolbar select {
   background: rgba(255, 255, 255, 0.06) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 6px !important;
+  border-radius: 8px!important;
   color: #ffffff !important;
-  font-size: 11.5px !important;
+  font-size: 12px !important;
   font-weight: 550 !important;
   padding: 4px 8px !important;
   outline: none !important;
@@ -2673,7 +3079,7 @@
 .studio-workspace:not(.is-carousel-mode) .ce-typography-toolbar button {
   background: rgba(255, 255, 255, 0.05) !important;
   border: 1px solid rgba(255, 255, 255, 0.09) !important;
-  border-radius: 6px !important;
+  border-radius: 8px!important;
   color: rgba(255, 255, 255, 0.82) !important;
   font-size: 11px !important;
   font-weight: 600 !important;
@@ -2699,7 +3105,7 @@
 .studio-workspace:not(.is-carousel-mode) .ce-typography-toolbar .ce-palette-shuffle-btn {
   background: rgba(255, 255, 255, 0.06) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 6px !important;
+  border-radius: 8px!important;
   padding: 4px 9px !important;
   font-size: 11px !important;
   font-weight: 650 !important;
@@ -2713,35 +3119,79 @@
   color: var(--accent) !important;
 }
 
-/* Best Fit Designs Grid */
-.studio-workspace:not(.is-carousel-mode) .ce-look-picker {
+/* Best Fit Designs Grid — Sleek 2-column list with full legible titles & swatches */
+.studio-workspace:not(.is-carousel-mode) .ce-look-picker,
+.ce-dock-looks .ce-look-picker-grid {
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(2, 1fr) !important;
   gap: 8px !important;
   width: 100% !important;
 }
 
-.studio-workspace:not(.is-carousel-mode) .ce-look-choice {
-  border-radius: 9px !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+.studio-workspace:not(.is-carousel-mode) .ce-look-choice:not(.ce-look-choice--visual),
+.ce-dock-looks .ce-look-choice:not(.ce-look-choice--visual) {
+  border-radius: 8px!important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   overflow: hidden !important;
-  aspect-ratio: 4 / 5 !important;
-  background: #111 !important;
+  aspect-ratio: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
   cursor: pointer !important;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease, box-shadow 0.18s ease !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  padding: 0 10px !important;
+  gap: 8px !important;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  box-sizing: border-box !important;
 }
 
-.studio-workspace:not(.is-carousel-mode) .ce-look-choice:hover {
-  transform: translateY(-2px) !important;
+.studio-workspace:not(.is-carousel-mode) .ce-look-choice:hover,
+.ce-dock-looks .ce-look-choice:hover {
+  transform: translateY(-1px) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   border-color: rgba(255, 255, 255, 0.28) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
 }
 
-.studio-workspace:not(.is-carousel-mode) .ce-look-choice.active {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 16px var(--accent-glow), inset 0 0 0 1px var(--accent) !important;
-  transform: scale(1.02) !important;
+.studio-workspace:not(.is-carousel-mode) .ce-look-choice.active,
+.ce-dock-looks .ce-look-choice.active {
+  border-color: var(--accent, #c43b4e) !important;
+  background: color-mix(in srgb, var(--accent, #c43b4e) 18%, rgba(255, 255, 255, 0.04)) !important;
+  box-shadow: 0 0 0 1px var(--accent, #c43b4e), 0 2px 10px rgba(196, 59, 78, 0.35) !important;
+  transform: none !important;
+}
+
+.studio-workspace:not(.is-carousel-mode) .ce-look-choice .ce-look-swatch,
+.ce-dock-looks .ce-look-choice .ce-look-swatch {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  border-radius: 4px!important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  flex-shrink: 0 !important;
+}
+
+.studio-workspace:not(.is-carousel-mode) .ce-look-choice .ce-look-choice-name,
+.ce-dock-looks .ce-look-choice .ce-look-choice-name {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--ink, #fff) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-align: left !important;
+  flex: 1 !important;
+  line-height: 1.2 !important;
 }
 
 /* ── W14 · Canva-grade block movement ────────────────────────────────
@@ -2757,7 +3207,7 @@
   justify-content: center;
   width: 30px;
   height: 20px;
-  border-radius: 6px;
+  border-radius: 8px;
   /* Frosted neutral glass: readable on near-black Midnight faces and on
      light paper faces alike — a solid dark pill vanished on dark looks. */
   background: rgba(130, 130, 138, 0.42);
@@ -2805,4 +3255,2281 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ce-live-pulse-dot { animation: none; }
+}
+
+/* ==========================================================
+   Owner hardening + premium pass 2026-09-03.
+   Root fix for the "full-width fields / giant labels" Studio mess:
+   the inspector geometry previously hung ONLY off
+   .studio-workspace.is-carousel-mode — any stale mode class left the
+   inspector unstyled and stretching across the whole window. These
+   base rules make both paths safe by default; the mode-scoped rules
+   above only refine them.
+   ========================================================== */
+.ce-studio-inspector {
+  flex: 0 0 320px;
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.ce-studio-inspector .ce-inspector-scroll,
+.ce-studio-inspector .ce-studio-inspector-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ce-inspector-pinned {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--border);
+  padding: 10px 14px 12px;
+  background: var(--surface);
+}
+.ce-inspector-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.ce-inspector-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--faint);
+  white-space: nowrap;
+}
+.ce-hook-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.ce-hook-chip {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Defensive: post-style dock classes that land in carousel mode must still
+   form a 320px rail, never a full-width row over the canvas. */
+.studio-workspace.is-carousel-mode .ce-carousel-dock {
+  flex: 0 0 320px;
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
+  flex-direction: column;
+  align-items: stretch;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 12px 14px;
+  gap: 14px;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+}
+
+/* Spacing sliders (owner 2026-09-03, Canva-style) */
+.ce-typo-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 94%, var(--ink) 6%);
+}
+.ce-typo-slider {
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  align-items: center;
+  gap: 10px;
+  font-weight: 650; font-size: 10px; line-height: 1; font-family: system-ui, sans-serif;
+  color: var(--muted);
+}
+.ce-typo-slider input[type="range"] { width: 100%; accent-color: var(--accent); cursor: ew-resize; }
+.ce-typo-slider output { font-variant-numeric: tabular-nums; text-align: right; color: var(--ink); }
+
+/* Owner cursor law: text reads as a text editor; hand only while moving */
+.studio-workspace .ce-render-block-content :is(.hook,.body,.poem,.profile,.sub,.bubble .body),
+.studio-workspace .ce-poem-text-block,
+#studio-editable-text { cursor: text; }
+.studio-workspace .ce-render-block[style*="transform"] { cursor: grab; }
+body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
+
+/* ==========================================================================
+   Studio dock premium refinement — owner 2026-09-03 23:47
+   One quiet instrument panel, not a stack of cards: 9.5px tracked labels,
+   10-11px control text, 8px rhythm, hairline dividers (white 6%), slim
+   crimson sliders. Apple-craft: hierarchy from weight + tracking, borders
+   only where a surface actually changes.
+   ========================================================================== */
+/* ==========================================================================
+   Studio dock Apple HIG Glossy Refinement — owner 2026-09-04
+   Full frosted glass instrument panel: 32px blur, 190% saturation,
+   hairline dividers (white 8%), 9.5px uppercase tracked labels,
+   segmented Apple-style tool strips, zero vertical scroll,
+   and crisp vector SVG icons.
+   ========================================================================== */
+.studio-workspace.is-carousel-mode .ce-studio-inspector,
+.studio-workspace.is-carousel-mode .ce-carousel-dock {
+  background: rgba(14, 16, 20, 0.85) !important;
+  backdrop-filter: blur(36px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(190%) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 -12px 40px rgba(0, 0, 0, 0.5) !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  height: 135px !important;
+  min-height: 135px !important;
+  max-height: 135px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  overflow: hidden !important;
+  z-index: 20 !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-inspector-scroll {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: thin !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+}
+.studio-workspace.is-carousel-mode .ce-inspector-scroll::-webkit-scrollbar {
+  height: 4px !important;
+}
+.studio-workspace.is-carousel-mode .ce-inspector-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 999px !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-inspector-section {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  padding: 10px 14px 8px !important;
+  gap: 7px !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border-radius: 0 !important;
+  min-height: 0 !important;
+}
+.studio-workspace.is-carousel-mode .ce-inspector-section:last-child {
+  border-right: 0 !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-inspector-label,
+.studio-workspace.is-carousel-mode .ce-dock-group-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: rgba(255, 255, 255, 0.48) !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  display: block !important;
+}
+
+/* SECTION 1: THIS SLIDE Context */
+.studio-workspace.is-carousel-mode .ce-dock-context {
+  min-width: 130px !important;
+  max-width: 160px !important;
+}
+.studio-workspace.is-carousel-mode .ce-inspector-context {
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  color: #fff !important;
+  letter-spacing: -0.01em !important;
+  margin: 2px 0 0 !important;
+  line-height: 1.3 !important;
+}
+
+/* SECTION 2: TEXT TOOLS — Zero vertical scroll, clean horizontal segmented strips */
+.studio-workspace.is-carousel-mode .ce-dock-text {
+  min-width: 320px !important;
+  max-width: 360px !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-inspector-font-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.studio-workspace.is-carousel-mode .ce-inspector-font-row > span {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+.studio-workspace.is-carousel-mode select#ce-font-family,
+.studio-workspace.is-carousel-mode .ce-inspector-font-row select {
+  flex: 1 !important;
+  height: 25px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 8px!important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  padding: 0 8px !important;
+  outline: none !important;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+.studio-workspace.is-carousel-mode select#ce-font-family:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+.studio-workspace.is-carousel-mode select#ce-font-family:focus {
+  border-color: var(--accent, #c43b4e) !important;
+  box-shadow: 0 0 0 2px rgba(196, 59, 78, 0.25) !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-text-tools-grid,
+.studio-workspace.is-carousel-mode .ce-typography-toolbar {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  overflow: visible !important;
+  max-height: none !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-tool-strip {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 8px!important;
+  padding: 2px !important;
+  gap: 2px !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-format-strip .ce-compact-tool,
+.studio-workspace.is-carousel-mode .ce-format-strip .ce-text-tool-btn {
+  width: 28px !important;
+  height: 25px !important;
+  min-height: 25px !important;
+  padding: 0 !important;
+  justify-content: center !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-action-strip .ce-compact-tool,
+.studio-workspace.is-carousel-mode .ce-action-strip .ce-text-tool-btn {
+  height: 25px !important;
+  min-height: 25px !important;
+  padding: 0 8px !important;
+  gap: 5px !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-compact-tool,
+.studio-workspace.is-carousel-mode .ce-text-tool-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  height: 25px !important;
+  min-height: 25px !important;
+  padding: 0 7px !important;
+  border-radius: 4px!important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  cursor: pointer !important;
+  transition: transform 100ms var(--ease-snappy), background-color 100ms ease, border-color 100ms ease, color 100ms ease !important;
+  position: relative !important;
+  user-select: none !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-compact-tool:hover,
+.studio-workspace.is-carousel-mode .ce-text-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+.studio-workspace.is-carousel-mode .ce-compact-tool:active,
+.studio-workspace.is-carousel-mode .ce-text-tool-btn:active {
+  transform: scale(0.95) !important;
+}
+.studio-workspace.is-carousel-mode .ce-compact-tool.active,
+.studio-workspace.is-carousel-mode .ce-text-tool-btn.active {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-tool-icon {
+  width: 14px !important;
+  height: 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0.9 !important;
+  filter: none !important;
+  flex-shrink: 0 !important;
+}
+.studio-workspace.is-carousel-mode .ce-tool-icon svg {
+  width: 13px !important;
+  height: 13px !important;
+  display: block !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-text-tool-caption {
+  font-size: 10px !important;
+  font-weight: 550 !important;
+  color: inherit !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-text-tool-color {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  position: relative !important;
+  cursor: pointer !important;
+  width: 31px !important;
+  max-width: 31px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: rgba(255,255,255,0.75) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+.studio-workspace.is-carousel-mode .ce-text-tool-color .ce-tool-icon {
+  pointer-events: none !important;
+  opacity: 0.9 !important;
+}
+.studio-workspace.is-carousel-mode .ce-text-tool-color input[type="color"] {
+  position: absolute !important;
+  inset: 0 !important;
+  opacity: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+  cursor: pointer !important;
+}
+
+/* SECTION 3: SPACING (Dedicated Sliders Column) */
+.studio-workspace.is-carousel-mode .ce-dock-spacing {
+  min-width: 180px !important;
+  max-width: 220px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-spacing .ce-typo-sliders {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+/* 2026-09-07 cleanup: superseded by SECTION 7 (slide-action unification). */
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-disclosure[open] .ce-add-slide-pills {
+  display: flex !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  align-self: flex-start !important;
+  margin: 0 !important;
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  gap: 6px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-disclosure {
+  flex: 1 1 140px !important;
+  min-width: 128px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row {
+  flex: 0 0 auto !important;
+  flex-wrap: nowrap !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-row {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack > div {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+}
+
+/* 2026-09-07 cleanup: superseded by SECTION 7 (slide-action unification).
+   The old 2-column full-width grid stretched the icon buttons to ~72px
+   rectangles — exactly the "weirdly not clean" look the owner flagged. */
+.studio-workspace.is-carousel-mode .ce-typo-slider {
+  display: grid !important;
+  grid-template-columns: 42px 1fr 44px !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+.studio-workspace.is-carousel-mode .ce-typo-slider input[type="range"] {
+  height: 3px !important;
+  border-radius: 4px!important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  accent-color: var(--accent, #c43b4e) !important;
+  cursor: ew-resize !important;
+}
+.studio-workspace.is-carousel-mode .ce-typo-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  width: 11px !important;
+  height: 11px !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  border: 2px solid var(--accent, #c43b4e) !important;
+  cursor: ew-resize !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  transition: transform 0.15s var(--spring-snappy, cubic-bezier(0.16, 1, 0.3, 1)) !important;
+}
+.studio-workspace.is-carousel-mode .ce-typo-slider input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(1.3) !important;
+  box-shadow: 0 0 8px rgba(196, 59, 78, 0.6) !important;
+}
+.studio-workspace.is-carousel-mode .ce-typo-slider .ce-typo-slider-name {
+  font-size: 10px !important;
+  letter-spacing: 0.04em !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+.studio-workspace.is-carousel-mode .ce-typo-slider output {
+  font-size: 10px !important;
+  font-variant-numeric: tabular-nums !important;
+  text-align: right !important;
+  color: #fff !important;
+}
+
+/* SECTION 4: DESIGN & LOOKS */
+.ce-dock-looks {
+  min-width: 280px !important;
+  max-width: 380px !important;
+}
+.ce-look-scope-row {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px!important;
+  padding: 3px !important;
+  gap: 3px !important;
+  margin-bottom: 10px !important;
+}
+.ce-look-scope-row > span {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  padding: 0 6px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+}
+.ce-scope-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 4px 10px !important;
+  border-radius: 8px!important;
+  font-size: 11px !important;
+  font-weight: 550 !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  cursor: pointer !important;
+  transition: transform 150ms var(--ease-snappy), background-color 150ms ease, color 150ms ease, box-shadow 150ms ease !important;
+  user-select: none !important;
+  position: relative !important;
+}
+.ce-scope-pill:hover {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+.ce-scope-pill:has(input:checked),
+.ce-scope-pill.is-active {
+  background: var(--accent, #c43b4e) !important;
+  color: #fff !important;
+  font-weight: 650 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35) !important;
+}
+.ce-scope-pill input[type="radio"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  display: none !important;
+}
+
+/* 2026-09-07 cleanup: superseded by the A1 grid rule further down (2 columns,
+   width:100%). The fixed 340px/150px min here clipped the cards. Removed. */
+.studio-workspace.is-carousel-mode .ce-look-picker-grid::-webkit-scrollbar {
+  width: 4px !important;
+  height: 4px !important;
+}
+.studio-workspace.is-carousel-mode .ce-look-picker-grid::-webkit-scrollbar-thumb {
+  border-radius: 999px !important;
+}
+.studio-workspace.is-carousel-mode .ce-look-choice {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 36px !important;
+  padding: 5px 8px !important;
+  border-radius: 8px!important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #fff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  cursor: pointer !important;
+  transition: transform 120ms var(--ease-snappy), background-color 120ms ease, border-color 120ms ease, color 120ms ease, box-shadow 120ms ease !important;
+}
+.studio-workspace.is-carousel-mode .ce-look-choice .ce-look-swatch {
+  display: grid !important;
+  width: 24px !important;
+  height: 24px !important;
+  flex: 0 0 24px !important;
+}
+/* Design-panel visual cards own their aspect ratio so a 1080x1350 slide
+   fills the card edge-to-edge with no clipping AND no letterbox.
+   A1 restructure 2026-09-07: the Presentation column is wider than the old
+   360px rail (cards 131px, not 97px), so a PINNED pixel height now letterboxes
+   (bc7c23d's 163px only fits a 97px card). The height now derives from the
+   width instead: the stage carries aspect-ratio 4/5 — width-driven, so the
+   fitter's clientHeight read can never feed back into it (no shrink-loop) —
+   and the card is stage + fixed 44px label strip. */
+.studio-workspace.is-carousel-mode .ce-look-choice.ce-look-choice--visual {
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  padding: 4px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+/* C1 (2026-09-07): the post studio's design grid now uses the same visual
+   cards; mirror the carousel geometry for post mode so both studios render
+   one identical component. */
+.studio-workspace.is-post-mode .ce-look-choice.ce-look-choice--visual {
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  padding: 4px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.studio-workspace:is(.is-carousel-mode,.is-post-mode) .ce-look-choice.ce-look-choice--visual > .ce-post-template-stage {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  /* WYSIWYG root fix (owner 2026-09-07): the preview face MUST match the
+     applied slide. The .ce-look-choice card inherits text-align:center from
+     its ancestor, so any look whose .hook/.mid do NOT specify their own
+     alignment (e.g. Casefile — left in the editor) rendered CENTERED in the
+     design picker while applying LEFT — "two different looks". Pin the face
+     container to the same default the editor stage uses so inherited
+     alignment matches; looks that explicitly center themselves are unaffected. */
+  text-align: start !important;
+  height: auto !important;
+  aspect-ratio: 4 / 5 !important;
+}
+/* A3: name label strip — matches the post studio's ce-post-template-label.
+   Fixed 44px height so the stage is identical on every card regardless of
+   whether the look name wraps to two lines or fits on one. Without this,
+   1-line names left a 13px vertical letterbox (stage 122 vs slide 109). */
+.studio-workspace:is(.is-carousel-mode,.is-post-mode) .ce-look-choice--visual .ce-post-template-label {
+  flex: 0 0 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 5px 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--ink, #f2f0f4) !important;
+  background: var(--surface, #17161c) !important;
+  border-top: 1px solid var(--border, rgba(255,255,255,0.1)) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.studio-workspace:is(.is-carousel-mode,.is-post-mode) .ce-look-choice .ce-look-choice-name {
+  display: block !important;
+  min-width: 0 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.2 !important;
+}
+.studio-workspace.is-carousel-mode .ce-look-choice:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+.studio-workspace.is-carousel-mode .ce-look-choice.active {
+  border-color: var(--accent, #c43b4e) !important;
+  background: color-mix(in srgb, var(--accent, #c43b4e) 18%, rgba(255, 255, 255, 0.05)) !important;
+  box-shadow: 0 0 0 1px var(--accent, #c43b4e), 0 2px 8px rgba(196, 59, 78, 0.35) !important;
+}
+
+/* SECTION 5: SIMILAR DECKS / CONTENT SWITCH */
+.studio-workspace.is-carousel-mode .ce-dock-content-switch {
+  min-width: 200px !important;
+  max-width: 300px !important;
+}
+.studio-workspace.is-carousel-mode .ce-content-switch-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  overflow-x: auto !important;
+  scrollbar-width: thin !important;
+  padding: 2px 0 4px !important;
+}
+.studio-workspace.is-carousel-mode .ce-content-switch-chip {
+  flex-shrink: 0 !important;
+  height: 28px !important;
+  border-radius: 8px!important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 10px !important;
+  padding: 0 9px !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease !important;
+}
+.studio-workspace.is-carousel-mode .ce-content-switch-chip:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* SECTION 6: CAPTION (Pinned Right Section) */
+.studio-workspace.is-carousel-mode .ce-inspector-pinned {
+  flex: 1 1 260px !important;
+  min-width: 220px !important;
+  border-top: 0 !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.07) !important;
+  padding: 10px 16px 8px !important;
+  background: transparent !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+}
+.studio-workspace.is-carousel-mode .ce-caption-box textarea,
+.studio-workspace.is-carousel-mode #ce-carousel-caption {
+  width: 100% !important;
+  height: 66px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px!important;
+  color: #fff !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  padding: 8px 10px !important;
+  resize: none !important;
+  outline: none !important;
+  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease !important;
+}
+.studio-workspace.is-carousel-mode .ce-caption-box textarea:focus,
+.studio-workspace.is-carousel-mode #ce-carousel-caption:focus {
+  border-color: var(--accent, #c43b4e) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 0 0 2px rgba(196, 59, 78, 0.25) !important;
+}
+.studio-workspace.is-carousel-mode .ce-caption-meta {
+  font-size: 10px !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  text-align: right !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+/* SECTION 7: SLIDE STRUCTURE ACTIONS — 2026-09-07 unification.
+   The slide buttons now share the SAME compact button language as the Text
+   Tools (30px, radius 8, hairline border) instead of the old 999px pill row —
+   the owner saw two button families in one dock and it read as dumped-in.
+   The disclosure stays: collapsed it is one clean full-width "Add slide" row,
+   opened it reveals a quiet type menu. */
+.studio-workspace.is-carousel-mode .ce-dock-structure {
+  min-width: 220px !important;
+}
+.studio-workspace.is-carousel-mode .ce-add-slide-disclosure summary.ce-add-slide-btn {
+  width: 100% !important;
+  height: 30px !important;
+  padding: 0 10px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border) !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: rgba(255,255,255,0.8) !important;
+  font: 600 12px/1 var(--font-ui) !important;
+  text-align: left !important;
+}
+.studio-workspace.is-carousel-mode .ce-add-slide-disclosure summary.ce-add-slide-btn:hover {
+  background: rgba(255,255,255,0.07) !important;
+  color: #fff !important;
+}
+/* Opened type menu: small quiet chips. Visibility is owned by the base
+   .ce-add-slide-disclosure[open] toggle — do NOT force display here. */
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-pills {
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+  padding-top: 6px !important;
+}
+.studio-workspace.is-carousel-mode .ce-add-slide-pills button {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  min-height: 22px !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+  cursor: pointer !important;
+  transition: background-color 100ms ease, border-color 100ms ease, color 100ms ease !important;
+}
+.studio-workspace.is-carousel-mode .ce-add-slide-pills button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+/* Move/copy/delete: one row of compact squares, same as the text tools */
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row {
+  width: auto !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  flex: 0 0 auto !important;
+  gap: 6px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row .ce-icon-action {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  flex: 0 0 30px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: rgba(255,255,255,0.75) !important;
+  box-sizing: border-box !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row .ce-icon-action .ce-tool-icon,
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row .ce-icon-action svg {
+  width: 13px !important;
+  height: 13px !important;
+  display: block !important;
+  margin: 0 !important;
+}
+
+/* 3. Gallery rail: rounded frames that fit, soft lift, quiet labels */
+.studio-workspace .ce-filmstrip-card .ce-carousel-slide-frame {
+  border-radius: 12px!important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.38), 0 2px 8px rgba(0, 0, 0, 0.28) !important;
+}
+.studio-workspace .ce-filmstrip-card .ce-carousel-slide-stage {
+  border-radius: 12px!important;
+}
+.studio-workspace .ce-filmstrip-card.is-selected .ce-carousel-slide-frame {
+  box-shadow: 0 0 0 2px var(--accent, #c43b4e), 0 12px 30px rgba(0, 0, 0, 0.42) !important;
+}
+.studio-workspace .ce-filmstrip-card .ce-filmstrip-num {
+  font-size: 10px !important;
+  opacity: 0.55 !important;
+}
+
+/* ==========================================================================
+   Dock + rail refinement v3 — owner 2026-09-04 01:58 screenshot
+   (1) The v2 vertical palette overflowed the 248px dock and clipped its last
+       rows — compact the palette so all ten tools fit without scrolling.
+   (2) Rail cards: a touch smaller than v1 with real inter-card space, like
+       the Library rails — big never means touching.
+   ========================================================================== */
+.studio-workspace.is-carousel-mode .ce-text-tools-grid,
+.studio-workspace.is-carousel-mode .ce-typography-toolbar {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+.studio-workspace.is-carousel-mode .ce-tool-strip {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 8px!important;
+  padding: 2px !important;
+  gap: 2px !important;
+}
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-compact-tool,
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-text-tool-btn {
+  width: 27px !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 4px!important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  cursor: pointer !important;
+  transition: transform 100ms var(--ease-snappy), background-color 100ms ease, border-color 100ms ease, color 100ms ease, box-shadow 100ms ease !important;
+  box-sizing: border-box !important;
+}
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-compact-tool:hover,
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-text-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-compact-tool.active,
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-text-tool-btn.active {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+.studio-workspace .ce-filmstrip--gallery .ce-filmstrip-track {
+  gap: 22px !important;
+  padding-left: 10px !important;
+}
+
+/* Devanagari Matra Clearance and Shirorekha Protection */
+.ce-render-block-content .poem,
+.ce-poem-text-block,
+.slide--poem .mid,
+.ce-deva-text {
+  line-height: var(--deva-lh-loose, 1.6) !important;
+  padding-block: var(--deva-matra-padding, 0.15em) !important;
+  -webkit-font-smoothing: subpixel-antialiased !important;
+}
+
+/* Emil Kowalski Tactile Button Spring */
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-compact-tool:active,
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-text-tool-btn:active,
+.studio-workspace.is-carousel-mode .ce-add-slide-pills button:active,
+.studio-workspace.is-carousel-mode .ce-slide-action-row button:active,
+.studio-workspace.is-carousel-mode .ce-scope-pill:active {
+  transform: scale(0.92) translateY(1px) !important;
+  transition-duration: 0.08s !important;
+}
+
+/* ==========================================================================
+   Creator workbench anatomy v5
+   One two-dimensional instrument surface replaces the one-row control dump:
+   the artwork stays dominant, every control remains visible, and Caption owns
+   one stable column. The material is reserved for this top-level control layer;
+   sections themselves stay flat and are grouped by hairlines, not nested cards.
+   ========================================================================== */
+:root {
+  /* Owner 2026-09-09 15:21: height is adaptive — 41vh (341px at the 832px
+     studio window, 360px at the real 900px+ window) so the Slide column's
+     three sections (Text tools + Spacing + Slides pinned at the foot) always
+     fit without scroll. Floor 300px keeps every control reachable. */
+  --studio-workbench-height: clamp(300px, 41vh, 360px);
+  --studio-caption-width: 280px;
+  --studio-workbench-bg: rgba(13, 12, 17, 0.90);
+  --studio-workbench-line: rgba(255, 255, 255, 0.075);
+}
+
+.studio-workspace.is-carousel-mode .ce-studio-inspector {
+  flex: 0 0 var(--studio-workbench-height) !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: var(--studio-workbench-height) !important;
+  min-height: var(--studio-workbench-height) !important;
+  max-height: var(--studio-workbench-height) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) var(--studio-caption-width) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: var(--studio-workbench-bg) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(165%) !important;
+  backdrop-filter: blur(28px) saturate(165%) !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.11) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055), 0 -18px 54px rgba(0, 0, 0, 0.34) !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  /* A1 (deep visual audit 2026-09-07): six panels side-by-side read as a
+     dense control panel. Regrouped into THREE titled columns —
+     Slide / Content / Presentation — each column a vertical stack of its
+     sections, each section scrolling inside its own box. No control removed. */
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+  scrollbar-width: thin !important;
+}
+
+/* Column chrome: head owns the title (+ anchored APPLIES TO toggle), body
+   stacks the sections. Dividers run the full height between columns and the
+   full width between sections — one continuous language, no dead rules. */
+.studio-workspace.is-carousel-mode .ce-dock-column {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  flex: 1 1 0 !important;
+  border-right: 1px solid var(--studio-workbench-line) !important;
+}
+/* 2026-09-07: tightened — the Slide column is the tightest of the three;
+   272px keeps the text-tools grid on one row and the spacing box snug. */
+/* Owner 2026-09-08 13:37 dock order: Presentation | Slide | Content (Content
+   now sits beside the pinned Caption column). Widths follow the order.
+   Presentation AND Content share the surplus (grow:1) — with the name strips
+   gone the design faces are the whole card, so the picker column must be the
+   widest when there is room (gate law: stage >= 110x130 real face). Slide
+   stays snug at 272 (text-tools row). */
+.studio-workspace.is-carousel-mode .ce-dock-column:nth-child(1) { flex-grow: 1 !important; flex-shrink: 1 !important; flex-basis: 380px !important; }
+.studio-workspace.is-carousel-mode .ce-dock-column:nth-child(2) { flex-grow: 0 !important; flex-shrink: 1 !important; flex-basis: 272px !important; }
+.studio-workspace.is-carousel-mode .ce-dock-column:nth-child(3) { flex-basis: 340px !important; border-right: 0 !important; }
+.studio-workspace.is-carousel-mode .ce-dock-column-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  padding: 10px 16px 9px !important;
+  border-bottom: 1px solid var(--studio-workbench-line) !important;
+  min-height: 40px !important;
+  box-sizing: border-box !important;
+  flex: 0 0 auto !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-column-title {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  color: rgba(255, 255, 255, 0.62) !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-column-body {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin !important;
+}
+
+/* Owner 2026-09-07: text tools must never clip. Give the tool strip room to
+   wrap to two tidy rows instead of overflowing horizontally. */
+.studio-workspace.is-carousel-mode .ce-dock-text .ce-tool-strip {
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-text .ce-inspector-font-row select {
+  max-width: 100% !important;
+}
+
+/* Sections now live INSIDE a column body: vertical stack, section dividers
+   run horizontally between them; each section scrolls its own overflow so
+   nothing is ever clipped without recourse (chrome-collision gate law). */
+.studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-inspector-section {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  flex: 0 0 auto !important;
+  padding: 12px 16px 11px !important;
+  gap: 8px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+/* Hook cards carry a 1px ring + shadow; clip-x on the section ate the
+   right edge of the active row (owner 17:32). Let the ring paint. */
+.studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks {
+  overflow-x: visible !important;
+  padding: 12px 14px 11px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-inspector-section + .ce-inspector-section {
+  border-top: 1px solid var(--studio-workbench-line) !important;
+}
+/* The Design grid is the one section that must absorb all leftover height. */
+.studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks {
+  flex: 1 1 auto !important;
+}
+/* Owner 2026-09-09 15:21: Slides (Add slide + move/copy/delete) lives at the
+   BOTTOM of the Slide column — margin-top:auto pins it below Text tools +
+   Spacing. The block compresses to ONE row: [＋ Add slide][↑][↓][copy][delete]
+   so it fits the panel foot instead of pushing Add slide below the fold. */
+.studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure {
+  margin-top: auto !important;
+  border-top: 1px solid var(--studio-workbench-line) !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: start !important;
+  gap: 6px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-disclosure {
+  grid-row: 1 !important;
+  grid-column: 1 !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row {
+  grid-row: 1 !important;
+  grid-column: 2 !important;
+}
+/* Opened type menu flows UNDER the row, spanning both columns. */
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-pills {
+  grid-row: 2 !important;
+  grid-column: 1 / -1 !important;
+}
+/* Slide-column sections tighten so Text tools + Spacing + Slides all fit the
+   column body (≈274px at the owner's 1440×900 window) with zero dead space. */
+.studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-text,
+.studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-spacing,
+.studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure {
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  gap: 5px !important;
+}
+/* Hook variations keep the Content panel to themselves (slides block moved
+   to the Slide column) — they absorb the column's leftover height so the
+   variations list breathes instead of leaving dead space. */
+.studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+/* A2: APPLIES TO anchors in the Presentation column head — quiet label +
+   compact pills, no longer debris floating above the grid. */
+.studio-workspace.is-carousel-mode .ce-dock-column-head .ce-look-scope-row {
+  margin: 0 !important;
+  gap: 6px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-column-head .ce-look-scope-row > span {
+  font-size: 10px !important;
+  font-weight: 650 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+  color: rgba(255, 255, 255, 0.42) !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-column-head .ce-scope-pill {
+  min-height: 26px !important;
+  padding: 4px 10px !important;
+  font-size: 11px !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-hook-row-item {
+  min-height: 44px !important;
+  padding: 7px 10px !important;
+  gap: 3px !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-dock-hooks {
+  padding: 0 !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+.studio-workspace.is-carousel-mode .ce-hook-options-list {
+  gap: 8px !important;
+  overflow-x: visible !important;
+  padding: 1px 2px 6px 0 !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-dock-spacing .ce-typo-sliders,
+.studio-workspace.is-carousel-mode .ce-dock-looks,
+.studio-workspace.is-carousel-mode .ce-dock-text,
+.studio-workspace.is-carousel-mode .ce-dock-structure,
+.studio-workspace.is-carousel-mode .ce-dock-content-switch {
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-typo-sliders {
+  width: 100% !important;
+  padding: 6px 8px !important;
+  gap: 5px !important;
+  border-color: var(--studio-workbench-line) !important;
+  background: rgba(255, 255, 255, 0.025) !important;
+  border-radius: 8px !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-inspector-font-row select {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-compact-tool,
+.studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-text-tool-btn {
+  width: 31px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-look-picker-grid {
+  display: grid !important;
+  width: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  overflow-y: visible !important;
+  scrollbar-width: thin !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  /* A1: rows must size to the card content (stage 4:5 + 44px label). The old
+     max-height:100% + stretched auto rows compressed cards to 79px and let
+     the slide overflow in both directions. */
+  grid-auto-rows: max-content !important;
+  align-items: start !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-look-choice {
+  min-height: 32px !important;
+  padding-block: 4px !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-inspector-pinned {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  width: var(--studio-caption-width) !important;
+  min-width: var(--studio-caption-width) !important;
+  max-width: var(--studio-caption-width) !important;
+  min-height: 0 !important;
+  padding: 15px 16px !important;
+  gap: 9px !important;
+  overflow-y: auto !important;
+  border: 0 !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.10) !important;
+  background: rgba(255, 255, 255, 0.018) !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-caption-box textarea,
+.studio-workspace.is-carousel-mode #ce-carousel-caption,
+.studio-workspace.is-carousel-mode .ce-deck-caption-input {
+  height: auto !important;
+  min-height: 150px !important;
+  max-height: none !important;
+  padding: 11px 12px !important;
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+}
+/* A1 balance (2026-09-07 deep audit): the caption column is the only column
+   that never overflowed — a fixed 210px textarea left a visible void beside
+   three full columns. It now grows to fill the pinned column; the counter
+   stays docked at the bottom (margin-top:auto above). */
+.studio-workspace.is-carousel-mode .ce-inspector-pinned .ce-inspector-caption {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+.studio-workspace.is-carousel-mode .ce-inspector-pinned .ce-deck-caption-input {
+  flex: 1 1 auto !important;
+  min-height: 120px !important;
+}
+
+.studio-workspace.is-post-mode .ce-inspector-section,
+.studio-workspace.is-post-mode .ce-dock-group {
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin !important;
+}
+
+/* ==========================================================================
+   Craft pass 2026-09-04: press feedback, focus rings, scroll-edge fades and
+   rail rhythm — the unseen details that make the chrome feel premium.
+   ========================================================================== */
+
+.studio-workspace button,
+#studio-left-rail button {
+  transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.studio-workspace button:active,
+#studio-left-rail button:active {
+  transform: scale(0.97);
+}
+
+.studio-workspace :focus-visible,
+#studio-left-rail :focus-visible {
+  outline: 2px solid rgba(196, 59, 78, 0.8);
+  outline-offset: 2px;
+}
+
+.studio-workspace.is-post-mode .ce-dock-group.ce-left-rail-nav {
+  flex-direction: row !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
+
+.studio-workspace.is-post-mode .ce-left-rail-hooks {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 56px), transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 56px), transparent 100%);
+}
+
+.studio-workspace.is-carousel-mode .ce-inspector-pinned {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-inspector-pinned .ce-caption-counter {
+  margin-top: auto !important;
+}
+
+/* Graphical filmstrip header: counter chip + progress bar, no sentences. */
+.ce-filmstrip-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 16px 6px !important;
+  text-transform: none !important;
+}
+
+.ce-filmstrip-count {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em !important;
+  color: var(--muted) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-radius: 999px !important;
+  padding: 2px 8px !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.ce-filmstrip-progress {
+  flex: 1 !important;
+  height: 2px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 4px!important;
+  overflow: hidden !important;
+}
+
+.ce-filmstrip-progress i {
+  display: block !important;
+  height: 100% !important;
+  background: var(--accent) !important;
+  transform-origin: 0 50% !important;
+  transform: scaleX(0) !important;
+  transition: transform 120ms ease-out !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-filmstrip-track {
+  overscroll-behavior-x: contain !important;
+}
+
+/* Nameless visual look cards in the carousel dock. */
+.studio-workspace.is-carousel-mode .ce-look-choice--visual {
+  padding: 0 !important;
+  border-radius: 10px;
+  flex: 0 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Owner 2026-09-07 revert: hiding the text layer left the DESIGN swatches as
+   blank paper (CarouselCore faces are typography-first — no text, no face).
+   The real garble was the fit feedback loop (now fixed at the root); with
+   correct sizing the authored mini faces render exactly like the owner's
+   working build. Text stays visible. */
+.studio-workspace.is-carousel-mode .ce-look-choice--visual .ce-carousel-slide-stage :is(.hook, .body, .poem, .profile, .sub, .kt, .bk-t, .bk-h, .bk-foot, .quote, .num, .kickline, .kicker, [data-ce-block]) {
+  visibility: visible !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-look-choice--visual .ce-post-template-stage {
+  border-radius: 8px!important;
+}
+
+/* Post Studio keeps the familiar right inspector but stops abbreviating the
+   actual design choices. Two-line names are quieter than wider chrome. */
+.studio-workspace:not(.is-carousel-mode) .ce-look-choice {
+  height: auto !important;
+  min-height: 46px !important;
+  max-height: none !important;
+  padding: 7px 10px !important;
+}
+
+.studio-workspace:not(.is-carousel-mode) .ce-look-choice .ce-look-choice-name {
+  display: block !important;
+  min-width: 0 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.24 !important;
+  text-wrap: pretty !important;
+}
+
+@media (max-width: 1250px) {
+  :root {
+    /* 2026-09-09 15:21: was 280px — too short for the restructured Slide
+       column (Text tools 139 + Spacing 70 + Slides 58 + head 40 = 307px).
+       330px fits all three with the Slides row pinned at the panel foot. */
+    --studio-workbench-height: clamp(300px, 41vh, 330px);
+    --studio-caption-width: 250px;
+  }
+  .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: none !important;
+    grid-auto-rows: minmax(96px, auto) !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll > .ce-inspector-section {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .studio-workspace.is-carousel-mode .ce-studio-inspector {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: #111016 !important;
+  }
+}
+
+/* ==========================================================================
+   Post Studio Dual-Panel Workspace & Apple-Grade Refinements
+   ========================================================================== */
+
+/* Left Rail: 320px balanced navigation, hook variations & quick actions */
+.studio-left-rail {
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
+  height: 100%;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 0;
+  background: rgba(14, 16, 22, 0.78);
+  backdrop-filter: blur(32px) saturate(190%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 16px 18px 24px;
+  gap: 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.03);
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.studio-workspace.is-post-mode .studio-left-rail {
+  display: flex !important;
+}
+
+.studio-workspace:not(.is-post-mode) .studio-left-rail {
+  display: none !important;
+}
+
+/* Post Mode Symmetrical Centering */
+.studio-workspace.is-post-mode .studio-stage {
+  flex: 1 1 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px !important;
+  position: relative !important;
+  background: radial-gradient(circle at 50% 50%, rgba(28, 30, 42, 0.6) 0%, rgba(10, 11, 15, 0.98) 78%) !important;
+  overflow: hidden !important;
+}
+
+.studio-workspace.is-post-mode .studio-canvas-wrap.ce-studio-canvas-wrap--post {
+  margin: auto !important;
+  max-height: calc(100vh - 120px) !important;
+  aspect-ratio: 4 / 5 !important;
+  box-shadow: 0 32px 80px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px!important;
+}
+
+.ce-post-nav-bar,
+.ce-left-rail-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.ce-left-rail-nav .ce-selection-chip {
+  flex: 1 1 auto;
+  text-align: center;
+  justify-content: center;
+}
+
+/* Hook Options: Clean Stacked Selectable Rows */
+.ce-left-rail-hooks .ce-hook-options-sweep,
+.ce-hook-options-sweep {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  min-height: 0 !important;
+}
+
+.ce-left-rail-hooks .ce-hook-options-list,
+.ce-hook-options-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+  /* Owner 2026-09-07 (screenshot: hook list clipped at 1.5 rows, letterpress
+     pills cut mid-row): the section box is height-capped by the dock grid while
+     this list rendered overflow-y:visible — 6 hooks (322px) in an 88px window
+     with no way to reach rows 3+. Scroll within the section instead. */
+  overflow-y: auto !important;
+  min-height: 0 !important;
+  scrollbar-width: thin !important;
+  padding: 0 !important;
+}
+
+.ce-left-rail-hooks .ce-hook-card,
+.ce-hook-row-item {
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: 56px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  padding: 10px 12px !important;
+  border-radius: 10px!important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #f1f2f6 !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  outline: none !important;
+}
+
+.ce-left-rail-hooks .ce-hook-card:hover,
+.ce-hook-row-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px) !important;
+}
+
+.ce-left-rail-hooks .ce-hook-card.is-active,
+.ce-left-rail-hooks .ce-hook-card.active,
+.ce-hook-row-item.is-active,
+.ce-hook-row-item.active {
+  background: rgba(196, 59, 78, 0.1) !important;
+  border-color: #c43b4e !important;
+  box-shadow: 0 0 0 1px #c43b4e, 0 4px 16px rgba(196, 59, 78, 0.22) !important;
+}
+
+.ce-hook-row-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  gap: 6px !important;
+}
+
+.ce-hook-row-badge {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  transition: color 0.18s ease !important;
+}
+
+.ce-hook-row-item.is-active .ce-hook-row-badge,
+.ce-hook-card.is-active .ce-hook-row-badge {
+  color: #c43b4e !important;
+}
+
+.ce-hook-row-index {
+  font-size: 10px !important;
+  color: rgba(255, 255, 255, 0.35) !important;
+  font-weight: 500 !important;
+  margin-left: auto !important;
+  margin-right: 6px !important;
+}
+
+.ce-hook-row-indicator {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #c43b4e !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: rgba(196, 59, 78, 0.15) !important;
+}
+
+.ce-hook-row-indicator:empty {
+  display: none !important;
+}
+
+.ce-hook-row-text {
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  word-break: break-word !important;
+}
+
+/* Post Design Templates: Rich Visual 4:5 Preview Cards */
+.ce-post-design-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  padding: 2px 0 6px !important;
+}
+
+.studio-workspace .ce-dock-looks .ce-look-choice.ce-post-template-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  height: auto !important;
+  min-height: 120px !important;
+  max-height: none !important;
+  padding: 6px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px!important;
+  cursor: pointer !important;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  outline: none !important;
+  gap: 7px !important;
+  box-sizing: border-box !important;
+}
+
+.studio-workspace .ce-dock-looks .ce-look-choice.ce-post-template-card > * {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  height: auto !important;
+  width: auto !important;
+}
+
+.studio-workspace .ce-dock-looks .ce-look-choice.ce-post-template-card > .ce-post-template-stage {
+  display: flex !important;
+  width: 100% !important;
+  height: 80px !important;
+  aspect-ratio: 4 / 5 !important;
+  box-sizing: border-box !important;
+}
+
+/* Owner bug 2026-09-08 (design-tab cards read as half-black voids in the
+   narrow dock): the carousel-mode visual card inherits the legacy ROW flex
+   (line 988: display:flex; align-items:center; justify-content:center), so
+   the stage and the 44px label strip share the card's WIDTH — the stage gets
+   squeezed to ~41-58px, the mini fitter scales the 1080x1350 face to that
+   width, and the face paints ~51px tall inside a ~118px box: black void
+   under every design card (owner screenshot 10:11, reproduced in the 96px
+   grid; the 137px grid never shows it). The post-mode block above already
+   solves this with flex-direction:column; carousel mode was never mirrored.
+   Root fix: column for BOTH modes — stage on top (width:100%, aspect 4/5),
+   label below. No fixed heights: the wide layout must keep its full-size
+   face (independent audit 2026-09-08 §5.3). */
+.studio-workspace.is-carousel-mode .ce-look-choice.ce-look-choice--visual {
+  flex-direction: column !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: 4 / 5 !important;
+  padding: 4px !important;
+}
+/* Owner 2026-09-08 13:37: name strips removed — the card IS the template
+   thumbnail. Active rides as a quiet corner pill overlay. */
+.studio-workspace.is-carousel-mode .ce-look-choice--visual > .ce-post-template-active-badge.ce-look-active-corner {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  z-index: 2 !important;
+  background: rgba(196, 59, 78, 0.92) !important;
+  color: #fff !important;
+}
+
+.studio-workspace .ce-dock-looks .ce-look-choice.ce-post-template-card > .ce-post-template-label {
+  display: flex !important;
+  width: 100% !important;
+  height: auto !important;
+  margin-top: 4px !important;
+  box-sizing: border-box !important;
+}
+
+.studio-workspace .ce-dock-looks .ce-look-choice.ce-post-template-card:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+.studio-workspace .ce-dock-looks .ce-look-choice.ce-post-template-card.active,
+.studio-workspace .ce-dock-looks .ce-look-choice.ce-post-template-card.is-active {
+  background: rgba(196, 59, 78, 0.08) !important;
+  border-color: #c43b4e !important;
+  box-shadow: 0 0 0 1px #c43b4e, 0 6px 20px rgba(196, 59, 78, 0.25) !important;
+}
+
+.ce-post-template-stage {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px;
+  box-sizing: border-box;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.ce-post-template-kicker {
+  height: 3px;
+  width: 22px;
+  border-radius: 4px;
+  opacity: 0.9;
+}
+
+.ce-post-template-headline {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: auto 0;
+}
+
+.ce-post-template-line {
+  display: block;
+  height: 4px;
+  width: 100%;
+  border-radius: 4px;
+}
+
+.ce-post-template-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.ce-post-template-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+
+.ce-post-template-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+  gap: 4px;
+}
+
+.ce-post-template-label .ce-look-choice-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.ce-post-template-active-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #c43b4e;
+  background: rgba(196, 59, 78, 0.15);
+  padding: 1px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   Owner live-audit refinement · 2026-09-05 03:50
+   Capsule slide rail · 3-up real mini-design look cards · quiet hook rows.
+   Final layer: wins the cascade over every earlier pass by order.
+   ========================================================================== */
+
+/* --- Slide rail as a capsule gallery (mirrors the library rails) --------- */
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track,
+.studio-workspace.is-carousel-mode #ce-carousel-slide-scroll {
+  padding: 18px 26px !important;
+  gap: 16px !important;
+  margin: 10px 18px 12px !important;
+  width: auto;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px!important;
+  background: color-mix(in srgb, var(--bg) 90%, #ffffff 10%) !important;
+  scroll-snap-type: x proximity !important;
+  scroll-behavior: auto;
+}
+
+.studio-workspace.is-carousel-mode .ce-filmstrip-card {
+  position: relative;
+  padding: 10px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px!important;
+  background: color-mix(in srgb, var(--card) 86%, #ffffff 14%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .28);
+  scroll-snap-align: center;
+  scroll-snap-stop: normal !important;
+  cursor: pointer;
+  transition: transform 160ms cubic-bezier(.23, 1, .32, 1),
+    box-shadow 160ms ease, border-color 160ms ease;
+}
+.studio-workspace.is-carousel-mode .ce-filmstrip-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .36);
+  border-color: color-mix(in srgb, var(--border) 55%, #ffffff 45%) !important;
+}
+.studio-workspace.is-carousel-mode .ce-filmstrip-card:active {
+  transform: translateY(-1px) scale(.995);
+}
+.studio-workspace.is-carousel-mode .ce-filmstrip-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.studio-workspace.is-carousel-mode .ce-filmstrip-card.is-selected {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 14px 34px rgba(0, 0, 0, .36);
+}
+.studio-workspace.is-carousel-mode .ce-filmstrip-card .ce-carousel-slide-frame,
+.studio-workspace.is-carousel-mode .ce-filmstrip-card .ce-carousel-slide-stage {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: none;
+}
+.studio-workspace.is-carousel-mode .ce-filmstrip-num {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+.studio-workspace.is-carousel-mode .ce-filmstrip-role {
+  margin-top: 6px;
+  opacity: .55;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.studio-workspace.is-carousel-mode .ce-filmstrip-add {
+  align-self: stretch;
+  min-width: 96px;
+  height: auto;
+  border: 1.5px dashed var(--border) !important;
+  border-radius: 16px!important;
+  background: transparent !important;
+  transition: border-color 160ms ease, color 160ms ease,
+    transform 160ms cubic-bezier(.23, 1, .32, 1);
+}
+.studio-workspace.is-carousel-mode .ce-filmstrip-add:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* --- Look picker: 2026-09-07 cleanup — grid geometry now owned by the single
+   A1 rule (.ce-look-picker-grid, 2 columns). The old 3-column rule here fought
+   the A1 restructure (same selector, later in file → won the cascade) and
+   clipped cards to ~131px. Removed. The .ce-look-choice card chrome below is
+   kept. */
+.studio-workspace.is-carousel-mode .ce-look-picker-grid .ce-look-choice {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: transparent;
+  transition: transform 160ms cubic-bezier(.23, 1, .32, 1),
+    box-shadow 160ms ease, border-color 160ms ease;
+}
+.studio-workspace.is-carousel-mode .ce-look-picker-grid .ce-look-choice:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .35);
+}
+.studio-workspace.is-carousel-mode .ce-look-picker-grid .ce-look-choice:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.studio-workspace.is-carousel-mode .ce-look-picker-grid .ce-look-choice.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.ce-look-mini-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10% 10% 8%;
+}
+.ce-look-mini-kick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ce-look-mini-rule {
+  display: inline-block;
+  width: 14%;
+  height: 2px;
+  border-radius: 4px;
+}
+.ce-look-mini-tag {
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .85;
+}
+.ce-look-mini-head {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.ce-look-mini-head .ce-post-template-line {
+  display: block;
+  height: 7px;
+  border-radius: 4px;
+}
+/* E-008 fix 2026-09-05: real miniature headline text (was blank bars). */
+.ce-look-mini-head-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-align: left;
+}
+/* E-005 fix 2026-09-05: long-poem Read overlay + affordance. Spec: 560px max
+   paper, 20px Devanagari type, 1.6 leading, 28px padding, Escape returns focus. */
+.ce-poem-reader-backdrop {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(6,6,10,0.62);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.ce-poem-reader-paper {
+  width: 100%; max-width: 560px; max-height: 82vh; overflow-y: auto;
+  background: var(--card, #17161c); color: var(--ink, #f2f0f4);
+  border: 1px solid var(--border, rgba(255,255,255,0.1));
+  border-radius: 12px; padding: 28px;
+  box-shadow: 0 24px 64px -12px rgba(0,0,0,0.85);
+  position: relative;
+}
+.ce-poem-reader-title {
+  font-size: 13px; font-weight: 700; letter-spacing: .04em;
+  color: var(--muted, #9a97a3); margin-bottom: 14px; text-transform: uppercase;
+}
+.ce-poem-reader-text {
+  font-family: 'Kohinoor Devanagari', 'Noto Serif Devanagari', system-ui, sans-serif;
+  font-size: 20px; line-height: 1.6; white-space: normal;
+}
+.ce-poem-reader-close {
+  position: absolute; top: 10px; right: 12px; width: 32px; height: 32px;
+  border: 0; border-radius: 8px; background: transparent; cursor: pointer;
+  color: var(--muted, #9a97a3); font-size: 20px; line-height: 1;
+}
+.ce-poem-reader-close:hover { background: rgba(255,255,255,0.08); color: var(--ink, #f2f0f4); }
+.ce-poem-read-btn {
+  position: absolute; right: 10px; bottom: 10px; z-index: 3;
+  border: 1px solid rgba(255,255,255,0.22); border-radius: 8px;
+  background: rgba(10,10,14,0.72); color: #fff;
+  font-size: 11px; font-weight: 700; padding: 5px 10px; cursor: pointer;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.ce-poem-read-btn:hover { background: rgba(10,10,14,0.9); }
+.ce-long-read-badge {
+  position: absolute; left: 10px; bottom: 10px; z-index: 3;
+  font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: rgba(255,255,255,0.85); background: rgba(10,10,14,0.55);
+  border-radius: 8px; padding: 3px 7px; pointer-events: none;
+}
+.ce-look-mini-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+.ce-look-mini-subline {
+  display: block;
+  height: 4px;
+  border-radius: 4px;
+  opacity: .55;
+}
+.ce-look-mini-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  letter-spacing: .08em;
+}
+.ce-look-mini-arrow { font-size: 10px; }
+
+/* --- Hook variations: quiet rows, accent left-bar when active ------------ */
+.ce-hook-card {
+  padding: 8px 10px !important;
+  border: 1px solid transparent !important;
+  border-left: 2px solid transparent !important;
+  border-radius: 12px!important;
+  background: color-mix(in srgb, var(--card) 80%, #ffffff 6%) !important;
+  transition: background 140ms ease, border-color 140ms ease,
+    transform 140ms cubic-bezier(.23, 1, .32, 1);
+}
+.ce-hook-card:hover {
+  background: color-mix(in srgb, var(--card) 70%, #ffffff 10%) !important;
+  transform: translateY(-1px);
+}
+.ce-hook-card.is-active,
+.ce-hook-card.active {
+  background: color-mix(in srgb, var(--accent) 12%, var(--card)) !important;
+  border-color: transparent !important;
+  border-left: 2px solid var(--accent) !important;
+}
+.ce-hook-card.is-active .ce-hook-row-badge,
+.ce-hook-card.is-active .ce-hook-card-angle { color: var(--accent) !important; }
+.ce-hook-card .ce-hook-row-text,
+.ce-hook-card .ce-hook-card-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  opacity: .72;
+}
+
+/* --- Motion safety -------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .studio-workspace.is-carousel-mode .ce-filmstrip-card,
+  .studio-workspace.is-carousel-mode .ce-filmstrip-add,
+  .studio-workspace.is-carousel-mode .ce-look-picker-grid .ce-look-choice,
+  .ce-hook-card {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* ===== Owner polish 2026-09-06: premium corner language inside Studio =====
+   The 1080x1350 authored stage renders scaled via transform — a composited
+   layer that ESCAPES border-radius clipping on its Chromium parent, so big
+   studio slides showed harsh square corners while library rails stayed
+   rounded. clip-path inset() clips composited children correctly. Radius
+   ladder now: stage 16px / mini design cards 12px / filmstrip 12px — one
+   soft, readable family across the editor. */
+.studio-workspace.is-carousel-mode .ce-carousel-slide-frame,
+.studio-workspace.is-carousel-mode .ce-carousel-slide-scroll .ce-carousel-slide-frame,
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-carousel-slide-frame,
+.studio-workspace.is-carousel-mode .ce-look-choice--visual,
+.studio-workspace.is-post-mode .ce-look-choice--visual {
+  clip-path: inset(0 round 16px);
+  -webkit-clip-path: inset(0 round 16px);
+}
+
+/* Mini design cards read slightly tighter than the big stage.
+   clip-path is required: design minis photocopy via transform:scale()
+   (a composited layer that escapes border-radius); inset() clips it. */
+.studio-workspace.is-carousel-mode .ce-look-choice--visual,
+.studio-workspace.is-post-mode .ce-look-choice--visual {
+  clip-path: inset(0 round 12px);
+  -webkit-clip-path: inset(0 round 12px);
+}
+
+/* Selected slide keeps its crimson ring but inherits the same soft corners. */
+.studio-workspace.is-carousel-mode .ce-carousel-slide-frame.is-selected,
+.studio-workspace.is-carousel-mode .ce-filmstrip-card.is-selected .ce-carousel-slide-frame {
+  clip-path: inset(0 round 16px);
+  box-shadow: 0 0 0 2px var(--accent, #c43b4e), 0 14px 34px rgba(0, 0, 0, 0.44) !important;
+}
+
+/* Corner scale: the authored .slide paints its own inverse-scaled radius
+   (see fitCarouselEditorSlides). --ce-corner is the on-screen target. */
+.studio-workspace.is-carousel-mode .ce-carousel-slide-frame {
+  --ce-corner: 16px;
+}
+.studio-workspace.is-carousel-mode .ce-look-choice--visual {
+  --ce-corner: 12px;
+}
+
+/* ===== Dock tabs (panel merge 09-06): Slide / Text / Design ===== */
+.ce-dock-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  flex: 0 0 auto;
+}
+.ce-dock-tab {
+  flex: 1 1 0;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 12px/1 var(--font-ui);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 140ms var(--ease-spring, ease), color 140ms ease;
+}
+.ce-dock-tab:hover { background: rgba(255,255,255,0.05); color: var(--ink); }
+.ce-dock-tab.is-active {
+  background: rgba(255,255,255,0.08);
+  color: var(--ink);
+}
+
+/* ===== Add-slide disclosure (panel merge B2) ===== */
+.ce-add-slide-disclosure { position: relative; }
+.ce-add-slide-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font: 600 12px/1 var(--font-ui);
+  cursor: pointer;
+  list-style: none;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+.ce-add-slide-btn::-webkit-details-marker { display: none; }
+.ce-add-slide-btn:hover { color: var(--ink); border-color: var(--border-strong); background: rgba(255,255,255,0.04); }
+.ce-add-slide-plus {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+}
+.ce-add-slide-disclosure[open] .ce-add-slide-pills { display: flex; }
+.ce-add-slide-disclosure .ce-add-slide-pills { display: none; padding-top: 8px; }
+
+/* Caption counter sleeps at 0 (silence test — panel merge C4). */
+.ce-caption-counter.is-zero { opacity: 0.35; }
+
+/* ===== Wave C — owner live fix 2026-09-06 (carousel stage + dock) ===== */
+
+/* C1 · Slide stage breathing room. Nested overflow:hidden + padding:0 clipped
+   slide tops/bottoms and amputated the selection ring into harsh vertical bars. */
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+  padding: 14px 18px !important;
+}
+
+/* C2 · Selected slide: no lift/scale (it overflowed the clipped track). The
+   card-level ring is the single selection treatment; drop the clipped frame ring. */
+.studio-workspace.is-carousel-mode .ce-filmstrip-card.is-selected {
+  transform: none !important;
+}
+.studio-workspace.is-carousel-mode .ce-carousel-slide-frame.is-selected,
+.studio-workspace.is-carousel-mode .ce-filmstrip-card.is-selected .ce-carousel-slide-frame {
+  box-shadow: none !important;
+}
+
+/* C3 · Dock tab strip opaque so scrolled rows never show through it. */
+.ce-dock-tabs {
+  background: var(--panel, #14161c);
+  box-shadow: 0 1px 0 var(--border);
+  position: relative;
+  z-index: 2;
+}
+/* Soft top/bottom fade so a mid-scroll row dissolves instead of hard-cutting. */
+.studio-workspace.is-carousel-mode .ce-inspector-scroll {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+}
+
+/* C4 · Icon-only slide actions (owner: graphical, not text buttons). */
+.ce-slide-action-row { gap: 6px; }
+.ce-icon-action {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; flex: 0 0 auto;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: rgba(255,255,255,0.04); color: var(--ink, #e8e6e3);
+  cursor: pointer; transition: background 140ms ease, color 140ms ease;
+}
+.ce-icon-action:hover { background: rgba(255,255,255,0.09); }
+.ce-icon-action:disabled { opacity: 0.35; cursor: default; }
+.ce-icon-action svg, .ce-icon-action .ce-tool-icon { width: 16px; height: 16px; display: block; }
+.ce-icon-action svg { stroke: currentColor; fill: none; }
+.ce-icon-action--danger:hover { color: var(--accent, #c43b4e); border-color: var(--accent, #c43b4e); }
+
+/* C5 · Quick-type strip sits quiet at the top of the Slide tab. */
+.ce-dock-quicktype { padding-block: 8px; }
+.ce-dock-quicktype .ce-tool-segmented-group { justify-content: flex-start; }
+
+
+/* C8 · Overflow indicator is information, not an alarm: quiet muted dot. */
+.studio-workspace.is-carousel-mode .ce-filmstrip-fit-dot:not([hidden]) {
+  width: 8px !important; height: 8px !important;
+  background: var(--muted, #8b8f98) !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+}
+
+/* C10 · The authored paper sheet paints inside .gfx (overflow:hidden but
+   border-radius:0), so the slide's 16px rounding never reached it and slide
+   tops rendered square. Inherit the radius so all four corners round. */
+.studio-workspace.is-carousel-mode .ce-carousel-slide-stage .slide .gfx {
+  border-radius: inherit !important;
+}
+
+/* C10b · Selection frames the card from OUTSIDE with a calm neutral ring; the
+   crimson ring read as harsh vertical bars against the dark dock. Crimson stays
+   only on the small slide-number badge. */
+.studio-workspace.is-carousel-mode .ce-filmstrip-card.is-selected {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.62), 0 16px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* C11 · Center the fitted stage in its frame so the headroom is even and the
+   authored margins + rounded corners are visible on all four sides. */
+.studio-workspace.is-carousel-mode .ce-carousel-slide-frame {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Wave E · one-exit topbar law (NEW-CE-001/TB): Back is the visible exit;
+   Close lives in the ••• menu (#studio-close-menu-btn). */
+.studio-topbar .studio-close-btn { display: none !important; }
+
+/* ── Filmstrip rail: cards fit, corners stay round, selection stays inside ── */
+.studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+  gap: 14px !important;
+  padding: 12px 18px 16px !important;
+}
+.studio-workspace.is-carousel-mode .ce-filmstrip-card {
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 0 !important;
+  padding: 10px !important;
+}
+.studio-workspace.is-carousel-mode .ce-filmstrip-card .ce-carousel-slide-frame {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+/* Calm neutral selection: ring INSIDE the card so nothing bleeds into the gaps. */
+.studio-workspace.is-carousel-mode .ce-filmstrip-card.is-selected {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.32), 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+}
+/* Dead markup guard: the role caption is retired from the cards. */
+.studio-workspace.is-carousel-mode .ce-filmstrip-role { display: none !important; }
+
+/* D3 (plan 2026-09-07): focus rings on every dock control. Tabbing through
+   the studio dock previously showed no visible focus indicator — keyboard
+   users could not tell where they were. */
+.studio-workspace .ce-compact-tool:focus-visible,
+.studio-workspace .ce-look-choice:focus-visible,
+.studio-workspace .ce-text-tool-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }

@@ -8,7 +8,7 @@
   --ideas-muted: #6d687d;
   --ideas-line: #e6e1ed;
   --ideas-accent: #c43b4e;
-  padding: 16px 28px 72px;
+  padding: 58px 28px 72px; /* floating topbar band (owner 2026-09-03) */
   overflow-y: auto;
   overflow-x: hidden;
   background: linear-gradient(180deg, var(--bg), var(--ideas-panel));
@@ -78,10 +78,28 @@ body:not(.bright-theme) .ce-ideas-parity {
   color: var(--ideas-surface);
 }
 
+/* One active language across both facets (deep visual audit 2026-09-07): the
+   category pills selected as filled ink while the language pills selected as
+   accent-outline — two "active" vocabularies in one row read as incoherent.
+   Both now use the same ink fill; the facet separation is carried by the
+   divider below, not by a different selection style. */
 .ce-ideas-language .ce-ideas-filter.is-active {
-  background: color-mix(in srgb, var(--ideas-accent) 18%, var(--ideas-surface));
-  border-color: color-mix(in srgb, var(--ideas-accent) 42%, var(--ideas-line));
-  color: var(--ideas-accent);
+  background: var(--ideas-ink);
+  border-color: var(--ideas-ink);
+  color: var(--ideas-surface);
+}
+.ce-ideas-language {
+  position: relative;
+  margin-left: 14px;
+}
+.ce-ideas-language::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 15%;
+  bottom: 15%;
+  width: 1px;
+  background: color-mix(in srgb, var(--ideas-line) 70%, var(--ideas-muted));
 }
 
 .ce-ideas-filter-menu-wrap {
@@ -140,11 +158,14 @@ body:not(.bright-theme) .ce-ideas-parity {
   font-weight: 700;
 }
 
+/* The count line is metadata, not a control: pill styling made it read as a
+   fourth selectable filter (deep visual audit 2026-09-07). Quiet text now. */
 .ce-ideas-summary span {
-  border: 1px solid var(--ideas-line);
-  border-radius: 999px;
-  padding: 6px 10px;
-  background: var(--ideas-surface);
+  border: 0;
+  border-radius: 0;
+  padding: 0 10px 0 0;
+  background: transparent;
+  font-weight: 600;
 }
 
 .ce-ideas-section {

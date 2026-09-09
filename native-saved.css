@@ -109,10 +109,25 @@
   display: flex;
   gap: 14px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
   scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
+}
+.ce-next-best-rail::-webkit-scrollbar {
+  height: 4px;
+}
+.ce-next-best-rail::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ce-next-best-rail::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+.ce-next-best-rail:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
 }
 .ce-next-best-card {
   flex: 0 0 200px;
@@ -147,7 +162,7 @@
   flex: 1;
 }
 .ce-next-best-badge {
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 750;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -311,9 +326,11 @@
 
 /* ── Saved Bank Workspace View ── */
 .ce-saved-workspace {
-  padding: 24px 32px;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 24px 32px 64px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
 }
 .ce-saved-header {
   margin-bottom: 24px;
@@ -404,10 +421,18 @@
 /* ── Saved Bank Grid & Pure Design Cards (No Clutter, No Labels) ── */
 .ce-saved-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
   gap: 24px;
   align-items: start;
-  padding-top: 16px;
+  padding-top: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.ce-saved-grid:has(> .ce-saved-card:only-child) {
+  grid-template-columns: minmax(310px, 420px);
+}
+.ce-saved-grid:has(> .ce-saved-card:first-child:nth-last-child(2)) {
+  grid-template-columns: repeat(2, minmax(310px, 420px));
 }
 .ce-saved-card {
   position: relative;
@@ -490,6 +515,7 @@
 /* ── Empty State in Saved Bank ── */
 .ce-saved-empty {
   grid-column: 1 / -1;
+  min-height: 46vh;
   padding: 60px 20px;
   text-align: center;
   display: flex;
@@ -505,6 +531,9 @@
 .ce-saved-empty-icon {
   font-size: 32px;
   opacity: 0.7;
+  color: var(--muted, #8b8b94);
+  display: flex;
+  justify-content: center;
 }
 .ce-saved-empty-title {
   font-size: 16px;
@@ -516,6 +545,21 @@
   color: var(--muted);
   max-width: 420px;
   line-height: 1.5;
+}
+.ce-saved-empty-cta {
+  margin-top: 6px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.ce-saved-empty-cta:hover {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
 /* ── Sectioned Saved Bank (Poems, Posts, Carousels) ── */

@@ -1,0 +1,565 @@
+/* ==========================================================================
+   CE phone layer — GitHub Pages / iPhone viewing (owner 2026-09-09)
+   The app chrome was built for the Mac window. On a phone: the sidebar
+   becomes a slim icon rail, the dock columns stack, the studio topbar
+   wraps cleanly, library cards go single-column, and every control keeps
+   a 44px touch target. Desktop rules above stay untouched.
+   ========================================================================== */
+
+/* ---------- Shell: keep the icon rail usable, drop text labels ---------- */
+@media (max-width: 700px) {
+  #sidebar {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+  }
+  #sidebar .sidebar-label,
+  #sidebar-nav button span:not([class*="icon"]) {
+    display: none !important;
+  }
+  #sidebar-nav button {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+  /* The share build hides Plan/Saved/Write/Grow; make sure the rail
+     bottom (theme toggle, settings) stays reachable. */
+  #sidebar > * { min-width: 0 !important; }
+
+  /* Topbar: let it wrap instead of clipping the Schedule/Post buttons. */
+  .topbar, .app-topbar {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    min-height: 52px !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+  }
+
+  /* Library grids: honest single column with readable cards. */
+  .library-grid, .poem-grid, .posts-grid, .ce-shelf-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+  .card-title, .ce-card-title { font-size: 15px !important; }
+
+  /* Horizontal shelves scroll instead of crushing. */
+  .ce-shelf-track, .ce-library-shelf {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+/* ---------- Studio: the workbench is the critical surface ---------- */
+@media (max-width: 700px) {
+  /* Topbar wraps: back / title / actions never clip. */
+  .studio-topbar {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    min-height: 52px !important;
+    gap: 6px !important;
+    padding: 8px 10px !important;
+  }
+  .studio-title-box { max-width: 46vw !important; }
+  .studio-title {
+    font-size: 14px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+    max-width: 100% !important;
+  }
+  .studio-tag { display: none !important; }
+  .studio-primary-actions { gap: 6px !important; }
+  .pill-btn {
+    min-height: 40px !important;
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+  }
+  /* The ••• menu opens over the dock, not clipped at the right edge. */
+  .studio-more-menu {
+    right: 0 !important;
+    left: auto !important;
+    max-width: 82vw !important;
+  }
+
+  /* Filmstrip: swipe track stays, cards shrink to fit 1.6 per view. */
+  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
+    width: min(58vw, 300px) !important;
+  }
+
+  /* The workbench (360px on desktop) would eat the screen: collapse to
+     a vertical stack under the canvas with its own scroll. */
+  .studio-workspace.is-carousel-mode .ce-studio-inspector {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: 0 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 62vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-dock-column {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--studio-workbench-line, rgba(255,255,255,0.075)) !important;
+    flex-basis: auto !important;
+    min-height: 0 !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-dock-column-body {
+    overflow-y: visible !important;
+    max-height: none !important;
+  }
+  /* Sections relax their desktop height-absorption — content decides. */
+  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
+  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks {
+    flex: 0 0 auto !important;
+    max-height: none !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure {
+    margin-top: 0 !important;
+  }
+
+  /* Caption column becomes a normal stacked panel. */
+  .studio-workspace.is-carousel-mode .ce-inspector-pinned {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    border-left: 0 !important;
+    border-top: 1px solid rgba(255,255,255,0.10) !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-inspector-pinned .ce-deck-caption-input {
+    min-height: 96px !important;
+    font-size: 16px !important; /* iOS zooms into <16px inputs */
+  }
+
+  /* Text inputs across the app: kill the iOS focus zoom. */
+  input[type="text"], input[type="search"], textarea, select {
+    font-size: 16px !important;
+  }
+
+  /* Dock buttons: comfortable touch targets, same visual language. */
+  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row .ce-icon-action,
+  .ce-compact-tool {
+    min-width: 38px !important;
+    min-height: 38px !important;
+  }
+
+  /* Look-picker grid: 3-up instead of the desktop 4-up squeeze. */
+  .studio-workspace.is-carousel-mode .ce-look-picker-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Slides row (Add slide + icons) fits a phone width on one line. */
+  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack {
+    grid-template-columns: 1fr !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row {
+    grid-row: 2 !important;
+    grid-column: 1 !important;
+  }
+
+  /* Download-for-phone button: full-width, first in the menu. */
+  #studio-download-pack-btn {
+    min-height: 44px !important;
+    font-weight: 700 !important;
+  }
+}
+
+/* ---------- Poem studio + very narrow phones ---------- */
+@media (max-width: 420px) {
+  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
+    width: 72vw !important;
+  }
+  .pill-btn { padding: 8px 10px !important; font-size: 12px !important; }
+  .studio-title { max-width: 40vw !important; }
+}
+
+
+/* ==========================================================================
+   PHONE STACK — specificity pass 2 (2026-09-09 19:30)
+   native-studio.css pins the workbench with single-chain !important rules.
+   Double-chain selectors (below) win the cascade at equal importance.
+   ========================================================================== */
+@media (max-width: 700px) {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector {
+    height: auto !important;
+    max-height: 58vh !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column {
+    flex: 0 0 auto !important;
+    flex-basis: auto !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--studio-workbench-line, rgba(255,255,255,0.075)) !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column:last-child {
+    border-bottom: 0 !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks {
+    flex: 0 0 auto !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure {
+    margin-top: 0 !important;
+  }
+  /* One-column Slides row: Add slide full width, icons row beneath. */
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn {
+    height: 40px !important;
+    font-size: 13px !important;
+  }
+  /* Caption panel: own block, readable textarea. */
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-inspector-pinned {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    border-left: 0 !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+  /* Filmstrip cards: bigger tap faces, snap scrolling. */
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
+    width: min(62vw, 320px) !important;
+    scroll-snap-align: center !important;
+  }
+  /* Hook rows: comfortable reading height. */
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-hook-row-item {
+    min-height: 52px !important;
+  }
+  /* Look grid 3-up with readable faces. */
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-look-picker-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* ===== phone hard-gate twins (html.ce-phone) ===== */
+/* class twin of @media (max-width: 700px) { */
+html.ce-phone {
+
+  #sidebar {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+  }
+  #sidebar .sidebar-label,
+  #sidebar-nav button span:not([class*="icon"]) {
+    display: none !important;
+  }
+  #sidebar-nav button {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+  /* The share build hides Plan/Saved/Write/Grow; make sure the rail
+     bottom (theme toggle, settings) stays reachable. */
+  #sidebar > * { min-width: 0 !important; }
+
+  /* Topbar: let it wrap instead of clipping the Schedule/Post buttons. */
+  .topbar, .app-topbar {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    min-height: 52px !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+  }
+
+  /* Library grids: honest single column with readable cards. */
+  .library-grid, .poem-grid, .posts-grid, .ce-shelf-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+  .card-title, .ce-card-title { font-size: 15px !important; }
+
+  /* Horizontal shelves scroll instead of crushing. */
+  .ce-shelf-track, .ce-library-shelf {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+}
+
+/* class twin of @media (max-width: 700px) { */
+html.ce-phone {
+
+  /* Topbar wraps: back / title / actions never clip. */
+  .studio-topbar {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    min-height: 52px !important;
+    gap: 6px !important;
+    padding: 8px 10px !important;
+  }
+  .studio-title-box { max-width: 46vw !important; }
+  .studio-title {
+    font-size: 14px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+    max-width: 100% !important;
+  }
+  .studio-tag { display: none !important; }
+  .studio-primary-actions { gap: 6px !important; }
+  .pill-btn {
+    min-height: 40px !important;
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+  }
+  /* The ••• menu opens over the dock, not clipped at the right edge. */
+  .studio-more-menu {
+    right: 0 !important;
+    left: auto !important;
+    max-width: 82vw !important;
+  }
+
+  /* Filmstrip: swipe track stays, cards shrink to fit 1.6 per view. */
+  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
+    width: min(58vw, 300px) !important;
+  }
+
+  /* The workbench (360px on desktop) would eat the screen: collapse to
+     a vertical stack under the canvas with its own scroll. */
+  .studio-workspace.is-carousel-mode .ce-studio-inspector {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: 0 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 62vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-dock-column {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--studio-workbench-line, rgba(255,255,255,0.075)) !important;
+    flex-basis: auto !important;
+    min-height: 0 !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-dock-column-body {
+    overflow-y: visible !important;
+    max-height: none !important;
+  }
+  /* Sections relax their desktop height-absorption — content decides. */
+  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
+  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks {
+    flex: 0 0 auto !important;
+    max-height: none !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure {
+    margin-top: 0 !important;
+  }
+
+  /* Caption column becomes a normal stacked panel. */
+  .studio-workspace.is-carousel-mode .ce-inspector-pinned {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    border-left: 0 !important;
+    border-top: 1px solid rgba(255,255,255,0.10) !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-inspector-pinned .ce-deck-caption-input {
+    min-height: 96px !important;
+    font-size: 16px !important; /* iOS zooms into <16px inputs */
+  }
+
+  /* Text inputs across the app: kill the iOS focus zoom. */
+  input[type="text"], input[type="search"], textarea, select {
+    font-size: 16px !important;
+  }
+
+  /* Dock buttons: comfortable touch targets, same visual language. */
+  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row .ce-icon-action,
+  .ce-compact-tool {
+    min-width: 38px !important;
+    min-height: 38px !important;
+  }
+
+  /* Look-picker grid: 3-up instead of the desktop 4-up squeeze. */
+  .studio-workspace.is-carousel-mode .ce-look-picker-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Slides row (Add slide + icons) fits a phone width on one line. */
+  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack {
+    grid-template-columns: 1fr !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row {
+    grid-row: 2 !important;
+    grid-column: 1 !important;
+  }
+
+  /* Download-for-phone button: full-width, first in the menu. */
+  #studio-download-pack-btn {
+    min-height: 44px !important;
+    font-weight: 700 !important;
+  }
+
+}
+
+/* class twin of @media (max-width: 420px) { */
+html.ce-phone {
+
+  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
+    width: 72vw !important;
+  }
+  .pill-btn { padding: 8px 10px !important; font-size: 12px !important; }
+  .studio-title { max-width: 40vw !important; }
+
+}
+
+/* class twin of @media (max-width: 700px) { */
+html.ce-phone {
+
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector {
+    height: auto !important;
+    max-height: 58vh !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column {
+    flex: 0 0 auto !important;
+    flex-basis: auto !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--studio-workbench-line, rgba(255,255,255,0.075)) !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column:last-child {
+    border-bottom: 0 !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks {
+    flex: 0 0 auto !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure {
+    margin-top: 0 !important;
+  }
+  /* One-column Slides row: Add slide full width, icons row beneath. */
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn {
+    height: 40px !important;
+    font-size: 13px !important;
+  }
+  /* Caption panel: own block, readable textarea. */
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-inspector-pinned {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    border-left: 0 !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+  /* Filmstrip cards: bigger tap faces, snap scrolling. */
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
+    width: min(62vw, 320px) !important;
+    scroll-snap-align: center !important;
+  }
+  /* Hook rows: comfortable reading height. */
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-hook-row-item {
+    min-height: 52px !important;
+  }
+  /* Look grid 3-up with readable faces. */
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-look-picker-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+}
+
+/* ===== phone: surface "Download for phone" as THE primary action ===== */
+@media (max-width: 700px) {
+  .studio-topbar { position: relative !important; }
+  .studio-workspace .studio-topbar #studio-download-pack-btn {
+    position: static !important;
+    order: -1 !important;
+    display: inline-flex !important;
+    min-height: 40px !important;
+    padding: 8px 16px !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    color: #fff !important;
+    background: linear-gradient(135deg, #d4576b, #a83242) !important;
+    border: 1px solid rgba(255,255,255,0.14) !important;
+  }
+  /* hide the native-only Export button in the menu on phone (the pack replaces it) */
+  .studio-workspace .studio-topbar #studio-export-btn { display: none !important; }
+}
+html.ce-phone .studio-topbar #studio-download-pack-btn {
+  position: static !important;
+  order: -1 !important;
+  display: inline-flex !important;
+  min-height: 40px !important;
+  padding: 8px 16px !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  color: #fff !important;
+  background: linear-gradient(135deg, #d4576b, #a83242) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+}
+html.ce-phone .studio-topbar #studio-export-btn { display: none !important; }
+
+/* ===== phone: the pack button must be IN the topbar flow, not the dropdown =====
+   The menu stays display:none until opened, so any order/flex trick inside it
+   is invisible. CSS alone cannot reparent — the boot script below moves it. */

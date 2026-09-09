@@ -183,8 +183,9 @@
         // honor explicit x (0..100); else distribute evenly with padding
         let x = it && it.x != null ? clamp(it.x, 0, 100) : (n === 1 ? 50 : 8 + (84) * i / (n - 1));
         const up = i % 2 === 0;
+        const cardX = clamp(x, 14, 86);
         return `<div class="ib-node" style="left:${f(x)}%;"></div>
-          <div class="ib-event ${up ? 'up' : 'down'}" style="left:${f(x)}%;">
+          <div class="ib-event ${up ? 'up' : 'down'}" style="left:${f(cardX)}%;">
             <div class="ib-eventCard">
               ${it && it.tag ? `<div class="ib-eventTag">${escapeBlockText(it.tag)}</div>` : ''}
               <div class="ib-eventH">${escapeBlockText(it && it.title)}</div>
@@ -201,7 +202,7 @@
     if (kind === 'process_loop'){
       const items = arr(d.items).slice(0, 6);
       const n = items.length || 1;
-      const SZ = 760, cx = SZ / 2, cy = SZ / 2, R = 300;      // ring radius for node CENTERS
+      const SZ = 760, cx = SZ / 2, cy = SZ / 2, R = 250;      // ring radius for node CENTERS (250 keeps 200px cards within 760 stage)
       const NW = 200, NH = 122;                                // node card size
       const breakName = txt(d.break_at).toLowerCase();
       // arc segments between consecutive node centers (drawn slightly inside the ring)
@@ -238,85 +239,102 @@
     /* 8 ── sketch_model ─ hand-drawn diagram; SVG shapes w/ turbulence displacement, HTML text over for readability */
     if (kind === 'sketch_model'){
       const parts = arr(d.parts).slice(0, 7);
-      const W = 900, H = 580;
+      const W = 900, H = 640;
       const computedParts = parts.map((pt, i) => {
         const rawX = clamp(pt && pt.x, 14, 86);
-        const rawY = clamp(pt && pt.y, 4, 96);
+        const rawY = clamp(pt && pt.y, 16, 84);
         const shape = txt(pt && pt.shape).toLowerCase() || 'box';
-        return {
+        const posX = rawX / 100 * W;
+        const posY = rawY / 100 * H;
+        const maxW = Math.max(160, Math.floor(Math.min(posX, W - posX) * 2 - 24));
+        const pt2 = {
           idx: i,
           raw: pt,
-          x: rawX / 100 * W,
-          y: rawY / 100 * H,
+          x: posX,
+          y: posY,
           pctX: rawX,
           pctY: rawY,
           shape: shape,
           label: pt && pt.label ? String(pt.label) : '',
           text: pt && pt.text ? String(pt.text) : '',
           isContainer: false,
-          nestedIn: null
+          sh: 1 // collision-driven vertical squeeze factor for drawn shape + label
         };
+        // drawn footprint in SVG units — single source of truth for both SVG
+        // shapes and collision sweep below. Centered boxes get full 380px width,
+        // while off-center parts hug maxW so they never escape the canvas.
+        if (shape === 'arrow') { pt2.dw = Math.min(240, maxW); pt2.dh = 52; }
+        else if (shape === 'circle') { pt2.dw = Math.min(140, maxW); pt2.dh = 64; }
+        else { pt2.dw = Math.min(380, maxW); pt2.dh = 76; }
+        return pt2;
       });
 
-      computedParts.forEach(p1 => {
-        if (p1.shape === 'box') {
-          computedParts.forEach(p2 => {
-            if (p1.idx !== p2.idx && p2.shape !== 'arrow') {
-              const dx = Math.abs(p1.x - p2.x);
-              const dy = Math.abs(p1.y - p2.y);
-              if (dx < 180 && dy < 130) {
-                p1.isContainer = true;
-                p2.nestedIn = p1.idx;
-              }
-            }
-          });
+      // Owner 2026-09-06: deterministic collision resolver. Authored y
+      // percentages can pack shapes tighter than their drawn heights allow.
+      // Every part is a stack band: proportional vertical squeeze when the
+      // stack cannot fit, then a top→bottom sweep inside the stage.
+      const topEdge = H * 0.06, bottomEdge = H * 0.94, gap = 12;
+      const stack = computedParts.slice().sort((a, b) => a.y - b.y);
+      let remaining = stack.reduce((s, p) => s + p.dh + gap, 0);
+      let cursor = topEdge;
+      for (let i = 0; i < stack.length; i++) {
+        const pt = stack[i];
+        const avail = bottomEdge - cursor;
+        if (remaining > avail && remaining > 0) {
+          const squeeze = Math.max(0.7, avail / remaining);
+          for (let j = i; j < stack.length; j++) stack[j].sh *= squeeze;
+          remaining = avail;
         }
-      });
+        const hh = (pt.dh * pt.sh) / 2;
+        const center = Math.max(pt.y, cursor + hh);
+        pt.y = Math.min(center, bottomEdge - hh);
+        cursor = pt.y + hh + gap;
+        remaining -= (pt.dh * pt.sh) + gap;
+      }
+      stack.forEach(pt => { pt.pctY = clamp(pt.y / H * 100, 0, 100); });
 
       const shapes = computedParts.map(pt => {
-        const x = pt.x, y = pt.y;
+        const x = pt.x, y = pt.y, s = pt.sh;
+        const bw = pt.dw, bh = pt.dh * s;
         if (pt.shape === 'circle'){
-          const rx = pt.nestedIn != null ? 104 : 118;
-          const ry = pt.nestedIn != null ? 74 : 86;
-          return `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${rx}" ry="${ry}" fill="color-mix(in srgb, var(--panel) 90%, var(--bg) 10%)" stroke="var(--acc)" stroke-width="3.2" filter="url(#ibRough)"/>`;
+          return `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(bw / 2)}" ry="${f(bh / 2)}" fill="color-mix(in srgb, var(--panel) 90%, var(--bg) 10%)" stroke="var(--acc)" stroke-width="3.2" filter="url(#ibRough)"/>`;
         }
         if (pt.shape === 'arrow'){
-          return `<path d="M ${f(x - 110)} ${f(y)} L ${f(x + 100)} ${f(y)} M ${f(x + 100)} ${f(y)} L ${f(x + 78)} ${f(y - 16)} M ${f(x + 100)} ${f(y)} L ${f(x + 78)} ${f(y + 16)}" fill="none" stroke="var(--acc2,var(--acc))" stroke-width="3.4" stroke-linecap="round" filter="url(#ibRough)"/>`;
+          const half = bw / 2;
+          const arrowY = y + 14;
+          return `<path d="M ${f(x - half)} ${f(arrowY)} L ${f(x + half - 8)} ${f(arrowY)} M ${f(x + half - 8)} ${f(arrowY)} L ${f(x + half - 28)} ${f(arrowY - 14)} M ${f(x + half - 8)} ${f(arrowY)} L ${f(x + half - 28)} ${f(arrowY + 14)}" fill="none" stroke="var(--acc2,var(--acc))" stroke-width="3.4" stroke-linecap="round" filter="url(#ibRough)"/>`;
         }
         if (pt.isContainer) {
-          const bw = 320, bh = 175;
-          return `<rect x="${f(x - bw / 2)}" y="${f(y - bh / 2)}" width="${bw}" height="${bh}" rx="20" fill="color-mix(in srgb, var(--panel) 60%, transparent)" stroke="var(--acc)" stroke-width="2.6" stroke-dasharray="6 4" filter="url(#ibRough)"/>`;
+          return `<rect x="${f(x - bw / 2)}" y="${f(y - bh / 2)}" width="${f(bw)}" height="${f(bh)}" rx="20" fill="color-mix(in srgb, var(--panel) 60%, transparent)" stroke="var(--acc)" stroke-width="2.6" stroke-dasharray="6 4" filter="url(#ibRough)"/>`;
         }
-        return `<rect x="${f(x - 120)}" y="${f(y - 74)}" width="240" height="148" rx="16" fill="color-mix(in srgb, var(--panel) 85%, var(--bg) 15%)" stroke="var(--acc)" stroke-width="3.2" filter="url(#ibRough)"/>`;
+        return `<rect x="${f(x - bw / 2)}" y="${f(y - bh / 2)}" width="${f(bw)}" height="${f(bh)}" rx="16" fill="color-mix(in srgb, var(--panel) 85%, var(--bg) 15%)" stroke="var(--acc)" stroke-width="3.2" filter="url(#ibRough)"/>`;
       }).join('');
 
+      // Labels sit centered on their own shape (same resolved y as the SVG).
+      // Arrow labels sit neatly above the drawn path line.
       const labels = computedParts.map(pt => {
+        const s = pt.sh;
+        const bw = pt.dw;
         if (pt.shape === 'arrow') {
-          if (!pt.label && !pt.text) return '';
-          return `<div class="ib-skPart ib-skArrowPart" style="left:${f(pt.pctX)}%;top:${f(pt.pctY - 5)}%;">
-            ${pt.label ? `<div class="ib-skArrowLab">${escapeBlockText(pt.label)}</div>` : ''}
-            ${pt.text ? `<div class="ib-skArrowT">${escapeBlockText(pt.text)}</div>` : ''}
+          const labSize = f(28 * s);
+          return `<div class="ib-skPart ib-skArrowPart" style="left:${f(pt.pctX)}%;top:${f(pt.pctY - 2)}%;width:${f(bw)}px;">
+            ${pt.label ? `<div class="ib-skLab ib-skArrowLab" style="font-size:${labSize}px;">${escapeBlockText(pt.label)}</div>` : ''}
           </div>`;
         }
-        if (pt.isContainer) {
-          return `<div class="ib-skPart ib-skContainerPart" style="left:${f(pt.pctX)}%;top:${f(pt.pctY - 10)}%;">
-            ${pt.label ? `<div class="ib-skLab ib-skContainerLab">${escapeBlockText(pt.label)}</div>` : ''}
-            ${pt.text ? `<div class="ib-skT ib-skContainerT">${escapeBlockText(pt.text)}</div>` : ''}
-          </div>`;
-        }
-        return `<div class="ib-skPart${pt.nestedIn != null ? ' ib-skNestedPart' : ''}" style="left:${f(pt.pctX)}%;top:${f(pt.pctY)}%;">
-          ${pt.label ? `<div class="ib-skLab">${escapeBlockText(pt.label)}</div>` : ''}${pt.text ? `<div class="ib-skT">${escapeBlockText(pt.text)}</div>` : ''}
+        const labSize = f(30 * s), txtSize = f(24 * s);
+        return `<div class="ib-skPart" style="left:${f(pt.pctX)}%;top:${f(pt.pctY)}%;width:${f(bw - 20)}px;">
+          ${pt.label ? `<div class="ib-skLab" style="font-size:${labSize}px;">${escapeBlockText(pt.label)}</div>` : ''}${pt.text ? `<div class="ib-skT" style="font-size:${txtSize}px;">${escapeBlockText(pt.text)}</div>` : ''}
         </div>`;
       }).join('');
 
       return `<div class="ib-sketch">${d.title ? `<div class="ib-skTitle">${escapeBlockText(d.title)}</div>` : ''}
-        <div class="ib-skStage">
+        <div class="ib-skStage"><div class="ib-skStageInner">
           <svg viewBox="0 0 ${W} ${H}" class="ib-skSvg" preserveAspectRatio="xMidYMid meet">
             <defs><filter id="ibRough"><feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="8" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="4"/></filter></defs>
             ${shapes}
           </svg>
           ${labels}
-        </div>
+        </div></div>
         ${d.note ? `<div class="ib-skNote">${escapeBlockText(d.note)}</div>` : ''}
       </div>`;
     }
@@ -338,16 +356,31 @@
       // build a hard-stop gradient from the snapped zone ranges (palette-aware defaults if no color)
       const stops = zr.map(z => `${z.col} ${f(z.from)}% ${f(z.to)}%`).join(', ');
       const zLabels = zr.map(z => {
-        const mid = (z.from + z.to) / 2;
-        return `<div class="ib-specZ" style="left:${f(mid)}%;"><b style="color:${z.col};">${escapeBlockText(z.label)}</b></div>`;
+        const width = Math.max(0, z.to - z.from);
+        const raw = String(z.label || '').trim();
+        const parts = raw.split(/\s*[—–-]\s*|\s*:\s*/);
+        const title = parts[0] || raw;
+        const desc = parts.slice(1).join(' — ');
+        return `<div class="ib-specZ" style="left:${f(z.from)}%;width:${f(width)}%;">
+          <div class="ib-specZ-head" style="color:${z.col};">${escapeBlockText(title)}</div>
+          ${desc ? `<div class="ib-specZ-desc">${escapeBlockText(desc)}</div>` : ''}
+        </div>`;
       }).join('');
       const m = d.marker || {};
-      const mv = clamp(m.value, 6, 94);
+      const mv = clamp(m.value, 12, 88);
+      const markerHtml = m && m.label ? `
+        <div class="ib-specMarkerArea">
+          <div class="ib-specMarker" style="left:${f(mv)}%;">
+            <div class="ib-specFlag">${escapeBlockText(m.label)}</div>
+            <div class="ib-specArrow"></div>
+          </div>
+        </div>` : '';
       return `<div class="ib-spectrum">
-        <div class="ib-specEnds"><span>${escapeBlockText(d.left)}</span><span>${escapeBlockText(d.right)}</span></div>
+        ${(d.left || d.right) ? `<div class="ib-specEnds"><span>${escapeBlockText(d.left)}</span><span>${escapeBlockText(d.right)}</span></div>` : ''}
+        ${markerHtml}
         <div class="ib-specTrackWrap">
           <div class="ib-specTrack" style="background:linear-gradient(90deg, ${stops});"></div>
-          <div class="ib-specMarker" style="left:${f(mv)}%;"><div class="ib-specStem"></div><div class="ib-specFlag">${escapeBlockText(m.label)}</div></div>
+          <div class="ib-specPin" style="left:${f(mv)}%;"></div>
         </div>
         <div class="ib-specZones">${zLabels}</div>
       </div>`;
@@ -366,7 +399,7 @@
           <polygon points="176,238 544,238 648,540 72,540" fill="var(--panel)" stroke="var(--line)" stroke-width="2.5" opacity="0.72"/>
           <rect x="96" y="556" width="528" height="150" rx="10" fill="var(--panel)" stroke="var(--line)" stroke-width="2.5" opacity="0.55"/>
         </svg>
-        <div class="ib-iceWater">waterline</div>
+        <div class="ib-iceWater">${escapeBlockText(d.waterline || d.line || 'waterline')}</div>
         <div class="ib-iceLayer surface">${layerHtml(surface)}</div>
         <div class="ib-iceLayer hidden">${layerHtml(hidden)}</div>
         <div class="ib-iceLayer root">${layerHtml(rootL)}</div>
@@ -394,8 +427,8 @@
       const branches = arr(d.branches).slice(0, 7);
       const n = branches.length || 1;
       const W = 900, H = 760, cx = W / 2, cy = H / 2;
-      const RX = 320, RY = 288;                                 // elliptical spread so cards fit the 900x760 stage
-      const CW = 246, CH = 120;                                 // branch card size
+      const RX = 320, RY = 260;                                 // elliptical spread leaves room for wrapped branch copy
+      const CW = 220, CH = 190;                                 // real worst-case branch budget used by both placement and CSS
       const lines = [], cards = [];
       branches.forEach((b, i) => {
         // honor explicit angle; else spread evenly starting from top
@@ -403,7 +436,9 @@
         const a = ang * Math.PI / 180;
         const bx = cx + Math.cos(a) * RX, by = cy + Math.sin(a) * RY;
         lines.push(`<line x1="${f(cx)}" y1="${f(cy)}" x2="${f(bx)}" y2="${f(by)}" stroke="${b && b.active ? 'var(--acc)' : 'var(--line)'}" stroke-width="2.4" stroke-dasharray="6 8"/>`);
-        const L = f((bx - CW / 2) / W * 100), T = f((by - CH / 2) / H * 100);
+        const rawL = (bx - CW / 2) / W * 100, rawT = (by - CH / 2) / H * 100;
+        const L = f(clamp(rawL, 2, 100 - (CW / W * 100) - 2));
+        const T = f(clamp(rawT, 2, 100 - (CH / H * 100) - 2));
         cards.push(`<div class="ib-mmBranch${b && b.active ? ' on' : ''}" style="left:${L}%;top:${T}%;width:${f(CW / W * 100)}%;">
           <div class="ib-mmLab">${escapeBlockText(b && b.label)}</div>${b && b.text ? `<div class="ib-mmT">${escapeBlockText(b.text)}</div>` : ''}
         </div>`);
@@ -469,22 +504,22 @@
   .ib-matrixMid{ display:flex; align-items:stretch; gap:14px; width:100%; }
   .ib-axX{ display:flex; align-items:center; font-family:'Poppins'; font-weight:700; font-size:22px; letter-spacing:.12em; text-transform:uppercase; color:var(--sub); writing-mode:vertical-rl; }
   .ib-axX.left{ transform:rotate(180deg); }
-  .ib-matrix{ flex:1; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; border:1.5px solid var(--line); min-height:660px; }
-  .ib-cell{ padding:36px 32px; border:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; }
+  .ib-matrix{ flex:1; height:620px; min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(2,minmax(0,1fr)); border:1.5px solid var(--line); }
+  .ib-cell{ min-height:0; padding:22px 24px; border:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; }
   .ib-cell.active{ box-shadow:inset 0 0 0 4px var(--acc); }
-  .ib-cellTag{ font-family:'Poppins'; font-weight:800; font-size:22px; letter-spacing:2px; text-transform:uppercase; color:var(--acc); margin-bottom:12px; }
-  .ib-cellH{ font-family:'Poppins'; font-weight:700; font-size:38px; color:var(--ink); margin-bottom:10px; line-height:1.14; }
-  .ib-cellT{ font-family:'Poppins','Laila'; font-weight:300; font-size:29px; color:var(--sub); line-height:1.4; }
+  .ib-cellTag{ font-family:'Poppins'; font-weight:800; font-size:18px; letter-spacing:1.5px; text-transform:uppercase; color:var(--acc); margin-bottom:8px; }
+  .ib-cellH{ font-family:'Poppins','Laila'; font-weight:700; font-size:30px; color:var(--ink); margin-bottom:8px; line-height:1.16; }
+  .ib-cellT{ font-family:'Poppins','Laila'; font-weight:300; font-size:22px; color:var(--sub); line-height:1.34; }
 
   /* 4 · comparison_table */
   .ib-cmpTable{ display:grid; grid-template-columns:1fr 1fr; border:1.5px solid var(--line); border-radius:6px; overflow:hidden; }
-  .ib-cmpHead{ font-family:'Poppins'; font-weight:800; font-size:26px; letter-spacing:.1em; text-transform:uppercase; background:var(--ink); color:var(--bg); padding:26px 30px; }
+  .ib-cmpHead{ font-family:'Poppins'; font-weight:800; font-size:22px; letter-spacing:.08em; text-transform:uppercase; background:var(--ink); color:var(--bg); padding:18px 20px; }
   .ib-cmpHead.r{ background:var(--acc); }
   .ib-cmpRow{ display:contents; }
-  .ib-cmpCell{ padding:28px 30px; border-top:1px solid var(--line); font-family:'Poppins','Laila'; font-size:31px; line-height:1.36; }
+  .ib-cmpCell{ min-width:0; padding:16px 20px; border-top:1px solid var(--line); font-family:'Poppins','Laila'; font-size:21px; line-height:1.3; overflow-wrap:anywhere; }
   .ib-cmpCell.left{ color:var(--sub); text-decoration:line-through; text-decoration-color:var(--acc); text-decoration-thickness:3px; opacity:.75; }
   .ib-cmpCell.right{ color:var(--ink); font-weight:700; border-left:1px solid var(--line); }
-  .ib-cmpSig{ display:block; margin-top:8px; font-family:'Poppins'; font-weight:700; font-size:20px; letter-spacing:1.5px; text-transform:uppercase; color:var(--acc); }
+  .ib-cmpSig{ display:block; margin-top:6px; font-family:'Poppins'; font-weight:700; font-size:16px; letter-spacing:1.2px; text-transform:uppercase; color:var(--acc); }
 
   /* 5 · ranking_ladder */
   .ib-ladderStack{ display:flex; flex-direction:column-reverse; gap:14px; align-items:center; }
@@ -500,13 +535,13 @@
   .ib-rail{ position:relative; height:640px; }
   .ib-rail:before{ content:''; position:absolute; left:40px; right:40px; top:50%; height:4px; background:var(--line); transform:translateY(-50%); }
   .ib-node{ position:absolute; top:50%; transform:translate(-50%,-50%); width:26px; height:26px; border-radius:50%; background:var(--acc); box-shadow:0 0 0 10px var(--panel), 0 0 0 12px var(--line); z-index:2; }
-  .ib-event{ position:absolute; width:250px; transform:translateX(-50%); }
+  .ib-event{ position:absolute; width:220px; transform:translateX(-50%); }
   .ib-event.up{ bottom:calc(50% + 40px); }
   .ib-event.down{ top:calc(50% + 40px); }
-  .ib-eventCard{ border:1.5px solid var(--line); border-radius:12px; background:var(--panel); padding:22px 24px; }
-  .ib-eventTag{ font-family:'Poppins'; font-weight:800; font-size:21px; letter-spacing:1.5px; color:var(--acc); margin-bottom:8px; }
-  .ib-eventH{ font-family:'Poppins'; font-weight:700; font-size:32px; color:var(--ink); line-height:1.14; }
-  .ib-eventT{ font-family:'Poppins','Laila'; font-weight:300; font-size:26px; color:var(--sub); margin-top:6px; line-height:1.34; }
+  .ib-eventCard{ border:1.5px solid var(--line); border-radius:12px; background:var(--panel); padding:14px 16px; }
+  .ib-eventTag{ font-family:'Poppins'; font-weight:800; font-size:16px; letter-spacing:1.2px; color:var(--acc); margin-bottom:5px; }
+  .ib-eventH{ font-family:'Poppins','Laila'; font-weight:700; font-size:24px; color:var(--ink); line-height:1.16; }
+  .ib-eventT{ font-family:'Poppins','Laila'; font-weight:300; font-size:18px; color:var(--sub); margin-top:5px; line-height:1.28; overflow-wrap:anywhere; }
   .ib-railEnds{ display:flex; justify-content:space-between; font-family:'Poppins'; font-weight:700; font-size:24px; letter-spacing:.1em; text-transform:uppercase; color:var(--sub); padding:0 30px; }
 
   /* 7 · process_loop */
@@ -535,15 +570,19 @@
   .ib-skArrowT{ font-size:19px; color:var(--sub); line-height:1.2; margin-top:2px; }
 
   /* 9 · spectrum_scale */
-  .ib-spectrum{ display:flex; flex-direction:column; gap:0; padding:20px 0; }
-  .ib-specEnds{ display:flex; justify-content:space-between; font-family:'Poppins'; font-weight:700; font-size:28px; color:var(--ink); margin-bottom:22px; }
-  .ib-specTrackWrap{ position:relative; }
-  .ib-specTrack{ height:36px; border-radius:6px; border:1.5px solid var(--line); }
-  .ib-specMarker{ position:absolute; top:-24px; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; }
-  .ib-specStem{ width:4px; height:96px; background:var(--ink); }
-  .ib-specFlag{ margin-top:8px; font-family:'Poppins','Laila'; font-weight:700; font-size:28px; color:var(--ink); background:var(--panel); border:1.5px solid var(--ink); border-radius:8px; padding:6px 16px; white-space:nowrap; }
-  .ib-specZones{ position:relative; height:44px; margin-top:14px; }
-  .ib-specZ{ position:absolute; transform:translateX(-50%); font-family:'Poppins'; font-weight:700; font-size:26px; letter-spacing:.06em; text-transform:uppercase; }
+  .ib-spectrum{ display:flex; flex-direction:column; gap:12px; padding:16px 0 24px; position:relative; }
+  .ib-specEnds{ display:flex; justify-content:space-between; font-family:'Poppins'; font-weight:700; font-size:24px; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
+  .ib-specMarkerArea{ position:relative; min-height:56px; display:flex; align-items:flex-end; }
+  .ib-specMarker{ position:absolute; bottom:0; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; pointer-events:none; }
+  .ib-specFlag{ font-family:'Poppins','Laila',sans-serif; font-weight:600; font-size:21px; line-height:1.28; color:var(--ink); background:color-mix(in srgb, var(--panel) 94%, var(--bg) 6%); border:1.5px solid var(--acc, var(--line)); border-radius:8px; padding:6px 14px; text-align:center; max-width:440px; box-shadow:0 4px 14px rgba(0,0,0,0.25); word-break:break-word; }
+  .ib-specArrow{ width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:8px solid var(--acc, var(--line)); margin:2px auto 0; }
+  .ib-specTrackWrap{ position:relative; height:32px; }
+  .ib-specTrack{ height:32px; border-radius:8px; border:1.5px solid var(--line); box-shadow:inset 0 2px 4px rgba(0,0,0,0.18); }
+  .ib-specPin{ position:absolute; top:-4px; bottom:-4px; width:6px; transform:translateX(-50%); background:var(--ink); border-radius:3px; box-shadow:0 0 8px rgba(0,0,0,0.5); z-index:2; }
+  .ib-specZones{ position:relative; min-height:110px; margin-top:12px; }
+  .ib-specZ{ position:absolute; top:0; box-sizing:border-box; padding:0 8px; text-align:center; }
+  .ib-specZ-head{ font-family:'Poppins'; font-weight:700; font-size:22px; line-height:1.2; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .ib-specZ-desc{ font-family:'Poppins','Laila',sans-serif; font-weight:400; font-size:18px; line-height:1.32; color:var(--sub); opacity:.9; }
 
   /* 10 · iceberg_layers */
   .ib-iceberg{ position:relative; width:100%; max-width:720px; margin:0 auto; aspect-ratio:720/760; }
@@ -567,11 +606,11 @@
   .ib-mindmap{ display:flex; justify-content:center; }
   .ib-mmWrap{ position:relative; width:100%; max-width:900px; aspect-ratio:900/760; }
   .ib-mmSvg{ position:absolute; inset:0; width:100%; height:100%; }
-  .ib-mmCenter{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:27%; min-height:150px; display:flex; align-items:center; justify-content:center; text-align:center; border:2px solid var(--acc); border-radius:16px; background:var(--panel); padding:18px; font-family:'Poppins','Laila'; font-weight:700; font-size:32px; line-height:1.22; color:var(--ink); box-sizing:border-box; }
-  .ib-mmBranch{ position:absolute; transform:translateY(0); border:1.5px solid var(--line); border-radius:12px; background:var(--panel); padding:16px 18px; text-align:center; box-sizing:border-box; }
+  .ib-mmCenter{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:30%; min-height:132px; display:flex; align-items:center; justify-content:center; text-align:center; border:2px solid var(--acc); border-radius:16px; background:var(--panel); padding:14px; font-family:'Poppins','Laila'; font-weight:700; font-size:26px; line-height:1.18; color:var(--ink); box-sizing:border-box; overflow-wrap:anywhere; }
+  .ib-mmBranch{ position:absolute; min-height:120px; max-height:190px; transform:translateY(0); border:1.5px solid var(--line); border-radius:12px; background:var(--panel); padding:12px 14px; text-align:center; box-sizing:border-box; overflow-wrap:anywhere; }
   .ib-mmBranch.on{ border-color:var(--acc); box-shadow:inset 0 0 0 3px var(--acc); }
-  .ib-mmLab{ font-family:'Poppins','Laila'; font-weight:700; font-size:29px; color:var(--ink); line-height:1.12; word-break:break-word; }
-  .ib-mmT{ font-family:'Poppins','Laila'; font-weight:300; font-size:24px; color:var(--sub); margin-top:5px; line-height:1.28; word-break:break-word; }
+  .ib-mmLab{ font-family:'Poppins','Laila'; font-weight:700; font-size:22px; color:var(--ink); line-height:1.14; word-break:break-word; }
+  .ib-mmT{ font-family:'Poppins','Laila'; font-weight:300; font-size:17px; color:var(--sub); margin-top:4px; line-height:1.26; word-break:break-word; }
 
   /* 13 · decision_tree */
   .ib-tree{ display:flex; flex-direction:column; align-items:center; }
@@ -633,6 +672,55 @@
   .ce-render-block[style*="--ce-text-color"] > :is(.hook,.body,.poem,.profile,.bubble,.bk-title),
   .ce-render-block[style*="--ce-text-color"] .kt,
   .ce-render-block.foot[style*="--ce-text-color"] > *{ color:var(--ce-text-color) !important; }
+  /* Owner 2026-09-03: Canva-style line/letter/word spacing, per slide or element */
+  .ce-render-block[style*="--ce-line-height"] > :is(.hook,.body,.poem,.profile,.bubble,.bk-title),
+  .ce-render-block[style*="--ce-line-height"] .kt{ line-height:var(--ce-line-height) !important; }
+  .ce-render-block[style*="--ce-letter-spacing"] > :is(.hook,.body,.poem,.profile,.bubble,.bk-title),
+  .ce-render-block[style*="--ce-letter-spacing"] .kt{ letter-spacing:var(--ce-letter-spacing) !important; }
+  .ce-render-block[style*="--ce-word-spacing"] > :is(.hook,.body,.poem,.profile,.bubble,.bk-title),
+  .ce-render-block[style*="--ce-word-spacing"] .kt{ word-spacing:var(--ce-word-spacing) !important; }
+
+  /* --- Editorial Density Scaling (Auto-Fit Canon) --- */
+  .ce-dense-md .hook{ font-size:62px !important; line-height:1.32 !important; }
+  .ce-dense-md .body{ font-size:42px !important; line-height:1.56 !important; }
+  .ce-dense-md .poem{ font-size:54px !important; line-height:1.54 !important; }
+  .ce-dense-md .bk-t{ font-size:30px !important; line-height:1.48 !important; }
+  .ce-dense-md .bk-cell{ padding:26px 24px !important; }
+
+  .ce-dense-hi .hook{ font-size:52px !important; line-height:1.26 !important; }
+  .ce-dense-hi .body{ font-size:35px !important; line-height:1.48 !important; }
+  .ce-dense-hi .poem{ font-size:44px !important; line-height:1.48 !important; }
+  .ce-dense-hi .bk-t{ font-size:26px !important; line-height:1.42 !important; }
+  .ce-dense-hi .bk-cell{ padding:20px 18px !important; }
+
+  /* --- Long Hook Scaling (Clip Prevention Canon) --- */
+  .ce-hook-xl{ font-size:64px !important; line-height:1.3 !important; }
+  .ce-hook-xxl{ font-size:52px !important; line-height:1.25 !important; }
+
+  /* --- Body Interior Visual System (No Centered Text Walls) --- */
+  .slide--body .mid{ justify-content:flex-start; padding-top:90px; }
+  .slide--body .body{ max-width:920px; font-size:48px; line-height:1.64; }
+  .slide--body .body b{ color:var(--acc, #C43B4E); font-weight:600; }
+
+  /* --- Pause / Reflection Intentional Layout --- */
+  .slide--pause .mid{ justify-content:center; align-items:flex-start; padding-top:0; }
+  .slide--pause .ce-pause-mark{ font-family:'Laila','Poppins',serif; font-size:84px; color:var(--acc, #C43B4E); opacity:.85; line-height:1; margin-bottom:24px; }
+  .slide--pause .body{ font-family:'Laila','Poppins',serif; font-size:52px; line-height:1.64; color:var(--ink, #ffffff); max-width:900px; }
+  .slide--pause .body b{ color:var(--acc, #C43B4E); font-weight:600; }
+
+  /* --- Devanagari Glyph Law (No Underline Cuts, Zero Letter-Spacing) --- */
+  .slide--devanagari, .slide--devanagari :is(.hook, .body, .poem, .profile, .sub, .kt, .bk-t, .bk-h){
+    letter-spacing:0 !important;
+  }
+  .slide--matra-risk :is(.hook, .body, .poem, .profile, .sub, .kicker){
+    font-family:'Kohinoor Devanagari','Noto Serif Devanagari','Devanagari Sangam MN',sans-serif !important;
+  }
+  .slide--devanagari .hook b,
+  .slide--devanagari .body b,
+  .slide--devanagari b{
+    text-decoration:none !important;
+    color:var(--acc, #C43B4E);
+  }
 
   /* ---- infographic blocks (palette from --vars on .slide) ---- */
   .bk-title{ font-family:'Poppins'; font-weight:700; font-size:40px; color:var(--ink); margin-bottom:20px; line-height:1.24; letter-spacing:-.5px; }
@@ -742,6 +830,10 @@
     if ([300, 400, 500, 600, 700, 800].includes(fontWeight)) styles.push(`--ce-font-weight:${fontWeight}`);
     if (['left', 'center', 'right'].includes(source.textAlign)) styles.push(`--ce-text-align:${source.textAlign}`);
     if (/^#[0-9a-f]{6}$/i.test(String(source.color || ''))) styles.push(`--ce-text-color:${source.color}`);
+    const lineHeight = Number(source.lineHeight);
+    if (Number.isFinite(lineHeight) && lineHeight >= 0.8 && lineHeight <= 3) styles.push(`--ce-line-height:${lineHeight}`);
+    if (/^\d*\.?\d+em$/.test(String(source.letterSpacing || ''))) styles.push(`--ce-letter-spacing:${source.letterSpacing}`);
+    if (/^\d*\.?\d+em$/.test(String(source.wordSpacing || ''))) styles.push(`--ce-word-spacing:${source.wordSpacing}`);
     return styles.length ? styles.join(';') + ';' : '';
   }
 
@@ -770,13 +862,43 @@
     const allowStampGfx = !stampHeavy || i === 0 || i === Math.min(3, Math.max(1, n - 2));
     const gfx = L.graphic && allowStampGfx ? `<div class="gfx">${L.graphic}</div>` : '';
     const brand = '<div class="brand">@DOALFAAZ</div>';
+    let sHtml = String(s.html || '').replace(/<\\\/([a-zA-Z0-9]+)>/g, '</$1>').replace(/<\\\/([a-zA-Z0-9]+)/g, '<$1');
+    let sSub = s.sub ? String(s.sub).replace(/<\\\/([a-zA-Z0-9]+)>/g, '</$1>').replace(/<\\\/([a-zA-Z0-9]+)/g, '<$1') : '';
+    // Owner 2026-09-08 17:32: hook/body slides with no authored <b> painted
+    // as a one-weight text dump while later slides and library covers showed
+    // the punch in the look's accent. Apply emph at paint time when the
+    // slide carries no emphasis yet — looks with a contrasting .hook b
+    // color (fieldmap terracotta, brut blue, riso red) then actually show it.
+    if (sHtml && !/<b[\s>]|<span class=["'](?:t|u)["']/i.test(sHtml) && (s.role === 'hook' || s.role === 'body' || s.role === 'poem')) {
+      var asText = sHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
+      var punched = (s.role === 'poem') ? emphPoem(asText) : emphCore(asText);
+      if (punched && /<b[\s>]/.test(punched)) sHtml = punched.replace(/\n/g, '<br>');
+    }
+    const plainText = (sHtml + ' ' + (s.text || '')).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const hasDevanagari = /[\u0900-\u097F]/.test(sHtml + ' ' + sSub + ' ' + (s.title || ''));
+    // Laila drops the vocalic-R matra (U+0943): drishya paints without it,
+    // so a Devanagari slide carrying consonant+U+0943 must use the safe stack.
+    const matraRisk = /[\u0915-\u0939]\u0943/.test(plainText + ' ' + sSub + ' ' + (s.title || ''));
+
+    // Detect Pause / Thehrav reflective moment
+    const isPause = /^(ruko|pause|thehro|thoda ruko|ek minute|ek pal|saans lo|ruk jao)[\s.?!॥—]/i.test(plainText)
+      || s.role === 'pause'
+      || (s.role === 'body' && plainText.length > 0 && plainText.length < 52 && !s.bubble && !s.num && !s.kickline && i > 0 && i < n - 1);
+
     let content;
-    if (s.role === 'hook') content = `<div class="hook">${s.html}</div>${s.sub ? `<div class="sub">${s.sub}</div>` : ''}`;
-    else if (s.role === 'poem') content = `<div class="poem">${s.html}</div>`;
-    else if (s.role === 'profile') content = `<div class="profile">${s.html}</div>`;
+    if (isPause) {
+      content = `<div class="ce-pause-mark">॥</div><div class="body">${sHtml}</div>`;
+    } else if (s.role === 'hook') {
+      const hookWords = plainText.split(/\s+/).filter(Boolean).length;
+      const hookSizeClass = hookWords > 18 ? ' ce-hook-xxl' : (hookWords > 12 ? ' ce-hook-xl' : '');
+      content = `<div class="hook${hookSizeClass}">${sHtml}</div>${sSub ? `<div class="sub">${sSub}</div>` : ''}`;
+    }
+    else if (s.role === 'poem') content = `<div class="poem">${sHtml}</div>`;
+    else if (s.role === 'profile') content = `<div class="profile">${sHtml}</div>`;
     else if (s.role === 'block') content = `${s.title ? `<div class="bk-title">${s.title}</div>` : ''}${renderBlock(s.block, s.data)}${s.foot ? `<div class="bk-foot">${s.foot}</div>` : ''}`;
-    else if (s.bubble) content = `<div class="bubble"><div class="body">${s.html}</div>${s.kicker ? `<div class="kicker">${s.kicker}</div>` : ''}</div>`;
-    else content = `<div class="body">${s.num ? `<span class="num">${s.num}</span>` : ''}${s.html}</div>`;
+    else if (s.bubble) content = `<div class="bubble"><div class="body">${sHtml}</div>${s.kicker ? `<div class="kicker">${s.kicker}</div>` : ''}</div>`;
+    else content = `<div class="body">${s.num ? `<span class="num">${s.num}</span>` : ''}${sHtml}</div>`;
+
     // Hide cryptic machinery codes and BTS strategy labels in kicklines.
     // Pillar vocabulary (teaching/story/objection/sales family) never belongs
     // on an audience design — fold it into the clean editorial labels instead
@@ -793,6 +915,14 @@
       } else if (/story|recognition|founder|narrative/i.test(kickRaw)) {
         kickRaw = 'Ek Kahani';
       }
+    }
+    // Interior body visual system: if no kicker was authored on a body slide,
+    // anchor it with an editorial topic thread so it never floats as an unanchored text wall.
+    if (!kickRaw && s.role === 'body' && !s.bubble && !isPause && i > 0 && i < n - 1) {
+      kickRaw = (i === n - 2) ? 'Antim Baat' : (i === 1 ? 'Shuruat' : 'Gaur Karo');
+    }
+    if (!kickRaw && isPause) {
+      kickRaw = 'Thehrav';
     }
     const kickOk = !!kickRaw;
     const kick = kickOk ? `<div class="kickline ce-render-block" data-ce-block="kicker" style="${layoutStyle(s, 'kicker')}"><span class="rule"></span><span class="kt">${kickRaw}</span></div>` : '';
@@ -811,7 +941,13 @@
         ? `<span class="pageno" style="letter-spacing:2px;">&#10022;&nbsp;&nbsp;full note in caption</span>`
         : '')
       : `<span class="pageno">${String(i + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}</span>${i < n - 1 ? `<span class="arrow">${ARROWSVG(L.arrow || '#888')}</span>` : ''}`;
-    return `<div class="slide" style="${palStyle(lookId)}">${gfx}<div class="top-b">${brand}</div><div class="mid">${kick}${renderedContent}</div><div class="foot ce-render-block" data-ce-block="footer" style="${layoutStyle(s, 'footer')}">${foot}</div></div>`;
+    const slideClasses = [
+      'slide',
+      isPause ? 'slide--pause' : `slide--${s.role || 'body'}`,
+      hasDevanagari ? 'slide--devanagari' : '',
+      matraRisk ? 'slide--matra-risk' : ''
+    ].filter(Boolean).join(' ');
+    return `<div class="${slideClasses}" data-role="${s.role || 'body'}" style="${palStyle(lookId)}">${gfx}<div class="top-b">${brand}</div><div class="mid">${kick}${renderedContent}</div><div class="foot ce-render-block" data-ce-block="footer" style="${layoutStyle(s, 'footer')}">${foot}</div></div>`;
   }
 
   // ================= LOOKS — each a distinct movement =================
@@ -1442,7 +1578,7 @@
       graphic:"<div style=\"position:absolute;left:0;right:0;top:0;height:1350px;background:linear-gradient(90deg,transparent 0 49%,rgba(0,0,0,.055) 50%,transparent 51%);\"></div><div style=\"position:absolute;top:0;left:0;width:280px;height:280px;background-image:radial-gradient(#15110d 0 1px,transparent 1.5px);background-size:9px 9px;opacity:.07;\"></div><div style=\"position:absolute;bottom:0;right:0;width:280px;height:280px;background-image:radial-gradient(#15110d 0 1px,transparent 1.5px);background-size:9px 9px;opacity:.07;\"></div><div style=\"position:absolute;top:150px;left:70px;right:70px;height:76px;border-top:3px solid #15110d;border-bottom:1px solid #15110d;display:flex;align-items:center;justify-content:space-between;\"><span style=\"font-family:'Didot',serif;font-weight:800;font-size:30px;letter-spacing:6px;color:#15110d;\">THE DOALFAAZ</span><span style=\"font-family:'Poppins';font-weight:800;font-size:18px;letter-spacing:2px;color:#b81423;\">ISSUE · काव्य</span></div>",
       css:"\n    .slide{ background:#f7f0df; color:#15110d; }\n    .mid{ padding-top:152px; }\n    .kickline{ border-bottom:1px solid #bcae95; padding-bottom:18px; margin-bottom:40px; } .kickline .rule{ width:0; }\n    .kickline .kt{ font-family:'Poppins'; font-weight:800; font-size:22px; letter-spacing:.14em; text-transform:uppercase; color:#b81423; }\n    .hook{ font-family:'Didot','Laila','Georgia',serif; font-weight:800; font-size:84px; line-height:1.12; color:#15110d; }\n    .hook b{ color:#b81423; }\n    .sub{ font-family:'Georgia','Laila',serif; font-style:italic; font-size:30px; color:#61584d; margin-top:34px; line-height:1.4; }\n    .body{ font-family:'Georgia','Laila',serif; font-weight:400; font-size:40px; line-height:1.5; color:#241d16; }\n    .body b, .poem b{ color:#b81423; font-weight:700; }\n    .body .num{ font-family:'Didot',serif; font-weight:800; font-size:46px; color:#0f5d68; display:block; margin-bottom:10px; }\n    .poem{ font-family:'Laila','Georgia',serif; font-weight:650; font-size:66px; line-height:1.58; color:#15110d; text-align:center; border-top:2px solid #15110d; border-bottom:2px solid #15110d; padding:40px 0; }\n    .poem b{ color:#b81423; }\n    .bubble{ border:1px solid #bcae95; border-top:4px solid #b81423; border-radius:2px; padding:52px; background:#fff8e8; }\n    .kicker{ font-family:'Poppins'; font-weight:800; font-size:22px; color:#0f5d68; margin-top:28px; letter-spacing:1px; }\n    .profile{ font-family:'Georgia','Laila',serif; font-weight:400; font-size:32px; line-height:1.44; color:#241d16; text-align:center; }\n    .profile b{ color:#b81423; font-weight:700; }\n    .brand{ font-family:'Didot',serif; color:#61584d; letter-spacing:4px; }\n    .pageno{ font-family:'Georgia',serif; font-size:26px; color:#61584d; }" },
     fieldmap: { name:"Field Map Contour", chip:"#b65f2a", bg:"#edf1ed", arrow:"#b65f2a",
-      graphic:"<svg width=\"1080\" height=\"1350\" viewBox=\"0 0 1080 1350\" style=\"position:absolute;inset:0\"><g fill=\"none\" stroke=\"#2d6a72\" stroke-width=\"1.2\" stroke-opacity=\"0.13\"><path d=\"M-40 300 C 260 220, 520 360, 760 260 C 940 190, 1060 300, 1140 250\"/><path d=\"M-40 360 C 260 280, 520 420, 760 320 C 940 250, 1060 360, 1140 310\"/><path d=\"M-40 430 C 280 350, 540 500, 780 400 C 960 330, 1070 430, 1160 380\"/><path d=\"M-40 900 C 300 1000, 560 840, 800 960 C 980 1050, 1080 940, 1160 990\"/><path d=\"M-40 970 C 300 1070, 560 910, 800 1030 C 980 1120, 1080 1010, 1160 1060\"/><ellipse cx=\"560\" cy=\"640\" rx=\"150\" ry=\"110\"/><ellipse cx=\"560\" cy=\"640\" rx=\"90\" ry=\"66\"/></g><path d=\"M180 260 C 360 520, 700 560, 620 900 C 560 1120, 820 1160, 900 1080\" fill=\"none\" stroke=\"#b65f2a\" stroke-width=\"2.4\" stroke-dasharray=\"4 12\" stroke-linecap=\"round\" stroke-opacity=\"0.55\"/><circle cx=\"900\" cy=\"1080\" r=\"12\" fill=\"#b65f2a\"/><circle cx=\"900\" cy=\"1080\" r=\"22\" fill=\"none\" stroke=\"#b65f2a\" stroke-width=\"2\"/><text x=\"66\" y=\"1290\" font-family=\"Courier New,monospace\" font-size=\"19\" fill=\"#68746b\" opacity=\"0.6\">A1 · B2 · YOU ARE HERE</text></svg>",
+      graphic:"<svg width=\"1080\" height=\"1350\" viewBox=\"0 0 1080 1350\" style=\"position:absolute;inset:0\"><g fill=\"none\" stroke=\"#2d6a72\" stroke-width=\"1.2\" stroke-opacity=\"0.13\"><path d=\"M-40 300 C 260 220, 520 360, 760 260 C 940 190, 1060 300, 1140 250\"/><path d=\"M-40 360 C 260 280, 520 420, 760 320 C 940 250, 1060 360, 1140 310\"/><path d=\"M-40 430 C 280 350, 540 500, 780 400 C 960 330, 1070 430, 1160 380\"/><path d=\"M-40 900 C 300 1000, 560 840, 800 960 C 980 1050, 1080 940, 1160 990\"/><path d=\"M-40 970 C 300 1070, 560 910, 800 1030 C 980 1120, 1080 1010, 1160 1060\"/><ellipse cx=\"560\" cy=\"640\" rx=\"150\" ry=\"110\"/><ellipse cx=\"560\" cy=\"640\" rx=\"90\" ry=\"66\"/></g><path d=\"M180 260 C 360 520, 700 560, 620 900 C 560 1120, 820 1160, 900 1080\" fill=\"none\" stroke=\"#b65f2a\" stroke-width=\"2.4\" stroke-dasharray=\"4 12\" stroke-linecap=\"round\" stroke-opacity=\"0.55\"/><circle cx=\"900\" cy=\"1080\" r=\"12\" fill=\"#b65f2a\"/><circle cx=\"900\" cy=\"1080\" r=\"22\" fill=\"none\" stroke=\"#b65f2a\" stroke-width=\"2\"/><text x=\"66\" y=\"1290\" font-family=\"Courier New,monospace\" font-size=\"19\" fill=\"#68746b\" opacity=\"0.6\">FIELD CONTOUR · DOALFAAZ</text></svg>",
       css:"\n    .slide{ background:#edf1ed; color:#18201c; }\n    .kickline .rule{ width:46px; height:2px; background:#b65f2a; }\n    .kickline .kt{ font-family:'Courier New',monospace; font-weight:700; font-size:22px; letter-spacing:2px; text-transform:uppercase; color:#b65f2a; }\n    .hook{ font-family:'Poppins','Laila',sans-serif; font-weight:800; font-size:80px; line-height:1.08; letter-spacing:-.5px; color:#18201c; }\n    .hook b{ color:#b65f2a; }\n    .sub{ font-family:'Georgia','Laila',serif; font-style:italic; font-size:30px; color:#68746b; margin-top:32px; line-height:1.4; }\n    .body{ font-family:'Georgia','Laila',serif; font-weight:400; font-size:40px; line-height:1.52; color:#26302a; }\n    .body b, .poem b{ color:#b65f2a; font-weight:700; }\n    .body .num{ font-family:'Courier New',monospace; font-weight:700; font-size:26px; color:#2d6a72; display:block; margin-bottom:12px; }\n    .poem{ font-family:'Laila','Georgia',serif; font-weight:600; font-size:60px; line-height:1.68; color:#18201c; text-align:center; }\n    .poem b{ color:#b65f2a; }\n    .bubble{ border:1px solid #9fb0a4; border-radius:10px; padding:48px 52px; background:rgba(249,251,247,.82); }\n    .kicker{ font-family:'Courier New',monospace; font-weight:700; font-size:22px; color:#2d6a72; margin-top:26px; letter-spacing:1px; }\n    .profile{ font-family:'Georgia','Laila',serif; font-weight:400; font-size:32px; line-height:1.44; color:#26302a; text-align:center; }\n    .profile b{ color:#b65f2a; font-weight:700; }\n    .brand{ font-family:'Courier New',monospace; color:#68746b; letter-spacing:2px; }\n    .pageno{ font-family:'Courier New',monospace; font-size:24px; color:#68746b; }" },
     noirstage: { name:"Noir Theatre", chip:"#e02323", bg:"#070707", arrow:"#e02323",
       graphic:"<div style=\"position:absolute;inset:0;background:radial-gradient(46% 40% at 35% 22%,rgba(53,34,27,.9) 0%,transparent 60%);\"></div><div style=\"position:absolute;top:0;bottom:0;left:0;width:200px;background:linear-gradient(90deg,rgba(0,0,0,.85),transparent);\"></div><div style=\"position:absolute;top:0;bottom:0;right:0;width:200px;background:linear-gradient(270deg,rgba(0,0,0,.85),transparent);\"></div><div style=\"position:absolute;top:0;bottom:0;left:72px;width:1px;background:rgba(224,35,35,.55);\"></div><svg width=\"1080\" height=\"1350\" viewBox=\"0 0 1080 1350\" style=\"position:absolute;inset:0\"><path d=\"M420 -60 L680 -60 L900 620 L200 620 Z\" fill=\"rgba(240,193,75,.05)\"/></svg>",
@@ -1719,7 +1855,7 @@
       .kickline{ justify-content:center; } .kickline .rule{ width:0; }
       .kickline .kt{ font-family:'Poppins'; font-weight:550; font-size:20px; letter-spacing:.26em; text-transform:uppercase; color:#b39c74; }
       .hook{ font-family:'Laila','Georgia',serif; font-weight:520; font-size:84px; line-height:1.4; color:#1d1a16; text-align:center; }
-      .hook b{ color:#1d1a16; font-weight:650; }
+      .hook b{ color:#b39c74; font-weight:650; }
       .sub{ font-family:'Poppins'; font-weight:300; font-size:28px; color:#8f877a; margin-top:44px; line-height:1.6; text-align:center; }
       .body{ font-family:'Laila','Poppins',serif; font-weight:400; font-size:56px; line-height:1.6; color:#2a2620; text-align:center; }
       .body b, .poem b{ color:#1d1a16; font-weight:650; }
@@ -4409,7 +4545,7 @@ niwala: { name: 'Pehla Niwala', chip: '#c9973f', bg: '#243b28', arrow: '#c9973f'
   function roughEllipse(cx, cy, rx, ry){
     return `M ${cx-rx} ${cy+3} C ${cx-rx+2} ${cy-ry*1.05}, ${cx-rx*0.45} ${cy-ry}, ${cx+4} ${cy-ry+2} C ${cx+rx*0.6} ${cy-ry-2}, ${cx+rx} ${cy-ry*0.45}, ${cx+rx-2} ${cy} C ${cx+rx+2} ${cy+ry*1.05}, ${cx+rx*0.4} ${cy+ry}, ${cx-2} ${cy+ry-2} C ${cx-rx*0.6} ${cy+ry+2}, ${cx-rx-2} ${cy+ry*0.5}, ${cx-rx} ${cy+3} Z`;
   }
-  const roughUnderline = `<svg viewBox="0 0 300 20" preserveAspectRatio="none" style="width:100%;height:18px;display:block;margin-top:6px;"><path d="M4 12 C 60 6, 120 16, 180 9 S 280 8, 296 13" fill="none" stroke="var(--acc)" stroke-width="4" stroke-linecap="round"/></svg>`;
+  const roughUnderline = `<svg viewBox="0 0 300 14" preserveAspectRatio="none" style="width:100%;height:12px;display:block;margin-top:6px;"><path d="M4 8 C 80 5, 160 10, 240 6 S 285 6, 296 8" fill="none" stroke="var(--acc)" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/></svg>`;
   // simple hand-drawn icon set (viewBox 0 0 100 100, strokes use currentColor => set color:var(--acc))
   const ICONS = {
     eye:   '<path d="M6 50 C 30 20, 70 20, 94 50 C 70 80, 30 80, 6 50 Z" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="50" cy="50" r="13" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="50" cy="50" r="4" fill="currentColor"/>',
@@ -4897,8 +5033,8 @@ function suggestLooks(card){
   }
 
   const API = { LOOKS, CORE, RETIRED, isActive, slideHTML, nsCSS, ARROWSVG, SLIDE_BASE_CSS, bake, splitBody, emph, LOOK_GROUP, LOOK_GROUP_SECONDARY, GROUP_ORDER, PILLAR_LOOKS, suggestLooks, renderBlock, blockCSS: () => { const m = blocksMod(); return m ? m.css : ''; }, PAL, palStyle, SHLOKS, shlokFor, ICONS, postVariations, THUMB_BASE_CSS, THUMB_STYLES, thumbHTML, thumbVariations };
+  root.CarouselCore = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
-  else root.CarouselCore = API;
 
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -5635,8 +5771,8 @@ function suggestLooks(card){
   const arrowSVG = (c, w) => `<svg width="${w||70}" height="30" viewBox="0 0 70 30" fill="none">
       <path d="M2 15 H60 M48 5 L62 15 L48 25" stroke="${c}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   // rough scratch underline (bold-word hero)
-  const scratchSVG = c => `<svg width="560" height="24" viewBox="0 0 560 24" fill="none" preserveAspectRatio="none">
-      <path d="M6 15 Q150 4 300 13 T554 11" stroke="${c}" stroke-width="7" fill="none" stroke-linecap="round"/></svg>`;
+  const scratchSVG = c => `<svg width="560" height="16" viewBox="0 0 560 16" fill="none" preserveAspectRatio="none">
+      <path d="M4 10 C 140 6, 280 13, 420 8 S 520 7, 556 10" stroke="${c}" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.85"/></svg>`;
   // irregular red manuscript border (data-driven, drawn as inline svg)
   const msBorderSVG = c => `<svg width="1080" height="1350" viewBox="0 0 1080 1350" fill="none" preserveAspectRatio="none" style="opacity:.42">
       <path d="M54 60 Q60 55 120 58 T540 56 T960 58 Q1024 56 1026 120 T1024 675 T1026 1230 Q1024 1294 960 1292 T540 1294 T120 1292 Q56 1294 54 1230 T56 675 T54 60Z"
@@ -6277,8 +6413,9 @@ function suggestLooks(card){
       // loop skip entirely (16px max vs 48px floor), leaving shelf cards
       // technically hydrated but visually blank. Begin at the usable floor;
       // the fitting pass can still shrink down to it, never below it.
+      const absFloor = Math.max(14, Number(o.absoluteFloor || 18));
       let size = Math.max(maxSize, minSize), results = null;
-      for (; size >= minSize; size -= (o.step || 2)) {
+      for (; size >= absFloor; size -= (o.step || 2)) {
         results = authored.map(t => fit(t, { boxW, boxH: Infinity, maxSize: size, minSize: size, lineHeight: lh, measure }));
         const totalLines = results.reduce((n, r) => n + r.lines.length, 0);
         const allLines = results.flatMap(r => r.lines);
@@ -6286,7 +6423,7 @@ function suggestLooks(card){
         if (widest <= boxW && totalLines * size * lh <= boxH) break;
       }
       if (!results) return null;
-      if (size < minSize) size = minSize;
+      if (size < absFloor) size = absFloor;
       el.style.fontSize = size + 'px';
       const lines = results.flatMap(r => r.lines);
       el.innerHTML = lines.map(escHtml).join('<br>');
@@ -6343,12 +6480,27 @@ function suggestLooks(card){
     const accentTag = accentEl ? accentEl.tagName.toLowerCase() : 'b';
     const accentClass = accentEl && accentTag === 'span' ? accentEl.className : '';
     const r = fitElement(el, o);
-    if (!r || !accentText) return r;
+    if (!r || !r.lines || !r.lines.length) return r;
     const normalize = s => s.replace(/ /g, ' ');
-    const target = normalize(accentText);
+    const target = accentText ? normalize(accentText) : '';
     const joined = r.lines.map(normalize).join(' ');
-    const start = joined.indexOf(target);
-    if (start < 0) return r;                    // accent text not found verbatim — leave unaccented
+    let start = target ? joined.indexOf(target) : -1;
+    // Owner 2026-09-08 17:32: dropping the punch when reflow shuffled a
+    // dash/break turned hook slides into a one-color text dump (fieldmap
+    // "Tum already bahut jaante ho" vs slide 2 which kept its accent). If
+    // the verbatim span is gone, bold the last fitted line — same law as
+    // emphPoem — so the look's .hook b / .body b color still paints.
+    if (start < 0) {
+      if (r.lines.length === 1 && !target) return r;
+      const last = r.lines[r.lines.length - 1];
+      const openTag = accentTag === 'span' ? `<span class="${accentClass}">` : `<${accentTag}>`;
+      const closeTag = accentTag === 'span' ? '</span>' : `</${accentTag}>`;
+      el.innerHTML = r.lines.map((ln, i, a) => {
+        const e = escHtml(ln);
+        return i === a.length - 1 ? openTag + e + closeTag : e;
+      }).join('<br>');
+      return r;
+    }
     const end = start + target.length;
     const openTag = accentTag === 'span' ? `<span class="${accentClass}">` : `<${accentTag}>`;
     const closeTag = accentTag === 'span' ? '</span>' : `</${accentTag}>`;

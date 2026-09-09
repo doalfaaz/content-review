@@ -44,6 +44,45 @@
   .ce-render-block[style*="--ce-text-color"] .kt,
   .ce-render-block.foot[style*="--ce-text-color"] > *{ color:var(--ce-text-color) !important; }
 
+  /* --- Editorial Density Scaling (Auto-Fit Canon) --- */
+  .ce-dense-md .hook{ font-size:62px !important; line-height:1.32 !important; }
+  .ce-dense-md .body{ font-size:42px !important; line-height:1.56 !important; }
+  .ce-dense-md .poem{ font-size:54px !important; line-height:1.54 !important; }
+  .ce-dense-md .bk-t{ font-size:30px !important; line-height:1.48 !important; }
+  .ce-dense-md .bk-cell{ padding:26px 24px !important; }
+
+  .ce-dense-hi .hook{ font-size:52px !important; line-height:1.26 !important; }
+  .ce-dense-hi .body{ font-size:35px !important; line-height:1.48 !important; }
+  .ce-dense-hi .poem{ font-size:44px !important; line-height:1.48 !important; }
+  .ce-dense-hi .bk-t{ font-size:26px !important; line-height:1.42 !important; }
+  .ce-dense-hi .bk-cell{ padding:20px 18px !important; }
+
+  /* --- Long Hook Scaling (Clip Prevention Canon) --- */
+  .ce-hook-xl{ font-size:64px !important; line-height:1.3 !important; }
+  .ce-hook-xxl{ font-size:52px !important; line-height:1.25 !important; }
+
+  /* --- Body Interior Visual System (No Centered Text Walls) --- */
+  .slide--body .mid{ justify-content:flex-start; padding-top:90px; }
+  .slide--body .body{ max-width:920px; font-size:48px; line-height:1.64; }
+  .slide--body .body b{ color:var(--acc, #C43B4E); font-weight:600; }
+
+  /* --- Pause / Reflection Intentional Layout --- */
+  .slide--pause .mid{ justify-content:center; align-items:flex-start; padding-top:0; }
+  .slide--pause .ce-pause-mark{ font-family:'Laila','Poppins',serif; font-size:84px; color:var(--acc, #C43B4E); opacity:.85; line-height:1; margin-bottom:24px; }
+  .slide--pause .body{ font-family:'Laila','Poppins',serif; font-size:52px; line-height:1.64; color:var(--ink, #ffffff); max-width:900px; }
+  .slide--pause .body b{ color:var(--acc, #C43B4E); font-weight:600; }
+
+  /* --- Devanagari Glyph Law (No Underline Cuts, Zero Letter-Spacing) --- */
+  .slide--devanagari, .slide--devanagari :is(.hook, .body, .poem, .profile, .sub, .kt, .bk-t, .bk-h){
+    letter-spacing:0 !important;
+  }
+  .slide--devanagari .hook b,
+  .slide--devanagari .body b,
+  .slide--devanagari b{
+    text-decoration:none !important;
+    color:var(--acc, #C43B4E);
+  }
+
   /* ---- infographic blocks (palette from --vars on .slide) ---- */
   .bk-title{ font-family:'Poppins'; font-weight:700; font-size:40px; color:var(--ink); margin-bottom:20px; line-height:1.24; letter-spacing:-.5px; }
   .bk-foot{ font-family:'Poppins'; font-weight:400; font-size:28px; color:var(--sub); margin-top:18px; line-height:1.44; }
@@ -396,23 +435,30 @@
 
   /* 8 · sketch_model */
   .ib-skTitle{ font-family:'Bradley Hand','Comic Sans MS','Poppins','Laila',cursive; font-weight:700; font-size:38px; color:var(--ink); margin-bottom:14px; line-height:1.2; }
-  .ib-skStage{ position:relative; width:100%; aspect-ratio:900/580; max-height:540px; }
-  .ib-skSvg{ position:absolute; inset:0; width:100%; height:100%; }
-  .ib-skPart{ position:absolute; transform:translate(-50%,-50%); width:230px; text-align:center; }
+  .ib-skStage{ display:flex; justify-content:center; }
+  .ib-skStageInner{ position:relative; width:100%; aspect-ratio:900/640; }
+  .ib-skStageInner .ib-skSvg{ position:absolute; inset:0; width:100%; height:100%; }
+  .ib-skStageInner .ib-skPart{ transform:translate(-50%,-50%); width:380px; text-align:center; pointer-events:none; }
+  .ib-skStageInner .ib-skArrowPart{ width:240px; }
   .ib-skLab{ font-family:'Bradley Hand','Comic Sans MS','Poppins','Laila',cursive; font-weight:700; font-size:30px; color:var(--ink); line-height:1.14; }
+  .ib-skArrowLab{ font-family:'Bradley Hand','Comic Sans MS','Poppins','Laila',cursive; font-weight:700; color:var(--ink); }
   .ib-skT{ font-family:'Bradley Hand','Comic Sans MS','Poppins','Laila',cursive; font-weight:400; font-size:24px; color:var(--sub); margin-top:4px; line-height:1.24; }
   .ib-skNote{ font-family:'Bradley Hand','Comic Sans MS','Poppins','Laila',cursive; font-weight:400; font-size:26px; color:var(--sub); margin-top:14px; line-height:1.32; }
 
   /* 9 · spectrum_scale */
-  .ib-spectrum{ display:flex; flex-direction:column; gap:0; padding:20px 0; }
-  .ib-specEnds{ display:flex; justify-content:space-between; font-family:'Poppins'; font-weight:700; font-size:28px; color:var(--ink); margin-bottom:22px; }
-  .ib-specTrackWrap{ position:relative; }
-  .ib-specTrack{ height:36px; border-radius:6px; border:1.5px solid var(--line); }
-  .ib-specMarker{ position:absolute; top:-24px; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; }
-  .ib-specStem{ width:4px; height:96px; background:var(--ink); }
-  .ib-specFlag{ margin-top:8px; font-family:'Poppins','Laila'; font-weight:700; font-size:28px; color:var(--ink); background:var(--panel); border:1.5px solid var(--ink); border-radius:8px; padding:6px 16px; white-space:nowrap; }
-  .ib-specZones{ position:relative; height:44px; margin-top:14px; }
-  .ib-specZ{ position:absolute; transform:translateX(-50%); font-family:'Poppins'; font-weight:700; font-size:26px; letter-spacing:.06em; text-transform:uppercase; }
+  .ib-spectrum{ display:flex; flex-direction:column; gap:12px; padding:16px 0 24px; position:relative; }
+  .ib-specEnds{ display:flex; justify-content:space-between; font-family:'Poppins'; font-weight:700; font-size:24px; color:var(--sub); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
+  .ib-specMarkerArea{ position:relative; min-height:56px; display:flex; align-items:flex-end; }
+  .ib-specMarker{ position:absolute; bottom:0; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; pointer-events:none; }
+  .ib-specFlag{ font-family:'Poppins','Laila',sans-serif; font-weight:600; font-size:21px; line-height:1.28; color:var(--ink); background:color-mix(in srgb, var(--panel) 94%, var(--bg) 6%); border:1.5px solid var(--acc, var(--line)); border-radius:8px; padding:6px 14px; text-align:center; max-width:440px; box-shadow:0 4px 14px rgba(0,0,0,0.25); word-break:break-word; }
+  .ib-specArrow{ width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:8px solid var(--acc, var(--line)); margin:2px auto 0; }
+  .ib-specTrackWrap{ position:relative; height:32px; }
+  .ib-specTrack{ height:32px; border-radius:8px; border:1.5px solid var(--line); box-shadow:inset 0 2px 4px rgba(0,0,0,0.18); }
+  .ib-specPin{ position:absolute; top:-4px; bottom:-4px; width:6px; transform:translateX(-50%); background:var(--ink); border-radius:3px; box-shadow:0 0 8px rgba(0,0,0,0.5); z-index:2; }
+  .ib-specZones{ position:relative; min-height:110px; margin-top:12px; }
+  .ib-specZ{ position:absolute; top:0; box-sizing:border-box; padding:0 8px; text-align:center; }
+  .ib-specZ-head{ font-family:'Poppins'; font-weight:700; font-size:22px; line-height:1.2; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .ib-specZ-desc{ font-family:'Poppins','Laila',sans-serif; font-weight:400; font-size:18px; line-height:1.32; color:var(--sub); opacity:.9; }
 
   /* 10 · iceberg_layers */
   .ib-iceberg{ position:relative; width:100%; max-width:720px; margin:0 auto; aspect-ratio:720/760; }
