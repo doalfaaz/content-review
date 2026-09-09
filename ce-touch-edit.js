@@ -399,21 +399,32 @@
   };
   // Inject the Schedule button next to the pack button inside the studio topbar.
   function armScheduleButton() {
-    if (document.getElementById('studio-schedule-btn')) return;
-    // Sit beside the pack button: on phone the reparent logic moves the pack
-    // into the topbar cluster, so prefer the pack's actual parent.
+    // Sit beside the pack button wherever it CURRENTLY lives: the phone-mode
+    // reparent moves the pack out of the hidden more-menu into the topbar, so
+    // a naive one-time insert strands this button inside the hidden menu.
     var pack = document.getElementById('studio-download-pack-btn');
     var home = (pack && pack.parentElement) || document.querySelector('.studio-primary-actions');
     if (!home) return;
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.id = 'studio-schedule-btn';
-    btn.textContent = 'Schedule';
-    btn.title = 'Queue this piece on Meta\u2019s clock (a week+ out)';
-    btn.style.cssText = 'order:-1 !important; display:inline-flex !important; align-items:center; min-height:40px !important; padding:8px 14px !important; font-weight:800 !important; border-radius:10px !important; color:#fff !important; background:#2e6f5e !important; border:1px solid rgba(255,255,255,0.14) !important; cursor:pointer;';
-    btn.onclick = function () { try { window.__CE_PHONE_SCHEDULE__(); } catch (e) { if (window.showAppToast) window.showAppToast('Schedule failed: ' + e.message); } };
-    if (pack && pack.parentElement === home) home.insertBefore(btn, pack);
-    else home.insertBefore(btn, home.firstChild);
+    var btn = document.getElementById('studio-schedule-btn');
+    var justCreated = false;
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'studio-schedule-btn';
+      btn.textContent = 'Schedule';
+      btn.title = 'Queue this piece on Meta\u2019s clock (a week+ out)';
+      btn.style.cssText = 'display:inline-flex; align-items:center; min-height:40px; padding:8px 14px; font-weight:800; border-radius:10px; color:#fff; background:#2e6f5e; border:1px solid rgba(255,255,255,0.14); cursor:pointer;';
+      btn.onclick = function () { try { window.__CE_PHONE_SCHEDULE__(); } catch (e) { if (window.showAppToast) window.showAppToast('Schedule failed: ' + e.message); } };
+      justCreated = true;
+    }
+    if (btn.parentElement !== home) {
+      home.insertBefore(btn, (pack && pack.parentElement === home) ? pack : home.firstChild);
+    } else if (!justCreated) {
+      var r = btn.getBoundingClientRect();
+      if (getComputedStyle(btn).display === 'none' || r.width === 0) {
+        home.insertBefore(btn, (pack && pack.parentElement === home) ? pack : home.firstChild);
+      }
+    }
   }
   window.__CE_SCHEDULE_BUTTON__ = armScheduleButton;
   var origOpen = window.openStudio;
