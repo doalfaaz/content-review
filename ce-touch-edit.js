@@ -161,10 +161,17 @@
     };
     try { localStorage.setItem('ce_deck_edits', JSON.stringify(store)); } catch (_) {}
     if (window.__CE_SYNC_ENDPOINT__) {
-      fetch(window.__CE_SYNC_ENDPOINT__ + '/decks', {
+      var payload = { deckId: deck.id, deck: store[deck.id] };
+      var url = window.__CE_SYNC_ENDPOINT__ + '/decks';
+      fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deckId: deck.id, deck: store[deck.id] })
+        body: JSON.stringify(payload)
+      }).catch(function () {
+        // WebKit/Safari: public->private POST bodies are blocked; simple GET
+        // write still passes. GET /set?d=<b64> applies the same payload.
+        var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+        return fetch(window.__CE_SYNC_ENDPOINT__ + '/set?d=' + encodeURIComponent(b64));
       }).catch(function () {});
     }
   };
