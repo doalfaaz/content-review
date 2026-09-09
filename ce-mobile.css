@@ -563,3 +563,25 @@ html.ce-phone .studio-topbar #studio-export-btn { display: none !important; }
 /* ===== phone: the pack button must be IN the topbar flow, not the dropdown =====
    The menu stays display:none until opened, so any order/flex trick inside it
    is invisible. CSS alone cannot reparent — the boot script below moves it. */
+
+/* ==== iPhone 17 / Dynamic Island / home-indicator safe areas (2026-09-09) ====
+   viewport-fit=cover is on in the viewport meta. Without these rules, fixed
+   bottom UI (toasts) and the studio shell sit under the home indicator, and
+   standalone (Add to Home Screen) mode tucks the topbar under the island.
+   env() reads 0 on desktop, so these degrade to the previous layout there. */
+html.ce-phone body {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html.ce-phone #ce-app-toast,
+html.ce-phone #ce-queue-toast {
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+  right: calc(16px + env(safe-area-inset-right, 0px)) !important;
+  max-width: min(520px, calc(100vw - 32px - env(safe-area-inset-right, 0px) - env(safe-area-inset-left, 0px))) !important;
+}
+html.ce-phone #studio {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html.ce-phone .studio-workspace {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
