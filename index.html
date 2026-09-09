@@ -2163,6 +2163,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   syncTopbar();
   addEventListener('resize', syncTopbar);
   setInterval(syncTopbar, 2000);
+  try {
+    if (!navigator.standalone && !localStorage.getItem('ce_pwa_tip_dismissed') && document.documentElement.classList.contains('ce-phone')) {
+      var tip = document.createElement('div');
+      tip.id = 'ce-pwa-tip';
+      tip.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:99997;background:#2e6f5e;color:#fff;padding:10px 34px 10px 14px;border-radius:12px;font:600 12px/-1.4 -apple-system,system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.4);';
+      tip.textContent = 'Tip: Share \u2192 Add to Home Screen for full-screen CE Studio.';
+      var x = document.createElement('button');
+      x.textContent = '\u00d7';
+      x.style.cssText = 'position:absolute;right:8px;top:6px;background:none;border:0;color:#fff;font-size:16px;cursor:pointer;';
+      x.onclick = function () { try { localStorage.setItem('ce_pwa_tip_dismissed', '1'); } catch (_) {} tip.remove(); };
+      tip.appendChild(x);
+      document.body.appendChild(tip);
+      setTimeout(function () { try { tip.remove(); } catch (_) {} }, 12000);
+    }
+  } catch (_) {}
   var apply = function () {
     var physicalSmall = Math.min(window.screen.width, window.screen.height) <= 820;
     var narrowLayout = window.innerWidth <= 700;
