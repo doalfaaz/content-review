@@ -416,6 +416,10 @@
     var now = new Date(Date.now() + 7 * 864e5 + 5.5 * 3600 * 1000);
     return new Date(now.getTime() + now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   }
+  function istDateStrFromUnix(sec) {
+    var d = new Date((sec + 5.5 * 3600) * 1000);
+    return d.toISOString().slice(0, 10);
+  }
   window.__CE_PHONE_SCHEDULE__ = function () {
     var deck = window.studioDeck ? window.studioDeck() : null;
     if (!deck || !deck.slides || !deck.slides.length) { if (window.showAppToast) window.showAppToast('Open a deck first'); return; }
@@ -432,7 +436,7 @@
       '<select id="ce-sched-platform" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
       '<option value="facebook">Facebook — fully automatic, holds on Meta\u2019s clock</option>' +
       '<option value="instagram">Instagram — fires from the Mac at its minute (\u226410 slides)</option></select>' +
-      '<label style="font-size:12px;opacity:.75">Date (a week+ out — owner law)</label>' +
+      '<label style="font-size:12px;opacity:.75" id="ce-sched-datelabel">Date (a week+ out — owner law)</label>' +
       '<input id="ce-sched-date" type="date" min="' + istFloorPlus7DateStr() + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
       '<label style="font-size:12px;opacity:.75">Time (IST)</label>' +
       '<input id="ce-sched-time" type="time" value="11:30" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
@@ -443,6 +447,26 @@
       '<button id="ce-sched-cancel" style="padding:12px 18px;border:1px solid #555;border-radius:10px;background:transparent;color:#fff;font-weight:700">Cancel</button></div>' +
       '<div id="ce-sched-status" style="font-size:12px;opacity:.8;margin-top:8px;min-height:16px"></div></div>';
     document.body.appendChild(sheet);
+    /* Production consent (owner 2026-09-10): the SERVER is the floor's single
+       truth — when its ce_allow_soon marker is on, near dates are legitimate
+       production schedules, so the min follows the live floor instead of the
+       hardcoded week+. Health failure keeps the strict +7 default. */
+    try {
+      var ep0 = window.__CE_SYNC_ENDPOINT__;
+      if (ep0) {
+        fetch(ep0 + '/health', { mode: 'cors' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (h) {
+            if (!h || !h.weekOutFloorUnix) return;
+            var minStr = istDateStrFromUnix(h.weekOutFloorUnix);
+            var dateEl = sheet.querySelector('#ce-sched-date');
+            var labelEl = sheet.querySelector('#ce-sched-datelabel');
+            if (dateEl) dateEl.min = minStr;
+            if (labelEl && minStr !== istFloorPlus7DateStr()) labelEl.textContent = 'Date (from ' + minStr + ' — production mode)';
+          })
+          .catch(function () {});
+      }
+    } catch (_f) {}
     var cap = '';
     try { cap = ((window.state && window.state.igCaption) || (deck.slides[0] && (deck.slides[0].html || deck.slides[0].text)) || '').replace(/<[^>]+>/g, ''); } catch (_) {}
     sheet.querySelector('#ce-sched-caption').value = cap;

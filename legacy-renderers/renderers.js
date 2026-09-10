@@ -855,7 +855,30 @@
   }
 
   // Build one slide's HTML (the .slide element). look = look id (for graphic + arrow).
+  /* Back-compat slide schema (owner 2026-09-10, found by reaudit).
+     Three stored decks (post:arsenal_0933, post:clbal:12:4, post:clseed:9:27) carry the
+     older generator's slide shape {kind, text} instead of the canonical {role, html}.
+     slideHTML read `s.html`, found nothing, and painted the slide skeleton with an EMPTY
+     content block — all 18 of those slides rendered as just the footer ("@DOALFAAZ 01 / 07").
+     The content was present the whole time, in `s.text`, and was simply never read.
+     Normalise at the paint boundary so every surface (shelf, Studio, export, thumbnails)
+     recovers them without rewriting the stored rows. `text` is stored already HTML-escaped
+     (&quot; appears verbatim in the data), so it is handled exactly like `html`: only
+     line breaks are converted. */
+  function normalizeSlideSchema(s) {
+    if (!s || typeof s !== 'object') return s;
+    if (s.html || s.role) return s;                  // already canonical
+    if (s.text == null && s.kind == null) return s;  // nothing to recover
+    const KIND_ROLE = { title: 'hook', hook: 'hook', body: 'body', poem: 'poem',
+                        profile: 'profile', block: 'block', pause: 'pause' };
+    const role = KIND_ROLE[String(s.kind || '').toLowerCase()] || 'body';
+    const html = String(s.text == null ? '' : s.text)
+      .replace(/\r\n?/g, '\n').replace(/\n/g, '<br>');
+    return Object.assign({}, s, { role, html });
+  }
+
   function slideHTML(s, i, n, lookId) {
+    s = normalizeSlideSchema(s);
     const L = LOOKS[lookId] || {};
     // A5: machinery stamps (CONFIRMED / CASE NOTE / cryptic codes) only on slide 1 + one interior.
     const stampHeavy = L.graphic && /CONFIRMED|CASE NOTE|NOTE\s*\d+|A\d+\s*·\s*B\d+|YOU ARE HERE/i.test(L.graphic);
@@ -895,7 +918,19 @@
     }
     else if (s.role === 'poem') content = `<div class="poem">${sHtml}</div>`;
     else if (s.role === 'profile') content = `<div class="profile">${sHtml}</div>`;
-    else if (s.role === 'block') content = `${s.title ? `<div class="bk-title">${s.title}</div>` : ''}${renderBlock(s.block, s.data)}${s.foot ? `<div class="bk-foot">${s.foot}</div>` : ''}`;
+    else if (s.role === 'block') {
+      // Owner 2026-09-10 reaudit: five slides of post:newgold:batch30:leadmagnet:cover
+      // declare role:"block" but carry their text in `html`, with no block/data/title/foot,
+      // so this branch rendered NOTHING and those slides painted only the footer. A `block`
+      // with no block payload is not a block — fall back to the authored html so a slide
+      // that HAS text on it can never paint an empty content block.
+      const blockHasPayload = !!(s.block || s.data || s.title || s.foot);
+      if (!blockHasPayload && sHtml) {
+        content = `<div class="body">${sHtml}</div>`;
+      } else {
+        content = `${s.title ? `<div class="bk-title">${s.title}</div>` : ''}${renderBlock(s.block, s.data)}${s.foot ? `<div class="bk-foot">${s.foot}</div>` : ''}`;
+      }
+    }
     else if (s.bubble) content = `<div class="bubble"><div class="body">${sHtml}</div>${s.kicker ? `<div class="kicker">${s.kicker}</div>` : ''}</div>`;
     else content = `<div class="body">${s.num ? `<span class="num">${s.num}</span>` : ''}${sHtml}</div>`;
 
@@ -5032,7 +5067,94 @@ function suggestLooks(card){
     return out.slice(0, 6);
   }
 
-  const API = { LOOKS, CORE, RETIRED, isActive, slideHTML, nsCSS, ARROWSVG, SLIDE_BASE_CSS, bake, splitBody, emph, LOOK_GROUP, LOOK_GROUP_SECONDARY, GROUP_ORDER, PILLAR_LOOKS, suggestLooks, renderBlock, blockCSS: () => { const m = blocksMod(); return m ? m.css : ''; }, PAL, palStyle, SHLOKS, shlokFor, ICONS, postVariations, THUMB_BASE_CSS, THUMB_STYLES, thumbHTML, thumbVariations };
+  /* ---- Slide fit pass (owner 2026-09-10) ------------------------------------
+     `.slide .mid` is a fixed box (max-height: calc(1350 - 96 - 120 - 40) = 1049px)
+     with overflow:hidden. The density relief meant to keep text inside it was keyed
+     on CHARACTER COUNT (densChars > 420 / > 560), which misses the real failure
+     mode: a slide can be short in characters and still WRAP into more lines than
+     the box holds. Measured on the owner's deck post:newgold:batch-c2:carousel:c2:007
+     at 1080x1350 through this renderer: slide 14 is only 225 characters but lays out
+     1133px of content into the 1049px box, so its last line was sliced through the
+     glyphs; slide 7 lost 19px the same way. 2 of 15 slides on that deck.
+     This pass MEASURES instead of guessing: it steps the existing density ladder
+     (ce-dense-md -> ce-dense-hi, both already designed in this file) until the
+     content block fits, and only if even that cannot fit does it scale the block.
+     Nothing may ever be painted half-cut. */
+  const FIT_DENSITY_LADDER = ['ce-dense-md', 'ce-dense-hi'];
+  function fitSlides(rootEl) {
+    if (!rootEl || typeof rootEl.querySelectorAll !== 'function') return 0;
+    const slides = (rootEl.classList && rootEl.classList.contains('slide'))
+      ? [rootEl] : Array.prototype.slice.call(rootEl.querySelectorAll('.slide'));
+    let fitted = 0;
+    slides.forEach(slide => {
+      const mid = slide.querySelector('.mid');
+      const content = slide.querySelector('.ce-render-block-content');
+      if (!mid || !content) return;
+      const avail = mid.clientHeight;
+      if (avail <= 0) return;
+
+      // --- horizontal pass (v357 law: `.pu` phrase units are white-space:nowrap so
+      // the browser may only break BETWEEN breath units. The cost is that a single
+      // long unit can never wrap and runs straight off the card — measured live on
+      // post:newgold:batch-c5:carousel:c5:003 slide 1, where one .pu unit painted
+      // 1360px inside an 896px box, i.e. 464px outside the safe area, because the
+      // content block is overflow-x:visible. Relax ONLY the units that actually
+      // exceed their box, so the phrase law survives everywhere it can: a phrase
+      // that wraps is better than a line painted off the card.
+      const boxW = content.clientWidth;
+      if (boxW > 0) {
+        content.querySelectorAll('.pu, .nowrap').forEach(u => {
+          if (u.getBoundingClientRect().width > boxW + 0.5) {
+            u.style.whiteSpace = 'normal';
+            u.style.overflowWrap = 'break-word';
+            u.style.maxWidth = '100%';
+            u.setAttribute('data-ce-fit-wrap', 'true');
+            fitted++;
+          }
+        });
+      }
+
+      // The law is WHERE the block ENDS, not how TALL it is. `.mid` also carries the
+      // kicker, so comparing the block's height against mid.clientHeight reports "fits"
+      // for a slide whose kick pushed the block past the box — measured live on
+      // post:newgold:batch-c5:carousel:c5:006 slide 7, where that height metric said
+      // -158px (plenty of room) while 91px of text sat below the box edge, cut.
+      // Position is the honest measure. NOT scrollHeight: infographic blocks (therapylab
+      // process_loop) carry a diagram that deliberately bleeds ~79px past the box on every
+      // slide, and scrollHeight counts that decoration, which would shrink real text for
+      // no reason. The block's own bottom edge ignores decoration below it.
+      const boxBottom = () => mid.getBoundingClientRect().bottom;
+      const fits = () => content.getBoundingClientRect().bottom <= boxBottom() + 0.5;
+      if (fits()) return;
+      let k = 0;
+      while (!fits() && k < FIT_DENSITY_LADDER.length) {
+        content.classList.add(FIT_DENSITY_LADDER[k]);
+        fitted++;
+        k++;
+      }
+      if (!fits() && !content.hasAttribute('data-ce-fit-scale')) {
+        // Last resort for a slide no ladder step can save: scale the block so the
+        // frame is never painted with a cut line. Width is compensated so the text
+        // keeps its authored wrap points.
+        // Scale only the CONTENT so that kick + content fits: the kicker keeps its
+        // authored size, so factor against the room actually left for the block.
+        const contentH = content.getBoundingClientRect().height;
+        const overhang = Math.max(0, content.getBoundingClientRect().bottom - boxBottom());
+        const room = Math.max(40, contentH - overhang);
+        const need = contentH;
+        if (need > room && need > 0) {
+          const f = Math.max(0.55, room / need);
+          content.style.transformOrigin = 'top left';
+          content.style.transform = 'scale(' + f.toFixed(4) + ')';
+          content.style.width = 'calc(100% / ' + f.toFixed(4) + ')';
+          content.setAttribute('data-ce-fit-scale', f.toFixed(4));
+        }
+      }
+    });
+    return fitted;
+  }
+
+  const API = { LOOKS, CORE, RETIRED, isActive, slideHTML, nsCSS, ARROWSVG, SLIDE_BASE_CSS, bake, splitBody, emph, fitSlides, LOOK_GROUP, LOOK_GROUP_SECONDARY, GROUP_ORDER, PILLAR_LOOKS, suggestLooks, renderBlock, blockCSS: () => { const m = blocksMod(); return m ? m.css : ''; }, PAL, palStyle, SHLOKS, shlokFor, ICONS, postVariations, THUMB_BASE_CSS, THUMB_STYLES, thumbHTML, thumbVariations };
   root.CarouselCore = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
 
