@@ -9,8 +9,9 @@
 /* ---------- Shell: the OWNER drawer is the 2026-09-03 touch drawer
    (min(78vw,300px), labels, scrim, tap-outside) — app CSS owns it, this
    layer must never shrink it. The compact 64px icon rail exists ONLY for
-   share visitors (html.ce-share, set by the boot script when there is no
-   bridge and no stored write key). ---------- */
+   share visitors (html.ce-share, set by the boot script when the URL
+   carries #share / ?share=1 — URL-marked ONLY, owner law 2026-09-10;
+   the root URL is always the full app). ---------- */
 @media (max-width: 700px) {
   html.ce-share #sidebar {
     width: 64px !important;
@@ -187,10 +188,24 @@
     font-size: 16px !important; /* iOS zooms into <16px inputs */
   }
 
-  /* Text inputs across the app: kill the iOS focus zoom. */
-  input[type="text"], input[type="search"], textarea, select {
+  /* Text inputs across the app: kill the iOS focus zoom.
+     A8-P2-7: date/time inputs included — the Schedule sheet's date/time
+     pickers were the last zoom triggers. */
+  input[type="text"], input[type="search"], input[type="date"], input[type="time"], input[type="number"], textarea, select {
     font-size: 16px !important;
   }
+  /* A8-P2-4 (44px law): the owner drawer's nav rows were desktop-compact
+     (21-34px). Touch rows get real targets; the visual rhythm stays tight
+     via padding, not shrinking. */
+  #sidebar .nav-btn { min-height: 44px; }
+  #sidebar .nav-sub-btn { min-height: 40px; }
+  #sidebar .nav-nest-btn { min-height: 36px; }
+  /* A8-P2-6: the 24px invisible edge strip over content is a desktop hover
+     affordance; on touch the drawer has toggle + edge-swipe already. The
+     strip intercepted real taps at the left edge of cards/rails. */
+  .sidebar-edge-trigger { display: none !important; }
+  /* A8-P2-8: --faint fails WCAG in the drawer; phone nav text lifts. */
+  #sidebar .nav-nest-btn, #sidebar .nav-sub-btn { color: var(--muted); }
 
   /* Dock buttons: 38px visual + padding => >=44px hit area (F-14). */
   .studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row .ce-icon-action,
@@ -368,12 +383,17 @@ html.ce-phone .ce-shelf-track, html.ce-phone .ce-library-shelf { overflow-x: aut
    bulk-edit affordance. */
 @media (pointer: coarse), (max-width: 640px) {
   .ce-card-select-toggle { display: none !important; }
-  .ce-card-action-cluster { display: none !important; }
+  .pure-card:not(.ce-saved-card) .ce-card-action-cluster { display: none !important; }
   .ce-card-status-chip { display: none !important; }
 }
 html.ce-phone .ce-card-select-toggle,
-html.ce-phone .ce-card-action-cluster,
+html.ce-phone .pure-card:not(.ce-saved-card) .ce-card-action-cluster,
 html.ce-phone .ce-card-status-chip { display: none !important; }
+/* Never-remove-features law: Saved Bank actions stay reachable on touch —
+   persistent, not hover-only. */
+html.ce-phone .ce-saved-card .ce-card-action-cluster {
+  opacity: 1 !important; transform: none !important; pointer-events: auto !important; display: flex !important;
+}
 
 
 /* class twin of @media (max-width: 700px) { */
@@ -453,13 +473,21 @@ html.ce-phone /* Caption column becomes a normal stacked panel. */
 html.ce-phone .studio-workspace.is-carousel-mode .ce-inspector-pinned .ce-deck-caption-input { min-height: 96px !important;
     font-size: 16px !important; /* iOS zooms into <16px inputs */ }
 
-html.ce-phone /* Text inputs across the app: kill the iOS focus zoom. */
-  input[type="text"], input[type="search"], textarea, select { font-size: 16px !important; }
+html.ce-phone /* Text inputs across the app: kill the iOS focus zoom (date/time included, A8-P2-7). */
+  input[type="text"], input[type="search"], input[type="date"], input[type="time"], input[type="number"], textarea, select { font-size: 16px !important; }
+html.ce-phone #sidebar .nav-btn { min-height: 44px; }
+html.ce-phone #sidebar .nav-sub-btn { min-height: 40px; color: var(--muted); }
+html.ce-phone #sidebar .nav-nest-btn { min-height: 36px; color: var(--muted); }
+html.ce-phone .sidebar-edge-trigger { display: none !important; }
 
-html.ce-phone /* Dock buttons: comfortable touch targets, same visual language. */
+html.ce-phone /* Dock buttons: 38px visual + padding => >=44px hit area (F-14).
+   The twin previously lacked the padding + box-sizing, so in 980px-layout
+   webviews (A8-P2-4) it sat at a flat 38px. */
   .studio-workspace.is-carousel-mode .ce-dock-structure .ce-slide-action-row .ce-icon-action,
   .ce-compact-tool { min-width: 38px !important;
-    min-height: 38px !important; }
+    min-height: 38px !important;
+    padding: 3px !important;
+    box-sizing: content-box !important; }
 
 html.ce-phone /* Look-picker grid: 3-up instead of the desktop 4-up squeeze. */
   .studio-workspace.is-carousel-mode .ce-look-picker-grid { grid-template-columns: repeat(3, 1fr) !important;
@@ -552,7 +580,9 @@ html.ce-phone /* Look grid 3-up with readable faces. */
     position: static !important;
     order: -1 !important;
     display: inline-flex !important;
-    min-height: 40px !important;
+    /* A8-P2-4: the 44px touch law — the later 40px here contradicted the
+       earlier 44px rule (higher specificity won the cascade by accident). */
+    min-height: 44px !important;
     padding: 8px 16px !important;
     font-weight: 700 !important;
     border-radius: 10px !important;
@@ -567,7 +597,7 @@ html.ce-phone .studio-topbar #studio-download-pack-btn {
   position: static !important;
   order: -1 !important;
   display: inline-flex !important;
-  min-height: 40px !important;
+  min-height: 44px !important;
   padding: 8px 16px !important;
   font-weight: 700 !important;
   border-radius: 10px !important;

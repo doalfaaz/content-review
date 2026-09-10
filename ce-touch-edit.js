@@ -321,13 +321,24 @@
   function applyLocalEdits() {
     var store = {};
     try { store = JSON.parse(localStorage.getItem('ce_deck_edits') || '{}'); } catch (_) { return; }
+    /* A2-P2-1 (prime audit): no supersede guard meant a deck deleted from
+       the library was RESURRECTED into __CE_DECKS_FULL__ by its stale local
+       edit on every boot. Overlay only decks the baked payloads still know
+       (static index or share-decks full payload). A deck created on the Mac
+       after the last bake is not lost: pullRemoteEdits brings it, with its
+       edits, from the live sync store. */
+    var known = {};
+    try { (window.__STATIC_DECK_INDEX__ || []).forEach(function (d) { if (d && d.id) known[String(d.id)] = 1; }); } catch (_) {}
+    try { ((window.__CE_FULL_DECKS__ || {}).decks || []).forEach(function (d) { if (d && d.id) known[String(d.id)] = 1; }); } catch (_) {}
     Object.keys(store).forEach(function (id) {
       var rec = store[id];
-      if (rec && Array.isArray(rec.slides) && rec.slides.length) {
-        window.__CE_DECKS_FULL__ = window.__CE_DECKS_FULL__ || {};
-        window.__CE_DECKS_FULL__[id] = Object.assign({}, window.__CE_DECKS_FULL__[id] || {}, rec, { id: id });
-      }
+      if (!rec || !Array.isArray(rec.slides) || !rec.slides.length) return;
+      if (!known[id]) { try { delete store[id]; } catch (_) {} return; }
+      window.__CE_DECKS_FULL__ = window.__CE_DECKS_FULL__ || {};
+      window.__CE_DECKS_FULL__[id] = Object.assign({}, window.__CE_DECKS_FULL__[id] || {}, rec, { id: id });
     });
+    // Persist the purge so ghost records do not re-grow every boot.
+    try { localStorage.setItem('ce_deck_edits', JSON.stringify(store)); } catch (_) {}
   }
   applyLocalEdits();
 
@@ -530,6 +541,10 @@
   // Keep arming: any .ce-render-block with content-bearing data-ce-block that
   // is not yet armed gets armed, whenever it appears (renders replace nodes).
   function armSweep() {
+    /* A8-P1-3 (share read-only law): #share visitors get the trimmed VIEW,
+       never the owner's edit/schedule powers. ce-share is URL-marked only
+       (ce-touch-edit boot), so this gate cannot lock the owner out. */
+    if (document.documentElement.classList.contains('ce-share')) return;
     var studio = document.getElementById('studio');
     if (!studio) return;
     armTouchEditing(studio);
@@ -538,7 +553,9 @@
   var mo = new MutationObserver(function () { setTimeout(armSweep, 120); });
   mo.observe(document.documentElement, { childList: true, subtree: true });
   var veilPoll = setInterval(function () {
-    if (document.querySelector('.pure-card.deck-card, .ce-rail-track .pure-card')) {
+    /* A7-P1-6: skeletons are .pure-card.deck-card too (aria-hidden) — the
+       poll must match REAL faces only, or the veil lifts over spinners. */
+    if (document.querySelector('.pure-card.deck-card:not([aria-hidden]), .ce-rail-track .pure-card:not([aria-hidden])')) {
       clearInterval(veilPoll);
       window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__();
     }

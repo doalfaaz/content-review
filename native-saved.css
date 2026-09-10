@@ -434,6 +434,10 @@
 .ce-saved-grid:has(> .ce-saved-card:first-child:nth-last-child(2)) {
   grid-template-columns: repeat(2, minmax(310px, 420px));
 }
+/* Owner 2026-09-10: poems read best at exactly three per row — never 4-up. */
+.ce-saved-grid--poem {
+  grid-template-columns: repeat(3, minmax(310px, 420px));
+}
 .ce-saved-card {
   position: relative;
   border-radius: 12px;

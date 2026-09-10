@@ -10,7 +10,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" type="image/png" href="./favicon.png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: file: ce-still:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: file: ce-still:; connect-src 'self' https://tushars-macbook-air.tail697d80.ts.net http://192.168.1.35:4145 http://localhost:4145 http://127.0.0.1:4145; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: file: ce-still:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: file: ce-still:; connect-src 'self' https://tushars-macbook-air.tail697d80.ts.net http://localhost:4145 http://127.0.0.1:4145; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <title>Content Engine Studio</title>
 <style>
   :root {
@@ -547,13 +547,23 @@
   #sidebar.collapsed { padding-top: 14px !important; }
   @media (pointer: coarse), (max-width: 640px) {
     .sidebar, .sidebar.collapsed { width: min(78vw, 300px) !important; min-width: 0 !important; }
-    /* Touch cards: the desktop hover affordances are dead weight on a
-       phone (owner screenshot 2026-09-10: ✓ + checkbox stamped on every
-       rail face). The action cluster never gets :hover on touch, so it
-       must not hold space; selection is a desktop bulk-edit affordance. */
+    /* Touch cards: the desktop hover affordances are dead weight on rail
+       faces (owner screenshot 2026-09-10: ✓ + checkbox stamped on every
+       carousel). The action cluster never gets :hover on touch, so it must
+       not hold space on the shelf. Selection is a desktop bulk-edit
+       affordance. EXCEPTION (never-remove-features law): Saved Bank cards
+       keep their actions — on touch they render persistent instead of
+       hover-only, because Plan/Studio/Reject is the owner's phone triage
+       workflow and there is no other door to it. */
     .ce-card-select-toggle { display: none !important; }
-    .ce-card-action-cluster { display: none !important; }
     .ce-card-status-chip { display: none !important; }
+    .pure-card:not(.ce-saved-card) .ce-card-action-cluster { display: none !important; }
+    .ce-saved-card .ce-card-action-cluster {
+      opacity: 1 !important;
+      transform: none !important;
+      pointer-events: auto !important;
+    }
+    .ce-saved-card .ce-card-action-cluster button { min-width: 30px; min-height: 30px; }
   }
 
   .app-title {
@@ -2164,20 +2174,20 @@
 </div>
 
 <!-- Embedded Data Scripts -->
-<script src="./content_data.js"></script>
-<script src="./deck_index.js"></script>
-<script src="./ideas_catalog.js"></script>
-<link rel="stylesheet" href="./native-ideas.css" />
-<link rel="stylesheet" href="./native-plan.css" />
-<link rel="stylesheet" href="./native-saved.css" />
-<link rel="stylesheet" href="./native-studio.css" />
+<script src="./content_data.js?v=b24bfee929"></script>
+<script src="./deck_index.js?v=ad93ebe0fb"></script>
+<script src="./ideas_catalog.js?v=d9f6268b0b"></script>
+<link rel="stylesheet" href="./native-ideas.css?v=9a09a33078" />
+<link rel="stylesheet" href="./native-plan.css?v=75cf64169d" />
+<link rel="stylesheet" href="./native-saved.css?v=4070f3d29b" />
+<link rel="stylesheet" href="./native-studio.css?v=17481989e1" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css" />
-<script src="./ce-touch-edit.js"></script>
+<link rel="stylesheet" href="./ce-mobile.css?v=0378db913e" />
+<script src="./ce-touch-edit.js?v=8069320795"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -2236,12 +2246,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 })();
 </script>
 
-<script src="./share-decks.js"></script>
-<script src="./deck_index.js"></script>
-<script src="./content_data.js"></script>
-<script src="./ideas_catalog.js"></script>
-<script src="./native-ideas.js"></script>
-<script src="./ce-insights.js"></script>
+<script src="./share-decks.js?v=5e7d79ee88"></script>
+<script src="./native-ideas.js?v=f0d91c6246"></script>
+<script src="./ce-insights.js?v=e30373b449"></script>
 <script src="./legacy-renderers/renderers.js"></script>
 
 <!-- Real Deck Engine & Native Boot Adapter -->
@@ -7633,11 +7640,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var __origCount = __orig && Array.isArray(__orig.slides) ? __orig.slides.length : null;
     var __deckId = String((deck && deck.id) || '');
     var __indexCount = null;
-    var __idxEntry = (window.__NATIVE_DECK_INDEX__ || []).find(function (d) {
+    // A2-P1-3 (prime audit): the guard read __NATIVE_DECK_INDEX__ — a
+    // NATIVE-injected global that does not exist on the phone web, so the
+    // synth-collapse protection was silently Mac-only. The static index
+    // (deck_index.js) is carried by BOTH surfaces and records the library's
+    // slide count as a numeric `slides`. Fall back to it off-bridge.
+    var __srcIdx = window.__NATIVE_DECK_INDEX__ || window.__STATIC_DECK_INDEX__ || [];
+    var __idxEntry = (__srcIdx || []).find(function (d) {
       return d && String(d.id || '') === __deckId;
     });
-    if (__idxEntry && Number.isFinite(Number(__idxEntry.slideCount))) {
-      __indexCount = Number(__idxEntry.slideCount);
+    if (__idxEntry && Number.isFinite(Number(__idxEntry.slideCount != null ? __idxEntry.slideCount : __idxEntry.slides))) {
+      __indexCount = Number(__idxEntry.slideCount != null ? __idxEntry.slideCount : __idxEntry.slides);
     }
     var __hist = (state.studioUndoStack || []).concat(state.studioRedoStack || []);
     var __hadDelete = __hist.some(function (h) { return /delet/i.test(String((h && h.label) || '')); });
@@ -12270,6 +12283,27 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   window.__CE_SWEEP_PENDING_RAILS__ = sweepPendingRails;
   window.__CE_RAIL_SWEEP__ = sweepPendingRails;
   window.__CE_RAIL_VISIBLE_IN_VIEW__ = ceRailVisibleInView;
+  /* A7-P1-2: grid "All" drains its chunks across frames — bounded work per
+     frame, identical end state, no multi-second sync lock at 957 cards. */
+  function ceMountGridDrain(track, kind) {
+    if (!track) return;
+    if (track.__ceGridDraining) return;
+    track.__ceGridDraining = true;
+    var step = function () {
+      var budget = performance.now() + 12; // ~12ms per frame
+      while (track.__ceChunkMounted < (track.__ceItems || []).length && performance.now() < budget) {
+        if (!ceAppendRailChunk(track, kind)) break;
+      }
+      if (window.__CE_FIT_ALL__) requestAnimationFrame(window.__CE_FIT_ALL__);
+      if (track.__ceChunkMounted < (track.__ceItems || []).length && track.isConnected) {
+        requestAnimationFrame(step);
+      } else {
+        track.__ceGridDraining = false;
+      }
+    };
+    requestAnimationFrame(step);
+  }
+  window.__CE_MOUNT_GRID_DRAIN__ = ceMountGridDrain;
   function bindRailFallback() {
     if (window.__CE_RAIL_FALLBACK_BOUND__) return;
     window.__CE_RAIL_FALLBACK_BOUND__ = true;
@@ -13168,10 +13202,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               if (nextBtn) nextBtn.style.display = isGrid ? 'none' : '';
               if (isGrid) {
                 track.classList.remove('ce-rail-pending');
-                while (track.__ceChunkMounted < track.__ceItems.length) {
-                  var ok = ceAppendRailChunk(track, 'carousel');
-                  if (!ok) break;
-                }
+                ceMountGridDrain(track, 'carousel');
               }
             };
           }
@@ -13192,10 +13223,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               toggleBtn.textContent = isGrid ? 'Rail' : 'All';
 
               if (isGrid) {
-                while (track.__ceChunkMounted < track.__ceItems.length) {
-                  var ok = ceAppendRailChunk(track, 'carousel');
-                  if (!ok) break;
-                }
+                // A7-P1-2 (bounded mount law): the old unbounded while loop
+                // mounted all 957 cards in one synchronous pass — a multi-
+                // second main-thread lock, repeated per keystroke. Mount in
+                // chunks across animation frames instead: same end state,
+                // never a frozen UI.
+                ceMountGridDrain(track, 'carousel');
               } else {
                 track.__ceChunkSize = CE_RAIL_CHUNK_SIZE;
                 ceAppendRailChunk(track, 'carousel');
@@ -13376,10 +13409,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               if (nextBtn) nextBtn.style.display = isGrid ? 'none' : '';
               if (isGrid) {
                 track.classList.remove('ce-rail-pending');
-                while (track.__ceChunkMounted < track.__ceItems.length) {
-                  var ok = ceAppendRailChunk(track, 'post');
-                  if (!ok) break;
-                }
+                ceMountGridDrain(track, 'post');
               }
             };
           }
@@ -13400,10 +13430,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               toggleBtn.textContent = isGrid ? 'Rail' : 'All';
 
               if (isGrid) {
-                while (track.__ceChunkMounted < track.__ceItems.length) {
-                  var ok = ceAppendRailChunk(track, 'post');
-                  if (!ok) break;
-                }
+                ceMountGridDrain(track, 'post');
               } else {
                 track.__ceChunkSize = CE_RAIL_CHUNK_SIZE;
                 ceAppendRailChunk(track, 'post');
@@ -16621,7 +16648,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (e.button !== 0) return;
       if (!sidebar || !sidebar.classList.contains('collapsed') || !sidebar.classList.contains('peek')) return;
       const t = e.target;
-      if (t && t.closest && (t.closest('#sidebar') || t.closest('#sidebar-edge-trigger'))) return;
+      // Toggle-close law (prime audit B1#10/A8#1, live-repro 2026-09-10):
+      // the toggle lives in the topbar, OUTSIDE #sidebar — without this
+      // exclusion the capture pass closed the drawer on pointerdown and the
+      // button's own click handler then REOPENED it: the owner literally
+      // could not close the drawer with the toggle. The toggle manages its
+      // own state on click; the scrim click handler closes it too.
+      if (t && t.closest && (t.closest('#sidebar') || t.closest('#sidebar-edge-trigger') || t.closest('#sidebar-toggle') || t.closest('.ce-sidebar-scrim'))) return;
       hideCollapsedSidebar();
       syncTouchScrim();
     }, true);
@@ -16629,6 +16662,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       new MutationObserver(syncTouchScrim).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
     }
     window.__CE_SIDEBAR_COLLAPSE__ = () => { try { applySidebarState(true); } catch (_e) {} };
+    /* A8-P3-10: the drawer toggle announces its state, and Escape closes an
+       open drawer (keyboard parity with the scrim tap). */
+    try {
+      const __tg = document.getElementById('sidebar-toggle');
+      if (__tg) {
+        const syncAria = () => __tg.setAttribute('aria-expanded', String(!!(sidebar && sidebar.classList.contains('peek')) || !!(sidebar && !sidebar.classList.contains('collapsed'))));
+        if (sidebar) new MutationObserver(syncAria).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+        syncAria();
+      }
+      window.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        if (!sidebar || !sidebar.classList.contains('collapsed') || !sidebar.classList.contains('peek')) return;
+        hideCollapsedSidebar(); syncTouchScrim();
+      });
+    } catch (_aria) {}
     window.__CE_IS_TOUCH_DRAWER__ = () => { try { return isTouchDrawer(); } catch (_e) { return false; } };
     const toggleSidebar = () => {
       if (!sidebar) return;
@@ -16678,6 +16726,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     let sidebarPointerRaf = 0;
     const handleSidebarPointer = (event) => {
       if (!sidebar || !sidebar.classList.contains('collapsed')) return;
+      // A8-P2-5 (live audit 2026-09-10): touch must NOT hover-reveal. Shelf
+      // rails start at x=16, so an ordinary rail swipe began at x<=32 and
+      // popped the drawer open mid-scroll. Touch opens the drawer via the
+      // toggle or the dedicated 28px edge-swipe (ce-touch-edit) instead.
+      if (event.pointerType === 'touch') return;
       const clientX = event.clientX;
       if (sidebarPointerRaf) return;
       sidebarPointerRaf = requestAnimationFrame(() => {
