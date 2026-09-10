@@ -13,6 +13,37 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: file: ce-still:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: file: ce-still:; connect-src 'self' https://tushars-macbook-air.tail697d80.ts.net http://localhost:4145 http://127.0.0.1:4145; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <title>Content Engine Studio</title>
 <style>
+  /* ============================================================================
+     SHIPPED TYPEFACES (owner 2026-09-10). The card designs are set in Poppins and
+     Laila. Neither were ever shipped with the app: they existed only as fonts
+     installed in ~/Library/Fonts on this one Mac, so the desktop app rendered the
+     real typeface and EVERY other surface silently fell back to Times/serif. On the
+     phone that is what "the fonts are not showing" looked like -- a plain serif
+     card where a designed one belongs.
+
+     Shipping the woff2 files with the app (Resources/fonts/, carried to the Pages
+     bundle by web/build_pages_merge.py) makes the type identical everywhere and
+     works offline, under the existing CSP: default-src 'self' already permits
+     same-origin fonts, so nothing external is fetched and nothing needs relaxing.
+     Weights are exactly the ones the stylesheets ask for (Poppins 300-900 + italics,
+     Laila 300-700). font-display:swap keeps first paint immediate.
+     ============================================================================ */
+  @font-face{font-family:'Poppins';font-style:normal;font-weight:300;font-display:swap;src:url('./fonts/poppins-300.woff2') format('woff2');}
+  @font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url('./fonts/poppins-400.woff2') format('woff2');}
+  @font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url('./fonts/poppins-500.woff2') format('woff2');}
+  @font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url('./fonts/poppins-600.woff2') format('woff2');}
+  @font-face{font-family:'Poppins';font-style:normal;font-weight:700;font-display:swap;src:url('./fonts/poppins-700.woff2') format('woff2');}
+  @font-face{font-family:'Poppins';font-style:normal;font-weight:800;font-display:swap;src:url('./fonts/poppins-800.woff2') format('woff2');}
+  @font-face{font-family:'Poppins';font-style:normal;font-weight:900;font-display:swap;src:url('./fonts/poppins-900.woff2') format('woff2');}
+  @font-face{font-family:'Poppins';font-style:italic;font-weight:400;font-display:swap;src:url('./fonts/poppins-400i.woff2') format('woff2');}
+  @font-face{font-family:'Poppins';font-style:italic;font-weight:700;font-display:swap;src:url('./fonts/poppins-700i.woff2') format('woff2');}
+  @font-face{font-family:'Laila';font-style:normal;font-weight:300;font-display:swap;src:url('./fonts/laila-300.woff2') format('woff2');}
+  @font-face{font-family:'Laila';font-style:normal;font-weight:400;font-display:swap;src:url('./fonts/laila-400.woff2') format('woff2');}
+  @font-face{font-family:'Laila';font-style:normal;font-weight:500;font-display:swap;src:url('./fonts/laila-500.woff2') format('woff2');}
+  @font-face{font-family:'Laila';font-style:normal;font-weight:600;font-display:swap;src:url('./fonts/laila-600.woff2') format('woff2');}
+  @font-face{font-family:'Laila';font-style:normal;font-weight:700;font-display:swap;src:url('./fonts/laila-700.woff2') format('woff2');}
+</style>
+<style>
   :root {
     /* Dark-first premium neutrals (violet-tinted, never pure black). */
     --bg: #0c0b11;
