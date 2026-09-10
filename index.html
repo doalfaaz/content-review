@@ -16744,6 +16744,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       new MutationObserver(syncTouchScrim).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
     }
     window.__CE_SIDEBAR_COLLAPSE__ = () => { try { applySidebarState(true); } catch (_e) {} };
+    /* C1#11 (prime audit, live-confirmed): native <details> summaries never
+       dismiss on an outside tap — the studio ••• and plan ••• menus lingered
+       over the content until re-toggled. One capture-phase handler closes any
+       OPEN details whose summary was not the click target. */
+    document.addEventListener('pointerdown', (e) => {
+      try {
+        const t = e.target;
+        if (!t || !t.closest) return;
+        const inside = t.closest('details');
+        document.querySelectorAll('details[open]').forEach(d => { if (d !== inside) d.removeAttribute('open'); });
+      } catch (_d) {}
+    }, true);
     /* A8-P3-10: the drawer toggle announces its state, and Escape closes an
        open drawer (keyboard parity with the scrim tap). */
     try {
