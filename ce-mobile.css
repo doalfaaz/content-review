@@ -124,8 +124,8 @@
   }
   .studio-workspace.is-carousel-mode .ce-filmstrip--gallery {
     flex: 0 0 auto !important;
-    height: 48vh !important;
-    min-height: 340px !important;
+    height: 54vh !important;
+    min-height: 380px !important;
   }
   .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
     flex: 1 1 auto !important;
