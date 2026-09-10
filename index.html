@@ -2235,7 +2235,7 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=b3eeab7371" />
+<link rel="stylesheet" href="./ce-mobile.css?v=7d796377bf" />
 <script src="./ce-touch-edit.js?v=0b21742b98"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
@@ -16859,9 +16859,22 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     const armSidebarHover = () => {
       sidebarHoverArmed = true;
     };
-    // Arm hover after a brief post-boot delay so a stale cursor at the left
-    // edge does not flash the sidebar open on launch.
-    setTimeout(armSidebarHover, 600);
+    // Arm the hover-reveal on REAL interaction only.
+    //
+    // History: this used to be `setTimeout(armSidebarHover, 600)` with the note "arm hover
+    // after a brief post-boot delay so a stale cursor at the left edge does not flash the
+    // sidebar open on launch". The delay only postponed the problem. If the cursor happens
+    // to be parked at the left edge when the app opens -- which is precisely where it sits
+    // for anyone who launches from the left of the screen or from the Dock -- then the
+    // timer fires, a mouseenter lands on the edge trigger, and the rail peeks open and
+    // STAYS open. That is the owner's "when I open the app it opens with the sidebar".
+    //
+    // A stationary cursor is not intent. Arm on the first real pointer MOVEMENT (a
+    // pointermove anywhere proves the user is using the mouse), a click, or a key press.
+    // If the cursor is merely resting at the edge, nothing arms and the rail stays tucked;
+    // if the user then moves toward the edge, the pointermove arms it and the subsequent
+    // mouseenter reveals it exactly as intended.
+    window.addEventListener('pointermove', armSidebarHover, { once: true, passive: true });
     document.addEventListener('pointerdown', armSidebarHover, { once: true, passive: true });
     document.addEventListener('keydown', armSidebarHover, { once: true, passive: true });
     // Keyboard-correct collapse: a fully hidden rail must not trap Tab focus,
