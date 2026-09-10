@@ -254,7 +254,7 @@
    Double-chain selectors (below) win the cascade at equal importance.
    ========================================================================== */
 @media (max-width: 700px) {
-  .studio-workspace.is-carousel-mode .ce-studio-inspector {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector {
     height: auto !important;
     max-height: 58vh !important;
     min-height: 0 !important;
@@ -264,43 +264,43 @@
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
   }
-  .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll {
     display: flex !important;
     flex-direction: column !important;
     overflow: visible !important;
   }
-  .studio-workspace.is-carousel-mode .ce-dock-column {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column {
     flex: 0 0 auto !important;
     flex-basis: auto !important;
     border-right: 0 !important;
     border-bottom: 1px solid var(--studio-workbench-line, rgba(255,255,255,0.075)) !important;
   }
-  .studio-workspace.is-carousel-mode .ce-dock-column:last-child {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column:last-child {
     border-bottom: 0 !important;
   }
-  .studio-workspace.is-carousel-mode .ce-dock-column-body {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body {
     overflow: visible !important;
     max-height: none !important;
   }
-  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
-  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks {
     flex: 0 0 auto !important;
   }
-  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure {
     margin-top: 0 !important;
   }
   /* One-column Slides row: Add slide full width, icons row beneath. */
-  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack {
     display: flex !important;
     flex-direction: column !important;
     gap: 8px !important;
   }
-  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn {
     height: 40px !important;
     font-size: 13px !important;
   }
   /* Caption panel: own block, readable textarea. */
-  .studio-workspace.is-carousel-mode .ce-inspector-pinned {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-inspector-pinned {
     width: 100% !important;
     max-width: none !important;
     min-width: 0 !important;
@@ -309,20 +309,20 @@
     grid-row: auto !important;
   }
   /* Filmstrip cards: bigger tap faces, snap scrolling. */
-  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
     scroll-snap-type: x mandatory !important;
     -webkit-overflow-scrolling: touch !important;
   }
-  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
     width: min(62vw, 320px) !important;
     scroll-snap-align: center !important;
   }
   /* Hook rows: comfortable reading height. */
-  .studio-workspace.is-carousel-mode .ce-hook-row-item {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-hook-row-item {
     min-height: 52px !important;
   }
   /* Look grid 3-up with readable faces. */
-  .studio-workspace.is-carousel-mode .ce-look-picker-grid {
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-look-picker-grid {
     grid-template-columns: repeat(3, 1fr) !important;
   }
 }
@@ -515,7 +515,7 @@ html.ce-phone .studio-title { max-width: 40vw !important; }
 
 /* class twin of @media (max-width: 700px) { */
 
-html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector { height: auto !important;
+html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector { height: auto !important;
     max-height: 58vh !important;
     min-height: 0 !important;
     display: flex !important;
@@ -524,35 +524,35 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector { height: 
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important; }
 
-html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll { display: flex !important;
+html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll { display: flex !important;
     flex-direction: column !important;
     overflow: visible !important; }
 
-html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column { flex: 0 0 auto !important;
+html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column { flex: 0 0 auto !important;
     flex-basis: auto !important;
     border-right: 0 !important;
     border-bottom: 1px solid var(--studio-workbench-line, rgba(255,255,255,0.075)) !important; }
 
-html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column:last-child { border-bottom: 0 !important; }
+html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column:last-child { border-bottom: 0 !important; }
 
-html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column-body { overflow: visible !important;
+html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body { overflow: visible !important;
     max-height: none !important; }
 
-html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
-  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks { flex: 0 0 auto !important; }
+html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks { flex: 0 0 auto !important; }
 
-html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure { margin-top: 0 !important; }
+html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure { margin-top: 0 !important; }
 
 html.ce-phone /* One-column Slides row: Add slide full width, icons row beneath. */
-  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack { display: flex !important;
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack { display: flex !important;
     flex-direction: column !important;
     gap: 8px !important; }
 
-html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn { height: 40px !important;
+html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn { height: 40px !important;
     font-size: 13px !important; }
 
 html.ce-phone /* Caption panel: own block, readable textarea. */
-  .studio-workspace.is-carousel-mode .ce-inspector-pinned { width: 100% !important;
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-inspector-pinned { width: 100% !important;
     max-width: none !important;
     min-width: 0 !important;
     border-left: 0 !important;
@@ -560,17 +560,17 @@ html.ce-phone /* Caption panel: own block, readable textarea. */
     grid-row: auto !important; }
 
 html.ce-phone /* Filmstrip cards: bigger tap faces, snap scrolling. */
-  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track { scroll-snap-type: x mandatory !important;
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track { scroll-snap-type: x mandatory !important;
     -webkit-overflow-scrolling: touch !important; }
 
-html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card { width: min(62vw, 320px) !important;
+html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card { width: min(62vw, 320px) !important;
     scroll-snap-align: center !important; }
 
 html.ce-phone /* Hook rows: comfortable reading height. */
-  .studio-workspace.is-carousel-mode .ce-hook-row-item { min-height: 52px !important; }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-hook-row-item { min-height: 52px !important; }
 
 html.ce-phone /* Look grid 3-up with readable faces. */
-  .studio-workspace.is-carousel-mode .ce-look-picker-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  .studio-workspace .studio-workspace.is-carousel-mode .ce-look-picker-grid { grid-template-columns: repeat(3, 1fr) !important; }
 
 
 /* ===== phone: surface "Download for phone" as THE primary action ===== */
@@ -631,6 +631,14 @@ html.ce-phone #studio {
 html.ce-phone .studio-workspace {
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
+}
+/* Audit 2026-09-10 (lane-09, P1): the deck-open header is the one top bar the
+   safe-area wave missed — its authored padding (8px 10px, no env) left the
+   Back button and title inside the status-bar/clock zone on notched iPhones
+   on every deck open. Same treatment as .topbar above; env() reads 0 on
+   desktop, so this degrades to the authored 8px there. */
+html.ce-phone .studio-topbar {
+  padding-top: calc(8px + env(safe-area-inset-top, 0px)) !important;
 }
 
 /* ==== W5: rails that feel designed (2026-09-10) ======================== */
@@ -709,3 +717,17 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
 html.ce-phone .ce-kanban-board { min-height: 0 !important; }
 html.ce-phone .ce-kanban-col { min-height: 0 !important; }
 html.ce-phone .ce-kanban-col-cards { min-height: 0 !important; }
+
+/* ---------------------------------------------------------------------------
+   LAUNCH "Pick from Library" CTA (lane08-F001, 2026-09-10): the candidate grid is
+   240px + 1fr with a 22px gap for the art tile, but the empty-day variant has NO
+   art -- the fixed column + gap ate the row and the button collapsed to 34x38px
+   with three clipped text fragments at 390. Content drives the row on phones:
+   the empty (non-slim) candidate goes single-column, so the CTA takes the full
+   row on one line. The slim variant (eyebrow + open + stage) and every desktop
+   surface (never ce-phone, innerWidth > 700) are untouched.
+   --------------------------------------------------------------------------- */
+@media (max-width: 700px) {
+  .ce-launch-board-cand:not(.ce-launch-board-cand--slim) { grid-template-columns: minmax(0, 1fr); }
+}
+html.ce-phone .ce-launch-board-cand:not(.ce-launch-board-cand--slim) { grid-template-columns: minmax(0, 1fr); }

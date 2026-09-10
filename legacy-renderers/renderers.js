@@ -311,14 +311,18 @@
       }).join('');
 
       // Labels sit centered on their own shape (same resolved y as the SVG).
-      // Arrow labels sit neatly above the drawn path line.
+      // Arrow labels sit neatly above the drawn path line; arrow part text (the
+      // annotation the deck authored for the arrow) paints under the label — owner
+      // 2026-09-10 audit lane04-F001: 145 sketch decks carried {shape:'arrow', text}
+      // that the arrow branch silently dropped, painting only pt.label. The
+      // .ib-skArrowT style was already designed in this file, just never emitted.
       const labels = computedParts.map(pt => {
         const s = pt.sh;
         const bw = pt.dw;
         if (pt.shape === 'arrow') {
-          const labSize = f(28 * s);
+          const labSize = f(28 * s), txtSize = f(19 * s);
           return `<div class="ib-skPart ib-skArrowPart" style="left:${f(pt.pctX)}%;top:${f(pt.pctY - 2)}%;width:${f(bw)}px;">
-            ${pt.label ? `<div class="ib-skLab ib-skArrowLab" style="font-size:${labSize}px;">${escapeBlockText(pt.label)}</div>` : ''}
+            ${pt.label ? `<div class="ib-skLab ib-skArrowLab" style="font-size:${labSize}px;">${escapeBlockText(pt.label)}</div>` : ''}${pt.text ? `<div class="ib-skT ib-skArrowT" style="font-size:${txtSize}px;">${escapeBlockText(pt.text)}</div>` : ''}
           </div>`;
         }
         const labSize = f(30 * s), txtSize = f(24 * s);
@@ -386,11 +390,15 @@
       </div>`;
     }
 
-    /* 10 ── iceberg_layers ─ visible tip / submerged body / deepest root, HTML text over SVG layers */
+    /* 10 ── iceberg_layers ─ visible tip / submerged body / deepest root, HTML text over SVG layers.
+        Owner 2026-09-10 audit lane04-F002: this block read slice(0,1) of each layer, so 22
+        corpus decks that authored 2-3 items per layer had the rest silently dropped. Render
+        every authored item — the layer columns stack (.ib-iceLayer is a flex column) and the
+        slide-level fit pass now guarantees nothing that does render can ride outside the box. */
     if (kind === 'iceberg_layers'){
-      const surface = arr(d.surface).slice(0, 1);
-      const hidden = arr(d.hidden).slice(0, 1);
-      const rootL = arr(d.root).slice(0, 1);
+      const surface = arr(d.surface);
+      const hidden = arr(d.hidden);
+      const rootL = arr(d.root);
       const layerHtml = (items, cls) => items.map(it => `<div class="ib-iceItem"><b>${escapeBlockText(it && it.label)}</b>${it && it.text ? `<span>${escapeBlockText(it.text)}</span>` : ''}</div>`).join('');
       return `<div class="ib-iceberg">
         <svg viewBox="0 0 720 760" class="ib-iceSvg" preserveAspectRatio="xMidYMid meet">
@@ -892,10 +900,17 @@
     // the punch in the look's accent. Apply emph at paint time when the
     // slide carries no emphasis yet — looks with a contrasting .hook b
     // color (fieldmap terracotta, brut blue, riso red) then actually show it.
+    // Poems keep their own line-split punch; hook/body punch through the
+    // markup-preserving path so authored spans/styles/<br> survive (lane04-F005).
     if (sHtml && !/<b[\s>]|<span class=["'](?:t|u)["']/i.test(sHtml) && (s.role === 'hook' || s.role === 'body' || s.role === 'poem')) {
-      var asText = sHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
-      var punched = (s.role === 'poem') ? emphPoem(asText) : emphCore(asText);
-      if (punched && /<b[\s>]/.test(punched)) sHtml = punched.replace(/\n/g, '<br>');
+      if (s.role === 'poem') {
+        var asText = sHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
+        var punched = emphPoem(asText);
+        if (punched && /<b[\s>]/.test(punched)) sHtml = punched.replace(/\n/g, '<br>');
+      } else {
+        var punchedHtml = emphPunchHTML(sHtml);
+        if (punchedHtml && /<b[\s>]/.test(punchedHtml)) sHtml = punchedHtml;
+      }
     }
     const plainText = (sHtml + ' ' + (s.text || '')).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     const hasDevanagari = /[\u0900-\u097F]/.test(sHtml + ' ' + sSub + ' ' + (s.title || ''));
@@ -4614,6 +4629,12 @@ niwala: { name: 'Pehla Niwala', chip: '#c9973f', bg: '#243b28', arrow: '#c9973f'
 
   // renderBlock — each returns HTML that styles itself from the --pal CSS vars set on .slide
   function renderBlock(kind, d){
+    // Owner 2026-09-10 audit lane04-F003: some decks store the block payload as a plain
+    // ARRAY (e.g. block:'steps', data:[...]) instead of {items:[...]}. Every list-style
+    // block reads d.items, so an array payload rendered an EMPTY body while the slide
+    // still passed every emptiness check (title + foot painted). Normalise the array to
+    // the object shape so it renders through the exact same quality path.
+    if (Array.isArray(d)) d = { items: d };
     d = d || {};
     if (kind === 'quadrant') return `<div class="bk-quad">${(d.items||[]).map(it=>`<div class="bk-cell"><div class="bk-tag">${it.tag||''}</div><div class="bk-h">${it.title||''}</div><div class="bk-t">${it.text||''}</div></div>`).join('')}</div>`;
     if (kind === 'columns') return `<div class="bk-cols">${(d.items||[]).map(it=>`<div class="bk-col"><div class="bk-tag">${it.tag||''}</div><div class="bk-t">${it.text||''}</div></div>`).join('')}</div>`;
@@ -4725,24 +4746,74 @@ niwala: { name: 'Pehla Niwala', chip: '#c9973f', bg: '#243b28', arrow: '#c9973f'
   }
   // bold the "punch": the clause after the last em-dash / colon, else the final sentence
   function emph(t){ return puWrap(emphCore(t)); }
-  function emphCore(t){
-    t = esc(t);
-    t = voiceGuard(t);
+  // Where the punch lands, as [start, end) over the prepared text — the three
+  // heuristics in one place, shared by the plain-text path (emphCore) and the
+  // markup-preserving path (emphPunchHTML) so both always agree.
+  function punchRange(t){
     // 1) short punchy tail after an em-dash (great for hooks/one-liners)
     for (const sep of [' — ', ' – ']) {
       const i = t.lastIndexOf(sep);
-      if (i > 8) { const tail = t.slice(i + sep.length); if (tail.length <= 72 && !/[.?!।].*[.?!।]/.test(tail)) return t.slice(0, i + sep.length) + '<b>' + tail + '</b>'; }
+      if (i > 8) { const tail = t.slice(i + sep.length); if (tail.length <= 72 && !/[.?!।].*[.?!।]/.test(tail)) return [i + sep.length, t.length]; }
     }
     // 2) bold the FINAL sentence (the punch) when there are several
     const sents = t.match(/[^.?!।]+[.?!।]+|\S[^.?!।]*$/g);
     if (sents && sents.length > 1) {
       const last = sents[sents.length - 1].trim();
-      if (last.length >= 6 && last.length <= 118) return t.slice(0, t.length - last.length) + '<b>' + last + '</b>';
+      if (last.length >= 6 && last.length <= 118) return [t.length - last.length, t.length];
     }
     // 3) label with a short value → bold the value
     const ci = t.indexOf(': ');
-    if (ci > 0) { const val = t.slice(ci + 2); if (val.length >= 4 && val.length <= 72) return t.slice(0, ci + 2) + '<b>' + val + '</b>'; }
-    return t;
+    if (ci > 0) { const val = t.slice(ci + 2); if (val.length >= 4 && val.length <= 72) return [ci + 2, t.length]; }
+    return null;
+  }
+  function emphCore(t){
+    t = esc(t);
+    t = voiceGuard(t);
+    const r = punchRange(t);
+    return r ? t.slice(0, r[0]) + '<b>' + t.slice(r[0], r[1]) + '</b>' + t.slice(r[1]) : t;
+  }
+  /* Markup-preserving punch-up (owner 2026-09-10 audit lane04-F005): the paint-time
+     punch used to strip EVERY tag, run the punch on the naked text, and rebuild plain
+     html — so authored inline spans/styles vanished (and authored <br> line breaks
+     flattened) whenever the punch fired. emphPunchHTML computes the SAME punch range
+     over the collapsed text, then splices <b>…</b> around exactly that range inside the
+     authored html: punch-up only ever ADDS emphasis, never removes markup. */
+  function emphPunchHTML(html){
+    const BR = /^<br\s*\/?>$/i;
+    const segs = String(html).split(/(<[^>]+>)/).map(s => (s && s.charAt(0) !== '<') ? voiceGuard(s) : s);
+    const ghtml = segs.join('');
+    // Walk the text like esc() sees it: tags contribute no text (a <br> counts as one
+    // collapsible space), whitespace runs collapse to a single space, edges trim. For
+    // every surviving text char record its html [start,end) offsets so the punch range
+    // can be spliced back where it belongs.
+    let pos = 0;
+    const chars = [], starts = [], ends = [];
+    const emit = (c, s0, e0, isWs) => {
+      if (isWs && (chars.length === 0 || /\s/.test(chars[chars.length - 1]))) return;
+      chars.push(isWs ? ' ' : c); starts.push(s0); ends.push(e0);
+    };
+    for (const seg of segs) {
+      if (!seg) continue;
+      if (seg.charAt(0) === '<') {
+        if (BR.test(seg)) emit(' ', pos, pos + seg.length, true);
+        pos += seg.length;
+        continue;
+      }
+      for (let j = 0; j < seg.length;) {
+        const c = seg[j];
+        emit(c, pos + j, pos + j + c.length, /\s/.test(c));
+        j += c.length;
+      }
+      pos += seg.length;
+    }
+    let end = chars.length; while (end > 0 && /\s/.test(chars[end - 1])) end--;
+    if (end === 0) return null;
+    const plain = chars.slice(0, end).join('');
+    const r = punchRange(plain);
+    if (!r) return null;
+    const at = i => (i < end ? starts[i] : ends[end - 1]);
+    const b0 = at(r[0]), b1 = at(Math.min(r[1], end));
+    return ghtml.slice(0, b0) + '<b>' + ghtml.slice(b0, b1) + '</b>' + ghtml.slice(b1);
   }
   // bold the last line of a poem (the detonation)
   function emphPoem(t){
@@ -5081,6 +5152,25 @@ function suggestLooks(card){
      content block fits, and only if even that cannot fit does it scale the block.
      Nothing may ever be painted half-cut. */
   const FIT_DENSITY_LADDER = ['ce-dense-md', 'ce-dense-hi'];
+  /* Owner 2026-09-10 audit wave (lane03-F001/F003/F005, lane04-F004, lane03-F007):
+     the first fit pass measured ONE edge — the content block's bottom against the
+     `.mid` BORDER-box bottom. `.mid` carries padding-bottom:28px (+ look padding-top)
+     and centers its children, so a block that is 1069px tall in a 1021px content box
+     centered-overflows and paints 28.4px ABOVE the box top while its bottom lands at
+     +0.4px — inside the old 0.5px bottom tolerance. 201 slides shipped with decapitated
+     titles that way. The law is therefore now BOTH edges, against the padding-aware
+     CONTENT box (overflow visually clips at the padding edge; centering distributes the
+     overflow around the content box). The kicker is measured too (it shares the box),
+     and Studio layout.y pushes are clamped to the box instead of painting off-slide.
+     Scale uses `zoom` rather than `transform:scale()` because zoom shrinks the block's
+     LAYOUT box: the flex column then re-centers the genuinely smaller output, so the
+     scaled result is symmetric by construction. (transform + origin top-left kept the
+     unscaled layout box, so flex centering still positioned the TALL box and the scaled
+     output hung up to 114px above the box top — lane03-F003.) Width is compensated so
+     the text keeps its authored wrap points. The scale floor is 0.40; past the floor a
+     hard max-height clamp stops the paint INSIDE the box — a slide never paints outside
+     `.mid`, whatever it is authored with. */
+  const FIT_SCALE_FLOOR = 0.40;
   function fitSlides(rootEl) {
     if (!rootEl || typeof rootEl.querySelectorAll !== 'function') return 0;
     const slides = (rootEl.classList && rootEl.classList.contains('slide'))
@@ -5090,8 +5180,54 @@ function suggestLooks(card){
       const mid = slide.querySelector('.mid');
       const content = slide.querySelector('.ce-render-block-content');
       if (!mid || !content) return;
-      const avail = mid.clientHeight;
-      if (avail <= 0) return;
+      if (mid.clientHeight <= 0) return;
+
+      // The clip box, padding-aware: the honest inner edges every fitted child must
+      // respect (borders are 0 today, but measure them so the law survives a border).
+      const mcs = getComputedStyle(mid);
+      const mR = mid.getBoundingClientRect();
+      const boxTop = mR.top + (parseFloat(mcs.borderTopWidth) || 0) + (parseFloat(mcs.paddingTop) || 0);
+      const boxBottom = mR.bottom - (parseFloat(mcs.borderBottomWidth) || 0) - (parseFloat(mcs.paddingBottom) || 0);
+      // Same law on the X axis (lane03-F002): layout.content.x pushed a whole block
+      // 420px LEFT of the card on 2 corpus slides while the vertical metric read
+      // "fits" — horizontal is measured and clamped exactly like vertical.
+      const boxLeft = mR.left + (parseFloat(mcs.borderLeftWidth) || 0) + (parseFloat(mcs.paddingLeft) || 0);
+      const boxRight = mR.right - (parseFloat(mcs.borderRightWidth) || 0) - (parseFloat(mcs.paddingRight) || 0);
+      const TOL = 0.5;
+
+      // --- Studio layout clamps (lane03-F007/F002): layout.y pushes (up to ±520px)
+      // moved the kicker 165-382.7px past the box on tasveer/qatra, and layout.x
+      // pushed whole blocks off-card, while the fitter — measuring only the content
+      // block's bottom — took no action. Both laid-out blocks are clamped INSIDE the
+      // box on BOTH axes: keep the authored offset up to the last pixel that still
+      // fits, then stop. Measurement, not a redesign of the Studio contract.
+      const clampTranslate = (el) => {
+        const r = el.getBoundingClientRect();
+        const oTop = boxTop - r.top;
+        const oBottom = r.bottom - boxBottom;
+        const oLeft = boxLeft - r.left;
+        const oRight = r.right - boxRight;
+        if (oTop <= TOL && oBottom <= TOL && oLeft <= TOL && oRight <= TOL) return;
+        const m = /translate\(\s*(-?[\d.]+)px\s*,\s*(-?[\d.]+)px\s*\)/.exec(el.style.transform || '');
+        let tx = m ? parseFloat(m[1]) : 0;
+        let ty = m ? parseFloat(m[2]) : 0;
+        // correct an axis only when the correction can actually reach inside; an axis
+        // that violates on BOTH sides (element bigger than the box) has no translate
+        // that fits, so the authored offset stays instead of trading one edge for the other
+        ty += (oTop > TOL && oBottom <= TOL) ? oTop : ((oBottom > TOL && oTop <= TOL) ? -oBottom : 0);
+        tx += (oLeft > TOL && oRight <= TOL) ? oLeft : ((oRight > TOL && oLeft <= TOL) ? -oRight : 0);
+        el.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px)';
+        fitted++;
+      };
+      const kick = mid.querySelector('.kickline');
+      // The content block's authored layout.translate is neutralised while the fit law
+      // measures (zoom re-flows the column, so a correction decided pre-zoom would be
+      // stale — the same is true for the kicker, which is why both are clamped LAST,
+      // against the FINAL geometry).
+      const cm = /translate\(\s*(-?[\d.]+)px\s*,\s*(-?[\d.]+)px\s*\)/.exec(content.style.transform || '');
+      const cTx = cm ? parseFloat(cm[1]) : 0;
+      const cTy = cm ? parseFloat(cm[2]) : 0;
+      if (cTx || cTy) content.style.transform = 'translate(0px,0px)';
 
       // --- horizontal pass (v357 law: `.pu` phrase units are white-space:nowrap so
       // the browser may only break BETWEEN breath units. The cost is that a single
@@ -5101,7 +5237,9 @@ function suggestLooks(card){
       // content block is overflow-x:visible. Relax ONLY the units that actually
       // exceed their box, so the phrase law survives everywhere it can: a phrase
       // that wraps is better than a line painted off the card.
-      const boxW = content.clientWidth;
+      // Rect width, not clientWidth: once a zoom is applied the two disagree, and a
+      // second fit pass (Studio re-render) must still compare like with like.
+      const boxW = content.getBoundingClientRect().width;
       if (boxW > 0) {
         content.querySelectorAll('.pu, .nowrap').forEach(u => {
           if (u.getBoundingClientRect().width > boxW + 0.5) {
@@ -5114,42 +5252,105 @@ function suggestLooks(card){
         });
       }
 
-      // The law is WHERE the block ENDS, not how TALL it is. `.mid` also carries the
-      // kicker, so comparing the block's height against mid.clientHeight reports "fits"
-      // for a slide whose kick pushed the block past the box — measured live on
-      // post:newgold:batch-c5:carousel:c5:006 slide 7, where that height metric said
-      // -158px (plenty of room) while 91px of text sat below the box edge, cut.
-      // Position is the honest measure. NOT scrollHeight: infographic blocks (therapylab
-      // process_loop) carry a diagram that deliberately bleeds ~79px past the box on every
-      // slide, and scrollHeight counts that decoration, which would shrink real text for
-      // no reason. The block's own bottom edge ignores decoration below it.
-      const boxBottom = () => mid.getBoundingClientRect().bottom;
-      const fits = () => content.getBoundingClientRect().bottom <= boxBottom() + 0.5;
-      if (fits()) return;
-      let k = 0;
-      while (!fits() && k < FIT_DENSITY_LADDER.length) {
-        content.classList.add(FIT_DENSITY_LADDER[k]);
-        fitted++;
-        k++;
+      // The law is WHERE the block BEGINS and ENDS, not how tall it is. NOT scrollHeight:
+      // infographic blocks (therapylab process_loop) carry a diagram that deliberately
+      // bleeds ~79px past the box on every slide, and scrollHeight counts that
+      // decoration, which would shrink real text for no reason. The block's own edges
+      // ignore decoration below/above it.
+      const overTop = () => boxTop - content.getBoundingClientRect().top;
+      const overBottom = () => content.getBoundingClientRect().bottom - boxBottom;
+      const fits = () => overTop() <= TOL && overBottom() <= TOL;
+      if (!fits()) {
+        let k = 0;
+        while (!fits() && k < FIT_DENSITY_LADDER.length) {
+          content.classList.add(FIT_DENSITY_LADDER[k]);
+          fitted++;
+          k++;
+        }
       }
-      if (!fits() && !content.hasAttribute('data-ce-fit-scale')) {
+      if (!fits()) {
         // Last resort for a slide no ladder step can save: scale the block so the
         // frame is never painted with a cut line. Width is compensated so the text
         // keeps its authored wrap points.
-        // Scale only the CONTENT so that kick + content fits: the kicker keeps its
+        // Scale only the CONTENT so kick + content fit together: the kicker keeps its
         // authored size, so factor against the room actually left for the block.
+        const kickRoom = kick
+          ? kick.offsetHeight + (parseFloat(getComputedStyle(kick).marginBottom) || 0)
+          : 0;
+        const room = Math.max(120, (boxBottom - boxTop) - kickRoom);
         const contentH = content.getBoundingClientRect().height;
-        const overhang = Math.max(0, content.getBoundingClientRect().bottom - boxBottom());
-        const room = Math.max(40, contentH - overhang);
-        const need = contentH;
-        if (need > room && need > 0) {
-          const f = Math.max(0.55, room / need);
-          content.style.transformOrigin = 'top left';
-          content.style.transform = 'scale(' + f.toFixed(4) + ')';
-          content.style.width = 'calc(100% / ' + f.toFixed(4) + ')';
-          content.setAttribute('data-ce-fit-scale', f.toFixed(4));
+        if (contentH > room && contentH > 0) {
+          const f = Math.max(FIT_SCALE_FLOOR, room / contentH);
+          // zoom composes multiplicatively across fit passes on the same DOM (Studio
+          // re-fits), and the measured height already includes the current zoom.
+          const cur = parseFloat(getComputedStyle(content).zoom) || 1;
+          const nz = Math.max(FIT_SCALE_FLOOR, cur * f);
+          // Width compensation keeps the authored wrap points. It must be an ABSOLUTE
+          // width: zoom multiplies absolute lengths but not percentages, so the old
+          // calc(100%/f) trick (correct under transform:scale) paints a box 1/f times
+          // too wide here — measured 2240px wide at zoom 0.4 in this file's gate.
+          const visW = content.getBoundingClientRect().width;
+          content.style.setProperty('zoom', nz.toFixed(4));
+          content.style.width = (visW / nz).toFixed(2) + 'px';
+          content.setAttribute('data-ce-fit-scale', nz.toFixed(4));
+          fitted++;
         }
       }
+      if (!fits() && !content.hasAttribute('data-ce-fit-clamped')) {
+        // The floor is reached and the block still will not fit: clamp the paint INSIDE
+        // the box (both edges) instead of letting it ride past the clip. This is the
+        // absolute stop the old floor-0.55 path lacked (lane03-F005: content still
+        // 94-405px below the box on 202/203 looks).
+        const kickRoom = kick
+          ? kick.offsetHeight + (parseFloat(getComputedStyle(kick).marginBottom) || 0)
+          : 0;
+        const cur = parseFloat(getComputedStyle(content).zoom) || 1;
+        const roomLocal = Math.max(60, Math.floor(((boxBottom - boxTop) - kickRoom) / cur));
+        content.style.maxHeight = roomLocal + 'px';
+        content.style.overflow = 'hidden';
+        content.setAttribute('data-ce-fit-clamped', 'true');
+        fitted++;
+      }
+      // Re-apply the authored content offset, clamped so the PAINT stays inside the box
+      // on all four edges. The paint is the block when it has a box of its own — plus,
+      // for looks that compose copy in absolutely-positioned children (shirorekha),
+      // every text-bearing descendant, which moves with the block once the transform
+      // makes it the children's containing block. Only slides with an authored
+      // translate are corrected here (the Studio push class); the transform stays ON
+      // for them even at 0 so the children never jump containing blocks.
+      if (cTx || cTy) {
+        content.style.transform = 'translate(' + cTx.toFixed(1) + 'px,' + cTy.toFixed(1) + 'px)';
+        const ownText = (el) => { let t = ''; for (const n of el.childNodes) if (n.nodeType === 3) t += n.textContent; return t.trim(); };
+        let rgT = Infinity, rgB = -Infinity, rgL = Infinity, rgR = -Infinity, rgAny = false;
+        const rgAdd = (el) => {
+          const x = el.getBoundingClientRect();
+          if (x.width === 0 && x.height === 0) return;
+          rgT = Math.min(rgT, x.top); rgB = Math.max(rgB, x.bottom);
+          rgL = Math.min(rgL, x.left); rgR = Math.max(rgR, x.right); rgAny = true;
+        };
+        if (content.getBoundingClientRect().height > 1) rgAdd(content);
+        content.querySelectorAll('*').forEach(el => { if (ownText(el)) rgAdd(el); });
+        if (rgAny) {
+          // region was measured WITH the authored translate applied, so correct by the
+          // measured overflow (translate never reflows — one shot is exact)
+          const oTop = boxTop - rgT, oBottom = rgB - boxBottom;
+          const oLeft = boxLeft - rgL, oRight = rgR - boxRight;
+          let ty = cTy, tx = cTx;
+          // same one-sided rule: an axis that cannot fit (region wider/taller than the
+          // box) keeps its authored offset — a translate trade would move the cut, not remove it
+          ty += (oTop > TOL && oBottom <= TOL) ? oTop : ((oBottom > TOL && oTop <= TOL) ? -oBottom : 0);
+          tx += (oLeft > TOL && oRight <= TOL) ? oLeft : ((oRight > TOL && oLeft <= TOL) ? -oRight : 0);
+          if (Math.abs(tx - cTx) > 0.05 || Math.abs(ty - cTy) > 0.05) {
+            content.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px)';
+            fitted++;
+          }
+        }
+      }
+      // Kicker clamp runs LAST: the zoom re-flow moved the flex column, so a translate
+      // decided earlier would be stale (measured: a pre-zoom clamp landed the kicker
+      // 72.9px past the box bottom on tasveer). Translate never reflows, so this
+      // correction is exact against the final geometry.
+      if (kick) clampTranslate(kick);
     });
     return fitted;
   }
