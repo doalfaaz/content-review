@@ -1210,14 +1210,14 @@
       graphic: `<div style="position:absolute;inset:0;background-image:radial-gradient(rgba(90,60,30,.10) 1px,transparent 1.4px);background-size:9px 9px;"></div><div style="position:absolute;top:88px;right:88px;width:196px;height:196px;border:3px solid rgba(120,60,40,.32);border-radius:50%;transform:rotate(-12deg);"></div><div style="position:absolute;top:110px;right:110px;width:152px;height:152px;border:1.5px solid rgba(120,60,40,.28);border-radius:50%;transform:rotate(-12deg);"></div>`,
       css: `
       .slide{ background:#c3a878; color:#3a2e1c; }
-      .hook{ font-family:'Rockwell','Poppins',serif; font-weight:700; font-size:82px; line-height:1.24; color:#33281a; }
+      .hook{ font-family:'Rockwell','Doalfaaz Slab','Poppins',serif; font-weight:700; font-size:82px; line-height:1.24; color:#33281a; }
       .hook b{ color:#9a4a25; }
       .kickline .kt{ font-family:'Courier New',monospace; font-weight:700; font-size:22px; letter-spacing:4px; text-transform:uppercase; color:#7a4a2a; }
       .kickline .rule{ width:50px; height:2px; background:#7a4a2a; }
       .sub{ font-family:'Courier New',monospace; font-size:29px; color:#6a5638; margin-top:32px; line-height:1.56; }
       .body{ font-family:'Courier New',monospace; font-weight:400; font-size:44px; line-height:1.61; color:#40331f; }
       .body b, .poem b{ color:#9a4a25; font-weight:700; }
-      .body .num{ display:block; font-family:'Rockwell',serif; font-weight:700; font-size:40px; color:#9a4a25; margin-bottom:14px; }
+      .body .num{ display:block; font-family:'Rockwell','Doalfaaz Slab',serif; font-weight:700; font-size:40px; color:#9a4a25; margin-bottom:14px; }
       .poem{ font-family:'Laila','Poppins',serif; font-weight:500; font-size:64px; line-height:1.62; color:#33281a; }
       .bubble{ border:2px dashed rgba(120,60,40,.5); border-radius:6px; padding:52px; }
       .kicker{ font-family:'Courier New',monospace; font-weight:700; font-size:24px; color:#9a4a25; margin-top:26px; }
@@ -1249,14 +1249,14 @@
       css: `
       .slide{ background:#f2efe6; color:#1a1a1a; }
       .mid{ justify-content:flex-start; padding-top:30px; }
-      .hook{ font-family:'Rockwell','Poppins',serif; font-weight:700; font-size:86px; line-height:1.14; letter-spacing:-1px; color:#111; border-bottom:4px solid #111; padding-bottom:26px; }
+      .hook{ font-family:'Rockwell','Doalfaaz Slab','Poppins',serif; font-weight:700; font-size:86px; line-height:1.14; letter-spacing:-1px; color:#111; border-bottom:4px solid #111; padding-bottom:26px; }
       .hook b{ color:#8a1a1a; }
       .kickline{ margin-bottom:14px; } .kickline .rule{ width:0; }
       .kickline .kt{ font-family:'Georgia',serif; font-weight:700; font-size:22px; letter-spacing:3px; text-transform:uppercase; color:#8a1a1a; }
       .sub{ font-family:'Georgia',serif; font-style:italic; font-size:30px; color:#444; margin-top:26px; line-height:1.56; }
       .body{ font-family:'Georgia','Laila',serif; font-weight:400; font-size:45px; line-height:1.58; color:#222; border-top:1px solid #cbc6b8; padding-top:28px; }
       .body b, .poem b{ color:#8a1a1a; font-weight:700; }
-      .body .num{ font-family:'Rockwell',serif; font-weight:700; font-size:32px; color:#8a1a1a; display:block; margin-bottom:12px; }
+      .body .num{ font-family:'Rockwell','Doalfaaz Slab',serif; font-weight:700; font-size:32px; color:#8a1a1a; display:block; margin-bottom:12px; }
       .poem{ font-family:'Laila','Georgia',serif; font-weight:500; font-size:62px; line-height:1.62; color:#111; text-align:center; border-top:2px solid #111; border-bottom:2px solid #111; padding:38px 0; }
       .bubble{ border:3px double #111; padding:48px; }
       .kicker{ font-family:'Georgia',serif; font-style:italic; font-weight:700; font-size:26px; color:#8a1a1a; margin-top:26px; }
@@ -1494,18 +1494,18 @@
       graphic: `<div style="position:absolute;inset:0;background-image:repeating-linear-gradient(92deg,rgba(26,23,18,.05) 0 3px,transparent 3px 12px);"></div>`,
       css: `
       .slide{ background:#efe6d0; color:#1a1712; }
-      .hook{ font-family:'Rockwell','Poppins',serif; font-weight:700; font-size:86px; line-height:1.22; color:#1a1712; letter-spacing:-.5px; }
+      .hook{ font-family:'Rockwell','Doalfaaz Slab','Poppins',serif; font-weight:700; font-size:86px; line-height:1.22; color:#1a1712; letter-spacing:-.5px; }
       .hook b{ color:#b0301f; }
-      .kickline .kt{ font-family:'Rockwell',serif; font-weight:700; font-size:22px; letter-spacing:3px; text-transform:uppercase; color:#b0301f; }
+      .kickline .kt{ font-family:'Rockwell','Doalfaaz Slab',serif; font-weight:700; font-size:22px; letter-spacing:3px; text-transform:uppercase; color:#b0301f; }
       .kickline .rule{ width:54px; height:3px; background:#1a1712; }
-      .sub{ font-family:'Rockwell',serif; font-size:30px; color:#5a5344; margin-top:30px; line-height:1.56; }
-      .body{ font-family:'Rockwell','Laila',serif; font-weight:400; font-size:46px; line-height:1.56; color:#2a2519; }
+      .sub{ font-family:'Rockwell','Doalfaaz Slab',serif; font-size:30px; color:#5a5344; margin-top:30px; line-height:1.56; }
+      .body{ font-family:'Rockwell','Doalfaaz Slab','Laila',serif; font-weight:400; font-size:46px; line-height:1.56; color:#2a2519; }
       .body b, .poem b{ color:#b0301f; font-weight:700; }
-      .body .num{ display:block; font-family:'Rockwell',serif; font-weight:700; font-size:36px; color:#b0301f; margin-bottom:12px; }
-      .poem{ font-family:'Laila','Rockwell',serif; font-weight:500; font-size:64px; line-height:1.62; color:#1a1712; }
+      .body .num{ display:block; font-family:'Rockwell','Doalfaaz Slab',serif; font-weight:700; font-size:36px; color:#b0301f; margin-bottom:12px; }
+      .poem{ font-family:'Laila','Rockwell','Doalfaaz Slab',serif; font-weight:500; font-size:64px; line-height:1.62; color:#1a1712; }
       .bubble{ border:3px solid #1a1712; border-radius:0; padding:50px; }
-      .kicker{ font-family:'Rockwell',serif; font-weight:700; font-size:26px; color:#b0301f; margin-top:26px; }
-      .profile{ font-family:'Rockwell',serif; font-weight:400; font-size:38px; line-height:1.56; color:#2a2519; text-align:center; } .profile b{ color:#b0301f; font-weight:700; }
+      .kicker{ font-family:'Rockwell','Doalfaaz Slab',serif; font-weight:700; font-size:26px; color:#b0301f; margin-top:26px; }
+      .profile{ font-family:'Rockwell','Doalfaaz Slab',serif; font-weight:400; font-size:38px; line-height:1.56; color:#2a2519; text-align:center; } .profile b{ color:#b0301f; font-weight:700; }
       .brand{ color:#8a8168; } .pageno{ color:#1a1712; font-weight:700; }` },
 
     data: { name: 'Data Viz', chip: '#0a7cff', bg: '#fbfbfa', arrow: '#0a7cff',

@@ -42,6 +42,13 @@
   @font-face{font-family:'Laila';font-style:normal;font-weight:500;font-display:swap;src:url('./fonts/laila-500.woff2') format('woff2');}
   @font-face{font-family:'Laila';font-style:normal;font-weight:600;font-display:swap;src:url('./fonts/laila-600.woff2') format('woff2');}
   @font-face{font-family:'Laila';font-style:normal;font-weight:700;font-display:swap;src:url('./fonts/laila-700.woff2') format('woff2');}
+  /* Rockwell ships with macOS but NOT iOS, and it may not be redistributed, so the phone
+     fell back to Poppins or a bare Times on exactly the elements the design leans on:
+     the .hook headline, its <b> punch and .num in the `press` and `kraft` looks (measured
+     live: 112+ element paints corpus-wide). 'Doalfaaz Slab' is a free OFL slab serif
+     (Bitter, variable) used as a same-character stand-in, placed AFTER the macOS family so
+     the Mac's rendering is unchanged and the phone gets a slab instead of a generic. */
+  @font-face{font-family:'Doalfaaz Slab';font-style:normal;font-weight:100 900;font-display:swap;src:url('./fonts/slab-var.woff2') format('woff2');}
 </style>
 <style>
   :root {
