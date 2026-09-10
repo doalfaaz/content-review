@@ -532,6 +532,14 @@
     top: var(--topbar-h, 42px) !important;
     z-index: 115 !important;
   }
+  /* The drawer overlaps page content on a phone — its 86% desktop wash let
+     the library text ghost THROUGH the panel (owner screenshot 2026-09-10).
+     A drawer must be a solid surface. */
+  #sidebar.collapsed {
+    background: var(--sidebar-bg) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
   /* The scrim must stay UNDER the drawer it dims (drawer z 115). */
   .ce-sidebar-scrim { z-index: 114 !important; }
   /* The drawer now starts BELOW the bar, so its old 38px top padding (which
