@@ -695,3 +695,17 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
   min-height: 0 !important;
   max-height: none !important;
 }
+
+
+/* ---------------------------------------------------------------------------
+   PHONE PROPORTION FIX (owner 2026-09-10: "its ratio is not correct as per mobile").
+   The board reserved a fixed band (.ce-kanban-board min-height 520px) and every column
+   its own (.ce-kanban-col min-height 380px) so that a desktop row of four day columns
+   keeps an even height. On a phone the columns stack to full width, so those floors do
+   nothing useful and instead render an EMPTY board as a tall card with a small dashed
+   add-zone floating above a large dead area -- exactly what the Inbox column looked
+   like. Size to content on phones; the desktop floors are untouched.
+   --------------------------------------------------------------------------- */
+html.ce-phone .ce-kanban-board { min-height: 0 !important; }
+html.ce-phone .ce-kanban-col { min-height: 0 !important; }
+html.ce-phone .ce-kanban-col-cards { min-height: 0 !important; }
