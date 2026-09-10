@@ -2175,7 +2175,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=b24bfee929"></script>
-<script src="./deck_index.js?v=ad93ebe0fb"></script>
+<script src="./deck_index.js?v=d907029e2f"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=9a09a33078" />
 <link rel="stylesheet" href="./native-plan.css?v=75cf64169d" />
@@ -13974,7 +13974,42 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var kanbanDays = getKanbanDays();
       var planMode = state.planViewMode || 'kanban';
 
-      function renderKanbanCard(q, idx) {
+      /* Caption picker for the board card (owner 2026-09-10: "show me as
+         dropdown my captions set — I choose and that one goes in there").
+         The saved caption bank (8 groups, all his lines) is the option list,
+         grouped with <optgroup>. Choosing writes q.igCaption (poems) or
+         q.caption (posts/carousels) + the per-piece caption map, so Schedule /
+         Post now / Copy all ship the picked text. "Auto" clears the override
+         and falls back to the resolver's autopick. */
+      function ceCaptionPickerHtml(q, idx) {
+        var bank = ceCaptionBank();
+        var groups = bank.groups || [];
+        var isPoem = (q && q.type === 'poem');
+        var current = isPoem
+          ? String((q && q.igCaption) || '')
+          : String((q && q.caption) || (q && q.item && q.item.caption) || '');
+        if (!current) { try { current = ceResolveIgCaption(q) || ''; } catch (_e) {} }
+        var inBank = false;
+        groups.forEach(function (g) { (g.captions || []).forEach(function (c) { if (c === current) inBank = true; }); });
+        var html = '<select class="queue-caption-select" data-idx="' + idx + '" title="Pick the caption for this piece (from your saved caption bank)" style="flex:1; min-width:0; font-size:10px; font-weight:600; padding:3px 4px; border:1px solid var(--border); border-radius:5px; background:var(--card); color:var(--ink); cursor:pointer;">';
+        html += '<option value="auto"' + (!q || !q.__capPicked ? ' selected' : '') + '>Caption: auto' + (current && !q.__capPicked ? ' — ' + escapeHtml(current.slice(0, 26)) + (current.length > 26 ? '…' : '') : '') + '</option>';
+        if (current && !inBank) {
+          // Custom authored caption (not from the bank) — keep it visible + selected.
+          html += '<option value="' + escapeHtml('||' + current) + '" selected>✎ ' + escapeHtml(current.slice(0, 34)) + (current.length > 34 ? '…' : '') + '</option>';
+        }
+        groups.forEach(function (g) {
+          html += '<optgroup label="' + escapeHtml(g.label) + '">';
+          (g.captions || []).forEach(function (c) {
+            var sel = current && c === current ? ' selected' : '';
+            html += '<option value="' + escapeHtml(g.id + '||' + c) + '"' + sel + '>' + escapeHtml(c) + '</option>';
+          });
+          html += '</optgroup>';
+        });
+        html += '</select>';
+        return html;
+      }
+
+      function renderKanbanCard(q, idx, col) {
         var currentDay = getQueueItemDay(q);
         var currentTime = q.scheduleTime || '';
         var dotColor = q.scheduled && q.scheduleTime ? 'var(--accent)' : (q.readyToPost ? '#f59e0b' : (q.exportStatus === 'EXPORTED' ? '#34d399' : 'var(--faint)'));
@@ -14001,27 +14036,28 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             </div>
 
             <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+              <!-- Owner law 2026-09-10: the column header IS the date — no day
+                   select on the card; and the time appears ONCE (the dashed
+                   chip + a dropdown was a duplicate). One compact row. -->
               <div style="display:flex; align-items:center; gap:6px;">
-                <select class="kanban-day-select" data-idx="${idx}" style="flex:1; min-width:0; background:var(--card); color:var(--ink); border:1px solid rgba(120,120,150,0.22); padding:4px 6px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer;">
-                  ${kanbanDays.map(d => `<option value="${d.id}" ${currentDay === d.id ? 'selected' : ''}>${escapeHtml(d.label)}</option>`).join('')}
+                <select class="kanban-time-select" data-idx="${idx}" title="Posting time on ${escapeHtml(col ? col.label : 'this day')}" aria-label="Posting time" style="flex:1; min-width:0; font-size:11px; padding:4px 4px; border:1px solid var(--border); border-radius:6px; background:rgba(255,255,255,0.06); color:var(--ink); cursor:pointer;">
+                  <option value=""${!currentTime ? ' selected' : ''}>Pick time…</option>
+                  ${['9:00 AM','10:30 AM','11:30 AM','1:00 PM','3:00 PM','5:00 PM','6:30 PM','8:00 PM','9:00 PM'].map(function(t){ return '<option' + (t === currentTime ? ' selected' : '') + '>' + t + '</option>'; }).join('')}
                 </select>
-                ${currentTime ? `<span class="queue-time-chip" style="flex:1; min-width:0; font-size:11px; font-weight:700; color:var(--ink); text-align:center; padding:4px 6px; border:1px dashed rgba(120,120,150,0.25); border-radius:6px;">${escapeHtml(currentTime)}</span>` : ''}
-                ${q.scheduleDate ? `<select class="kanban-time-select" data-idx="${idx}" title="Change this card's time" style="flex:1; min-width:0; font-size:11px; padding:4px 4px; border:1px solid var(--border); border-radius:6px; background:rgba(255,255,255,0.06); color:var(--ink); cursor:pointer;">
-                  ${['9:00 AM','10:30 AM','11:30 AM','1:00 PM','3:00 PM','5:00 PM','6:30 PM','8:00 PM','9:00 PM'].map(function(t){ return '<option' + (t === (q.scheduleTime || '11:30 AM') ? ' selected' : '') + '>' + t + '</option>'; }).join('')}
-                </select>` : ''}
+                <label style="display:flex; align-items:center; cursor:pointer;" title="Ready to publish">
+                  <input type="checkbox" class="queue-ready-topost" data-idx="${idx}" ${q.readyToPost ? 'checked' : ''} style="cursor:pointer; width:13px; height:13px; accent-color:var(--accent);">
+                </label>
               </div>
 
               <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; padding-top:4px;">
-                <button class="queue-copy-caption-btn" data-idx="${idx}" type="button" style="background:transparent; border:1px solid var(--border); color:var(--ink); padding:3px 7px; border-radius:5px; font-size:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:3px;" title="Copy caption">
-                  <span class="ce-ic ce-ic--copy ce-ic--14"></span> Caption
-                </button>
-                <button class="queue-open-composer-btn" data-idx="${idx}" type="button" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.14); color:var(--ink); padding:3px 7px; border-radius:5px; font-size:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:3px;" title="${window.__CE_META_HAS_TOKEN__ ? 'Schedule this piece to @doalfaaz at its board date/time (confirm first)' : 'Copy caption, open slides in Finder, and open Creator Studio (manual handoff)'}">
+                <!-- Owner law 2026-09-10: caption is a DROPDOWN of the saved
+                     caption bank (his 8 groups, all 45 lines) — pick one and it
+                     becomes this piece's caption. No more blind copy button. -->
+                ${ceCaptionPickerHtml(q, idx)}
+                <button class="queue-open-composer-btn" data-idx="${idx}" type="button" style="background:rgba(120,120,150,0.08); border:1px solid rgba(120,120,150,0.14); color:var(--ink); padding:3px 7px; border-radius:5px; font-size:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:3px; white-space:nowrap;" title="${window.__CE_META_HAS_TOKEN__ ? 'Schedule this piece to @doalfaaz at its board date/time (confirm first)' : 'Copy caption, open slides in Finder, and open Creator Studio (manual handoff)'}">
                   <span class="ce-ic ce-ic--share ce-ic--12"></span> ${window.__CE_META_HAS_TOKEN__ ? 'Schedule' : 'Prep + Open'}
                 </button>
                 <button class="queue-open-studio-btn" data-idx="${idx}" type="button" aria-label="Edit in Studio" title="Edit in Studio" style="border:none; background:transparent; color:var(--accent); padding:3px 6px; font-size:11px; font-weight:700; cursor:pointer; display:flex; align-items:center;">›</button>
-                <label style="display:flex; align-items:center; cursor:pointer; margin-left:auto;" title="Ready to publish">
-                  <input type="checkbox" class="queue-ready-topost" data-idx="${idx}" ${q.readyToPost ? 'checked' : ''} style="cursor:pointer; width:13px; height:13px; accent-color:var(--accent);">
-                </label>
               </div>
             </div>
           </div>
@@ -14044,7 +14080,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             <div class="ce-kanban-col-cards" data-col-id="${col.id}">
               ${itemsInCol.length === 0 ? `
                 <div class="ce-kanban-col-empty" style="display:flex; align-items:center; justify-content:center; min-height:86px; border:1px dashed var(--border); border-radius:10px; color:var(--muted); font-size:20px; font-weight:300; opacity:0.4;" aria-label="Drop a piece here">+</div>
-              ` : itemsInCol.map(entry => renderKanbanCard(entry.item, entry.originalIdx)).join('')}
+              ` : itemsInCol.map(entry => renderKanbanCard(entry.item, entry.originalIdx, col)).join('')}
             </div>
           </div>
         `;
@@ -14471,8 +14507,54 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               delete state.queueItems[idx].metaError;
             }
             localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
-            showQueueToast('Time set to ' + newTime);
+            showQueueToast(newTime ? 'Time set to ' + newTime : 'Time cleared — pick one before scheduling');
           }
+        };
+      });
+
+      /* Caption dropdown (owner 2026-09-10): the pick IS the caption. Poems
+         store q.igCaption + the per-piece map (ce_ig_captions); posts and
+         carousels store q.caption — both are what Schedule/Post-now/Copy read
+         first, so the chosen line ships verbatim. "auto" clears the override. */
+      planBox.querySelectorAll('.queue-caption-select').forEach(select => {
+        select.onchange = function (e) {
+          e.stopPropagation();
+          var idx = Number(select.getAttribute('data-idx'));
+          var q = state.queueItems[idx];
+          if (!q) return;
+          var v = String(select.value || '');
+          if (v === 'auto') {
+            delete q.igCaption;
+            delete q.caption;
+            delete q.__capPicked;
+            var pidA = '';
+            try { pidA = (typeof cePoemItemId === 'function') ? cePoemItemId(q.item) : String((q.item && (q.item.id || q.item.content_id)) || ''); } catch (_e) {}
+            if (pidA && state.igCaptionById) { delete state.igCaptionById[pidA]; ceSaveIgCaptions(); }
+            try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_s) {}
+            showQueueToast('Caption back to auto');
+            renderMain();
+            return;
+          }
+          var sep = v.indexOf('||');
+          var gid = sep >= 0 ? v.slice(0, sep) : '';
+          var cap = sep >= 0 ? v.slice(sep + 2) : v;
+          if (!cap) return;
+          if (q.type === 'poem') {
+            q.igCaption = cap;
+            var pid = '';
+            try { pid = (typeof cePoemItemId === 'function') ? cePoemItemId(q.item) : String((q.item && (q.item.id || q.item.content_id)) || ''); } catch (_e) {}
+            if (pid) {
+              if (!state.igCaptionById) state.igCaptionById = {};
+              state.igCaptionById[pid] = cap;
+              ceSaveIgCaptions();
+            }
+            if (gid) state.igCaptionGroupId = gid;
+          } else {
+            q.caption = cap;
+          }
+          q.__capPicked = true;
+          try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_s) {}
+          showQueueToast('Caption set: ' + cap.slice(0, 30) + (cap.length > 30 ? '…' : ''));
         };
       });
 
