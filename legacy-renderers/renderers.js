@@ -5352,6 +5352,51 @@ function suggestLooks(card){
       // correction is exact against the final geometry.
       if (kick) clampTranslate(kick);
     });
+
+    // --- fixed-band copy fit (owner bug 2026-09-11) ----------------------------
+    // Blocks that place copy at authored band positions assume SHORT text; real
+    // decks write longer copy, so one band's text lands on the next band's label:
+    //   .ib-iceberg  → .ib-iceLayer   (204 slides in the corpus)
+    //   .ib-skStage  → .ib-skPart     (551 slides; the compose-time resolver budgets
+    //                                  the DRAWN SHAPE height, not the rendered stack)
+    // SHRINK-ONLY: no position is ever rewritten (an earlier attempt that shifted
+    // `top: calc(% + px)` broke the iceberg's own coordinate space). Each band's
+    // available height is the distance to the next band (centered parts are centered
+    // on offsetTop, so that distance is the band), and the last band runs to the
+    // container edge. Type is scaled down only as far as needed, floor 0.55.
+    try {
+      const fitBands = (stageSel, partSel, centerAll) => {
+        const stages = rootEl.querySelectorAll ? rootEl.querySelectorAll(stageSel) : [];
+        Array.prototype.forEach.call(stages, (stage) => {
+          const parts = Array.prototype.slice.call(stage.querySelectorAll(partSel));
+          if (parts.length < 2) return;
+          const rows = parts
+            .map((p) => ({ el: p, anchor: p.offsetTop, type: Array.prototype.slice.call(p.querySelectorAll('b, span, .ib-skLab, .ib-skT')) }))
+            .sort((a, b) => a.anchor - b.anchor);
+          const floorY = stage.offsetHeight;
+          rows.forEach((row, i) => {
+            const next = rows[i + 1];
+            const avail = (next ? next.anchor : floorY) - row.anchor - (centerAll ? 8 : 12);
+            if (avail <= 0) return;
+            for (let round = 0; round < 3; round++) {
+              let used = 0;
+              row.type.forEach((t) => { used = Math.max(used, t.offsetHeight); });
+              const total = row.type.reduce((s, t) => s + t.offsetHeight, 0);
+              const need = Math.max(used, total);
+              if (need <= avail || !need) break;
+              const k = Math.max(0.55, avail / need);
+              row.type.forEach((t) => {
+                const fs = parseFloat(getComputedStyle(t).fontSize) || 0;
+                if (fs > 6) t.style.fontSize = (fs * k).toFixed(1) + 'px';
+              });
+            }
+            fitted++;
+          });
+        });
+      };
+      fitBands('.ib-iceberg', '.ib-iceLayer', false);
+      fitBands('.ib-skStage', '.ib-skPart', true);
+    } catch (_bandErr) {}
     return fitted;
   }
 
