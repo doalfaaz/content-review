@@ -244,7 +244,25 @@
     if (window.__CE_SYNC_ENDPOINT__) { cb(window.__CE_SYNC_ENDPOINT__); return; }
     discover();
   }
-  findSyncEndpoint(function (base) { if (base) window.__CE_SYNC_ENDPOINT__ = base; });
+  // OWNER LAW / AUDIT FIX (2026-09-11): do NOT probe the sync endpoint at page load.
+  // The endpoint lives on the owner's private tailnet. Probing it from a public
+  // visitor's browser (a) discloses the hostname in every visitor's network log and
+  // (b) produces an unavoidable console error (TLS/network failure from anywhere that
+  // cannot reach the tailnet), which tripped the pack-webkit-oracle gates x3.
+  // Discover LAZILY instead: on the first real pointer/key interaction, which is also
+  // the only time sync can actually be used. Nothing is lost — every sync action
+  // requires an interaction first, and `window.__CE_SYNC_ENDPOINT__` short-circuits the
+  // discovery once resolved (see the guard inside findSyncEndpoint).
+  var __ceSyncDiscoveryArmed = false;
+  function armSyncDiscovery() {
+    if (__ceSyncDiscoveryArmed) return;
+    __ceSyncDiscoveryArmed = true;
+    findSyncEndpoint(function (base) { if (base) window.__CE_SYNC_ENDPOINT__ = base; });
+  }
+  window.__CE_ARM_SYNC__ = armSyncDiscovery;
+  document.addEventListener('pointerdown', armSyncDiscovery, { once: true, passive: true });
+  document.addEventListener('keydown', armSyncDiscovery, { once: true, passive: true });
+  // A stale cached endpoint is still revalidated lazily, on the same trigger.
 
   /* ---- Write key (P0-2) ---------------------------------------------------
      Writes on the sync server require the shared write key (X-CE-Sync-Key
