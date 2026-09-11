@@ -2252,7 +2252,7 @@ html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav b
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
 <link rel="stylesheet" href="./ce-mobile.css?v=6c584befde" />
-<script src="./ce-touch-edit.js?v=fefedfa828"></script>
+<script src="./ce-touch-edit.js?v=5afca5d795"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -3106,7 +3106,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var say = window.__CE_PACK_SAY__ = function (m) { try { if (window.showAppToast) window.showAppToast(m); else console.log("[phone-pack] " + m); } catch (_) {} };
     var deck = (window.studioDeck ? window.studioDeck() : null);
     if (!deck || !Array.isArray(deck.slides) || !deck.slides.length) {
-      window.__CE_PACK_SAY__('Open a carousel or post first.');
+      if (typeof window.__CE_POEM_PACK__ === 'function') {
+        var __poemHandled = await window.__CE_POEM_PACK__();
+        if (__poemHandled) return;
+      }
+      window.__CE_PACK_SAY__('Open a carousel, post, or poem first.');
       return;
     }
     if (!window.CarouselCore || typeof window.CarouselCore.slideHTML !== 'function') {
@@ -4076,8 +4080,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     })(),
     // Native app cold-starts with the rail collapsed. Expand is a session
     // gesture (⌘B / the rail button). Do not restore an open rail from storage.
+    // Phone contract (owner 2026-09-11): the rail is a FULL-SCREEN overlay drawer
+    // there, so a remembered desktop-style "expanded" ('0') state made the drawer
+    // squat the whole app on every cold open ("it opens in sidebar, totally
+    // wrong"). Narrow/touch layouts always boot closed.
     sidebarCollapsed: (function () {
       if (window.__CE_NATIVE_APP__) return true;
+      try {
+        var __narrow = window.innerWidth <= 700
+          || Math.min(window.screen && window.screen.width || 9999,
+                      window.screen && window.screen.height || 9999) <= 820;
+        if (__narrow) return true;
+      } catch (_narrowErr) {}
       try { return localStorage.getItem('ce_sidebar_collapsed') !== '0'; }
       catch (_e) { return true; }
     })(),
@@ -17287,6 +17301,27 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         hideCollapsedSidebar();
       };
     });
+
+    // Phone drawer contract (owner 2026-09-11): on narrow/touch layouts the rail is
+    // a full-screen overlay drawer, so ANY destination tap must retract it. The
+    // retract logic existed only inside selectTab()/setLibraryType(), while the real
+    // nav buttons bind their own onclicks — so the drawer stayed open and covered
+    // the app (owner: "it opens in sidebar ... no button no tab works clean").
+    // Delegated + capture so every sub-button (lib filters, poem eras) is covered,
+    // and no-op on the desktop rail where the sidebar is a persistent column.
+    (function bindTouchDrawerRetract() {
+      const nav = document.getElementById('sidebar-nav');
+      if (!nav) return;
+      nav.addEventListener('click', (ev) => {
+        if (!ev.target.closest('button')) return;
+        let touchDrawer = false;
+        try { touchDrawer = !!(window.__CE_IS_TOUCH_DRAWER__ && window.__CE_IS_TOUCH_DRAWER__()); } catch (_td) {}
+        if (!touchDrawer) return;
+        const sb = document.getElementById('sidebar');
+        if (!sb || sb.classList.contains('collapsed')) return;
+        setTimeout(() => { try { window.__CE_SIDEBAR_COLLAPSE__ && window.__CE_SIDEBAR_COLLAPSE__(); } catch (_c) {} }, 0);
+      }, true);
+    })();
 
     document.querySelectorAll('#poem-eras [data-poem-era]').forEach(function (btn) {
       btn.onclick = function (e) {

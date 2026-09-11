@@ -752,3 +752,253 @@
   setTimeout(armSweep, 800);
   setInterval(armSweep, 2500); // safety net for replaced nodes
 })();
+/* ==========================================================================
+   "Download for phone" on a POEM (owner 2026-09-11)
+   The carousel pack renders decks through CarouselCore.slideHTML and refused
+   the poem surface outright ("Open a carousel or post first." while a poem WAS
+   open). A poem is not a deck, so this rasterizes the open poem canvas at post
+   resolution and hands back a PNG (+ the poem text on the clipboard).
+
+   Why it inlines CSS/fonts/images: an SVG rendered through <img> is an isolated
+   document — it CANNOT fetch the page stylesheet, the shipped woff2 faces, or
+   the photo-design backdrops. The first build of this function failed exactly
+   there ("svg render failed"). So the clone is made self-contained first:
+   page CSS (with fonts rewritten to data: URLs) + every image/background as a
+   data: URL, then the SVG/foreignObject snapshot.
+
+   Returns false when no poem is open, so the caller keeps its honest guard.
+   ========================================================================== */
+(function () {
+  'use strict';
+  if (window.__CE_POEM_PACK__) return;
+
+  function say(msg) {
+    try {
+      if (typeof window.__CE_PACK_SAY__ === 'function') window.__CE_PACK_SAY__(msg);
+      else if (window.showAppToast) window.showAppToast(msg);
+    } catch (_e) {}
+  }
+
+  function openPoem() {
+    try {
+      var st = window.__CE_STATE__ || window.state || {};
+      if (st.currentType !== 'poem' || !st.currentItem) return null;
+      return st.currentItem;
+    } catch (_e) { return null; }
+  }
+
+  function authoredBox(canvas) {
+    var zoom = parseFloat(canvas.style.zoom) || 1;
+    var w = parseFloat(canvas.style.width) || 580;
+    var h = 0;
+    var parts = String(canvas.style.aspectRatio || '').split('/');
+    if (parts.length === 2 && parseFloat(parts[0]) > 0 && parseFloat(parts[1]) > 0) {
+      h = w * (parseFloat(parts[1]) / parseFloat(parts[0]));
+    } else {
+      h = (canvas.offsetHeight / zoom) || 725;
+    }
+    return { w: Math.round(w), h: Math.round(h) };
+  }
+
+  function fetchAsDataUrl(url) {
+    return fetch(url, { mode: 'cors', credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.blob(); })
+      .then(function (b) {
+        return new Promise(function (res, rej) {
+          var fr = new FileReader();
+          fr.onload = function () { res(fr.result); };
+          fr.onerror = rej;
+          fr.readAsDataURL(b);
+        });
+      });
+  }
+
+  var ABS = function (u) { try { return new URL(u, document.baseURI).href; } catch (_e) { return u; } };
+
+  /* Page CSS with @font-face src: url(...) rewritten to data: URLs, so the SVG
+     renders in the shipped Laila / Poppins faces instead of a fallback. */
+  function collectCss() {
+    var text = '';
+    var fontFetches = [];
+    try {
+      Array.prototype.forEach.call(document.styleSheets, function (ss) {
+        var rules = null;
+        try { rules = ss.cssRules; } catch (_c) { rules = null; }
+        if (!rules) return;
+        Array.prototype.forEach.call(rules, function (r) {
+          var t = r.cssText || '';
+          if (t.indexOf('@font-face') !== -1) {
+            t = t.replace(/url\((['"]?)([^'")]+)\1\)/g, function (m, q, u) {
+              if (/^data:/.test(u)) return m;
+              var abs = ABS(u);
+              var ph = '__FONT' + fontFetches.length + '__';
+              fontFetches.push({ ph: ph, url: abs });
+              return 'url(' + ph + ')';
+            });
+          }
+          text += t + '\n';
+        });
+      });
+    } catch (_e) {}
+    return Promise.all(fontFetches.map(function (f) {
+      return fetchAsDataUrl(f.url).then(function (d) { return { ph: f.ph, data: d }; }).catch(function () { return null; });
+    })).then(function (done) {
+      done.forEach(function (d) { if (d) text = text.split(d.ph).join(d.data); });
+      return text;
+    });
+  }
+
+  /* Every <img> + CSS background-image inside the clone becomes a data: URL. */
+  function inlineAssets(origRoot, cloneRoot) {
+    var jobs = [];
+    var oImgs = origRoot.querySelectorAll('img');
+    var cImgs = cloneRoot.querySelectorAll('img');
+    Array.prototype.forEach.call(cImgs, function (img, i) {
+      var src = (oImgs[i] && (oImgs[i].currentSrc || oImgs[i].src)) || img.getAttribute('src') || '';
+      if (!src || /^data:/.test(src)) return;
+      img.setAttribute('src', ABS(src));
+      jobs.push(fetchAsDataUrl(ABS(src)).then(function (d) { img.setAttribute('src', d); }).catch(function () {}));
+    });
+    var oAll = origRoot.querySelectorAll('*');
+    var cAll = cloneRoot.querySelectorAll('*');
+    Array.prototype.forEach.call(cAll, function (el, i) {
+      var orig = oAll[i];
+      if (!orig) return;
+      var bg = '';
+      try { bg = getComputedStyle(orig).backgroundImage || ''; } catch (_b) { bg = ''; }
+      if (!bg || bg === 'none' || bg.indexOf('url(') === -1) return;
+      var m = bg.match(/url\((['"]?)([^'")]+)\1\)/);
+      if (!m || /^data:/.test(m[2])) return;
+      var abs = ABS(m[2]);
+      jobs.push(fetchAsDataUrl(abs).then(function (d) {
+        el.style.backgroundImage = 'url("' + d + '")';
+      }).catch(function () {}));
+    });
+    return Promise.all(jobs);
+  }
+
+  window.__CE_POEM_PACK__ = async function () {
+    var poem = openPoem();
+    var canvas = document.getElementById('active-studio-canvas');
+    if (!poem || !canvas) return false;
+
+    var box = authoredBox(canvas);
+    var scale = Math.min(1350 / box.h, 1080 / box.w);   // IG-safe, aspect kept
+    var W = Math.max(1, Math.round(box.w * scale));
+    var H = Math.max(1, Math.round(box.h * scale));
+    say('Rendering your poem at ' + W + '×' + H + '…');
+
+    var holder = document.createElement('div');
+    holder.style.cssText = 'position:fixed;left:-99999px;top:0;width:' + W + 'px;height:' + H +
+      'px;overflow:hidden;z-index:-1;';
+    var inner = document.createElement('div');
+    inner.style.cssText = 'width:' + box.w + 'px;height:' + box.h + 'px;transform:scale(' + scale +
+      ');transform-origin:top left;';
+    var clone = canvas.cloneNode(true);
+    clone.style.zoom = '';
+    clone.style.transform = '';
+    clone.style.width = box.w + 'px';
+    clone.style.height = box.h + 'px';
+    Array.prototype.forEach.call(clone.querySelectorAll('.is-selected, .ce-drag-ghost, [contenteditable]'),
+      function (n) { n.classList.remove('is-selected', 'ce-drag-ghost'); n.removeAttribute('contenteditable'); });
+
+    try {
+      var css = await collectCss();
+      await inlineAssets(canvas, clone);
+      var styleTag = document.createElement('style');
+      /* Inside an XML document, <style> content is character data: raw '<' or
+         '&' in the page CSS (content:"<", media queries aside) makes the SVG
+         unparseable. Escape, then it is valid in both worlds. */
+      styleTag.textContent = String(css || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;');
+      inner.appendChild(styleTag);
+      inner.appendChild(clone);
+      holder.appendChild(inner);
+      document.body.appendChild(holder);
+
+      await new Promise(function (r) { setTimeout(r, 320); });
+      /* An SVG loaded through <img> is parsed as XML: void tags must be
+         self-closed and stray ampersands escaped, or the whole document fails
+         to parse ("svg render failed", nothing drawn). The carousel pack gets
+         away with a lighter pass because its markup is generated; this clone is
+         arbitrary studio DOM, so it gets the full treatment. */
+      var xmlSafe = holder.innerHTML
+        .replace(/<br\s*\/?>/gi, '<br/>')
+        .replace(/<(img|hr|input|source|meta|link)((?:[^>"']|"[^"]*"|'[^']*')*?)\/?>/gi, '<$1$2/>')
+        .replace(/&nbsp;/g, '\u00a0')
+        .replace(/&(?![a-zA-Z#0-9]+;)/g, '&amp;');
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '">' +
+        '<foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml" style="width:' +
+        W + 'px;height:' + H + 'px;">' + xmlSafe + '</div></foreignObject></svg>';
+      try {
+        var parsed = new DOMParser().parseFromString(svg, 'image/svg+xml');
+        var perr = parsed.querySelector('parsererror');
+        if (perr) { say('Poem render blocked by an XML error: ' + String(perr.textContent || '').slice(0, 120)); return true; }
+      } catch (_pv) {}
+      var img = new Image();
+      var src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+      await new Promise(function (res, rej) {
+        var tries = 0;
+        img.onload = res;
+        img.onerror = function () {
+          if (tries++ < 2) setTimeout(function () { img.src = src; }, 280);
+          else rej(new Error('svg render failed'));
+        };
+        img.src = src;
+      });
+      var out = document.createElement('canvas');
+      out.width = W; out.height = H;
+      var cx = out.getContext('2d');
+      cx.fillStyle = '#ffffff';
+      cx.fillRect(0, 0, W, H);
+      cx.drawImage(img, 0, 0, W, H);
+      var dataUrl = out.toDataURL('image/png');
+
+      var slug = String(poem.title || poem.text || 'poem')
+        .replace(/<[^>]+>/g, '')
+        .replace(/[^A-Za-z0-9\u0900-\u097F-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 48) || 'poem';
+      var name = slug + '.png';
+      var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+      var shared = false;
+      if (isIOS && navigator.share) {
+        try {
+          var b64 = dataUrl.split(',')[1];
+          var bin = atob(b64);
+          var arr = new Uint8Array(bin.length);
+          for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+          var file = new File([arr], name, { type: 'image/png' });
+          if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file] });
+            shared = true;
+          }
+        } catch (shareErr) {
+          if (shareErr && shareErr.name === 'AbortError') return true;
+        }
+      }
+      if (!shared) {
+        var a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      var copied = false;
+      try {
+        var edit = document.getElementById('studio-editable-text');
+        var text = (edit ? edit.innerText : (poem.text || '')).trim();
+        if (text) { await navigator.clipboard.writeText(text); copied = true; }
+      } catch (_c) { copied = false; }
+      say('Saved ' + name + ' (' + W + '×' + H + ')' + (copied ? ' — poem text copied.' : '.'));
+      return true;
+    } catch (err) {
+      say('Poem download failed: ' + (err && err.message ? err.message : err));
+      return true;
+    } finally {
+      holder.remove();
+    }
+  };
+})();
