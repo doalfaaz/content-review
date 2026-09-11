@@ -1033,3 +1033,35 @@
     }
   };
 })();
+
+
+// ── 2026-09-11 audit order 3 (P1) — phone carousel Tools row unreachable by finger.
+// Measured: the row's containing block resolves INSIDE the filmstrip band (137-805)
+// while the dock ASIDE sits at 818-874, so it rendered at y=679-690 under the
+// filmstrip track. Every position override failed (z-index, absolute, fixed,
+// display:contents, computed offsets) because the CONTAINING BLOCK is wrong, not the
+// offsets. Fix: move the node into the dock and make it a NORMAL IN-FLOW child — no
+// position override at all — so the dock's own flex layout places it inside 818-874.
+(function () {
+  function ensureDockTools() {
+    var t = document.getElementById('ce-tools-toggle');
+    var dock = document.querySelector('aside.ce-studio-inspector, .ce-studio-inspector');
+    if (!t || !dock) return;
+    if (t.parentElement !== dock) dock.appendChild(t);
+    t.style.setProperty('position', 'static', 'important');
+    ['top', 'bottom', 'left', 'right'].forEach(function (k) { t.style.setProperty(k, 'auto', 'important'); });
+    t.style.setProperty('display', 'flex', 'important');
+    t.style.setProperty('align-items', 'center', 'important');
+    t.style.setProperty('justify-content', 'center', 'important');
+    t.style.setProperty('flex', '0 0 auto', 'important');
+    t.style.setProperty('width', '100%', 'important');
+    t.style.setProperty('height', '44px', 'important');
+    t.style.setProperty('pointer-events', 'auto', 'important');
+    t.style.setProperty('z-index', '400', 'important');
+  }
+  function arm() {
+    ensureDockTools();
+    new MutationObserver(function () { ensureDockTools(); }).observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm); else arm();
+})();

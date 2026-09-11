@@ -1045,6 +1045,18 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-inspector-scroll {
   min-height: 44px !important;
   overflow: visible !important;
 }
+/* Audit order 3 (P1) — REAL root cause, measured: ASIDE#ce-studio-inspector is 56px tall
+   (818-874) but its content is ~90px (the 44px .ce-inspector-scroll plus the 44px Tools
+   row) and it aligns to the end, so the content OVERFLOWS UPWARD to y=754 — straight over
+   the filmstrip (track 137-805). That is why no position/z-index rule ever helped: the row
+   was never in its dock's band. Let the dock size to its content so both children lay out
+   INSIDE 818-874. */
+html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
+  height: auto !important;
+  min-height: 56px !important;
+  overflow: visible !important;
+  justify-content: flex-start !important;
+}
 html.ce-phone .studio-workspace.is-carousel-mode .ce-tools-toggle {
   position: relative !important;
   top: auto !important;
