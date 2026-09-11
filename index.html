@@ -2235,7 +2235,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=b24bfee929"></script>
-<script src="./deck_index.js?v=7af2d02aab"></script>
+<script src="./deck_index.js?v=799573ec87"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=9a09a33078" />
 <link rel="stylesheet" href="./native-plan.css?v=75cf64169d" />
@@ -2246,8 +2246,8 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=2d49c7bd75" />
-<script src="./ce-touch-edit.js?v=3d48978571"></script>
+<link rel="stylesheet" href="./ce-mobile.css?v=4b9330257d" />
+<script src="./ce-touch-edit.js?v=9d8155f1f0"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -8222,6 +8222,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
   function calcFilmstripDims(slideCount, containerWidth, containerHeight) {
     var n = Math.max(1, slideCount || 1);
+    // Owner 2026-09-11 (canvas-first, phone): the desktop budget below floors
+    // `usable` at 480 and the card at 300px. Those floors were authored for a
+    // wide workbench; on a 390px phone they held the deck paper at 77% of the
+    // screen while the tool dock kept a desktop band, so the slide -- the one
+    // thing this surface exists to show -- was the smaller half of its own
+    // editor. Phone law: ONE card per view, sized from the real box, capped by
+    // the real height budget. Desktop (vw > 700) is untouched.
+    var vw = (typeof window !== 'undefined' && window.innerWidth) || 1440;
+    if (vw <= 700) {
+      var phoneW = Math.max(220, Math.min(460, (containerWidth || vw) - 24));
+      var phoneByH = Infinity;
+      if (containerHeight && containerHeight > 200) phoneByH = Math.floor((containerHeight - 28) * (4 / 5));
+      var pw = Math.max(220, Math.min(phoneW, phoneByH));
+      return { miniW: pw, miniH: Math.round(pw * (5 / 4)), usable: phoneW };
+    }
     // Owner 2026-09-03 evening: ONE big swipe gallery of all slides — no
     // separate tiny rail + center hero. Cards are large enough to read and
     // edit; the track scrolls horizontally so every slide is one sweep away.
@@ -9715,7 +9730,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         // Height budget: the stage column minus the bottom workbench (360px)
         // gives the filmstrip's real box before it exists in the DOM.
         var stageBoxH = (document.getElementById('studio-stage') && document.getElementById('studio-stage').clientHeight) || 560;
-        var filmstripH = Math.max(260, stageBoxH - 360);
+        // Owner 2026-09-11: on a phone the stage column is the WHOLE editor —
+        // there is no 360px desktop workbench under it, so subtracting 360
+        // starved the track and the fitter then shrank the paper to fit a band
+        // it never had. Phone law: the filmstrip owns the column minus the slim
+        // tool strip, so hand the sizer the real band (62vh of the viewport).
+        var isPhoneVp = ((typeof window !== 'undefined' && window.innerWidth) || 1440) <= 700;
+        var filmstripH = isPhoneVp
+          ? Math.max(300, Math.round(((window.innerHeight || 844) * 0.62) - 28))
+          : Math.max(260, stageBoxH - 360);
         const stripDims = calcFilmstripDims(slides.length, (canvasWrap && canvasWrap.clientWidth) || 1600, filmstripH);
         const filmstripCards = slides.map(function (slide, index) {
           const slideLook = studioSlideLook(slide, deck);
@@ -10907,8 +10930,33 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // it is what you actually operate on a carousel; Content (slides + hooks)
       // moves to the RIGHT so it sits with the pinned Caption column (copy lives
       // with copy). Slide tools stay leftmost-adjacent to the gallery they edit.
-      dockControls.innerHTML = '<div class="ce-inspector-scroll">' + presentationColumn + slideColumn + contentColumn + '</div>'
+      // Owner 2026-09-11 (canvas-first): on a phone the tool wall lived in flow
+      // under the gallery and took a third of the screen on every deck open, so
+      // the slide was the smaller half of its own editor. The strip now rests as
+      // a single Tools row; opening it floats the same panels as a bottom sheet
+      // OVER the gallery, so the paper keeps the field. Nothing is removed --
+      // every panel is one tap away, and the desktop dock is untouched.
+      var phoneDock = ((typeof window !== 'undefined' && window.innerWidth) || 1440) <= 700;
+      var dockToggleMarkup = phoneDock
+        ? '<button type="button" class="ce-tools-toggle" id="ce-tools-toggle" aria-expanded="false" aria-controls="ce-studio-inspector">'
+          + '<span class="ce-tools-toggle-label">Tools</span>'
+          + '<span class="ce-tools-toggle-hint">Design, text, caption</span></button>'
+        : '';
+      dockControls.innerHTML = '<div class="ce-inspector-scroll">' + dockToggleMarkup + presentationColumn + slideColumn + contentColumn + '</div>'
         + '<div class="ce-inspector-pinned">' + captionSection + '</div>';
+      if (phoneDock) {
+        var toolsToggleBtn = dockControls.querySelector('#ce-tools-toggle');
+        var toolsEditorEl = dockControls.closest('.ce-carousel-editor') || document.querySelector('.ce-carousel-editor');
+        if (toolsToggleBtn && toolsEditorEl) {
+          toolsToggleBtn.onclick = function () {
+            var toolsOpen = toolsEditorEl.classList.toggle('ce-tools-open');
+            toolsToggleBtn.setAttribute('aria-expanded', toolsOpen ? 'true' : 'false');
+            var toolsLabel = toolsToggleBtn.querySelector('.ce-tools-toggle-label');
+            if (toolsLabel) toolsLabel.textContent = toolsOpen ? 'Close tools' : 'Tools';
+            try { if (typeof fitCarouselEditorSlides === 'function') fitCarouselEditorSlides(); } catch (_toolsFit) {}
+          };
+        }
+      }
     }
 
     // Mini design faces rendered by studioLookThumbMarkup scale through the
@@ -15300,8 +15348,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
         <section class="ce-launch-intelligence" aria-label="Launch board intelligence">
           <div class="ce-launch-intelligence-head">
-            <div><span>Board intelligence</span><strong>${__planLen}-day rhythm</strong></div>
-            <small>${(__boardPieces.length || __boardStaged) ? "Live from this rack · no estimated data" : "Rack is empty · stage pieces from Library to activate the rhythm"}</small>
+            <div><span>This week</span><strong>${__planLen}-day posting rhythm</strong></div>
+            <small>${(__boardPieces.length || __boardStaged) ? "Live from your board · nothing estimated" : "Nothing staged yet · pick pieces from Library and the week fills in"}</small>
           </div>
           <div class="ce-launch-insights">
             <div class="ce-launch-insight${__boardPieces.length ? "" : " is-zero"}"><strong>${__boardPieces.length}/${__planLen}</strong><span>days covered</span></div>
@@ -17775,11 +17823,27 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     view.classList.toggle('is-dense');
     window.__CE_STATE__.shelfDensity = view.classList.contains('is-dense') ? 'dense' : 'comfy';
   });
+  // Owner 2026-09-11: the canvas px readout ("580×435 · 54%") is designer chrome
+  // on a creator surface — it was always-on and read as debug furniture. It is
+  // now OPT-IN and never shown on the phone form factor:
+  //   localStorage.setItem('ce_canvas_hud', '1')  → readout returns
+  //   localStorage.removeItem('ce_canvas_hud')    → silent (default)
+  // Nothing is deleted; the measurement is one line away for design work.
+  function ceCanvasHudEnabled() {
+    try {
+      if (document.documentElement.classList.contains('ce-phone')) return false;
+      return localStorage.getItem('ce_canvas_hud') === '1';
+    } catch (_hudFlag) { return false; }
+  }
   function ceUpdateCanvasHud() {
     var canvas = document.getElementById('active-studio-canvas');
     var wrap = document.getElementById('studio-canvas');
     if (!canvas || !wrap) return;
     var hud = document.getElementById('ce-canvas-hud');
+    if (!ceCanvasHudEnabled()) {
+      if (hud) hud.style.display = 'none';
+      return;
+    }
     if (!hud) {
       hud = document.createElement('div');
       hud.id = 'ce-canvas-hud';

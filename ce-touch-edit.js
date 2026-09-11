@@ -438,6 +438,99 @@
     var d = new Date((sec + 5.5 * 3600) * 1000);
     return d.toISOString().slice(0, 10);
   }
+  /* Owner 2026-09-11 — relay outcome reconciliation (lane13-F005).
+     The sheet used to stop at "Queued…" and never read the Mac back, so a
+     schedule the engine REFUSED looked exactly like one that landed: the only
+     honest next move looked like scheduling it again, and that is how a deck
+     gets double-booked. The server doors for this already existed
+     (GET /schedule-requests, POST /schedule-requests/retry) but no client ever
+     called them. This closes the loop: after the POST returns its row id the
+     sheet polls the row's REAL state and reports what actually happened, and a
+     refused row gets the server's own retry door. Never publishes anything —
+     the Mac's engine still owns every decision. */
+  function ceScheduleMount(key) {
+    var ep = window.__CE_SYNC_ENDPOINT__;
+    if (!ep || !key) return;
+    fetch(ep + '/schedule-requests', { headers: { 'X-CE-Sync-Key': key } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var rows = ((j && j.requests) || []).filter(function (row) { return row && row.state === 'failed'; });
+        if (!rows.length) return;
+        window.__CE_SCHED_FAILED__ = rows;
+        var n = rows.length;
+        if (window.showAppToast) window.showAppToast(n === 1 ? 'A schedule failed on your Mac — open Schedule to retry' : n + ' schedules failed on your Mac — open Schedule to retry');
+      })
+      .catch(function () {});
+  }
+  function ceScheduleRow(key, id) {
+    var ep = window.__CE_SYNC_ENDPOINT__;
+    if (!ep || !id) return Promise.resolve(null);
+    return fetch(ep + '/schedule-requests', { headers: { 'X-CE-Sync-Key': key } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var rows = (j && j.requests) || [];
+        for (var i = 0; i < rows.length; i++) if (rows[i] && rows[i].id === id) return rows[i];
+        return null;
+      })
+      .catch(function () { return null; });
+  }
+  function ceScheduleWatch(key, id, statusEl, retryEl) {
+    var tries = 0, MAX_TRIES = 9;
+    var why = function (row) {
+      var res = row && row.result;
+      var msg = (res && (res.error || res.message || res.detail)) || row && row.error;
+      if (msg && typeof msg === 'object') msg = JSON.stringify(msg);
+      return String(msg || 'the engine refused it').slice(0, 160);
+    };
+    var armRetry = function (row) {
+      if (!retryEl) return;
+      retryEl.style.display = '';
+      retryEl.onclick = function () {
+        retryEl.disabled = true;
+        statusEl.textContent = 'Re-queuing\u2026';
+        fetch(window.__CE_SYNC_ENDPOINT__ + '/schedule-requests/retry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key },
+          body: JSON.stringify({ id: id })
+        }).then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
+          .then(function (out) {
+            retryEl.disabled = false;
+            if (out.s === 200) {
+              retryEl.style.display = 'none';
+              statusEl.textContent = 'Re-queued. Your Mac will try Meta again within ~30s.';
+              ceScheduleWatch(key, id, statusEl, retryEl);
+            } else {
+              statusEl.textContent = (out.j && out.j.error) ? out.j.error : 'Retry did not go through.';
+            }
+          }, function () { retryEl.disabled = false; statusEl.textContent = 'Network failed on retry.'; });
+      };
+    };
+    var tick = function () {
+      tries++;
+      ceScheduleRow(key, id).then(function (row) {
+        if (!row) { if (tries < MAX_TRIES) setTimeout(tick, 4000); return; }
+        var st = String(row.state || '');
+        if (st === 'pending' || st === 'queued' || st === 'scheduling') {
+          statusEl.textContent = 'Queued \u2014 your Mac picks it up within ~30s (it must be running).';
+          if (tries < MAX_TRIES) setTimeout(tick, 4000);
+          return;
+        }
+        if (st === 'scheduled' || st === 'published') {
+          statusEl.textContent = 'Confirmed: on Meta\u2019s clock. Your Mac reported it landed.';
+          if (retryEl) retryEl.style.display = 'none';
+          if (window.showAppToast) window.showAppToast('Schedule confirmed by your Mac');
+          return;
+        }
+        if (st === 'failed') {
+          statusEl.textContent = 'Did not go through: ' + why(row);
+          armRetry(row);
+          return;
+        }
+        statusEl.textContent = 'Mac says: ' + st;
+      });
+    };
+    setTimeout(tick, 4000);
+  }
   window.__CE_PHONE_SCHEDULE__ = function () {
     var deck = window.studioDeck ? window.studioDeck() : null;
     if (!deck || !deck.slides || !deck.slides.length) { if (window.showAppToast) window.showAppToast('Open a deck first'); return; }
@@ -463,7 +556,8 @@
       '<div style="display:flex;gap:8px">' +
       '<button id="ce-sched-go" style="flex:1;padding:12px;border:0;border-radius:10px;font-weight:800;background:#d4576b;color:#fff;font-size:14px">Schedule (week+ out)</button>' +
       '<button id="ce-sched-cancel" style="padding:12px 18px;border:1px solid #555;border-radius:10px;background:transparent;color:#fff;font-weight:700">Cancel</button></div>' +
-      '<div id="ce-sched-status" style="font-size:12px;opacity:.8;margin-top:8px;min-height:16px"></div></div>';
+      '<div id="ce-sched-status" style="font-size:12px;opacity:.8;margin-top:8px;min-height:16px"></div>' +
+      '<button id="ce-sched-retry" type="button" style="display:none;width:100%;margin-top:8px;padding:11px;border:1px solid #d4576b;border-radius:10px;background:transparent;color:#ff9db0;font-weight:800;font-size:13px">Retry this schedule</button></div>';
     document.body.appendChild(sheet);
     /* Production consent (owner 2026-09-10): the SERVER is the floor's single
        truth — when its ce_allow_soon marker is on, near dates are legitimate
@@ -489,6 +583,9 @@
     try { cap = ((window.state && window.state.igCaption) || (deck.slides[0] && (deck.slides[0].html || deck.slides[0].text)) || '').replace(/<[^>]+>/g, ''); } catch (_) {}
     sheet.querySelector('#ce-sched-caption').value = cap;
     sheet.querySelector('#ce-sched-cancel').onclick = function () { sheet.remove(); };
+    // Owner 2026-09-11: a schedule that failed on the Mac used to be invisible on
+    // the phone. Ask the relay on open and say it out loud.
+    try { ensureWriteKey(function (k) { ceScheduleMount(k); }); } catch (_mm) {}
     sheet.querySelector('#ce-sched-go').onclick = function () {
       var platform = sheet.querySelector('#ce-sched-platform').value;
       var date = sheet.querySelector('#ce-sched-date').value;
@@ -519,19 +616,28 @@
             try { localStorage.removeItem('ce_sync_key'); } catch (_) {}
             ensureWriteKey(function (k2) {
               if (!k2) { status.textContent = 'Write key needed.'; btn.disabled = false; return; }
-              submit(k2).then(function (r2) { finish(r2); }, function () { status.textContent = 'Network failed.'; btn.disabled = false; });
+              submit(k2).then(function (r2) { finish(r2, k2); }, function () { status.textContent = 'Network failed.'; btn.disabled = false; });
             });
             return;
           }
-          finish(res);
+          finish(res, key);
         });
       });
-      function finish(res) {
+      function finish(res, usedKey) {
         btn.disabled = false;
+        var statusEl = sheet.querySelector('#ce-sched-status');
+        var retryEl = sheet.querySelector('#ce-sched-retry');
         if (res && res.status === 200 && res.body && res.body.ok) {
-          status.textContent = 'Queued. Your Mac schedules it on Meta\u2019s clock within ~30s (must be running).';
+          status.textContent = 'Queued \u2014 your Mac schedules it on Meta\u2019s clock within ~30s (must be running).';
           if (window.showAppToast) window.showAppToast('Schedule queued to your Mac');
-          setTimeout(function () { sheet.remove(); }, 2600);
+          // Owner 2026-09-11: the sheet used to close 2.6s after "Queued", so the
+          // real outcome (landed / refused) was never seen. It now stays open and
+          // reports the Mac's own verdict; Done closes it.
+          var rowId = res.body.id;
+          if (rowId && usedKey) {
+            sheet.querySelector('#ce-sched-cancel').textContent = 'Done';
+            ceScheduleWatch(usedKey, rowId, statusEl, retryEl);
+          }
         } else {
           status.textContent = (res && res.body && res.body.error) ? res.body.error : 'Could not queue the schedule.';
         }
@@ -540,6 +646,16 @@
   };
   // Inject the Schedule button next to the pack button inside the studio topbar.
   function armScheduleButton() {
+    // Owner 2026-09-11 (audit: "duplicate Schedule affordance"): this web-layer
+    // button exists because the PHONE topbar has no native Schedule. On a wide
+    // surface the app already draws its own studio-schedule-btn, so injecting a
+    // second one put two Schedule pills side by side in the desktop topbar. The
+    // phone form factor owns this button; everywhere else it is withdrawn.
+    if (!document.documentElement.classList.contains('ce-phone')) {
+      var stale = document.getElementById('ce-web-schedule-btn');
+      if (stale) stale.remove();
+      return;
+    }
     // Sit beside the pack button wherever it CURRENTLY lives: the phone-mode
     // reparent moves the pack out of the hidden more-menu into the topbar, so
     // a naive one-time insert strands this button inside the hidden menu.
