@@ -504,8 +504,22 @@
       })
       .catch(function () { return null; });
   }
-  function ceScheduleWatch(key, id, statusEl, retryEl) {
-    var tries = 0, MAX_TRIES = 9;
+  function ceScheduleWatch(key, id, statusEl, retryEl, onDone) {
+    // 2026-09-11 audit F1 (P1): the engine's true latency is 84-913s (measured on
+    // live relay rows) while this watch stopped at 9 x 4s = 36s and left a frozen
+    // optimistic line — a REFUSED schedule then looked identical to a landed one,
+    // which is what invites the re-tap that double-books. Watch the real budget,
+    // then keep a slow poll and say honestly what is known.
+    var tries = 0, FAST_TRIES = 45, FAST_MS = 4000, SLOW_MS = 15000, MAX_MS = 20 * 60 * 1000;
+    var startedAt = Date.now();
+    var waited = function () { return Math.round((Date.now() - startedAt) / 1000); };
+    var keepWatching = function () {
+      if (Date.now() - startedAt >= MAX_MS) {
+        statusEl.textContent = 'Still unconfirmed after 20 min — re-open this sheet to check again.';
+        return;
+      }
+      setTimeout(tick, tries < FAST_TRIES ? FAST_MS : SLOW_MS);
+    };
     var why = function (row) {
       var res = row && row.result;
       var msg = (res && (res.error || res.message || res.detail)) || row && row.error;
@@ -538,22 +552,26 @@
     var tick = function () {
       tries++;
       ceScheduleRow(key, id).then(function (row) {
-        if (!row) { if (tries < MAX_TRIES) setTimeout(tick, 4000); return; }
+        if (!row) { keepWatching(); return; }
         var st = String(row.state || '');
         if (st === 'pending' || st === 'queued' || st === 'scheduling') {
-          statusEl.textContent = 'Queued \u2014 your Mac picks it up within ~30s (it must be running).';
-          if (tries < MAX_TRIES) setTimeout(tick, 4000);
+          statusEl.textContent = waited() < 45
+            ? 'Queued \u2014 your Mac picks it up within ~30s (it must be running).'
+            : 'Still working on your Mac \u2014 ' + waited() + 's so far, last checked just now.';
+          keepWatching();
           return;
         }
         if (st === 'scheduled' || st === 'published') {
           statusEl.textContent = 'Confirmed: on Meta\u2019s clock. Your Mac reported it landed.';
           if (retryEl) retryEl.style.display = 'none';
           if (window.showAppToast) window.showAppToast('Schedule confirmed by your Mac');
+          if (typeof onDone === 'function') onDone('scheduled');
           return;
         }
         if (st === 'failed') {
           statusEl.textContent = 'Did not go through: ' + why(row);
           armRetry(row);
+          if (typeof onDone === 'function') onDone('failed');
           return;
         }
         statusEl.textContent = 'Mac says: ' + st;
@@ -654,9 +672,19 @@
         });
       });
       function finish(res, usedKey) {
-        btn.disabled = false;
         var statusEl = sheet.querySelector('#ce-sched-status');
         var retryEl = sheet.querySelector('#ce-sched-retry');
+        // Audit F2 (P1): the relay now refuses a second live row for the same
+        // deck+time. Say so plainly and leave the button latched.
+        if (res && res.status === 409) {
+          btn.disabled = true;
+          statusEl.textContent = 'Already scheduled for that time'
+            + (res.body && res.body.state ? ' (' + res.body.state + ')' : '')
+            + ' \u2014 it was not queued twice.';
+          if (window.showAppToast) window.showAppToast('Already scheduled for that time');
+          return;
+        }
+        btn.disabled = false;
         if (res && res.status === 200 && res.body && res.body.ok) {
           status.textContent = 'Queued \u2014 your Mac schedules it on Meta\u2019s clock within ~30s (must be running).';
           if (window.showAppToast) window.showAppToast('Schedule queued to your Mac');
@@ -665,8 +693,11 @@
           // reports the Mac's own verdict; Done closes it.
           var rowId = res.body.id;
           if (rowId && usedKey) {
+            btn.disabled = true;   // latched while the row is live — a second tap cannot double-book
             sheet.querySelector('#ce-sched-cancel').textContent = 'Done';
-            ceScheduleWatch(usedKey, rowId, statusEl, retryEl);
+            ceScheduleWatch(usedKey, rowId, statusEl, retryEl, function (terminal) {
+              if (terminal === 'failed') btn.disabled = false;   // retry path stays reachable
+            });
           }
         } else {
           status.textContent = (res && res.body && res.body.error) ? res.body.error : 'Could not queue the schedule.';

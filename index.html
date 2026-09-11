@@ -2239,8 +2239,8 @@
 </div>
 
 <!-- Embedded Data Scripts -->
-<script src="./content_data.js?v=b24bfee929"></script>
-<script src="./deck_index.js?v=930c44de9a"></script>
+<script src="./content_data.js?v=15236477c5"></script>
+<script src="./deck_index.js?v=119de1b8ad"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=9a09a33078" />
 <link rel="stylesheet" href="./native-plan.css?v=75cf64169d" />
@@ -2251,8 +2251,8 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=6c584befde" />
-<script src="./ce-touch-edit.js?v=5afca5d795"></script>
+<link rel="stylesheet" href="./ce-mobile.css?v=883fb03d76" />
+<script src="./ce-touch-edit.js?v=82ca9f44c9"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -4064,6 +4064,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     studioMessage: '',
     studioUndoStack: [],
     studioRedoStack: [],
+    // 2026-09-11 audit A4: carousel 'All Slides' view mode. It was never declared
+    // (undefined until first toggle) and never reset on open, so the mode leaked
+    // from one carousel into the next within a session.
+    studioShowAllSlides: false,
     studioOriginalSnapshot: null,
     launchDayType: localStorage.getItem('ce_launch_day_type') || 'good',
     launchChecks: readStoredJSON('ce_launch_checks', {}),
@@ -11338,6 +11342,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (__statusEl) __statusEl.textContent = '';
     state.studioUndoStack = [];
     state.studioRedoStack = [];
+    state.studioShowAllSlides = false;   // audit A4: never leak the view mode between carousels
     state.studioOriginalSnapshot = null;
     state.studioNavSource = {
       tab: state.activeTab || 'library',
@@ -17302,26 +17307,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       };
     });
 
-    // Phone drawer contract (owner 2026-09-11): on narrow/touch layouts the rail is
-    // a full-screen overlay drawer, so ANY destination tap must retract it. The
-    // retract logic existed only inside selectTab()/setLibraryType(), while the real
-    // nav buttons bind their own onclicks — so the drawer stayed open and covered
-    // the app (owner: "it opens in sidebar ... no button no tab works clean").
-    // Delegated + capture so every sub-button (lib filters, poem eras) is covered,
-    // and no-op on the desktop rail where the sidebar is a persistent column.
-    (function bindTouchDrawerRetract() {
-      const nav = document.getElementById('sidebar-nav');
-      if (!nav) return;
-      nav.addEventListener('click', (ev) => {
-        if (!ev.target.closest('button')) return;
-        let touchDrawer = false;
-        try { touchDrawer = !!(window.__CE_IS_TOUCH_DRAWER__ && window.__CE_IS_TOUCH_DRAWER__()); } catch (_td) {}
-        if (!touchDrawer) return;
-        const sb = document.getElementById('sidebar');
-        if (!sb || sb.classList.contains('collapsed')) return;
-        setTimeout(() => { try { window.__CE_SIDEBAR_COLLAPSE__ && window.__CE_SIDEBAR_COLLAPSE__(); } catch (_c) {} }, 0);
-      }, true);
-    })();
+    // 2026-09-11 audit B2: a delegated "retract the touch drawer" listener lived here
+    // and was DEAD CODE — it bailed when the sidebar had `collapsed`, but the phone
+    // drawer's open state IS `.collapsed` + `.peek`. The retraction the owner sees
+    // comes from the nav handlers' own `hideCollapsedSidebar()` call; verified by
+    // state (peek removed, left -300, scrim hidden after a destination tap).
 
     document.querySelectorAll('#poem-eras [data-poem-era]').forEach(function (btn) {
       btn.onclick = function (e) {

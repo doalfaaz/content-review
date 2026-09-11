@@ -1031,6 +1031,37 @@ html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-doc
   #studio-dock .ce-tools-toggle { display: flex !important; }
 }
 html.ce-phone #studio-dock .ce-tools-toggle { display: flex !important; }
+
+/* 2026-09-11 audit B1 (P1) — ROOT CAUSE: in the phone carousel editor the
+   inspector's scroll container collapses to ~5px, so the sticky Tools row is
+   orphaned outside its own container and paints UNDER the filmstrip
+   (filmstrip box spans the full column). z-index cannot fix an orphaned sticky
+   child; give the row a real box inside the inspector and lift that box above
+   the filmstrip layer. */
+html.ce-phone .studio-workspace.is-carousel-mode .ce-inspector-scroll {
+  position: relative !important;
+  z-index: 6 !important;
+  height: auto !important;
+  min-height: 44px !important;
+  overflow: visible !important;
+}
+html.ce-phone .studio-workspace.is-carousel-mode .ce-tools-toggle {
+  position: relative !important;
+  top: auto !important;
+  z-index: 7 !important;
+}
+html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
+  position: relative !important;
+  z-index: 5 !important;
+}
+html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery {
+  position: relative !important;
+  z-index: 1 !important;
+  /* The cards paint OUTSIDE this container's box into the inspector band below,
+     covering the Tools row (audit B1). Clip the bleed while keeping the track's
+     own horizontal scrolling intact. */
+  overflow: hidden !important;
+}
 html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock .ce-tools-toggle::after {
   transform: rotate(45deg) !important;
 }

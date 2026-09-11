@@ -6237,36 +6237,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17890853098147938",
-  "kind": "poem",
-  "title": "poem-17890853098147938",
-  "body": "\"७ उसकी आँखों का पिघलता काजल\nआसमान पर गिरा और रात कर गया । ११\n(७) | हो",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7100000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17915783584005515",
   "kind": "poem",
   "title": "poem-17915783584005515",
@@ -6649,36 +6619,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17860744678204546",
-  "kind": "poem",
-  "title": "poem-17860744678204546",
-  "body": "«० आख़िर किस-किस के लिए लिखें wea aa",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.42000000000000004,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17906249944117629",
@@ -7385,36 +7325,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17926892692053891",
-  "kind": "poem",
-  "title": "poem-17926892692053891",
-  "body": "सुनो मेरी होने वाली , (2\nअभी चाहे किसी भी\nबाबू , शोना को\nHappy Valentine's बोल दो !\nअंत में\nशिवरात्रि कौ भांग पीकर असली\nValentine's तो हमारे साथ ही\nमनाना है तुम्हें ww",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5800000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.55,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17924938663007312",
   "kind": "poem",
   "title": "poem-17924938663007312",
@@ -7735,36 +7645,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17896278679148146",
-  "kind": "poem",
-  "title": "poem-17896278679148146",
-  "body": "महिला दिवस कौ शुभकामनाएं\nउन लौंडों को भी जो\nअधेड़ अवस्था में भी Angel-Priya\nबने फिर रहे हैं ! wy",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17898309385171333",
   "kind": "poem",
   "title": "poem-17898309385171333",
@@ -7795,36 +7675,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17870990350200924",
-  "kind": "poem",
-  "title": "poem-17870990350200924",
-  "body": "0८ aasani se kaise mil poati L,\nMaangi bhi te humne wafa, tu!",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5650000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17911311175094228",
@@ -7955,36 +7805,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17871601027211212",
-  "kind": "poem",
-  "title": "poem-17871601027211212",
-  "body": "आख़िर कौनसा दर्द तुमने महफ़िल में सुनाया है\nकी साक़ी भी तुम्हें घर तक छोड़ने आया है !",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6750000000000002,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17906787460185900",
   "kind": "poem",
   "title": "poem-17906787460185900",
@@ -8047,36 +7867,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17918389564103302",
-  "kind": "poem",
-  "title": "poem-17918389564103302",
-  "body": "PURI DUNIYA KE JAZBAAT EK TARAF j P\nTUJHSE WO PEHLI MULAQAT EK TARAF !\n८",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17919527338105653",
@@ -8333,36 +8123,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17860337143241817",
-  "kind": "poem",
-  "title": "poem-17860337143241817",
-  "body": "उसके रुख़सार से पर्दा गिरा\nहवाओं तक का रंग बदल गया ।\nदेखो ! वैसे तो मैं सख्त लौंडा था,\nलेकिन यार यहाँ मैं पिघल गया ।।",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7500000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.75,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17926686727077163",
@@ -8651,36 +8411,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17910457855192162",
-  "kind": "poem",
-  "title": "poem-17910457855192162",
-  "body": "a\nWo shakhs jo mujhe mera lagta tha 4\nAise bichhda ke fir kabhi mila nahi | ।\n०\nRe a\n५ BY; ib",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7350000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.8499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17921841922122724",
@@ -9259,36 +8989,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17943398935038725",
-  "kind": "poem",
-  "title": "poem-17943398935038725",
-  "body": "४ |]\nह ... Wagt-wagt ki baat thi, =\nWaqt ke saath beet gayi ! é",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.55,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17911469890170034",
   "kind": "poem",
   "title": "poem-17911469890170034",
@@ -9735,36 +9435,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17922251233150884",
-  "kind": "poem",
-  "title": "poem-17922251233150884",
-  "body": "ea\naur likhte to ro hi padhte,\nrokna pada khud ko hamaari. al\ndaastan likhne se ! पा\nse 4 !",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.785,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 1,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17920544038159141",
@@ -10376,36 +10046,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17881518892230789",
-  "kind": "poem",
-  "title": "poem-17881518892230789",
-  "body": "Wo khatf& maine tumhare\nnaam likhe the ,\n(७ padhhan hist aur ha dil\nbehlaati he kya ?",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17953993462058248",
   "kind": "poem",
   "title": "poem-17953993462058248",
@@ -10822,36 +10462,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17927962561162105",
-  "kind": "poem",
-  "title": "poem-17927962561162105",
-  "body": "कुछ ik मिले फिर अपने से\nकुछ दर्द मिले फिर सपने से",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.52,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.35,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17850797611275320",
   "kind": "poem",
   "title": "poem-17850797611275320",
@@ -11202,66 +10812,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17845166656302450",
-  "kind": "poem",
-  "title": "poem-17845166656302450",
-  "body": "अंगड़ाई उधर वो लेते हैं\nबदन इधर मेरा टूटता है !",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6050000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17920072780195866",
-  "kind": "poem",
-  "title": "poem-17920072780195866",
-  "body": "ली: aasani se kaise mil posi\nMaangi bhi te humne wafa thi",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.52,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.35,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17961339550008252",
@@ -12672,36 +12222,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17903831020226521",
-  "kind": "poem",
-  "title": "poem-17903831020226521",
-  "body": "aes के साथ भी कुछ देर बैठ जाता हूँ",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.42000000000000004,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17934966952196828",
   "kind": "poem",
   "title": "poem-17934966952196828",
@@ -12956,36 +12476,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17997139168030636",
-  "kind": "poem",
-  "title": "poem-17997139168030636",
-  "body": "Mere pozbaaten he 6०4५०\nhom diya nw ,\nReshan sv faga me saaya\nhan diya no !",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17947700254160815",
@@ -15036,36 +14526,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17915831572248722",
-  "kind": "poem",
-  "title": "poem-17915831572248722",
-  "body": "\"Forever\" इतना छोटा कब a at\nगया... है",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5950000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17979974110185884",
   "kind": "poem",
   "title": "poem-17979974110185884",
@@ -15160,36 +14620,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17933444086238763",
-  "kind": "poem",
-  "title": "poem-17933444086238763",
-  "body": "हर रोज़ तुझे किसी और संग देखकर\nखूब मरेंगे\nat ! Rak अब ऐसे जी कर भी\nक्या करेंगे ?",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17876806477291911",
@@ -15800,36 +15230,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17943127846238546",
-  "kind": "poem",
-  "title": "poem-17943127846238546",
-  "body": "ए गुजरने वाले साल\nअगर हो सके तो इस aH\nउसे लोटा देना !",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5950000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17944561063237203",
   "kind": "poem",
   "title": "poem-17944561063237203",
@@ -16214,36 +15614,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18024891808002316",
-  "kind": "poem",
-  "title": "poem-18024891808002316",
-  "body": "i\n। \"ab tumhare hisse ki | |)\nghazalein dusre log\npadha karte hain ... j\nLooe De Al faa A\n\" हे i |!",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-18026225467043786",
   "kind": "poem",
   "title": "इश्क़ है , जज़्बात है",
@@ -16338,36 +15708,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17953186135231726",
-  "kind": "poem",
-  "title": "poem-17953186135231726",
-  "body": "ह mujhse bichhadne ke baad | j\npukaarte rahoge duniya ko\n= Tashan ॥",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-18004027219081037",
@@ -16658,36 +15998,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18014926708112559",
-  "kind": "poem",
-  "title": "poem-18014926708112559",
-  "body": "। ५\n* Jo khud me gulzaar ho ,\nUse bhala main ek gulaab है\nkya dun! eae\n४ 5... 0 है",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7400000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-18031057048004028",
   "kind": "poem",
   "title": "ख़ुद भूखी रहकर मेरी सलामती के लिए रखती हैं",
@@ -16848,66 +16158,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18019655203103529",
-  "kind": "poem",
-  "title": "poem-18019655203103529",
-  "body": "Jaane kaisi mohabbat thi , ।\nChand aansuon me beh gayi «००\n। an a '",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-18007731493187093",
-  "kind": "poem",
-  "title": "poem-18007731493187093",
-  "body": "' हि,\nHar umr apni mohabbat q\ndhundh hi leti hai\nfs be q",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-18036605650052801",
   "kind": "poem",
   "title": "poem-18036605650052801",
@@ -16970,36 +16220,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17905362406290858",
-  "kind": "poem",
-  "title": "poem-17905362406290858",
-  "body": "जाने कितनी आसानी से . की।\nहथेली पर मेहंदी से लिखे नाम\nबदल जाते हैं. ... ig",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5950000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-18005570644159557",
@@ -17418,36 +16638,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17951446861262736",
-  "kind": "poem",
-  "title": "poem-17951446861262736",
-  "body": "। पा\nहै पी\naur jab hansti aankhein bhi - '\nro padti hain to dard bhi i\ngehra jhalakta hai ... 7\n800 | ॥",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7150000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 1,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-18031320184103114",
   "kind": "poem",
   "title": "आज भी उसकी हाथों की मैहंदी का रंग",
@@ -17672,36 +16862,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17865894913358150",
-  "kind": "poem",
-  "title": "poem-17865894913358150",
-  "body": "\" एक आख़िरी वाक़या\n( Tue Last Conversation )\nमैं - मत जाओ छोड़कर\nमैं अकेले मर गया तो ?\nवो -सब अकेले ही मरते हैं !\n( इतना कहकर वो चली गयी\nऔर dt वहीं का वहीं रह गया )",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.62,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.55,
-     "khuddariStance": 0.8499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-18012498916168998",
   "kind": "poem",
   "title": "poem-18012498916168998",
@@ -17894,36 +17054,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17846927968408644",
-  "kind": "poem",
-  "title": "poem-17846927968408644",
-  "body": "हारा भी तो उसे\nजिसकी ख़ातिर ॥\nसब कुछ पाया था .. ह",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5900000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-18056060098035051",
   "kind": "poem",
   "title": "poem-18056060098035051",
@@ -17988,36 +17118,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18026258095134887",
-  "kind": "poem",
-  "title": "poem-18026258095134887",
-  "body": "meri wafa tere ishq ki 4\nmohtaaj nahi... aa\nfs - 7 ।",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7100000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.5,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-18055162663022344",
   "kind": "poem",
   "title": "poem-18055162663022344",
@@ -18048,36 +17148,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17989259404217355",
-  "kind": "poem",
-  "title": "poem-17989259404217355",
-  "body": "tumhare saath jitni guzar sake ,\nbas utni zindagi ka mohtaaj hun «««\nDe 74-०5",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17845434808417679",
@@ -18142,36 +17212,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17875084867345675",
-  "kind": "poem",
-  "title": "poem-17875084867345675",
-  "body": "Suno!\naaj mere sheher me mausam ki pehli\nbaarish waapas aayi ,\naise hi ek roz tum bhi to waapas\nlaut sakti thi na!\nKhairee\nDe 76०5",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7000000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.55,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-18037064131126361",
@@ -18718,36 +17758,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17971380511258106",
-  "kind": "poem",
-  "title": "poem-17971380511258106",
-  "body": "\"Forever\" इतना छोटा कब से हो\nगया... Pd",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5950000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17986059838246885",
   "kind": "poem",
   "title": "poem-17986059838246885",
@@ -18778,36 +17788,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17862417133397961",
-  "kind": "poem",
-  "title": "poem-17862417133397961",
-  "body": "ek adhura kissa jo hi\nkahani me dhalte-dhalte ॥\n' ५ क्या gaya !\n4 : j i",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-18068631487013668",
@@ -19418,36 +18398,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18034426951172989",
-  "kind": "poem",
-  "title": "poem-18034426951172989",
-  "body": "\"Happy Father's Day\nउन लौंडों को भी\nजो 'अपनी वाली' के हर was में\nउनका बाप बनने लगते हैं !",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5950000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17889385303356139",
   "kind": "poem",
   "title": "poem-17889385303356139",
@@ -19512,36 +18462,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18039647065166965",
-  "kind": "poem",
-  "title": "poem-18039647065166965",
-  "body": "ये कुछ लम्हें जो तुम्हारी याद में गुज़र रहे हैं\nतुम्हेरे संग जीने के लिए बचा के we थे !",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6350000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17918242432307168",
   "kind": "poem",
   "title": "poem-17918242432307168",
@@ -19572,36 +18492,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-18076940869055656",
-  "kind": "poem",
-  "title": "poem-18076940869055656",
-  "body": "wee उधर वो लेते हैं\nबदन इधर मेरा टूटता है !",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5650000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-18076392220003669",
@@ -20628,36 +19518,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17842671901761268",
-  "kind": "poem",
-  "title": "poem-17842671901761268",
-  "body": "फ़रेबी लोग बातें अक्सर सच्ची सी करते हैं !",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.52,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.35,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17882448781443865",
   "kind": "poem",
   "title": "poem-17882448781443865",
@@ -21234,36 +20094,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17850666871697898",
-  "kind": "poem",
-  "title": "poem-17850666871697898",
-  "body": "Kieson me baant diya gaya ,\nJo kal ko puri kahani tha!\ny : 0 ॥",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17845720756780375",
   "kind": "poem",
   "title": "poem-17845720756780375",
@@ -21582,36 +20412,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-18084160633089267",
-  "kind": "poem",
-  "title": "poem-18084160633089267",
-  "body": "tujhse milkar khud ha nahi rebta hunt 9\n४... 30 J }\ni i",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.78,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.8499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-18078069421156008",
@@ -22318,36 +21118,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17861357062688580",
-  "kind": "poem",
-  "title": "poem-17861357062688580",
-  "body": "ः प्यार करने से\nज़्यादा कठिन होता है\nप्यार ना करना ! है i\"",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.55,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17908784716406927",
   "kind": "poem",
   "title": "poem-17908784716406927",
@@ -22378,36 +21148,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17909666524404103",
-  "kind": "poem",
-  "title": "poem-17909666524404103",
-  "body": "\"कल Mecha\nsy\nA j aS\n()] 4८ क\nie_ ad AAS SN A\nUK aes /yyt)",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-18016011220263030",
@@ -22472,36 +21212,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17864527828631190",
-  "kind": "poem",
-  "title": "poem-17864527828631190",
-  "body": "४ |]\n। nae इतने करीब से\nदूर जाते हुए\nखराब लगोगे! &",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.55,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17856251827744367",
@@ -22664,36 +21374,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18017422294266631",
-  "kind": "poem",
-  "title": "poem-18017422294266631",
-  "body": "बस भूलकर खुद को मेरा कर दे! ९\n। ।\n४.\" be : क्",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.78,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.8499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17861202271725892",
   "kind": "poem",
   "title": "poem-17861202271725892",
@@ -22790,36 +21470,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17846167159950403",
-  "kind": "poem",
-  "title": "poem-17846167159950403",
-  "body": "५ ः4\n\"A Line is a dot that went for a Walk!\" 4\n- Paul Klee j\n5. a | ॥",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.64,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.6000000000000001,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17872940353576486",
   "kind": "poem",
   "title": "poem-17872940353576486",
@@ -22914,36 +21564,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17889234889478332",
-  "kind": "poem",
-  "title": "poem-17889234889478332",
-  "body": "तस्वीरें सीख लेती हैं ह\nFT रहने की तहज़ीब!\n- &: $6 Alfaas \"MN",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.55,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17931815593358116",
@@ -23234,96 +21854,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18094971712087774",
-  "kind": "poem",
-  "title": "poem-18094971712087774",
-  "body": "अब उस तरफ़ जाकर वो -\nx हे ही,\n।",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17846943424973960",
-  "kind": "poem",
-  "title": "poem-17846943424973960",
-  "body": "— ७०\nउम्र भर बस एक मलाल\nतेरा मिलना महज़ एकसवाल रहा!\nसमन «\nइमाम | *",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.775,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.8499999999999999,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17880281656547998",
-  "kind": "poem",
-  "title": "poem-17880281656547998",
-  "body": "न from my second Book,\n\"Sun rahi ho na tum!\"",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5900000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.35,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17882014393559346",
   "kind": "poem",
   "title": "poem-17882014393559346",
@@ -23386,36 +21916,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17892642259473935",
-  "kind": "poem",
-  "title": "poem-17892642259473935",
-  "body": "विश\n\"कारन\n५ \\ A\"\n7 ys हे हैं",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17904614683438589",
@@ -23608,36 +22108,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17882446612510188",
-  "kind": "poem",
-  "title": "poem-17882446612510188",
-  "body": "९ ]\nBr if\n- aur jab hansti aankhein bhi -\nro padti hain to dard bhi q\ngehra jhalakta hai «\nes 90",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17962565707307136",
@@ -23896,36 +22366,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17912231482406538",
-  "kind": "poem",
-  "title": "poem-17912231482406538",
-  "body": "Fir hui kal tanhaai se\nbaatein hamari $\nFir wahi kissey ८\nFir wahi yaadein tumhari!",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5950000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17948157631326173",
   "kind": "poem",
   "title": "poem-17948157631326173",
@@ -24086,36 +22526,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18045952876237256",
-  "kind": "poem",
-  "title": "poem-18045952876237256",
-  "body": "जुबान कॉपती रही!\noeHor) pe di taee । ' | ॥",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5650000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17943063043333278",
   "kind": "poem",
   "title": "तुमसे गुस्सा होकर भी",
@@ -24244,36 +22654,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18047553910238810",
-  "kind": "poem",
-  "title": "poem-18047553910238810",
-  "body": "\" THE CONVERSATION \"\nवो - मेरे ak aie जीना सीख ही\nलिया ना तुमने, क्यूँ ?\nमैं - अब ऐसे हालात में रहने को\nअगर जीना कहो तो फिर जीना ही ठीक!\n(इतना कहकर वो चल पड़ा, वापस जीने!)",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6200000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17891706709470349",
   "kind": "poem",
   "title": "poem-17891706709470349",
@@ -24304,36 +22684,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17909110468417976",
-  "kind": "poem",
-  "title": "poem-17909110468417976",
-  "body": "पर\ni Unke liye raat me rone waalon -\nKhyaal rahe, 4\nwo nahi rote yun tumhare liye ! yy (\nii i i",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7100000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.5,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17952098323320255",
@@ -24462,66 +22812,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17951523847319694",
-  "kind": "poem",
-  "title": "poem-17951523847319694",
-  "body": "ome दिल की मजबूरी है!",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.42000000000000004,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17868555235670174",
-  "kind": "poem",
-  "title": "poem-17868555235670174",
-  "body": "\" THE CONVERSATION \"\nवो - और आजकल कैसे हो ?\nमैं - ठीक !\nTER जाने के बाद\nबस किसी तरह fara हूँ !\nवो - बस... और ?\nकभी कभी खुद को ज़िन्दा\nरखना ही काफ़ी होता है !",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.71,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.75,
-     "oneObject": 0.55,
-     "khuddariStance": 0.8499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17894324035476390",
@@ -24781,36 +23071,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17899439689456678",
-  "kind": "poem",
-  "title": "poem-17899439689456678",
-  "body": "Zindagi ek alag cheez hai , ॥\nZinda rehna ek alag baat hai! —\n- Rahat Indori 7",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17921366479384259",
   "kind": "poem",
   "title": "poem-17921366479384259",
@@ -25035,36 +23295,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18092538076153134",
-  "kind": "poem",
-  "title": "poem-18092538076153134",
-  "body": "Iss qadar bichhde unse hum ,\nDobara milne par anjaan lage. है",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6350000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17843304425082735",
   "kind": "poem",
   "title": "poem-17843304425082735",
@@ -25193,66 +23423,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17850984796969909",
-  "kind": "poem",
-  "title": "poem-17850984796969909",
-  "body": "झालर तो नहीं लगा लिए ना!?",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.5,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17860518754789767",
-  "kind": "poem",
-  "title": "poem-17860518754789767",
-  "body": "\"THE CONVERSATION \"\nमाँ godt हैं - \"और अब उसका क्या हाल है?\"\nमैं टालकर कहता - \"अब बात नहीं होती!\"\nवो कहती हैं - \"फिर झगड़ा हुआ?\"\nमैं मन में बोल पड़ा - \"अब ऐसे भी हालात नहीं!\"",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.66,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.8499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17862273472767202",
   "kind": "poem",
   "title": "poem-17862273472767202",
@@ -25315,36 +23485,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17852836117914708",
-  "kind": "poem",
-  "title": "poem-17852836117914708",
-  "body": "Tere bin neh to lunge, mayan ye\nJere shehen se 4५०० bhi fayenge aur",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5650000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17905395835441887",
@@ -25441,36 +23581,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-18135919921039966",
-  "kind": "poem",
-  "title": "poem-18135919921039966",
-  "body": "Ram - मेरे wt amt |।\nके कितनी ज़ोर से गिरा था मैं\nfeet के लिए भागते हुए ! है",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6200000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17858856493855663",
@@ -25729,36 +23839,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17949158530322762",
-  "kind": "poem",
-  "title": "poem-17949158530322762",
-  "body": "\"उसने मुझसे कहा कि प्यार है!\"\n। q",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.64,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.75,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17862710479805831",
   "kind": "poem",
   "title": "। : तुम पूछते हो मेरे प्यार की ,",
@@ -25853,36 +23933,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17852655916980850",
-  "kind": "poem",
-  "title": "poem-17852655916980850",
-  "body": "छोड़ आऊँगा वापस! है",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.46,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17853376255942201",
@@ -26109,36 +24159,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17865048295773144",
-  "kind": "poem",
-  "title": "poem-17865048295773144",
-  "body": "(कक iss kadar toote ho 2 ५\nki ab khud se ye sawaal karna bhi chhod diya?\nKe sambhalkar rakhte the jis cheez ko,कं\naakhir me usey hi gusse me aakar tod diya? ७",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.665,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17914766176409981",
   "kind": "poem",
   "title": "मिलते वक़्त वाला इंसान हा",
@@ -26299,66 +24319,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17854944751905187",
-  "kind": "poem",
-  "title": "poem-17854944751905187",
-  "body": "किसी ने भी काश हमको\nSN तरह चाहा होता ! | ॥\n४... 90 ett",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6950000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17842633763141354",
-  "kind": "poem",
-  "title": "poem-17842633763141354",
-  "body": "ab hum tere sath bhi\nrahe to tanha ho p\njayenge eee\na\nव",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7400000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17845578455107336",
   "kind": "poem",
   "title": "उससे करा इतना सरल था",
@@ -26389,36 +24349,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17872880971665359",
-  "kind": "poem",
-  "title": "poem-17872880971665359",
-  "body": "हा Har nayi raat ke es\n-____wahi puraane dukhhotehain!}€9",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.52,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.35,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17891516044501384",
@@ -26485,36 +24415,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17891682049502449",
-  "kind": "poem",
-  "title": "poem-17891682049502449",
-  "body": "teri yaaden ha toofan ००५०७ hai,\nhumne khud he bihhraw (244५० ha. जे£",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6350000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17920801990392278",
   "kind": "poem",
   "title": "poem-17920801990392278",
@@ -26545,36 +24445,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17854302901965709",
-  "kind": "poem",
-  "title": "poem-17854302901965709",
-  "body": "का Har guzarti raat ke apne fasaane hote hain,\nDukh naye hote hain, zakhm puraane hote hain\npee\neo be 2",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17922491659382334",
@@ -26609,36 +24479,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17935893970364710",
-  "kind": "poem",
-  "title": "poem-17935893970364710",
-  "body": "(आज एक लेख आपकी तरफ़ से!)",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.53,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17868967135734833",
   "kind": "poem",
   "title": "डे हब नहीं लौट के आने वाला",
@@ -26669,36 +24509,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17881658884573779",
-  "kind": "poem",
-  "title": "poem-17881658884573779",
-  "body": "बिछड़ा कुछ इस अदा st Peथे\n> खालिद ete",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5950000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-18126641887075700",
@@ -26763,66 +24573,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-18033897754252054",
-  "kind": "poem",
-  "title": "poem-18033897754252054",
-  "body": "Zamane bhar ki baatein ho zehen me eo\nmagar ab koi ho hi na jisey keh sako ? ९\nbe a",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17854002763956391",
-  "kind": "poem",
-  "title": "poem-17854002763956391",
-  "body": "। हारा भी तो उसे हक\nजिसकी ख़ातिर\nसब कुछ पाया था .. ९ te\n। fs \" | ।",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17881821067579057",
@@ -26921,36 +24671,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18089697745170758",
-  "kind": "poem",
-  "title": "poem-18089697745170758",
-  "body": "aur jab hansti aankhein जा |]\nro padti hain to dard bhi\ngehra jhalakta hai «००० ।\n४\na",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17860465192850076",
   "kind": "poem",
   "title": "poem-17860465192850076",
@@ -26981,36 +24701,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17916164932416098",
-  "kind": "poem",
-  "title": "poem-17916164932416098",
-  "body": "सहम गया इस ख़्याल से मैं की\nकहीं दुःख मुझमें रहकर ख़ुश तो नहीं ! OD",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.63,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.35,
-     "oneObject": 0.75,
-     "khuddariStance": 0.8499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17880757699578182",
@@ -27045,36 +24735,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18101755702131520",
-  "kind": "poem",
-  "title": "poem-18101755702131520",
-  "body": "\"मेरा एक दोस्त था!\"",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.46,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-18142397110007064",
   "kind": "poem",
   "title": "| किसी के लिए उतना ही गिरना",
@@ -27105,36 +24765,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17884185454565276",
-  "kind": "poem",
-  "title": "poem-17884185454565276",
-  "body": "\"डिप्रेशन और दुःखी होने में wa होता हे!\"",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.48000000000000004,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.35,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-18100576366182024",
@@ -27231,36 +24861,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17851348997058905",
-  "kind": "poem",
-  "title": "poem-17851348997058905",
-  "body": "५ yy Sy aN Sy जीतने\nन् में हारने से ज़रा पहले जीतने\nवाला WA हूँ ।",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17935623463370942",
@@ -27519,36 +25119,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17920698892397355",
-  "kind": "poem",
-  "title": "poem-17920698892397355",
-  "body": "५0५ चल a की\nByte 4 7 = \\ का७4 IC! Lo\nके t : in ce\" \"Ate\nere । Hert Z >, Ly N\ntty, lid ५\nyg Smit, ३ | 4. \"",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.55,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17952403777333443",
   "kind": "poem",
   "title": "poem-17952403777333443",
@@ -27805,36 +25375,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17857807900955677",
-  "kind": "poem",
-  "title": "poem-17857807900955677",
-  "body": "\"आज तुम ख़ुद चले आये हो।\"\nCs (Read Captien) ia\n5.5... 0 ।न ।॥",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7400000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17914100839427791",
   "kind": "poem",
   "title": "poem-17914100839427791",
@@ -27865,36 +25405,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17866186837831046",
-  "kind": "poem",
-  "title": "poem-17866186837831046",
-  "body": ", दिलासों से नहीं जुड़ती",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.5,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-18095960062161478",
@@ -28089,96 +25599,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17860770622903731",
-  "kind": "poem",
-  "title": "poem-17860770622903731",
-  "body": "भाग्य का इससे बड़ा तंज़ क्या रहेगा कि\nने ही fear जैसी\nfier बनाई जिसका मूल उद्देश्य ही सुसाइड के\nविरुद्ध था।\nभगवान जाने नियति में क्या लिखा है,रा\nबस अब उनकी आत्मा को शांति मिले।\nअविश्वसनीय है ये ।",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.55,
-     "khuddariStance": 0.5,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17877872344678336",
-  "kind": "poem",
-  "title": "poem-17877872344678336",
-  "body": "। तुम्हारा आना! HP ह\n५. 0",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.665,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17910068659456584",
-  "kind": "poem",
-  "title": "poem-17910068659456584",
-  "body": "तो क्यूँ आख़िर इतना कुछ छूट जाता है १",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.46,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17844848006277100",
   "kind": "poem",
   "title": "poem-17844848006277100",
@@ -28209,66 +25629,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17862434875953409",
-  "kind": "poem",
-  "title": "poem-17862434875953409",
-  "body": "आज ही हमने घर मे आग लगाई है!",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.53,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17876320846751105",
-  "kind": "poem",
-  "title": "poem-17876320846751105",
-  "body": "दूसरों के अधिकदुःख में ढूंढता है।",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.46,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17881740298690229",
@@ -28559,96 +25919,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17879875768720611",
-  "kind": "poem",
-  "title": "poem-17879875768720611",
-  "body": "7 हज\nतोदर्दकोकुछददेर वक़्तदिया।",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6050000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17869384435862996",
-  "kind": "poem",
-  "title": "poem-17869384435862996",
-  "body": "2 : ५\nथाम लो हाथ में\nएक जाम या\nउसकी कोई तस्वीर !\nनशा कैसा भी हो ,",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5900000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17842676894306018",
-  "kind": "poem",
-  "title": "poem-17842676894306018",
-  "body": "एकलेखकलिजखबनेसेज़्यादामिटादेताहै।\nएक प्रेमी प्रेम करने से ज़्यादा झगड़ लेता है।\nsa बाद\nजोशेष बचजाता है",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.55,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-18071250304211322",
   "kind": "poem",
   "title": "जब हम हालात नहीं बदल सकते पा]",
@@ -28713,36 +25983,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17948001412360232",
-  "kind": "poem",
-  "title": "poem-17948001412360232",
-  "body": "> हमें मिलना था आख़िर में\n। सो हम बिछड़ गए शुरुआत से",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6750000000000002,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17871887374823940",
   "kind": "poem",
   "title": "poem-17871887374823940",
@@ -28805,36 +26045,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17909002825468675",
-  "kind": "poem",
-  "title": "poem-17909002825468675",
-  "body": "हि 2007 मैं w Bees\nतुम शोर करके मुझे\na जगाए रखना | ९",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6200000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17905261267481639",
@@ -29061,36 +26271,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-18065554330238997",
-  "kind": "poem",
-  "title": "poem-18065554330238997",
-  "body": "।' बदन इथर मेरा टूटता है D ....।",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.42000000000000004,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-18078922000200128",
   "kind": "poem",
   "title": "। 'बात यारों से ०",
@@ -29153,36 +26333,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17871434182844751",
-  "kind": "poem",
-  "title": "poem-17871434182844751",
-  "body": "— दूररहनेपरयादोंकीटीसउठती,\nपास रहोतोशिकायतों के गगादे हैं",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6050000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17925102982415471",
@@ -29441,36 +26591,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17859701906114412",
-  "kind": "poem",
-  "title": "poem-17859701906114412",
-  "body": "॥ अपने अपने फ़लसफ़े निकले।",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.46,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17854499954213475",
   "kind": "poem",
   "title": "poem-17854499954213475",
@@ -29501,36 +26621,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17879537782756319",
-  "kind": "poem",
-  "title": "poem-17879537782756319",
-  "body": "\"ad हुई कविता\". 9»\nbs । 4",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.64,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.75,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17912498251577797",
@@ -29629,36 +26719,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17922229945502219",
-  "kind": "poem",
-  "title": "poem-17922229945502219",
-  "body": "et°7 भी अखिर Ovid! VISA &l C4\nen ० क्र\nहै न ॥| Le J °\n। || wo: t\non ५ है 25 है\nmoh के हर",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17904597622632568",
   "kind": "poem",
   "title": "poem-17904597622632568",
@@ -29723,36 +26783,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17893372729799638",
-  "kind": "poem",
-  "title": "poem-17893372729799638",
-  "body": "a बेहद ईमानदार eT,\nEP O™ Gee ated F TR आज़मान तक।\n3 of A — es >. C By\nकक\nह डे",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17905423369648720",
   "kind": "poem",
   "title": "तो ढेरों हैं उड़ाने को,",
@@ -29783,36 +26813,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17942990347431012",
-  "kind": "poem",
-  "title": "poem-17942990347431012",
-  "body": "(8009/882 * 8s \"vs\nummm! good music maybe?\nTony Kakkar - 78h\nWhom should | cast in my next music\nvideo ? Any suggestions /९",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5200000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.15,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17860193549379820",
@@ -29847,66 +26847,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17869007957278421",
-  "kind": "poem",
-  "title": "poem-17869007957278421",
-  "body": "\"तुमसे दूर, बहुत दूर!\"",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.53,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17882122268025743",
-  "kind": "poem",
-  "title": "poem-17882122268025743",
-  "body": "50002 57032 es 00/26/0020 2007 कक इक\n(sha area tatesHAY Seepमें भी आजाद रहे\nGH गर इश्क़ मे भा आज़ाद ve,\n2 80540 Gan न ig + >Ber +5 ich पर ठहरा रहा\nce में तुहारे बिछड़ने तक पर ठहरा रहा!",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.64,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.75,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17877058673117869",
   "kind": "poem",
   "title": "poem-17877058673117869",
@@ -29937,96 +26877,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-18088817977237903",
-  "kind": "poem",
-  "title": "poem-18088817977237903",
-  "body": "ey हम तुम्हें ढूंढने लगते हैं।",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.49000000000000005,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17866042421271800",
-  "kind": "poem",
-  "title": "poem-17866042421271800",
-  "body": "on दिलासों से नहीं जुड़ती",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.46,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.5,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17866804139259110",
-  "kind": "poem",
-  "title": "poem-17866804139259110",
-  "body": "-रजजडकफ\nहि wahi puraane dukh hote hain! ९2",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.52,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.35,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17884422790996950",
@@ -30157,36 +27007,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17872384313159815",
-  "kind": "poem",
-  "title": "poem-17872384313159815",
-  "body": "eee शा फााज Ts, p oS ean\na सुलझना चाहता",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5950000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17979944749341273",
   "kind": "poem",
   "title": "poem-17979944749341273",
@@ -30217,36 +27037,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17936640907455013",
-  "kind": "poem",
-  "title": "poem-17936640907455013",
-  "body": "(७9 zs\nदेश में पहले ही बड़ी आग लग चुकी है। घर बैठकर\nघी डालने का काम ना करें! चारों तरफ़ गिद्ध लगे\nहुए हैं अपना मतलब सिद्ध करने में! घर्य और घीरज\nसे काम लें!\nजय हिन्द! घ्",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.665,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.5,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17912711341605987",
@@ -30345,36 +27135,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17878491374118403",
-  "kind": "poem",
-  "title": "poem-17878491374118403",
-  "body": "जा तुम्हारे पास आने पर क्या EM!",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.49000000000000005,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17932463413471405",
   "kind": "poem",
   "title": "poem-17932463413471405",
@@ -30405,36 +27165,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-18028447036289256",
-  "kind": "poem",
-  "title": "poem-18028447036289256",
-  "body": "= बिल्कुल सच्ची सी करते हैं!\n२ कप es See=\n5 Saag 3३३ ५ पु ॥",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5950000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17867549231280536",
@@ -30533,36 +27263,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17978420347345544",
-  "kind": "poem",
-  "title": "poem-17978420347345544",
-  "body": "तोड़कर अपने उन सभी Ala hel के ari को,\n\"मुझे कभी ना छोड़ने!\" का पहला वादा निभाओगी क्या?",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6350000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17966231044373319",
   "kind": "poem",
   "title": "poem-17966231044373319",
@@ -30659,36 +27359,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17863799930335961",
-  "kind": "poem",
-  "title": "poem-17863799930335961",
-  "body": "\"टूटे वादे ज़्यादा देर याद रहते हैं!\"",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.46,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17869078328252842",
   "kind": "poem",
   "title": "मिलते वक़्त वाला इंसान",
@@ -30719,36 +27389,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17896233373802284",
-  "kind": "poem",
-  "title": "poem-17896233373802284",
-  "body": "हर\nTet लगकर कह दिया उसने\nहै ५ अप RENO: - प्र }",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.55,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17860107422481939",
@@ -30783,66 +27423,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17884965119034469",
-  "kind": "poem",
-  "title": "poem-17884965119034469",
-  "body": "= वहाँ मरहम नहीं et",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.53,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.8499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17944417126436308",
-  "kind": "poem",
-  "title": "poem-17944417126436308",
-  "body": "oF . मेहनत बचाती है!\n4) 4,४. शेर",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5950000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-18203095441010802",
   "kind": "poem",
   "title": "= दुःख अपने हिस्से",
@@ -30873,36 +27453,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-18195098602020420",
-  "kind": "poem",
-  "title": "poem-18195098602020420",
-  "body": "ही eR जद 200 770 220 oa\nRee ही मलालइश्क़कानहीं, ....ः\n2 48 seatGAs Tehy , उसका 8: रे eee\n< — केस 23८",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7100000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.5,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17976530233355848",
@@ -30999,36 +27549,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17930136610475460",
-  "kind": "poem",
-  "title": "poem-17930136610475460",
-  "body": "जाती हैo YU ol ज्मं रे\nगुज़र 5तीel उम्र सार्च\nनिदा Thi Is ली",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17981826016343736",
@@ -31255,36 +27775,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17902493239750060",
-  "kind": "poem",
-  "title": "poem-17902493239750060",
-  "body": "ः और उसने आख़िर में\n+] \"हम साथ जी ही नहीं सकते,",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.67,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.35,
-     "oneObject": 0.75,
-     "khuddariStance": 0.8499999999999999,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17912154835636413",
   "kind": "poem",
   "title": "= कर्म करते हुए हर वक्त",
@@ -31315,96 +27805,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-18140589898148048",
-  "kind": "poem",
-  "title": "poem-18140589898148048",
-  "body": "a आप ही की दी मेहरबानी है\nकेअबहमबसएक कहानी है है",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.63,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.35,
-     "oneObject": 0.75,
-     "khuddariStance": 0.8499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17897543593859683",
-  "kind": "poem",
-  "title": "poem-17897543593859683",
-  "body": "। () फाजु/ —\nre ta wea pre हमने!",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6350000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.5,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-17883226976105541",
-  "kind": "poem",
-  "title": "poem-17883226976105541",
-  "body": "7 (६ FRY\nमुझे डर है की मेरे मरते वक़्त\n। मेरे बच्चे मृत्युंजय जाप की जगह\nमुझे ख़ुद को सम्भालने का",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6200000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17916666652604330",
@@ -31501,36 +27901,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-17922313573599638",
-  "kind": "poem",
-  "title": "poem-17922313573599638",
-  "body": "=\" \"कैसा दौर आ गया है!\"",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.46,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.15,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17889072680177582",
@@ -31725,66 +28095,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-17991153820482542",
-  "kind": "poem",
-  "title": "poem-17991153820482542",
-  "body": "जब रोका\nतो बोले\nजाने दो,\nजब जाने दिया\nतो बोले\nयही चाहते थे! /*",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.5900000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
-  "id": "poem:poem-18015730465394274",
-  "kind": "poem",
-  "title": "poem-18015730465394274",
-  "body": "life is a series of many अबे यार moments",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.48000000000000004,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.35,
-     "oneObject": 0.55,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-17959818098074047",
   "kind": "poem",
   "title": "poem-17959818098074047",
@@ -31815,36 +28125,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-18018553315510868",
-  "kind": "poem",
-  "title": "poem-18018553315510868",
-  "body": "भूलना भी ख़ुद से 5 डर\nदि + , fs pe\nकक SH RSR 2 x",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 3,
-    "score": 0.55,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.44999999999999996,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-18083488742184790",
@@ -32837,36 +29117,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-18131721670028903",
-  "kind": "poem",
-  "title": "poem-18131721670028903",
-  "body": "आख़िर में\nहारा भी तो उसे\nजिसकी ख़ातिर\nसब कुछ पाया था...",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6350000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.6,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-17852450875888610",
@@ -35493,36 +31743,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "poem:poem-auto-87b8717a6d79ff",
-  "kind": "poem",
-  "title": "poem-auto-87b8717a6d79ff",
-  "body": "महिला दिवस की शुभकामनाएँ\nउन लौंडों को भी जो\nअधेड अवस्था में भी Angel-Priya\nबने फिर रहे हैं ! 🙌🙌\n\n- तुषार",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.6250000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.3,
-     "scriptNative": 0.75,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
- },
- {
   "id": "poem:poem-auto-61c5899134e978",
   "kind": "poem",
   "title": "poem-auto-61c5899134e978",
@@ -35681,36 +31901,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-auto-6a5d1939632cb2",
-  "kind": "poem",
-  "title": "poem-auto-6a5d1939632cb2",
-  "body": "आख़िर कौनसा दर्द तुमने महफ़िल में सुनाया है\nकी साक़ी भी तुम्हें घर तक छोड़ने आया है !\n- तुषार",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.735,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.7,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-auto-cc7f50e4534893",
@@ -36031,36 +32221,6 @@ window.ALL_CONTENT_DATA = [
   "revision": 2,
   "rank": "0.0",
   "look_id": ""
- },
- {
-  "id": "poem:poem-auto-4837f1367c11cc",
-  "kind": "poem",
-  "title": "poem-auto-4837f1367c11cc",
-  "body": "उसके रुख़सार से पर्दा गिरा ,\nहवाओं तक का रंग बदल गया ।\nदेखो ! वैसे तो मैं सख़्त लौंडा था,\nलेकिन यार यहाँ मैं पिघल गया ।।\n- तुषार",
-  "pillar": "",
-  "status": "posted",
-  "metadata": {
-   "migrationSource": "ContentEngine_Backup_2026-07-11T20-23-17.json",
-   "craftRubric": {
-    "stars": 4,
-    "score": 0.7800000000000001,
-    "ratedAt": "2026-07-20T15:44:52.762Z",
-    "raterVersion": "craft-rubric-ai-v1",
-    "contentRevision": 1,
-    "confidenceBasis": "ai-craft-prior",
-    "policy": "craft-rubric/v1",
-    "signals": {
-     "turnDetonation": 0.85,
-     "oneObject": 0.75,
-     "khuddariStance": 0.6499999999999999,
-     "scriptNative": 0.95,
-     "hookOpen": 0.55
-    }
-   }
-  },
-  "createdAt": "2026-07-11T20:32:22.278Z",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "revision": 2
  },
  {
   "id": "poem:poem-auto-0a66f1c109696f",
