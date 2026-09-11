@@ -2240,7 +2240,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=15236477c5"></script>
-<script src="./deck_index.js?v=119de1b8ad"></script>
+<script src="./deck_index.js?v=efcbbdfaac"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=9a09a33078" />
 <link rel="stylesheet" href="./native-plan.css?v=75cf64169d" />
@@ -8509,6 +8509,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var authoredW = stripEl.getAttribute('data-ce-authored-w');
       if (authoredW) byWidth = Number(authoredW) / 1080;
       var scale = Math.min(byWidth, byHeight, byTrack);
+      // Owner bug 2026-09-11 (same class as the design minis' 8257-8263 note):
+      // clear the PREVIOUS pass's zoom/transform BEFORE the text-fit, otherwise
+      // the fitter measures the already-shrunk stage and writes wraps that are
+      // wrong for the authored 1080 box — the kicker then lands on top of the body
+      // copy in the strip while the big stage stays clean.
+      stage.style.transform = 'none';
+      stage.style.zoom = '';
       if (window.__CE_FIT_CAROUSEL_TEXT__) window.__CE_FIT_CAROUSEL_TEXT__(stage);
       // Owner 2026-09-06 corner law, final mechanism: transform:scale() lifts the
       // stage onto a composited layer that ESCAPES every ancestor border-radius
@@ -8517,9 +8524,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // compositing, so the radius chain paints normally: corner arcs match the
       // library rails at any zoom. (zoom keeps getBoundingClientRect correct,
       // so block grips and text editing keep working.)
-      stage.style.transform = 'none';
+      // Owner bug 2026-09-11 (carousel filmstrip pile-up): zoom() RE-LAYS-OUT the
+      // 1080x1350 stage at the fitted size, so every block that places its text
+      // against FIXED bands — iceberg layers, funnels, mind maps, decision trees,
+      // spectrum scales — reflows that text and the copy piles on itself. The
+      // design-picker minis were moved off zoom for exactly this reason; the
+      // filmstrip was left behind, which is why the editor looked fine on the big
+      // stage and smashed in the strip. Same "photocopy" as the design minis now:
+      // layout stays at the authored 1080 (so the text-fit above measures the real
+      // box), the composited layer is scaled, and the frame's clip-path:inset()
+      // owns the corner arcs (corner law, native-studio.css 5330-5337).
       stage.style.transformOrigin = 'top left';
-      stage.style.zoom = String(scale);
+      stage.style.transform = 'scale(' + scale + ')';
+      stage.style.zoom = '';
       // Sync the frame to hug the fitted paper. data-ce-mini-w is written for
       // consumers that need the CURRENT fitted width — it is no longer read
       // back as a scale cap (that feedback loop collapsed the cards).
