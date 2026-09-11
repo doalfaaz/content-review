@@ -5376,7 +5376,16 @@ function suggestLooks(card){
           const floorY = stage.offsetHeight;
           rows.forEach((row, i) => {
             const next = rows[i + 1];
-            const avail = (next ? next.anchor : floorY) - row.anchor - (centerAll ? 8 : 12);
+            let avail = (next ? next.anchor : floorY) - row.anchor - (centerAll ? 8 : 12);
+            // Two parts authored at (nearly) the same anchor still print over each
+            // other — a zero band used to be skipped outright, which is why the last
+            // midnight deck kept its 0.31 collision. Give a degenerate band a real
+            // budget (the gap to the next DISTINCT anchor, else a floor) and let the
+            // shrink pass work on it.
+            if (avail <= 0) {
+              const distinct = rows.slice(i + 1).find((r2) => r2.anchor - row.anchor >= 12);
+              avail = distinct ? (distinct.anchor - row.anchor - 8) : Math.max(24, floorY - row.anchor - 24);
+            }
             if (avail <= 0) return;
             for (let round = 0; round < 3; round++) {
               let used = 0;
@@ -5384,7 +5393,7 @@ function suggestLooks(card){
               const total = row.type.reduce((s, t) => s + t.offsetHeight, 0);
               const need = Math.max(used, total);
               if (need <= avail || !need) break;
-              const k = Math.max(0.55, avail / need);
+              const k = Math.max(0.42, avail / need);
               row.type.forEach((t) => {
                 const fs = parseFloat(getComputedStyle(t).fontSize) || 0;
                 if (fs > 6) t.style.fontSize = (fs * k).toFixed(1) + 'px';
@@ -5396,6 +5405,28 @@ function suggestLooks(card){
       };
       fitBands('.ib-iceberg', '.ib-iceLayer', false);
       fitBands('.ib-skStage', '.ib-skPart', true);
+      // Centered parts (translate(-50%,-50%)) grow UPWARD into the part above, so an
+      // anchor-to-anchor band is the wrong budget: measure the real centred boxes and
+      // shrink the LOWER part until it clears the upper one. Iterative + measured, so
+      // it converges on authored collisions the band pass cannot see.
+      Array.prototype.forEach.call(rootEl.querySelectorAll ? rootEl.querySelectorAll('.ib-skStage') : [], (stage) => {
+        const parts = Array.prototype.slice.call(stage.querySelectorAll('.ib-skPart'));
+        if (parts.length < 2) return;
+        const cbox = (el) => ({ t: el.offsetTop - el.offsetHeight / 2, b: el.offsetTop + el.offsetHeight / 2 });
+        for (let round = 0; round < 5; round++) {
+          const rows = parts.map((el) => ({ el, x: cbox(el) })).sort((a, b) => a.x.t - b.x.t);
+          let moved = 0;
+          for (let i = 0; i < rows.length - 1; i++) {
+            if (rows[i].x.b > rows[i + 1].x.t + 0.5) {
+              Array.prototype.forEach.call(rows[i + 1].el.querySelectorAll('.ib-skLab, .ib-skT'), (t) => {
+                const fs = parseFloat(getComputedStyle(t).fontSize) || 0;
+                if (fs > 6) { t.style.fontSize = (fs * 0.88).toFixed(1) + 'px'; moved++; }
+              });
+            }
+          }
+          if (!moved) break;
+        }
+      });
     } catch (_bandErr) {}
     return fitted;
   }
