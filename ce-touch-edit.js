@@ -154,27 +154,57 @@
       window.addEventListener('load', function () { setTimeout(function () { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); }, 3500); });
     }
   } catch (_) {}
-  /* Edge-swipe: swipe in from the LEFT edge opens the nav drawer (owner:
-     "swipe left and see the tabs"), with the app's own scrim + tap-outside. */
+  /* iOS-style edge gesture (owner 2026-09-11: "I want to move back… put my
+     finger on left side and sweep right so it should move back like how iOS
+     app works cleanly").
+     Two defects lived here and they were the same defect:
+       1. the ONLY nav-back gesture was a TWO-FINGER swipe (index.html
+          installAppBackGesture), which nobody discovers;
+       2. THIS handler claimed the natural ONE-FINGER left-edge swipe and spent
+          it opening the nav drawer.
+     So the owner's instinctive back-swipe popped the drawer and back never
+     fired — he read that as "the sidebar keeps opening weirdly" AND "back does
+     not work". One finger from the left edge now behaves like iOS: go BACK when
+     there is anywhere to go back to (studio open → close it; any other tab →
+     Library), and open the drawer only when back has nothing to do — i.e. at
+     the Library root, which is where a drawer makes sense. Two-finger swipes
+     and the desktop trackpad gesture are untouched, and a gesture that begins
+     on a horizontal rail/track is left to that rail. */
   try {
+    var CE_EDGE_PX = 24;
     var edgeStart = null;
+    var edgeFired = false;
+    var edgeIsRail = function (t) {
+      return !!(t && t.closest && t.closest('[data-ce-horizontal-scroll], .ce-carousel-slide-scroll, .ce-filmstrip-track, .ce-rail-track, .ce-look-picker, .ce-hook-options-list'));
+    };
     document.addEventListener('touchstart', function (e) {
+      edgeFired = false;
+      edgeStart = null;
+      if (!e.touches || e.touches.length !== 1) return;
       var t = e.touches[0];
-      if (t && t.clientX <= 28) edgeStart = { x: t.clientX, y: t.clientY };
-      else edgeStart = null;
+      if (t && t.clientX <= CE_EDGE_PX && !edgeIsRail(e.target)) edgeStart = { x: t.clientX, y: t.clientY };
     }, { passive: true });
     document.addEventListener('touchmove', function (e) {
-      if (!edgeStart) return;
-      var t = e.touches[0];
-      if (t.clientX - edgeStart.x > 48 && Math.abs(t.clientY - edgeStart.y) < 60) {
-        edgeStart = null;
-        var sb = document.querySelector('.sidebar');
-        if (sb && sb.classList.contains('collapsed')) {
-          var tg = document.getElementById('sidebar-toggle');
-          tg && tg.click();
-        }
+      if (!edgeStart || edgeFired) return;
+      var t = e.touches && e.touches[0];
+      if (!t) return;
+      var dy = t.clientY - edgeStart.y;
+      if (Math.abs(dy) > 60) { edgeStart = null; return; }   // vertical scroll is never ours
+      if (t.clientX - edgeStart.x <= 40) return;
+      edgeFired = true;
+      edgeStart = null;
+      var wentBack = false;
+      try { if (typeof window.__CE_APP_BACK__ === 'function') wentBack = !!window.__CE_APP_BACK__(); } catch (_b) {}
+      if (wentBack) return;
+      var sb = document.querySelector('.sidebar');
+      if (sb && sb.classList.contains('collapsed')) {
+        var tg = document.getElementById('sidebar-toggle');
+        tg && tg.click();
       }
     }, { passive: true });
+    var edgeReset = function () { edgeStart = null; };
+    document.addEventListener('touchend', edgeReset, { passive: true });
+    document.addEventListener('touchcancel', edgeReset, { passive: true });
   } catch (_) {}
   // W7: honest degradation — when the Mac is unreachable (in-app Chromium
   // webviews deny Local-Network-Access, Mac asleep, cellular), never leave a

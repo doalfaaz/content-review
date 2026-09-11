@@ -849,3 +849,26 @@ html.ce-phone .ce-carousel-editor.ce-tools-open .ce-tools-toggle::after {
   transform: rotate(45deg) !important;
 }
 
+
+/* ---------------------------------------------------------------------------
+   MOBILE SHELF SCALE (owner 2026-09-11: "the posts and carousels that are
+   showing in the panel are too big to be fitted in the mobile version — reduce
+   its entire size so it fits a little more").
+   Measured at 390x844 before this block: Carousels and Posts shelf cards were
+   min(78vw, 340px) = 304x380 — 45% of the viewport HEIGHT for one card, so
+   roughly one card per screen and a very long scroll to find anything.
+   Two-up now: min(44vw, 190px) = 171x214 at 390, which puts two full covers in
+   view plus the scroll snap signalling more. The desktop rail is untouched
+   (this is the phone layer only) and the poems masonry keeps its own column law
+   (see .masonry-grid — text previews need the width; the owner named posts and
+   carousels specifically). */
+@media (max-width: 700px) {
+  .ce-rail-track > * { width: min(44vw, 190px) !important; }
+  .ce-rail-track { gap: 14px !important; }
+  .ce-rail-track .ce-shelf-kicker { max-width: 100% !important; }
+}
+html.ce-phone .ce-rail-track > * { width: min(44vw, 190px) !important; }
+html.ce-phone .ce-rail-track { gap: 14px !important; }
+html.ce-phone .ce-rail-track .ce-shelf-kicker { max-width: 100% !important; }
+
+

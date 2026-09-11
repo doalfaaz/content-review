@@ -2246,8 +2246,8 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=4b9330257d" />
-<script src="./ce-touch-edit.js?v=9d8155f1f0"></script>
+<link rel="stylesheet" href="./ce-mobile.css?v=fc4aa41f78" />
+<script src="./ce-touch-edit.js?v=fefedfa828"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -11899,6 +11899,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }
     return false;
   }
+  // Owner 2026-09-11: the phone's one-finger edge gesture (ce-touch-edit.js)
+  // needs to ask "is there anywhere to go back to?" before deciding whether the
+  // edge swipe means BACK or the nav drawer. Exposed so the phone layer can ask
+  // rather than duplicate this surface logic.
+  window.__CE_APP_BACK__ = appNavigateBack;
 
   function installAppBackGesture() {
     if (window.__CE_APP_BACK_GESTURE__) return;
@@ -12674,7 +12679,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     container.className = 'ce-saved-workspace';
 
     var allSaved = Array.isArray(state.savedItems) ? state.savedItems : [];
-    var countShortlist = allSaved.filter(function (s) { return s && s.status === 'saved'; }).length;
+    /* Owner 2026-09-11: "Saved Bank is not working cleanly."
+       Root cause — "Save to Bank" (line ~17214) files the piece as
+       status 'in_progress' ("Polished"), but the Bank OPENED on the
+       `shortlist` filter, which accepted only status === 'saved'. So the piece
+       the owner had just saved was filtered out of the default view: the Bank
+       rendered "No saved pieces … 1 piece is in the other lists" while his save
+       sat invisibly behind another tab. Shortlist now means everything he kept
+       (saved OR in_progress); only Rejected/Archive is excluded, and the
+       Polished tab still narrows to in_progress. The counts follow the same
+       definition so the tab badge cannot disagree with the list again. */
+    var isKept = function (s) { return !!s && (s.status === 'saved' || s.status === 'in_progress'); };
+    var countShortlist = allSaved.filter(isKept).length;
     var countInProgress = allSaved.filter(function (s) { return s && s.status === 'in_progress'; }).length;
     var countRejected = allSaved.filter(function (s) { return s && s.status === 'rejected'; }).length;
 
@@ -12714,7 +12730,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
     var filteredItems = allSaved.filter(function (s) {
       if (!s) return false;
-      if (activeFilter === 'shortlist' && s.status !== 'saved') return false;
+      if (activeFilter === 'shortlist' && s.status !== 'saved' && s.status !== 'in_progress') return false;
       if (activeFilter === 'in_progress' && s.status !== 'in_progress') return false;
       if (activeFilter === 'rejected' && s.status !== 'rejected') return false;
 
@@ -12971,9 +12987,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var emptyTitle = activeFilter === 'rejected' ? 'No archived pieces' : 'No saved pieces';
       // If this subtab is empty but others hold pieces, say where they are —
       // the owner just saved from Studio and landed here on the default tab.
+      // `shortlist` now means everything kept, so its only "elsewhere" is the
+      // archive; counting in_progress here would double-report the same piece.
       var elsewhere = 0;
-      if (activeFilter === 'shortlist') elsewhere = countInProgress + countRejected;
-      else if (activeFilter === 'in_progress') elsewhere = countShortlist + countRejected;
+      if (activeFilter === 'shortlist') elsewhere = countRejected;
+      else if (activeFilter === 'in_progress') elsewhere = countShortlist - countInProgress + countRejected;
       else elsewhere = countShortlist + countInProgress;
       var elsewhereLine = elsewhere > 0
         ? '<div class="ce-saved-empty-sub">' + elsewhere + ' piece' + (elsewhere === 1 ? ' is' : 's are') + ' in the other lists above.</div>'
