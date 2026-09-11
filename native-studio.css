@@ -1216,7 +1216,12 @@
 @media (max-width: 900px) {
   .studio-tag,
   #studio-status,
-  .studio-primary-actions .pill-btn:not(#studio-export-btn) {
+  /* Direct-child only: this trims the narrow-screen TOPBAR actions. As a
+     descendant selector it also hid every button INSIDE the ••• menu (Save to
+     Bank / Queue / Plan / Copy / Close studio), so the summary stayed visible
+     and opened an empty menu — the owner's "no button works" on the phone.
+     The menu's own children now keep their display. */
+  .studio-primary-actions > .pill-btn:not(#studio-export-btn) {
     display: none;
   }
 
