@@ -2246,7 +2246,7 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=fc4aa41f78" />
+<link rel="stylesheet" href="./ce-mobile.css?v=6c584befde" />
 <script src="./ce-touch-edit.js?v=fefedfa828"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
@@ -9863,6 +9863,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         };
         requestAnimationFrame(fitStage);
         setTimeout(fitStage, 50);
+        // Owner re-audit 2026-09-11: the phone tools sheet toggles the stage's
+        // real height — keep the fitter reachable so the sheet's toggle can
+        // re-fit the paper instead of leaving a stale scale.
+        window.__CE_POST_STAGE_REFIT__ = fitStage;
       }
       renderCarouselDock(1, effectiveDeck, [synthSlide]);
     }
@@ -11514,6 +11518,54 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (sep1) sep1.style.display = 'none';
       if (sep2) sep2.style.display = 'none';
     }
+
+    // Owner re-audit 2026-09-11 (canvas-first law, poem + post): the phone
+    // workspace is a column now, so the dock rests as ONE Tools row and the
+    // same panels float as a bottom sheet when summoned — the slide keeps the
+    // field on every studio type, not only carousels. Nothing is removed;
+    // the desktop workbench never sees the toggle (CSS hides it off-phone).
+    try {
+      var dockEl0 = document.getElementById('studio-dock');
+      var phoneStudio = (((typeof window !== 'undefined' && window.innerWidth) || 1440) <= 700)
+        || document.documentElement.classList.contains('ce-phone');
+      if (dockEl0 && type !== 'carousel' && phoneStudio) {
+        var dockToggle = dockEl0.querySelector('#ce-dock-tools-toggle');
+        if (!dockToggle) {
+          dockToggle = document.createElement('button');
+          dockToggle.type = 'button';
+          dockToggle.className = 'ce-tools-toggle';
+          dockToggle.id = 'ce-dock-tools-toggle';
+          dockToggle.setAttribute('aria-expanded', 'false');
+          dockToggle.setAttribute('aria-controls', 'studio-dock');
+          dockToggle.innerHTML = '<span class="ce-tools-toggle-label">Tools</span><span class="ce-tools-toggle-hint"></span>';
+          dockToggle.onclick = function () {
+            var ws = document.querySelector('.studio-workspace');
+            if (!ws) return;
+            var openNow = ws.classList.toggle('ce-tools-open');
+            dockToggle.setAttribute('aria-expanded', openNow ? 'true' : 'false');
+            var lbl = dockToggle.querySelector('.ce-tools-toggle-label');
+            if (lbl) lbl.textContent = openNow ? 'Close tools' : 'Tools';
+            setTimeout(function () {
+              try { ceFitPoemStudioCanvas(); } catch (_pf) {}
+              try { if (typeof window.__CE_POST_STAGE_REFIT__ === 'function') window.__CE_POST_STAGE_REFIT__(); } catch (_pr) {}
+              try { if (typeof fitCarouselEditorSlides === 'function') fitCarouselEditorSlides(); } catch (_ff) {}
+            }, 80);
+          };
+          dockEl0.insertBefore(dockToggle, dockEl0.firstChild);
+        }
+        var hintEl = dockToggle.querySelector('.ce-tools-toggle-hint');
+        if (hintEl) hintEl.textContent = type === 'post' ? 'Design, hooks, caption' : 'Backdrop, text, style';
+        if (workspaceEl) workspaceEl.classList.remove('ce-tools-open');
+        dockToggle.setAttribute('aria-expanded', 'false');
+        var lbl0 = dockToggle.querySelector('.ce-tools-toggle-label');
+        if (lbl0) lbl0.textContent = 'Tools';
+      } else if (dockEl0 && !phoneStudio) {
+        var staleToggle = dockEl0.querySelector('#ce-dock-tools-toggle');
+        if (staleToggle) staleToggle.remove();
+        if (workspaceEl) workspaceEl.classList.remove('ce-tools-open');
+      }
+    } catch (_dockToggleErr) {}
+
     try {
       updateStudioCanvas();
       // WKWebView can expose the Studio subtree before its first paint. Re-run
@@ -11843,7 +11895,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       const studio = document.getElementById('studio');
       const workspaceEl = document.querySelector('.studio-workspace');
       const leftRail = document.getElementById('studio-left-rail');
-      if (workspaceEl) workspaceEl.classList.remove('is-carousel-mode', 'is-post-mode');
+      if (workspaceEl) workspaceEl.classList.remove('is-carousel-mode', 'is-post-mode', 'ce-tools-open');
       if (leftRail) leftRail.style.display = 'none';
       if (studio) {
         studio.classList.remove('open');
@@ -12770,7 +12822,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         + '</div>'
         + '<div class="ce-saved-bulk-actions">'
         + '<button type="button" class="ce-saved-bulk-btn is-primary" id="ce-bulk-stage-btn"><span class="ce-ic ce-ic--queue ce-ic--13"></span> Stage to Plan calendar (' + selectedCount + ')</button>'
-        + '<button type="button" class="ce-saved-bulk-btn is-danger" id="ce-bulk-reject-btn"><span class="ce-ic ce-ic--delete ce-ic--13"></span> Move to Archive (' + selectedCount + ')</button>'
+        + '<button type="button" class="ce-saved-bulk-btn" id="ce-bulk-reject-btn"><span class="ce-ic ce-ic--delete ce-ic--13"></span> Move to Archive (' + selectedCount + ')</button>'
         + '<button type="button" class="ce-saved-bulk-btn" id="ce-bulk-clear-btn">Deselect All</button>'
         + '</div>'
         + '</div>';
@@ -14966,8 +15018,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           <div class="ce-grow-colhead"><span class="ce-grow-stepnum">Observe</span></div>
         </section>
         <section class="ce-readiness-row" aria-label="Your content at a glance">
-          <div><span>Ready to publish</span><strong>${__growReady.toLocaleString()}</strong><small>of ${(state.queueItems || []).length} queued pieces on this Mac</small></div>
-          <div><span>Designed carousels</span><strong>${__growDecks.toLocaleString()}</strong><small>decks openable in Studio</small></div>
+          <div><span>Ready to publish</span><strong>${__growReady.toLocaleString()}</strong><small>of ${(state.queueItems || []).length} in your Plan</small></div>
+          <div><span>Designed carousels</span><strong>${__growDecks.toLocaleString()}</strong><small>ready to edit in Studio</small></div>
           <div><span>Unedited poems</span><strong>${__growPoems.toLocaleString()}</strong><small>poems in Library</small></div>
           <div><span>Authored posts</span><strong>${__growPosts.toLocaleString()}</strong><small>posts ready to shape</small></div>
         </section>
@@ -15371,9 +15423,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           </div>
           <div class="ce-launch-insights">
             <div class="ce-launch-insight${__boardPieces.length ? "" : " is-zero"}"><strong>${__boardPieces.length}/${__planLen}</strong><span>days covered</span></div>
-            <div class="ce-launch-insight${Object.keys(__boardPillars).length ? "" : " is-zero"}"><strong>${Object.keys(__boardPillars).length}</strong><span>pillars in rotation</span></div>
-            <div class="ce-launch-insight${Object.keys(__boardLooks).length ? "" : " is-zero"}"><strong>${Object.keys(__boardLooks).length}</strong><span>visual looks</span></div>
-            <div class="ce-launch-insight${__boardStaged ? "" : " is-zero"}"><strong>${__boardStaged}</strong><span>already staged</span></div>
+            <div class="ce-launch-insight${Object.keys(__boardPillars).length ? "" : " is-zero"}"><strong>${Object.keys(__boardPillars).length}</strong><span>pillars this week</span></div>
+            <div class="ce-launch-insight${Object.keys(__boardLooks).length ? "" : " is-zero"}"><strong>${Object.keys(__boardLooks).length}</strong><span>looks used</span></div>
+            <div class="ce-launch-insight${__boardStaged ? "" : " is-zero"}"><strong>${__boardStaged}</strong><span>staged in Plan</span></div>
           </div>
           <div class="ce-launch-rhythm" aria-label="Posting rhythm by day">
             ${__planDays.map(function (day) {
@@ -17873,9 +17925,43 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     hud.style.display = '';
     hud.textContent = w + '×' + h + ' · ' + Math.round((w / 1080) * 100) + '%';
   }
+  // Owner re-audit 2026-09-11 (canvas-first law): the poem canvas is authored
+  // as a fixed 580px box and NEVER had a fitter — on a 390px phone the row
+  // workspace shrank it to a 40x30 speck. With the workspace now a column on
+  // phone, the canvas needs the same honest fit the filmstrip stages have:
+  // zoom (not transform:scale) so getBoundingClientRect stays truthful for the
+  // drag box, text editing, and the magnet guides. Desktop is untouched —
+  // the workbench always had room for the authored size.
+  function ceFitPoemStudioCanvas() {
+    var stage = document.getElementById('studio-stage');
+    var wrap = document.getElementById('studio-canvas');
+    var canvas = document.getElementById('active-studio-canvas');
+    if (!stage || !wrap) return;
+    if (!canvas || state.currentType !== 'poem') { if (canvas) canvas.style.zoom = ''; return; }
+    var isPhone = document.documentElement.classList.contains('ce-phone') || window.innerWidth <= 700;
+    if (!isPhone) { canvas.style.zoom = ''; return; }
+    var arParts = String(canvas.style.aspectRatio || '').split('/');
+    var natW = 580;
+    var curZoom = parseFloat(canvas.style.zoom) || 1;
+    var natH = (arParts.length === 2 && +arParts[0] > 0 && +arParts[1] > 0)
+      ? natW * (+arParts[1] / +arParts[0])
+      : ((canvas.offsetHeight / curZoom) || 435);
+    var availW = stage.clientWidth - 24;
+    var availH = stage.clientHeight - 24;
+    if (availW < 40 || availH < 40) return;
+    var z = Math.min(availW / natW, availH / natH, 1);
+    canvas.style.zoom = z >= 0.985 ? '' : z.toFixed(4);
+  }
   (function () {
     var hudTarget = null, hudTimer = null;
-    function scheduleHud() { if (hudTimer) return; hudTimer = setTimeout(function () { hudTimer = null; ceUpdateCanvasHud(); }, 120); }
+    function scheduleHud() {
+      if (hudTimer) return;
+      hudTimer = setTimeout(function () {
+        hudTimer = null;
+        ceUpdateCanvasHud();
+        try { ceFitPoemStudioCanvas(); } catch (_poemFit) {}
+      }, 120);
+    }
     var obs = new MutationObserver(function () {
       var el = document.getElementById('active-studio-canvas');
       if (el && el !== hudTarget) { hudTarget = el; scheduleHud(); }

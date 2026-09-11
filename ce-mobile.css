@@ -254,7 +254,7 @@
    Double-chain selectors (below) win the cascade at equal importance.
    ========================================================================== */
 @media (max-width: 700px) {
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector {
+  .studio-workspace.is-carousel-mode .ce-studio-inspector {
     height: auto !important;
     max-height: 58vh !important;
     min-height: 0 !important;
@@ -264,43 +264,43 @@
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
   }
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll {
+  .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll {
     display: flex !important;
     flex-direction: column !important;
     overflow: visible !important;
   }
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column {
+  .studio-workspace.is-carousel-mode .ce-dock-column {
     flex: 0 0 auto !important;
     flex-basis: auto !important;
     border-right: 0 !important;
     border-bottom: 1px solid var(--studio-workbench-line, rgba(255,255,255,0.075)) !important;
   }
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column:last-child {
+  .studio-workspace.is-carousel-mode .ce-dock-column:last-child {
     border-bottom: 0 !important;
   }
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body {
+  .studio-workspace.is-carousel-mode .ce-dock-column-body {
     overflow: visible !important;
     max-height: none !important;
   }
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks {
+  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
+  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks {
     flex: 0 0 auto !important;
   }
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure {
+  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure {
     margin-top: 0 !important;
   }
   /* One-column Slides row: Add slide full width, icons row beneath. */
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack {
+  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack {
     display: flex !important;
     flex-direction: column !important;
     gap: 8px !important;
   }
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn {
+  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn {
     height: 40px !important;
     font-size: 13px !important;
   }
   /* Caption panel: own block, readable textarea. */
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-inspector-pinned {
+  .studio-workspace.is-carousel-mode .ce-inspector-pinned {
     width: 100% !important;
     max-width: none !important;
     min-width: 0 !important;
@@ -309,20 +309,20 @@
     grid-row: auto !important;
   }
   /* Filmstrip cards: bigger tap faces, snap scrolling. */
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
     scroll-snap-type: x mandatory !important;
     -webkit-overflow-scrolling: touch !important;
   }
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
+  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
     width: min(62vw, 320px) !important;
     scroll-snap-align: center !important;
   }
   /* Hook rows: comfortable reading height. */
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-hook-row-item {
+  .studio-workspace.is-carousel-mode .ce-hook-row-item {
     min-height: 52px !important;
   }
   /* Look grid 3-up with readable faces. */
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-look-picker-grid {
+  .studio-workspace.is-carousel-mode .ce-look-picker-grid {
     grid-template-columns: repeat(3, 1fr) !important;
   }
 }
@@ -515,7 +515,7 @@ html.ce-phone .studio-title { max-width: 40vw !important; }
 
 /* class twin of @media (max-width: 700px) { */
 
-html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector { height: auto !important;
+html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector { height: auto !important;
     max-height: 58vh !important;
     min-height: 0 !important;
     display: flex !important;
@@ -524,35 +524,35 @@ html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-in
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important; }
 
-html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll { display: flex !important;
+html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector > .ce-inspector-scroll { display: flex !important;
     flex-direction: column !important;
     overflow: visible !important; }
 
-html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column { flex: 0 0 auto !important;
+html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column { flex: 0 0 auto !important;
     flex-basis: auto !important;
     border-right: 0 !important;
     border-bottom: 1px solid var(--studio-workbench-line, rgba(255,255,255,0.075)) !important; }
 
-html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column:last-child { border-bottom: 0 !important; }
+html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column:last-child { border-bottom: 0 !important; }
 
-html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body { overflow: visible !important;
+html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column-body { overflow: visible !important;
     max-height: none !important; }
 
-html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks { flex: 0 0 auto !important; }
+html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-looks,
+  .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-hooks { flex: 0 0 auto !important; }
 
-html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure { margin-top: 0 !important; }
+html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column-body > .ce-dock-structure { margin-top: 0 !important; }
 
 html.ce-phone /* One-column Slides row: Add slide full width, icons row beneath. */
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack { display: flex !important;
+  .studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack { display: flex !important;
     flex-direction: column !important;
     gap: 8px !important; }
 
-html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn { height: 40px !important;
+html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn { height: 40px !important;
     font-size: 13px !important; }
 
 html.ce-phone /* Caption panel: own block, readable textarea. */
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-inspector-pinned { width: 100% !important;
+  .studio-workspace.is-carousel-mode .ce-inspector-pinned { width: 100% !important;
     max-width: none !important;
     min-width: 0 !important;
     border-left: 0 !important;
@@ -560,17 +560,17 @@ html.ce-phone /* Caption panel: own block, readable textarea. */
     grid-row: auto !important; }
 
 html.ce-phone /* Filmstrip cards: bigger tap faces, snap scrolling. */
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track { scroll-snap-type: x mandatory !important;
+  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track { scroll-snap-type: x mandatory !important;
     -webkit-overflow-scrolling: touch !important; }
 
-html.ce-phone .studio-workspace .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card { width: min(62vw, 320px) !important;
+html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card { width: min(62vw, 320px) !important;
     scroll-snap-align: center !important; }
 
 html.ce-phone /* Hook rows: comfortable reading height. */
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-hook-row-item { min-height: 52px !important; }
+  .studio-workspace.is-carousel-mode .ce-hook-row-item { min-height: 52px !important; }
 
 html.ce-phone /* Look grid 3-up with readable faces. */
-  .studio-workspace .studio-workspace.is-carousel-mode .ce-look-picker-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  .studio-workspace.is-carousel-mode .ce-look-picker-grid { grid-template-columns: repeat(3, 1fr) !important; }
 
 
 /* ===== phone: surface "Download for phone" as THE primary action ===== */
@@ -867,8 +867,177 @@ html.ce-phone .ce-carousel-editor.ce-tools-open .ce-tools-toggle::after {
   .ce-rail-track { gap: 14px !important; }
   .ce-rail-track .ce-shelf-kicker { max-width: 100% !important; }
 }
-html.ce-phone .ce-rail-track > * { width: min(44vw, 190px) !important; }
+/* Owner 2026-09-11 (recursive re-audit, W5): the shelf must keep the
+   two-up glance AND honestly promise a swipe. Cards start at x=40 (main
+   padL 24 + track padL 16) with a 14px gap, so two full cards + a real
+   peek needs W <= (vw - 102) / 2. min(44vw,190) alone gave peek 6px at
+   402 and NONE at 440 — a dead-end-looking rail. The third term floors
+   the peek at >= 24px on every iPhone width (440 -> 169px cards,
+   402 -> 150, 390 -> 144; 44vw still binds below ~340px). */
+html.ce-phone .ce-rail-track > * { width: min(44vw, 190px, calc((100vw - 102px) / 2)) !important; }
 html.ce-phone .ce-rail-track { gap: 14px !important; }
 html.ce-phone .ce-rail-track .ce-shelf-kicker { max-width: 100% !important; }
+
+
+/* ---------------------------------------------------------------------------
+   PHONE POEM/POST STUDIO — CANVAS-FIRST (recursive re-audit 2026-09-11).
+   Measured live at 390x844 on the deployed bundle: the workspace stays a ROW
+   on phone — the dock (310px) and the post rail (320px) squeezed the stage to
+   80px/48px wide, and the poem canvas painted at 40x30px (3.6% of the view,
+   a speck) while the post canvas measured 0x687. The slide must lead its own
+   editor on EVERY studio type, not only carousels:
+     1. the workspace goes column — the stage owns the field;
+     2. the post rail becomes a slim horizontal strip under the stage;
+     3. the dock rests as ONE 56px Tools row and floats as a bottom sheet when
+        summoned (the same contract the carousel editor already has).
+   The desktop workbench is untouched (every rule is ce-phone / <=700px). */
+
+@media (max-width: 700px) {
+  .studio-workspace:not(.is-carousel-mode) { flex-direction: column !important; }
+  .studio-workspace:not(.is-carousel-mode) .studio-stage {
+    order: 1 !important;
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 12px !important;
+  }
+  .studio-workspace:not(.is-carousel-mode) .studio-left-rail {
+    order: 2 !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 6px 12px !important;
+    max-height: 64px !important;
+    min-height: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-left: 0 !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .studio-workspace:not(.is-carousel-mode) .studio-left-rail > * { flex: 0 0 auto !important; }
+  .studio-workspace:not(.is-carousel-mode) .studio-dock {
+    order: 3 !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: 56px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    border-left: 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+    position: relative !important;
+    z-index: 20 !important;
+  }
+  .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-dock {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    max-height: 62vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    z-index: 40 !important;
+    padding: 4px 16px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 14px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
+    background: rgba(12, 13, 18, 0.96) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.55) !important;
+  }
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) { flex-direction: column !important; }
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-stage {
+  order: 1 !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 12px !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail {
+  order: 2 !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 12px !important;
+  max-height: 64px !important;
+  min-height: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-left: 0 !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail > * { flex: 0 0 auto !important; }
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-dock {
+  order: 3 !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: 56px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  border-left: 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: none !important;
+  position: relative !important;
+  z-index: 20 !important;
+}
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-dock {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  max-height: 62vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  z-index: 40 !important;
+  padding: 4px 16px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+  gap: 14px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background: rgba(12, 13, 18, 0.96) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.55) !important;
+}
+/* The dock's Tools row only exists inside the phone contract; never on the
+   desktop workbench (the poem/post dock has no collapse there). */
+#studio-dock .ce-tools-toggle { display: none !important; }
+@media (max-width: 700px) {
+  #studio-dock .ce-tools-toggle { display: flex !important; }
+}
+html.ce-phone #studio-dock .ce-tools-toggle { display: flex !important; }
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock .ce-tools-toggle::after {
+  transform: rotate(45deg) !important;
+}
+/* On phone the canvas may use nearly the whole viewport width — the desktop
+   85vw cap was part of the sliver, not protection. */
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-canvas-wrap {
+  max-width: calc(100vw - 24px) !important;
+}
 
 
