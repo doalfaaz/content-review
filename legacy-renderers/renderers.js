@@ -5351,6 +5351,53 @@ function suggestLooks(card){
       // 72.9px past the box bottom on tasveer). Translate never reflows, so this
       // correction is exact against the final geometry.
       if (kick) clampTranslate(kick);
+
+      // Extra studio elements (the palimpsest overlay class, lane re-audit
+      // 2026-09-12): each .ce-extra-element carries its own layout.elements[i]
+      // translate, and the fit pass never clamped them — a dragged element could
+      // paint 87px+ past the clip edge or over the slide's own bk-title/bk-foot/
+      // kickline/pageno. Order: box clamp → clear slide-chrome bands → box clamp
+      // again, so the clip law always has the final word. Only elements with an
+      // authored translate are corrected — in-flow siblings never overlap by layout.
+      slide.querySelectorAll('.ce-extra-element').forEach(el => {
+        if (!/translate\(/.test(el.style.transform || '')) return;
+        clampTranslate(el);
+        // Clear slide chrome in ONE move: pushing below each overlapped band in
+        // sequence oscillates when the element is taller than the gap between
+        // bands (pushed past the next band, then clamped back onto the first).
+        // The valid placements are: fully above the TOPMOST overlapped band or
+        // fully below the BOTTOMMOST one. Pick the one that violates the clip
+        // box least (ties → smaller move); the final box clamp then wins anyway,
+        // so an element too tall to dodge every band still never leaves the card.
+        const bands = Array.prototype.slice.call(
+          slide.querySelectorAll('.kickline, .brand, .pageno, .ce-render-block-content > .bk-title, .ce-render-block-content > .bk-foot')
+        ).filter(ch => !el.contains(ch));
+        let er = el.getBoundingClientRect();
+        const hits = bands.filter(ch => {
+          const cr = ch.getBoundingClientRect();
+          return Math.min(er.bottom, cr.bottom) > Math.max(er.top, cr.top)
+              && Math.min(er.right, cr.right) > Math.max(er.left, cr.left);
+        });
+        if (hits.length) {
+          const bandTop = Math.min.apply(null, hits.map(ch => ch.getBoundingClientRect().top));
+          const bandBot = Math.max.apply(null, hits.map(ch => ch.getBoundingClientRect().bottom));
+          const dyUp = bandTop - er.bottom;      // bottom edge lands just above the band
+          const dyDown = bandBot - er.top;       // top edge lands just below the band
+          const viol = (t, b) => Math.max(0, boxTop - t) + Math.max(0, b - boxBottom);
+          const vUp = viol(er.top + dyUp, er.bottom + dyUp);
+          const vDown = viol(er.top + dyDown, er.bottom + dyDown);
+          const dy = (vUp === vDown)
+            ? (Math.abs(dyUp) <= Math.abs(dyDown) ? dyUp : dyDown)
+            : (vUp < vDown ? dyUp : dyDown);
+          if (Math.abs(dy) > 0.05) {
+            const mm = /translate\(\s*(-?[\d.]+)px\s*,\s*(-?[\d.]+)px\s*\)/.exec(el.style.transform || '');
+            const tx = mm ? parseFloat(mm[1]) : 0, ty = mm ? parseFloat(mm[2]) : 0;
+            el.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + (ty + dy).toFixed(1) + 'px)';
+            fitted++;
+          }
+        }
+        clampTranslate(el);
+      });
     });
 
     // --- fixed-band copy fit (owner bug 2026-09-11) ----------------------------

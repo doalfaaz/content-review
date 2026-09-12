@@ -868,6 +868,12 @@
 .ce-extra-element {
   margin-top: 24px;
   width: 100%;
+  /* Stable containing block: infographic block children (ib-*) are absolutely
+     positioned and must resolve against THIS element, not the whole .slide —
+     which only happened incidentally once a layout translate existed
+     (transform creates the containing block). position:relative makes the
+     behavior identical with or without an authored offset. */
+  position: relative;
 }
 
 .ce-carousel-dock {

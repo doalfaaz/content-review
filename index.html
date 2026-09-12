@@ -2245,14 +2245,14 @@
 <link rel="stylesheet" href="./native-ideas.css?v=9a09a33078" />
 <link rel="stylesheet" href="./native-plan.css?v=75cf64169d" />
 <link rel="stylesheet" href="./native-saved.css?v=4070f3d29b" />
-<link rel="stylesheet" href="./native-studio.css?v=1fdf0541cc" />
+<link rel="stylesheet" href="./native-studio.css?v=0a333e7ed3" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
 <link rel="stylesheet" href="./ce-mobile.css?v=417fe368c3" />
-<script src="./ce-touch-edit.js?v=1679abbd79"></script>
+<script src="./ce-touch-edit.js?v=0dfbeeb716"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -3218,7 +3218,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           if (hit) {
             window.__CE_DECKS_FULL__[sid] = hit;
             delete pending[sid];
-            if (typeof applyDeck === 'function') applyDeck(null, hit);
+            if (typeof applyDeck === 'function') applyDeck(sid, hit);
             served++;
           } else {
             delete pending[sid];
@@ -4584,6 +4584,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
     if (type === 'carousel') {
       var deckId = String(item.id || item.designId || '');
+      // 2026-09-12 (owner's phone complaint): the phone ships deck_index.js rows carrying
+      // `coverSlide`, NOT `slides` — so `isSnapshot` was always false on the phone, which
+      // fell through to a `__CE_DECKS_FULL__`/`__NATIVE_DECKS__` lookup that can never
+      // resolve without a native bridge, then to `__CE_DECK_WANT__` (no bridge), and the
+      // card painted as a blank `opacity:0.42` skeleton (16 of them) whose tap went to
+      // the reel-proxy modal instead of the studio. The static index already carries the
+      // cover face — resolve it directly.
       var isSnapshot = Array.isArray(item.slides) && item.slides.length > 0;
       var deck = isSnapshot
         ? item
@@ -4596,6 +4603,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var chosenLook = (queueItem && queueItem.design && queueItem.design.look) || (deck && deck.look) || 'midnight';
       var look = (typeof validLook === 'function') ? validLook(chosenLook) : (window.__CE_VALID_LOOK__ ? window.__CE_VALID_LOOK__(chosenLook) : chosenLook);
 
+      // Phone path (2026-09-12): the static index carries coverSlide, not a slides array.
+      // If the deck has a coverSlide but no slides, resolve it into a one-slide face so the
+      // card paints a real cover instead of a placeholder shell.
+      if (deck && !Array.isArray(deck.slides) && deck.coverSlide && typeof deck.coverSlide === 'object') {
+        deck = { id: deck.id || deckId, designId: deck.designId, title: deck.title, look: deck.look, slideCount: deck.slideCount, slides: [deck.coverSlide] };
+      }
       if (deck && Array.isArray(deck.slides) && deck.slides.length && window.CarouselCore) {
         var slide = (typeof normSlide === 'function') ? normSlide(deck.slides[0] || {}, 0, deck.slides.length) : (deck.slides[0] || {});
         return '<div class="ce-cc ce-real-face" data-ce-deck="' + escapeHtml(deckId) + '" style="width:100%; aspect-ratio:4/5; overflow:hidden; position:relative; background:#111; border-radius:10px;">'
@@ -4604,10 +4617,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           + '</div></div>';
       }
 
+      // Keep the card's real deck id on the wrapper even when the face can't resolve, so the
+      // click handler can open it directly from the static index instead of falling through
+      // to the reel-proxy modal.
       if (deckId && window.__CE_DECK_WANT__) window.__CE_DECK_WANT__(deckId);
-      return '<div data-ce-deck="' + escapeHtml(deckId) + '" class="ce-deck-placeholder" style="width:100%; aspect-ratio:4/5; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#18181c; color:var(--muted); border-radius:10px; position:relative; overflow:hidden;">'
-        + '<div style="width:22px; height:22px; border:2px solid rgba(255,255,255,0.15); border-top-color:var(--accent); border-radius:50%; animation:ce-spin .7s linear infinite;"></div>'
-        + '<div style="margin-top:8px; font-size:11px; font-weight:700; opacity:.8;">Loading carousel…</div>'
+      // 2026-09-12 (owner's phone complaint): never paint a dead skeleton shell — a card that
+      // can't yet render its face shows a clean "Opening…" state with its real title, not an
+      // opacity-0.42 ghost the owner reads as broken. The face arrives when the lazy mount
+      // resolves it (IntersectionObserver on the phone; the static index already has the deck).
+      var phTitle = deck && (deck.title || deck.id) ? escapeHtml(deck.title || deck.id) : 'Carousel';
+      return '<div data-ce-deck="' + escapeHtml(deckId) + '" class="ce-deck-placeholder" style="width:100%; aspect-ratio:4/5; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:#18181c; color:var(--muted); border-radius:10px; position:relative; overflow:hidden; padding:18px; text-align:center;">'
+        + '<div style="font-size:12px; font-weight:700; letter-spacing:.3px; opacity:.85;">' + phTitle + '</div>'
+        + '<div style="width:18px; height:18px; border:2px solid rgba(255,255,255,0.14); border-top-color:var(--accent); border-radius:50%; animation:ce-spin .7s linear infinite;"></div>'
         + '</div>';
     }
 
@@ -5178,6 +5199,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (br) {
       br.postMessage({ action: 'getMetaToken' });
       br.postMessage({ action: 'getIgQueue' });
+      br.postMessage({ action: 'getScheduleRequests' });
     }
   })();
   window.__CE_COPY_RESULT__ = function (ok) { window.__CE_LAST_COPY_OK__ = !!ok; };
@@ -5196,6 +5218,72 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (String(rows[i].contentId || '') === cid) return rows[i];
     }
     return null;
+  }
+  /* Phone schedule relay (fleet backlog #4). The phone books through the sync
+     server into ce_schedule_requests.json — a file the board never read, so
+     phone-scheduled pieces were invisible here until Meta fired. The native
+     side answers getScheduleRequests with the raw rows; the board renders them
+     read-only (the relay store stays single-writer). */
+  window.__CE_SCHEDULE_REQ_STATE__ = [];
+  window.__CE_SCHEDULE_REQUESTS__ = function (json) {
+    var rows;
+    try { rows = typeof json === 'string' ? JSON.parse(json) : json; } catch (_e) { rows = []; }
+    var prev = JSON.stringify(window.__CE_SCHEDULE_REQ_STATE__ || []);
+    window.__CE_SCHEDULE_REQ_STATE__ = Array.isArray(rows) ? rows : [];
+    if (prev !== JSON.stringify(window.__CE_SCHEDULE_REQ_STATE__) && state.activeTab === 'plan' && typeof renderMain === 'function') renderMain();
+  };
+  function ceScheduleReqStripHtml() {
+    var rows = window.__CE_SCHEDULE_REQ_STATE__ || [];
+    if (!rows.length) return '';
+    var STATE_LABEL = {
+      pending: 'Queued from phone',
+      queued: 'Queued from phone',
+      scheduling: 'Booking on Meta…',
+      scheduled: 'On Meta clock',
+      published: 'Live',
+      failed: 'Failed',
+      superseded: 'Superseded',
+      needs_verification: 'Verify on Meta'
+    };
+    var STATE_COLOR = {
+      pending: 'var(--muted)', queued: 'var(--muted)', scheduling: '#fbbf24',
+      scheduled: '#60a5fa', published: '#34d399', failed: '#f87171',
+      superseded: 'var(--muted)', needs_verification: '#fbbf24'
+    };
+    // Newest first; terminal rows older than a day don't need board real estate.
+    var dayMs = 24 * 3600 * 1000;
+    var visible = rows.slice().sort(function (a, b) {
+      return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+    }).filter(function (r) {
+      var st = String(r.state || '');
+      if (st === 'scheduled' || st === 'published' || st === 'superseded') {
+        var t = Number(r.processedAt ? Date.parse(r.processedAt) : (Number(r.createdAt) || 0) * (r.createdAt && r.createdAt < 1e12 ? 1000 : 1));
+        return !t || (Date.now() - t < dayMs);
+      }
+      return true;
+    }).slice(0, 8);
+    if (!visible.length) return '';
+    var items = visible.map(function (r) {
+      var st = String(r.state || 'pending');
+      var label = STATE_LABEL[st] || st;
+      var color = STATE_COLOR[st] || 'var(--muted)';
+      var deckId = String(r.deckId || r.id || '');
+      var short = deckId.replace(/^(post|carousel|poem|asset):/, '').split(':').pop().slice(0, 14);
+      var when = '';
+      var ms = Number(r.scheduleUnixMs) || 0;
+      if (ms > 0) {
+        var d = new Date(ms);
+        when = d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      }
+      var platform = String(r.platform || 'facebook');
+      var err = (r.result && r.result.error) ? String(r.result.error) : '';
+      return '<span class="ce-sched-req-chip" title="' + escapeHtml(deckId + (err ? ' — ' + err : '')) + '" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.03em;padding:3px 8px;border-radius:99px;border:1px solid rgba(120,120,150,.28);background:rgba(120,120,150,.07);color:' + color + ';">'
+        + '<span style="width:5px;height:5px;border-radius:50%;background:' + color + ';flex:0 0 auto;"></span>'
+        + escapeHtml(short) + ' · ' + escapeHtml(platform === 'instagram' ? 'IG' : 'FB') + (when ? ' ' + escapeHtml(when) : '') + ' · ' + escapeHtml(label)
+        + '</span>';
+    }).join('');
+    return '<div class="ce-sched-req-strip" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;">'
+      + '<span style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);">Phone</span>' + items + '</div>';
   }
   /* Meta's own scheduled_posts list, normalized so a graphId can be checked
      against it. The chip below claims "On Meta clock" — 2026-09-10 audit A-1:
@@ -5244,6 +5332,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (row && row.state === 'queued') {
         ig = ' · IG ' + new Date((Number(row.fireUnix) || 0) * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
       } else if (row && row.state === 'published') { ig = ' · IG Live ✓'; }
+      else if (row && row.state === 'needs_verification') { ig = ' · IG ⚠ Verify on Meta'; }
       else if (row && row.state === 'failed') { ig = ' · IG ✗'; }
       var sched = ceMetaScheduledIds();
       var gid = String(q.metaGraphId || '');
@@ -5452,8 +5541,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   // is open (native pushes on every change too — this is the belt to its braces).
   setInterval(function () {
     var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
-    if (br && window.__CE_META_HAS_TOKEN__ && document.visibilityState === 'visible') {
-      br.postMessage({ action: 'getIgQueue' });
+    if (br && document.visibilityState === 'visible') {
+      if (window.__CE_META_HAS_TOKEN__) br.postMessage({ action: 'getIgQueue' });
+      // The phone relay file exists whether or not Meta is connected — a row
+      // stuck pending/failed is exactly what the owner needs to see on Plan.
+      br.postMessage({ action: 'getScheduleRequests' });
     }
   }, 30000);
 
@@ -11337,8 +11429,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (!hasFullSlides && window.__CE_OPEN_DECK__) {
         window.__CE_OPEN_DECK__(openId);
       }
+      // Phone path (2026-09-12): the static index ships coverSlide, not slides — so a
+      // card click hands openStudio an item whose slides array is absent and the hero
+      // painted empty. Resolve the cover face the same way the rail does.
       var openSlide = (item.slides && item.slides[0])
-        || (fullCached && fullCached.slides && fullCached.slides[0]);
+        || (fullCached && fullCached.slides && fullCached.slides[0])
+        || (item.coverSlide && typeof item.coverSlide === 'object' && item.coverSlide)
+        || (item.coverSlide && item.coverSlide.slides && item.coverSlide.slides[0]);
       rememberAuthoredCover(openId, openSlide || item.html || item.text, true);
     }
     state.currentSlideIdx = 0;
@@ -12447,7 +12544,27 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var actions = ceBuildCardActionHtml(kind, item);
     var look = kind === 'post' ? postCanonicalLook(item) : (item && item.look);
     if (kind === 'carousel') {
-      card.innerHTML = actions.badgeHtml + actions.actionClusterHtml + '<div style="width:100%;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;background:var(--card);color:var(--ink);border:1px solid var(--card-border);border-radius:12px;padding:16px;text-align:center;font-size:13px;font-weight:600;overflow-wrap:anywhere;">' + escapeHtml(title) + '</div>';
+      // 2026-09-12 (owner's phone complaint): a card that lands in the fallback used to
+      // paint a title-only grey box FOREVER (the lazy mount never retries), which is the
+      // exact opacity-0.42 skeleton the owner saw. Render the deck's cover face from the
+      // static index — it is always present — and only fall back to the title card if the
+      // face itself cannot be built.
+      var faceHtml = '';
+      try {
+        var resolved = (typeof ceDeckCoverDeck === 'function') ? ceDeckCoverDeck(item) : null;
+        if (resolved && window.CarouselCore && typeof window.CarouselCore.slideHTML === 'function') {
+          var cs = resolved.slides && resolved.slides[0];
+          if (cs) {
+            var look = (typeof validLook === 'function') ? validLook(resolved.look || item.look) : (resolved.look || item.look || 'midnight');
+            var slide = (typeof normSlide === 'function') ? normSlide(cs, 0, resolved.slides.length) : cs;
+            faceHtml = '<div class="ce-cc ce-real-face" data-ce-deck="' + escapeHtml(item && item.id || '') + '" style="width:100%; aspect-ratio:4/5; overflow:hidden; position:relative; background:#111; border-radius:10px;">'
+              + '<div class="look-' + escapeHtml(look) + '" style="width:1080px; height:1350px; transform-origin:top left; position:absolute; top:0; left:0;">'
+              + window.CarouselCore.slideHTML(slide, 0, resolved.slides.length, look)
+              + '</div></div>';
+          }
+        }
+      } catch (_faceErr) { faceHtml = ''; }
+      card.innerHTML = actions.badgeHtml + actions.actionClusterHtml + (faceHtml || '<div style="width:100%;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;background:var(--card);color:var(--ink);border:1px solid var(--card-border);border-radius:12px;padding:16px;text-align:center;font-size:13px;font-weight:600;overflow-wrap:anywhere;">' + escapeHtml(title) + '</div>');
       card.onclick = function () { openStudio('carousel', item); };
     } else {
       card.innerHTML = actions.badgeHtml + actions.actionClusterHtml + '<div style="width:100%;aspect-ratio:4/5;display:flex;flex-direction:column;justify-content:space-between;padding:24px;box-sizing:border-box;background:var(--card);color:var(--ink);border:1px solid var(--card-border);border-radius:12px;"><div style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;opacity:.6;">@DOALFAAZ</div><div style="font-size:14px;font-weight:700;line-height:1.45;overflow-wrap:anywhere;">' + escapeHtml(title) + '</div><div style="font-size:11px;opacity:.6;">@doalfaaz</div></div>';
@@ -13307,11 +13424,30 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             const item = document.createElement('div');
             item.className = 'masonry-item';
             item.setAttribute('data-content-id', poemId);
+            // 2026-09-12 (owner's phone complaint): on the phone bundle the poem face
+            // renderer (renderPhotoPoemHtml/renderPaperPoemHtml) can fail to paint —
+            // photo assets or a missing helper — leaving a .masonry-item with only the
+            // action buttons and no face. Never let a card paint blank: build the face,
+            // and if it cannot be built, emit a real text card (title + first lines).
+            var __poemFaceHtml = '';
+            try {
+              __poemFaceHtml = surfaceSection === 'photo'
+                ? renderPhotoPoemHtml(poem, canonicalIdx, surfaceStyle)
+                : renderPaperPoemHtml(poem, canonicalIdx, surfaceStyle);
+            } catch (_pf) { __poemFaceHtml = ''; }
+            if (!__poemFaceHtml || !String(__poemFaceHtml).trim()) {
+              var __pfTitle = escapeHtml(poem && (poem.title || poem.id) || 'Untitled poem');
+              var __pfBody = escapeHtml(String(poem && (poem.text || poem.body) || '').split('\n').slice(0, 4).join(' ').slice(0, 220));
+              __poemFaceHtml = '<div class="ce-poem-face" style="position:relative; width:100%; aspect-ratio:4/3; overflow:hidden; background:#1c1a24; border-radius:12px; padding:22px; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box;">'
+                + '<div style="font-family:\'Noto Sans Devanagari\',system-ui; font-size:15px; line-height:1.6; color:#fff; overflow-wrap:anywhere;">' + (__pfBody || __pfTitle) + '</div>'
+                + '<div style="font-family:\'Noto Sans Devanagari\',system-ui; font-size:12px; color:rgba(255,255,255,0.6);">— तुषार</div>'
+                + '</div>';
+            }
             item.innerHTML = `
               <div class="pure-card deck-card" data-content-id="${escapeHtml(poemId)}">
                 ${actions.badgeHtml}
                 ${actions.actionClusterHtml}
-                ${surfaceSection === 'photo' ? renderPhotoPoemHtml(poem, canonicalIdx, surfaceStyle) : renderPaperPoemHtml(poem, canonicalIdx, surfaceStyle)}
+                ${__poemFaceHtml}
                 ${__isLongPoem ? '<button type="button" class="ce-poem-read-btn" aria-label="Read full poem">Read</button>' : ''}
               </div>
             `;
@@ -14467,6 +14603,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               <span><strong>${planScheduled}</strong> on calendar</span>
               <span><strong>${planExported}</strong> exported</span>
             </div>` : ''}
+            ${ceScheduleReqStripHtml()}
           </div>
         </div>
 

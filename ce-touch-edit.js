@@ -484,11 +484,14 @@
     fetch(ep + '/schedule-requests', { headers: { 'X-CE-Sync-Key': key } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
-        var rows = ((j && j.requests) || []).filter(function (row) { return row && row.state === 'failed'; });
+        var rows = ((j && j.requests) || []).filter(function (row) { return row && (row.state === 'failed' || row.state === 'needs_verification'); });
         if (!rows.length) return;
         window.__CE_SCHED_FAILED__ = rows;
         var n = rows.length;
-        if (window.showAppToast) window.showAppToast(n === 1 ? 'A schedule failed on your Mac — open Schedule to retry' : n + ' schedules failed on your Mac — open Schedule to retry');
+        var verifyCount = rows.filter(function (row) { return row.state === 'needs_verification'; }).length;
+        if (verifyCount > 0) {
+          if (window.showAppToast) window.showAppToast(verifyCount === 1 ? 'A schedule needs verification on Meta’s clock' : verifyCount + ' schedules need verification on Meta’s clock');
+        } else if (window.showAppToast) window.showAppToast(n === 1 ? 'A schedule failed on your Mac — open Schedule to retry' : n + ' schedules failed on your Mac — open Schedule to retry');
       })
       .catch(function () {});
   }
@@ -566,6 +569,12 @@
           if (retryEl) retryEl.style.display = 'none';
           if (window.showAppToast) window.showAppToast('Schedule confirmed by your Mac');
           if (typeof onDone === 'function') onDone('scheduled');
+          return;
+        }
+        if (st === 'needs_verification') {
+          statusEl.textContent = 'Needs verification: the app restarted during scheduling. Check Meta’s clock before doing anything else.';
+          if (retryEl) retryEl.style.display = 'none';
+          if (typeof onDone === 'function') onDone('needs_verification');
           return;
         }
         if (st === 'failed') {
