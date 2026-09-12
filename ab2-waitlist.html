@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Aham Brahmasmi 2.0 — VIP Waitlist</title>
+<meta name="description" content="Join the VIP Waitlist for Aham Brahmasmi 2.0. Be the first when doors open.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #09090c; --bg2: #0f1014; --bg3: #161619; --bg4: #1c1c21;
+  --surface: #18181d; --surface2: #1e1e24;
+  --gold: #c8a96e; --gold-dim: #a08550; --gold-pale: #e8d5a8;
+  --gold-glow: rgba(200,169,110,0.10); --gold-glow2: rgba(200,169,110,0.18);
+  --green: #4ade80; --green-bg: rgba(74,222,128,0.08);
+  --text: #ede9e2; --text2: #a8a098; --text3: #666058;
+  --border: rgba(255,255,255,0.06); --border-gold: rgba(200,169,110,0.22);
+  --radius: 8px; --radius-lg: 12px;
+  --sans: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 15px; font-weight: 300;
+  line-height: 1.7; min-height: 100vh; overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--gold); text-decoration: none; }
+.container { max-width: 680px; margin: 0 auto; padding: 0 24px; }
+
+/* NAV */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(9,9,12,0.92); backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border); height: 52px;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+}
+.nav-brand { font-size: 0.7rem; font-weight: 500; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; }
+.nav-status {
+  font-size: 0.6rem; font-weight: 500; color: var(--green); letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 4px 12px; border: 1px solid rgba(74,222,128,0.2);
+  border-radius: 100px; background: var(--green-bg);
+}
+
+/* HERO */
+.hero { padding: 80px 0 48px; text-align: center; }
+.hero-eyebrow {
+  display: inline-block; font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-dim);
+  margin-bottom: 28px; padding: 6px 18px; border: 1px solid var(--border-gold);
+  border-radius: 100px; background: var(--gold-glow);
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; letter-spacing: -0.02em;
+  line-height: 1.2; margin-bottom: 16px;
+}
+.hero h1 em { font-style: italic; color: var(--gold); }
+.hero-sub { font-size: 1rem; color: var(--text2); max-width: 500px; margin: 0 auto 20px; line-height: 1.6; }
+.hero-voice {
+  font-size: 0.88rem; color: var(--text2); max-width: 480px; margin: 0 auto;
+  font-style: italic; line-height: 1.7;
+}
+
+/* COUNTDOWN */
+.countdown-section { padding: 40px 0; }
+.countdown-card {
+  background: var(--surface); border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg); padding: 36px 32px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.countdown-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, var(--gold-glow2) 0%, transparent 60%);
+  pointer-events: none;
+}
+.countdown-label {
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--gold-dim); margin-bottom: 20px;
+}
+.countdown-grid {
+  display: flex; justify-content: center; gap: 16px; margin-bottom: 20px;
+  position: relative;
+}
+.cd-unit {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 20px; min-width: 72px;
+}
+.cd-num {
+  font-size: 2.4rem; font-weight: 700; color: var(--gold);
+  letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums;
+}
+.cd-lbl {
+  font-size: 0.58rem; font-weight: 500; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--text3); margin-top: 6px;
+}
+.countdown-target {
+  font-size: 0.85rem; color: var(--text2); margin-top: 4px;
+}
+.countdown-target strong { color: var(--gold); font-weight: 500; }
+
+/* WAITLIST CTA */
+.cta-section { padding: 48px 0; text-align: center; }
+.cta-main {
+  display: inline-block; padding: 16px 44px; background: var(--gold); color: var(--bg);
+  font-family: var(--sans); font-size: 0.9rem; font-weight: 600;
+  letter-spacing: 0.06em; border: none; border-radius: 6px; cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 24px rgba(200,169,110,0.3);
+  text-decoration: none;
+}
+.cta-main:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,169,110,0.4); opacity: 1; }
+.cta-sub { font-size: 0.78rem; color: var(--text3); margin-top: 14px; line-height: 1.5; }
+.cta-promise {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;
+  padding: 8px 18px; border: 1px solid rgba(74,222,128,0.2);
+  border-radius: 100px; background: var(--green-bg);
+  font-size: 0.75rem; font-weight: 500; color: var(--green);
+}
+
+/* CAPTURE FORM — name + WhatsApp number -> wa.me deep link */
+.capture-form { max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.capture-form input {
+  width: 100%; padding: 14px 18px; background: var(--bg3); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-family: var(--sans); font-size: 0.92rem; font-weight: 300;
+  outline: none; transition: border-color 0.15s;
+}
+.capture-form input:focus { border-color: var(--gold-dim); }
+.capture-form input::placeholder { color: var(--text3); }
+.capture-form .cta-main { width: 100%; margin-top: 4px; }
+.capture-or {
+  margin-top: 26px; font-size: 0.78rem; color: var(--text3);
+}
+.capture-or a { color: var(--gold-dim); text-decoration: underline; text-underline-offset: 3px; }
+
+/* WHAT YOU GET TEASER */
+.teaser { padding: 60px 0; }
+.teaser-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
+@media (max-width: 560px) { .teaser-grid { grid-template-columns: 1fr; } }
+.teaser-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px 20px;
+}
+.teaser-card .icon { font-size: 1.4rem; margin-bottom: 10px; }
+.teaser-card h3 { font-size: 0.9rem; font-weight: 500; margin-bottom: 6px; }
+.teaser-card p { font-size: 0.8rem; color: var(--text2); line-height: 1.6; }
+
+/* LETTER (shortened) */
+.letter { padding: 60px 0; }
+.letter-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 36px 32px;
+  position: relative;
+}
+.letter-card::before {
+  content: '\201C'; position: absolute; top: 12px; left: 20px;
+  font-size: 3.5rem; color: var(--gold-dim); opacity: 0.25;
+  font-family: Georgia, serif; line-height: 1;
+}
+.letter-text {
+  font-size: 0.95rem; line-height: 1.9; color: var(--text);
+  white-space: pre-wrap; margin-top: 20px;
+}
+.letter-text .hl { color: var(--gold); font-weight: 400; }
+.letter-sig {
+  margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);
+  font-size: 0.82rem; color: var(--text2);
+}
+.letter-sig strong { color: var(--text); font-weight: 500; }
+
+/* WHAT IT IS / IS NOT */
+.what { padding: 48px 0; }
+.what-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+@media (max-width: 560px) { .what-grid { grid-template-columns: 1fr; } }
+.what-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 18px;
+}
+.what-card h3 { font-size: 0.88rem; font-weight: 500; margin-bottom: 12px; }
+.what-card ul { list-style: none; }
+.what-card li {
+  font-size: 0.78rem; color: var(--text2); padding: 5px 0;
+  border-top: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px;
+}
+.what-card li:first-child { border-top: none; }
+.what-card .ic { flex-shrink: 0; font-size: 0.7rem; margin-top: 2px; }
+
+/* PROOF */
+.proof-row {
+  display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
+  margin: 32px 0; padding: 20px 0; border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.proof-item { text-align: center; }
+.proof-item .num { font-size: 1.3rem; font-weight: 600; color: var(--gold); letter-spacing: -0.02em; }
+.proof-item .lbl { font-size: 0.65rem; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 2px; }
+
+/* NO-PRESSURE */
+.no-pressure {
+  text-align: center; padding: 40px 0;
+  font-size: 0.85rem; color: var(--text3); line-height: 1.7;
+}
+.no-pressure strong { color: var(--text2); font-weight: 400; }
+
+/* FOOTER */
+footer {
+  padding: 32px 0; text-align: center; border-top: 1px solid var(--border);
+  font-size: 0.7rem; color: var(--text3);
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fadeUp 0.5s ease-out forwards; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+.pulse { animation: pulse 2.5s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up, .pulse { animation: none; }
+  .cta-main, .teaser-card { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">Aham Brahmasmi 2.0</div>
+  <div class="nav-status pulse">Waitlist Open</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">After 3 years of silence</div>
+    <h1>You are not broken.<br><em>You are entangled.</em></h1>
+    <p class="hero-sub">Advaita Vedanta + modern psychology. For the mind that argues with itself all night.</p>
+    <p class="hero-voice">"Main 3 saal ke liye gayab ho gaya tha. Apne peak par. Ab wapas aa raha hoon — aur jo seekha hai, wo ek structured path mein samet diya hai."</p>
+  </div>
+</section>
+
+<!-- COUNTDOWN -->
+<section class="countdown-section">
+  <div class="container">
+    <div class="countdown-card">
+      <div class="countdown-label">Doors Open In</div>
+      <div class="countdown-grid">
+        <div class="cd-unit"><div class="cd-num" id="cdDays">00</div><div class="cd-lbl">Days</div></div>
+        <div class="cd-unit"><div class="cd-num" id="cdHours">00</div><div class="cd-lbl">Hours</div></div>
+        <div class="cd-unit"><div class="cd-num" id="cdMins">00</div><div class="cd-lbl">Mins</div></div>
+        <div class="cd-unit"><div class="cd-num" id="cdSecs">00</div><div class="cd-lbl">Secs</div></div>
+      </div>
+      <div class="countdown-target">Saturday · 8:00 PM IST</div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN CTA — WhatsApp capture -->
+<section class="cta-section" id="join">
+  <div class="container">
+    <form class="capture-form" id="wlForm" autocomplete="on">
+      <input type="text" id="wlName" name="name" placeholder="Your name" required maxlength="60">
+      <input type="tel" id="wlNum" name="whatsapp" placeholder="Your WhatsApp number" required maxlength="15">
+      <button type="submit" class="cta-main">Join VIP Waitlist on WhatsApp →</button>
+    </form>
+    <p class="cta-sub">Tapping the button opens your own WhatsApp with the message ready —<br>hit send and your seat on the list is locked.</p>
+    <div class="cta-promise">✓ You'll be the first to get the link when doors open</div>
+    <p class="capture-or">or <a href="https://www.instagram.com/doalfaaz/" target="_blank" rel="noopener">comment "SHURU" on the latest post</a> and we'll DM you.</p>
+  </div>
+</section>
+
+<!-- PROOF -->
+<div class="container">
+  <div class="proof-row">
+    <div class="proof-item"><div class="num">1,000+</div><div class="lbl">Students</div></div>
+    <div class="proof-item"><div class="num">5</div><div class="lbl">Live Batches</div></div>
+    <div class="proof-item"><div class="num">3 years</div><div class="lbl">Of Study</div></div>
+    <div class="proof-item"><div class="num">450+</div><div class="lbl">Books Distilled</div></div>
+  </div>
+</div>
+
+<!-- WHAT YOU GET (teaser, no price) -->
+<section class="teaser">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:8px">
+      <h2 style="font-size:1.3rem;font-weight:300">What's inside</h2>
+    </div>
+    <div class="teaser-grid">
+      <div class="teaser-card">
+        <div class="icon">🧠</div>
+        <h3>10+ Hours Structured Course</h3>
+        <p>Vedanta + modern psychology. 6 modules, from pattern recognition to lived integration. Recorded, self-paced.</p>
+      </div>
+      <div class="teaser-card">
+        <div class="icon">🎙</div>
+        <h3>Live "Talk To Tushar" Sessions</h3>
+        <p>Early birds get 2 live interactive sessions with Tushar. Recorded and added to the course for future buyers.</p>
+      </div>
+      <div class="teaser-card">
+        <div class="icon">📖</div>
+        <h3>Per-Lecture Notes + Workbook</h3>
+        <p>Every lecture comes with structured notes and reflection prompts. Not just watching — sitting with it.</p>
+      </div>
+      <div class="teaser-card">
+        <div class="icon">♾️</div>
+        <h3>18 Months Access</h3>
+        <p>No rush. No cohort pace. Come back whenever you want. The course waits for you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PERSONAL LETTER (shortened) -->
+<section class="letter">
+  <div class="container">
+    <div class="letter-card">
+      <div class="letter-text">Ek confession.
+
+Main bhi wahi karta tha jo tum karte ho: <span class="hl">raat bhar apne hi saath behas.</span>
+
+Raat ke 2:17, kitchen ki yellow light, thandi chai, aur phone notes mein ek line:
+"main khud se bahas karte-karte thak gaya hoon."
+
+Shayad tum bhi yahi karte ho.
+
+<span class="hl">Main tumhe fix karne nahi aaya.
+Main tumhare upar nahi khada.
+Main tumhare saath khada hoon.</span></div>
+      <div class="letter-sig"><strong>— Tushar</strong> · Do Alfaaz · Banaras</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IT IS / IS NOT -->
+<section class="what">
+  <div class="container">
+    <div class="what-grid">
+      <div class="what-card">
+        <h3 style="color:var(--green)">Ye hai</h3>
+        <ul>
+          <li><span class="ic">◆</span> Advaita Vedanta as inquiry, not belief</li>
+          <li><span class="ic">◆</span> Modern psychology as observation</li>
+          <li><span class="ic">◆</span> Practices for ordinary life</li>
+          <li><span class="ic">◆</span> 18 months of access</li>
+        </ul>
+      </div>
+      <div class="what-card">
+        <h3 style="color:#f87171">Ye nahi hai</h3>
+        <ul>
+          <li><span class="ic" style="color:#f87171">✕</span> Therapy ka replacement nahi</li>
+          <li><span class="ic" style="color:#f87171">✕</span> Religion ya guru worship nahi</li>
+          <li><span class="ic" style="color:#f87171">✕</span> Motivation ya fake positivity nahi</li>
+          <li><span class="ic" style="color:#f87171">✕</span> Instant fix nahi</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NO PRESSURE -->
+<div class="no-pressure">
+  <div class="container">
+    <strong>Jaldi mein decision mat lena.</strong><br>
+    Faisla shaant dimaag se lena. Waitlist par hone ka matlab commitment nahi hai —<br>
+    sirf itna ki jab doors open ho, aapko pehle pata chalega.
+  </div>
+</div>
+
+<!-- FINAL CTA -->
+<section class="cta-section" style="padding-bottom:80px">
+  <div class="container">
+    <h2 style="font-size:1.2rem;font-weight:300;margin-bottom:6px">Join the VIP Waitlist</h2>
+    <p style="color:var(--text2);margin-bottom:24px;font-size:0.9rem">Be the first when Saturday 8 PM arrives.</p>
+    <a href="#join" class="cta-main">Join VIP Waitlist →</a>
+    <p class="cta-sub">Name + WhatsApp number above — the message opens ready to send.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>Aham Brahmasmi 2.0 · Do Alfaaz · Banaras</p>
+    <p style="margin-top:4px">Ye therapy nahi, religion nahi, motivation nahi. Ye inquiry hai.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+
+  // Countdown to the next Saturday, 8:00 PM IST. No baked calendar date.
+  // IST = UTC+5:30, so 8:00 PM IST = 14:30 UTC.
+  function nextSaturday8pmIST() {
+    var now = new Date();
+    var istNow = new Date(now.getTime() + 5.5 * 3600000);
+    var add = (6 - istNow.getUTCDay() + 7) % 7;
+    var sat = new Date(Date.UTC(istNow.getUTCFullYear(), istNow.getUTCMonth(), istNow.getUTCDate() + add, 14, 30, 0));
+    if (sat.getTime() <= now.getTime()) sat = new Date(sat.getTime() + 7 * 86400000);
+    return sat;
+  }
+  var TARGET = nextSaturday8pmIST();
+
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+  function tick() {
+    var now = new Date();
+    var diff = TARGET - now;
+
+    if (diff <= 0) {
+      TARGET = nextSaturday8pmIST();
+      diff = TARGET - now;
+      if (diff <= 0) diff = 7 * 86400000;
+    }
+
+    var days = Math.floor(diff / 86400000);
+    var hours = Math.floor((diff % 86400000) / 3600000);
+    var mins = Math.floor((diff % 3600000) / 60000);
+    var secs = Math.floor((diff % 60000) / 1000);
+
+    document.getElementById('cdDays').textContent = pad(days);
+    document.getElementById('cdHours').textContent = pad(hours);
+    document.getElementById('cdMins').textContent = pad(mins);
+    document.getElementById('cdSecs').textContent = pad(secs);
+
+    requestAnimationFrame(function(){ setTimeout(tick, 500); });
+  }
+
+  tick();
+
+  // WhatsApp capture: name + number -> wa.me deep link.
+  // The visitor's own WhatsApp opens with the join message pre-filled to
+  // Tushar's number; hitting send delivers name + number in one message.
+  // Zero backend, zero monthly fee — the waitlist lands in Tushar's WhatsApp.
+  var WL_NUMBER = '9179222991'; // Tushar's WhatsApp (wa.me format, no +)
+  var form = document.getElementById('wlForm');
+  if (form) {
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var name = (document.getElementById('wlName').value || '').trim();
+      var num  = (document.getElementById('wlNum').value || '').replace(/[^\d]/g, '');
+      if (num.length < 10) { document.getElementById('wlNum').focus(); return; }
+      var msg = 'SHURU — VIP Waitlist\n'
+              + 'Name: ' + name + '\n'
+              + 'WhatsApp: ' + num + '\n\n'
+              + 'Please add me to the Aham Brahmasmi 2.0 waitlist.';
+      window.location.href = 'https://wa.me/' + WL_NUMBER + '?text=' + encodeURIComponent(msg);
+    });
+  }
+
+})();
+</script>
+</body>
+</html>
