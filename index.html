@@ -2240,7 +2240,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=fa577a0bd0"></script>
-<script src="./deck_index.js?v=24c36cf1fb"></script>
+<script src="./deck_index.js?v=5bc9507ee3"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=9a09a33078" />
 <link rel="stylesheet" href="./native-plan.css?v=75cf64169d" />
@@ -11072,7 +11072,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // a single Tools row; opening it floats the same panels as a bottom sheet
       // OVER the gallery, so the paper keeps the field. Nothing is removed --
       // every panel is one tap away, and the desktop dock is untouched.
-      var phoneDock = ((typeof window !== 'undefined' && window.innerWidth) || 1440) <= 700;
+      // Phone detection: check window width OR .ce-phone class (which covers in-app browsers
+      // and mobile viewports that lay out above 700px before pinch/scale).
+      var phoneDock = (((typeof window !== 'undefined' && window.innerWidth) || 1440) <= 700)
+        || document.documentElement.classList.contains('ce-phone');
       var dockToggleMarkup = phoneDock
         ? '<button type="button" class="ce-tools-toggle" id="ce-tools-toggle" aria-expanded="false" aria-controls="ce-studio-inspector">'
           + '<span class="ce-tools-toggle-label">Tools</span>'
