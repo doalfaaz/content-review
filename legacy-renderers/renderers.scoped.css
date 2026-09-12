@@ -55,7 +55,9 @@
       background:#9c2f1d; z-index:5; }.ce-cc .pc-manuscript .note{ position:absolute; right:78px; top:238px; z-index:5; font-family:'Poppins',sans-serif;
       font-weight:700; font-size:18px; letter-spacing:.06em; color:#fff; background:#1d4f78;
       padding:6px 14px; border-radius:16px; }.ce-cc .pc-manuscript .stack{ left:150px; top:295px; width:780px; text-align:left; }.ce-cc .pc-manuscript .pl{ font-weight:600; font-size:64px; line-height:1.75; color:#21160f; }.ce-cc .pc-manuscript .pl.last .d2{ color:#9c2f1d; }.ce-cc .pc-manuscript .pl.last{ color:#9c2f1d; }.ce-cc .pc-manuscript .ref{ position:absolute; left:150px; top:1180px; z-index:5; font-family:'Georgia',serif;
-      font-size:24px; color:#735f42; }.ce-cc .pc-manuscript .mark{ right:78px; bottom:70px; color:#735f42; }.ce-cc /* ============================================================= 3) SHER — RISO DUAL-INK
+      font-size:24px; color:#735f42; }.ce-cc .pc-manuscript .stack,.ce-cc .pc-blessing .stack{padding-bottom:12px}
+.ce-cc .pc-manuscript,.ce-cc .pc-blessing{min-height:100%;height:auto!important;overflow:visible!important}
+
      Off-white, .ce-cc red sun blob + blue misregistered dup, .ce-cc halftone, .ce-cc young/printed. */
   .pc-riso{ background:#fff3d6; color:#17120e; }.ce-cc .pc-riso .sun{ position:absolute; left:470px; top:300px; width:430px; height:430px; border-radius:50%;
       background:#e84b3c; mix-blend-mode:multiply; opacity:.9; z-index:2; }.ce-cc .pc-riso .sun.b{ background:#2565b7; transform:translate(10px,10px); opacity:.55; z-index:1; }.ce-cc .pc-riso .halftone{ position:absolute; inset:0; z-index:2;

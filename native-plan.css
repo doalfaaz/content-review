@@ -974,6 +974,7 @@ body.bright-theme .ce-launch-board-cadence {
 .ce-plan-shell .ce-kanban-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.14)}
 .ce-plan-inbox{background:color-mix(in srgb,var(--bg) 72%,var(--card) 28%);border-style:dashed;box-shadow:none}
 @media(max-width:700px){.ce-plan-shell{margin-top:52px;padding:0 14px 54px}.ce-plan-shell .ce-plan-intro{padding-bottom:14px}.ce-plan-shell .ce-kanban-board{display:flex;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:10px;margin-inline:-14px;padding-inline:14px}.ce-plan-shell .ce-kanban-col{min-width:286px;scroll-snap-align:start}.ce-plan-inbox-list{grid-template-columns:1fr}.ce-plan-inbox{margin-top:18px}}
+.ce-launch-day-art .ce-render-block-content{max-height:100%!important;overflow:hidden!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:8!important;line-height:1.35!important}
 /* Workbench hierarchy pass: one purpose per surface, quiet secondary diagnostics. */
 .ce-ops-shell{max-width:1440px;margin-top:52px;padding:0 28px 64px}
 .ce-ops-hero{border-color:color-mix(in srgb,var(--accent) 28%,var(--card-border));background:linear-gradient(135deg,color-mix(in srgb,var(--card) 92%,var(--accent) 8%),var(--card));box-shadow:0 14px 34px rgba(0,0,0,.14)}
