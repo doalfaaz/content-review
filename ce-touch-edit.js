@@ -939,6 +939,17 @@
     clone.style.transform = '';
     clone.style.width = box.w + 'px';
     clone.style.height = box.h + 'px';
+    // Preview chrome is allowed to round the card; exported pixels are the
+    // authored canvas. Remove only outer preview clipping in the clone.
+    [clone].concat(Array.from(clone.querySelectorAll('.ce-poem-stage, .ce-poem-canvas, .ce-poem-face, .ce-post-face, .ce-real-face')))
+      .forEach(function (frame) {
+        frame.style.borderRadius = '0';
+        frame.style.overflow = 'visible';
+        frame.style.clipPath = 'none';
+        frame.style.maskImage = 'none';
+        frame.style.webkitMaskImage = 'none';
+      });
+    inner.style.overflow = 'visible';
     Array.prototype.forEach.call(clone.querySelectorAll('.is-selected, .ce-drag-ghost, [contenteditable]'),
       function (n) { n.classList.remove('is-selected', 'ce-drag-ghost'); n.removeAttribute('contenteditable'); });
 
@@ -1044,37 +1055,110 @@
 })();
 
 
-// ── 2026-09-11 audit order 3 (P1) — phone carousel Tools row unreachable by finger.
-// Measured: the row's containing block resolves INSIDE the filmstrip band (137-805)
-// while the dock ASIDE sits at 818-874, so it rendered at y=679-690 under the
-// filmstrip track. Every position override failed (z-index, absolute, fixed,
-// display:contents, computed offsets) because the CONTAINING BLOCK is wrong, not the
-// offsets. Fix: move the node into the dock and make it a NORMAL IN-FLOW child — no
-// position override at all — so the dock's own flex layout places it inside 818-874.
+// ── Phone carousel Tools ownership: one final owner, one sheet contract.
+// The old implementation moved the button but left the inspector inside the
+// gallery's desktop stacking/flex context. That produced a toggled class with
+// Presentation painted above Tools and an empty-looking sheet. This owner
+// portals the whole inspector to body for the open state and restores it.
 (function () {
   function ensureDockTools() {
     var t = document.getElementById('ce-tools-toggle');
     var dock = document.querySelector('aside.ce-studio-inspector, .ce-studio-inspector');
     if (!t || !dock) return;
-    // Keep the toggle as the dock's first child. Appending it after the scroll
-    // content placed its 56px hit area outside the dock's 56px resting band;
-    // the finger hit then landed below the visible bar. The dock owns the
-    // ordering, while the sheet CSS makes the scroll content visible on open.
     if (t.parentElement !== dock || dock.firstElementChild !== t) dock.insertBefore(t, dock.firstElementChild);
+    var editor = dock.closest('.ce-carousel-editor') || t.__ceToolsEditor || document.querySelector('.ce-carousel-editor');
+    if (!editor) return;
+    if (t.__ceToolsEditor === editor) {
+      if (editor.classList.contains('ce-tools-open') && t.__ceToolsOpen) t.__ceToolsOpen();
+      t.style.setProperty('position', 'static', 'important');
+      t.style.setProperty('display', 'flex', 'important');
+      t.style.setProperty('width', '100%', 'important');
+      t.style.setProperty('height', '44px', 'important');
+      t.style.setProperty('pointer-events', 'auto', 'important');
+      return;
+    }
+    var originalParent = dock;
+    var originalNext = dock.nextSibling;
+    var originalStyle = dock.getAttribute('style');
+    var portaled = false;
+    function restore() {
+      if (!portaled) return;
+      if (originalNext && originalNext.parentNode === originalParent) originalParent.insertBefore(dock, originalNext);
+      else originalParent.appendChild(dock);
+      if (originalStyle == null) dock.removeAttribute('style');
+      else dock.setAttribute('style', originalStyle);
+      dock.classList.remove('ce-tools-sheet');
+      portaled = false;
+    }
+    function openSheet() {
+      if (!portaled) { document.body.appendChild(dock); portaled = true; }
+      dock.classList.add('ce-tools-sheet');
+      dock.style.setProperty('position', 'fixed', 'important');
+      dock.style.setProperty('left', '0', 'important');
+      dock.style.setProperty('right', '0', 'important');
+      dock.style.setProperty('bottom', '0', 'important');
+      dock.style.setProperty('top', 'auto', 'important');
+      dock.style.setProperty('width', '100vw', 'important');
+      dock.style.setProperty('min-width', '0', 'important');
+      dock.style.setProperty('max-width', 'none', 'important');
+      dock.style.setProperty('height', 'min(62vh, 560px)', 'important');
+      dock.style.setProperty('max-height', 'min(62vh, 560px)', 'important');
+      dock.style.setProperty('min-height', '180px', 'important');
+      dock.style.setProperty('display', 'block', 'important');
+      dock.style.setProperty('overflow', 'hidden', 'important');
+      dock.style.setProperty('z-index', '500', 'important');
+      dock.style.setProperty('box-sizing', 'border-box', 'important');
+      dock.style.setProperty('background', 'rgba(12, 13, 18, 0.98)', 'important');
+      var scroll = dock.querySelector('.ce-inspector-scroll');
+      var pinned = dock.querySelector('.ce-inspector-pinned');
+      if (scroll) {
+        scroll.style.setProperty('position', 'absolute', 'important');
+        scroll.style.setProperty('inset', '56px 0 96px 0', 'important');
+        scroll.style.setProperty('display', 'block', 'important');
+        scroll.style.setProperty('overflow-y', 'auto', 'important');
+        scroll.style.setProperty('overflow-x', 'hidden', 'important');
+        scroll.style.setProperty('width', '100vw', 'important');
+        scroll.querySelectorAll('.ce-dock-column').forEach(function (column) {
+          column.style.setProperty('position', 'static', 'important');
+          column.style.setProperty('display', 'block', 'important');
+          column.style.setProperty('width', '100vw', 'important');
+          column.style.setProperty('height', 'auto', 'important');
+          column.style.setProperty('overflow', 'visible', 'important');
+        });
+      }
+      if (pinned) {
+        pinned.style.setProperty('position', 'absolute', 'important');
+        pinned.style.setProperty('inset', 'auto 0 0 0', 'important');
+        pinned.style.setProperty('display', 'flex', 'important');
+        pinned.style.setProperty('width', '100vw', 'important');
+        pinned.style.setProperty('height', '96px', 'important');
+        pinned.style.setProperty('overflow-y', 'auto', 'important');
+      }
+    }
+    function toggle(event) {
+      if (event) { event.preventDefault(); event.stopImmediatePropagation(); }
+      var open = !editor.classList.contains('ce-tools-open');
+      editor.classList.toggle('ce-tools-open', open);
+      t.setAttribute('aria-expanded', open ? 'true' : 'false');
+      var label = t.querySelector('.ce-tools-toggle-label');
+      if (label) label.textContent = open ? 'Close tools' : 'Tools';
+      if (open) openSheet(); else restore();
+    }
+    t.addEventListener('click', toggle, true);
+    t.__ceToolsEditor = editor;
+    t.__ceToolsRestore = restore;
+    t.__ceToolsOpen = openSheet;
     t.style.setProperty('position', 'static', 'important');
-    ['top', 'bottom', 'left', 'right'].forEach(function (k) { t.style.setProperty(k, 'auto', 'important'); });
     t.style.setProperty('display', 'flex', 'important');
     t.style.setProperty('align-items', 'center', 'important');
     t.style.setProperty('justify-content', 'center', 'important');
-    t.style.setProperty('flex', '0 0 auto', 'important');
     t.style.setProperty('width', '100%', 'important');
     t.style.setProperty('height', '44px', 'important');
     t.style.setProperty('pointer-events', 'auto', 'important');
-    t.style.setProperty('z-index', '400', 'important');
   }
   function arm() {
     ensureDockTools();
-    new MutationObserver(function () { ensureDockTools(); }).observe(document.body, { childList: true, subtree: true });
+    new MutationObserver(ensureDockTools).observe(document.body, { childList: true, subtree: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm); else arm();
 })();

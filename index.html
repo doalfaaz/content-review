@@ -2219,7 +2219,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=6702562e41"></script>
-<script src="./deck_index.js?v=b2e0fd1952"></script>
+<script src="./deck_index.js?v=fffb04a70e"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=da5ebfb062" />
 <link rel="stylesheet" href="./native-plan.css?v=75cf64169d" />
@@ -2230,8 +2230,8 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=dddec16a82" />
-<script src="./ce-touch-edit.js?v=823658bb6f"></script>
+<link rel="stylesheet" href="./ce-mobile.css?v=1f483620a3" />
+<script src="./ce-touch-edit.js?v=b1efa2673c"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -11067,7 +11067,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           + '<span class="ce-tools-toggle-label">Tools</span>'
           + '<span class="ce-tools-toggle-hint">Design, text, caption</span></button>'
         : '';
-      dockControls.innerHTML = '<div class="ce-inspector-scroll">' + dockToggleMarkup + presentationColumn + slideColumn + contentColumn + '</div>'
+      dockControls.innerHTML = dockToggleMarkup
+        + '<div class="ce-inspector-scroll">' + presentationColumn + slideColumn + contentColumn + '</div>'
         + '<div class="ce-inspector-pinned">' + captionSection + '</div>';
       if (phoneDock) {
         var toolsToggleBtn = dockControls.querySelector('#ce-tools-toggle');
