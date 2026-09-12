@@ -357,7 +357,11 @@ body:not(.bright-theme) .ce-ideas-action.is-success { background: rgba(52, 211, 
 }
 
 @media (max-width: 760px) {
-  .ce-ideas-parity { padding: 12px 14px 54px; }
+  /* The mobile view sits below a fixed 52px topbar. Keeping the parity
+     surface at 12px top padding put its first filter row underneath the
+     search/theme chrome, making the first controls visually present but
+     pointer-occluded. */
+  .ce-ideas-parity { padding: calc(52px + env(safe-area-inset-top, 0px)) 14px 54px; }
   .ce-ideas-section-head { grid-template-columns: 38px minmax(0, 1fr); gap: 10px; padding: 12px 14px; }
   .ce-ideas-section-meta { grid-column: 2; justify-content: space-between; }
   .ce-ideas-section-title { font-size: 17px; }
