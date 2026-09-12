@@ -32,7 +32,13 @@
   --border-strong: rgba(255, 255, 255, 0.14);
   --ink: #f3f1ec;
   --muted: #96919f;
-  --faint: #625e6d;
+  /* Studio keeps its own dark token set, so the app-level AA lift never reached this surface:
+     --faint stayed #625e6d (3.12:1) and every dock/look-rail label rendered below AA.
+     Mirrors the app tokens: lifted --faint for text, --hairline for 1px structural borders,
+     --accent-text for small accent LABELS (accent itself stays for fills/borders). */
+  --faint: #8a8496;
+  --hairline: #625e6d;
+  --accent-text: #e0576b;
   --accent: #c43b4e;
   --accent-hover: #d4576b;
   --accent-tint: rgba(196, 59, 78, 0.16);
@@ -1134,7 +1140,7 @@
 
 .ce-hook-chip:hover {
   transform: translateY(-2px);
-  border-color: var(--accent);
+  border-color: var(--accent-text);
   background: rgba(255, 255, 255, 0.07);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
@@ -1145,7 +1151,7 @@
 }
 
 .ce-hook-chip.active {
-  border-color: var(--accent);
+  border-color: var(--accent-text);
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   box-shadow: 0 0 0 2px var(--accent), 0 8px 24px rgba(235, 185, 75, 0.2);
 }
@@ -1161,7 +1167,7 @@
   text-transform: uppercase;
   letter-spacing: .08em;
   background: color-mix(in srgb, var(--accent) 18%, transparent);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .ce-hook-text-preview {
@@ -2007,7 +2013,7 @@
   background: rgba(255,255,255,0.04) !important;
 }
 .ce-look-choice--chip.active {
-  border-color: var(--accent) !important;
+  border-color: var(--accent-text) !important;
   box-shadow: 0 0 0 1px var(--accent) !important;
 }
 .ce-look-swatch {
@@ -2101,7 +2107,7 @@
   text-transform: uppercase !important;
   color: var(--muted) !important;
 }
-.ce-hook-card.is-active .ce-hook-card-angle { color: var(--accent) !important; }
+.ce-hook-card.is-active .ce-hook-card-angle { color: var(--accent-text) !important; }
 .ce-hook-card-preview {
   font-size: 12px !important;
   line-height: 1.35 !important;
@@ -2616,8 +2622,8 @@
 }
 .ce-content-switch-chip:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: var(--accent);
-  color: var(--accent) !important;
+  border-color: var(--accent-text);
+  color: var(--accent-text) !important;
   transform: translateY(-1px);
 }
 
@@ -2825,7 +2831,7 @@
 .ce-minimap-pill.is-active {
   background: var(--accent);
   color: #fff;
-  border-color: var(--accent);
+  border-color: var(--accent-text);
   font-weight: 700;
   box-shadow: 0 0 10px var(--accent-glow);
 }
@@ -4839,7 +4845,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 
 .ce-hook-row-item.is-active .ce-hook-row-badge,
 .ce-hook-card.is-active .ce-hook-row-badge {
-  color: #c43b4e !important;
+  color: var(--accent-text) !important;
 }
 
 .ce-hook-row-index {
@@ -4853,7 +4859,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 .ce-hook-row-indicator {
   font-size: 11px !important;
   font-weight: 700 !important;
-  color: #c43b4e !important;
+  color: var(--accent-text) !important;
   width: 16px !important;
   height: 16px !important;
   display: flex !important;
@@ -5041,7 +5047,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  color: #c43b4e;
+  color: var(--accent-text);
   background: rgba(196, 59, 78, 0.15);
   padding: 1px 5px;
   border-radius: 4px;
@@ -5305,7 +5311,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   border-left: 2px solid var(--accent) !important;
 }
 .ce-hook-card.is-active .ce-hook-row-badge,
-.ce-hook-card.is-active .ce-hook-card-angle { color: var(--accent) !important; }
+.ce-hook-card.is-active .ce-hook-card-angle { color: var(--accent-text) !important; }
 .ce-hook-card .ce-hook-row-text,
 .ce-hook-card .ce-hook-card-preview {
   display: -webkit-box;

@@ -63,7 +63,13 @@
     --border-strong: rgba(255,255,255,0.14);
     --ink: #f3f1ec;
     --muted: #96919f;
-    --faint: #625e6d;
+    --faint: #8a8496;
+    /* --hairline keeps the ORIGINAL faint value for 1px structural borders: lifting --faint
+       for text must not repaint hairlines. AA audit 2026-09-12: #625e6d read 3.12:1 on --bg. */
+    --hairline: #625e6d;
+    /* Small accent LABELS (<=12px) need 4.5:1; --accent itself is 3.49:1 on --surface and stays
+       reserved for fills/borders/brand marks. */
+    --accent-text: #e0576b;
     /* Owner-locked 2026-09-01: crimson/garnet accent family stays. Not yellow. */
     --accent: #c43b4e;
     --accent-hover: #d4576b;
@@ -133,7 +139,9 @@
     --border-strong: rgba(0,0,0,0.16);
     --ink: #18161b;
     --muted: #5c5766;
-    --faint: #8e889b;
+    --faint: #6b6577;
+    --hairline: #8e889b;
+    --accent-text: #b83245;
     /* Same garnet hue family; deeper on cream for contrast. */
     --accent: #c43b4e;
     --accent-hover: #b03a4c;
@@ -1212,6 +1220,10 @@
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
     transition: transform 0.18s, opacity 0.18s, box-shadow 0.18s, border-color 0.18s, background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   }
+  /* Placeholders were never styled, so the UA default painted them dimmer than any token — the
+     CSS contrast probe reads `color`, never ::placeholder, so this class of text was unaudited.
+     Pin it to a real token (muted = 5.9:1 on the input fill) instead of the browser default. */
+  .search-input::placeholder { color: var(--muted); opacity: 1; }
   .search-input:focus {
     border-color: var(--accent);
     background: rgba(255, 255, 255, 0.09);
@@ -1464,7 +1476,7 @@
     font-size: 10px;
     font-weight: 700;
     background: var(--accent-tint);
-    color: var(--accent);
+    color: var(--accent-text);
     padding: 3px 8px;
     border-radius: 4px;
     text-transform: uppercase;
@@ -1796,9 +1808,9 @@
   .ce-saved-rail-subhead{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.55;padding:0 6px 8px;}
   .ce-rail-track.ce-saved-rail-track{scroll-snap-type:x proximity;}
   .ce-rail-track .ce-saved-design-card{flex:0 0 auto;width:clamp(310px,calc((100% - 3.2 * 18px) / 3.4),440px);scroll-snap-align:start;}
-  .ce-design-alternatives{display:flex;flex-direction:column;gap:8px;padding:12px 2px 2px;border-top:1px solid var(--faint);margin-top:12px;}
+  .ce-design-alternatives{display:flex;flex-direction:column;gap:8px;padding:12px 2px 2px;border-top:1px solid var(--hairline);margin-top:12px;}
   .ce-alt-row{display:flex;gap:8px;flex-wrap:wrap;}
-  .ce-alt-design{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 6px 4px;border:1px solid var(--faint);border-radius:8px;background:transparent;cursor:pointer;color:inherit;}
+  .ce-alt-design{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 6px 4px;border:1px solid var(--hairline);border-radius:8px;background:transparent;cursor:pointer;color:inherit;}
   .ce-alt-design:hover{border-color:var(--accent);}
   .ce-alt-design:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
   .ce-alt-thumb{position:relative;width:84px;height:105px;overflow:hidden;border-radius:6px;background:#111;}
@@ -1806,7 +1818,7 @@
   .ce-alt-thumb .ce-postcore-face{width:1080px !important;height:1350px;}
   .ce-alt-thumb .ce-postcore-stage{width:1080px;}
   .ce-alt-name{font-size:10px;font-weight:700;color:var(--muted);max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .ce-alt-design small{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;}
+  .ce-alt-design small{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--accent-text);text-transform:uppercase;}
   .ce-poem-load-more{display:block;margin:8px auto 34px;}
   .ce-load-more{flex:0 0 auto;width:180px;display:flex;align-items:center;justify-content:center;background:var(--card);color:var(--accent);border:1.5px dashed var(--accent);border-radius:12px;font-size:13px;font-weight:700;letter-spacing:.03em;cursor:pointer;transition:background .15s ease,color .15s ease;align-self:stretch;min-height:180px;}
   .ce-load-more:hover{background:var(--accent);color:var(--ink);}
@@ -1846,16 +1858,16 @@
   .ce-grow-colhead { display:flex; flex-direction:column; gap:2px; }
   .ce-grow-stepnum { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); background:var(--grad-accent-text); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
   .ce-grow-colhead p { margin:0; font-size:12px; color:var(--muted); }
-  .ce-apply-tag { display:inline-block; margin-top:6px; font-style:normal; font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--accent); text-transform:uppercase; }
+  .ce-apply-tag { display:inline-block; margin-top:6px; font-style:normal; font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--accent-text); text-transform:uppercase; }
   .ce-learn-panel { display:flex; flex-direction:column; gap:16px; }
   .ce-learn-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
-  .ce-learn-cell { display:flex; flex-direction:column; gap:4px; padding:14px 16px; background:var(--card); border:1px solid var(--faint); border-radius:10px; }
+  .ce-learn-cell { display:flex; flex-direction:column; gap:4px; padding:14px 16px; background:var(--card); border:1px solid var(--hairline); border-radius:10px; }
   .ce-learn-cell strong { font-size:13px; }
   .ce-learn-nodata { font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.02em; }
   .ce-learn-cell small { font-size:11px; color:var(--faint); }
   .ce-learn-note { margin:0; font-size:12px; line-height:1.5; color:var(--muted); }
   .ce-launch-status-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
-  .ce-launch-blockers, .ce-launch-artifacts { display:flex; flex-direction:column; gap:10px; padding:18px 20px; background:var(--card); border:1px solid var(--faint); border-radius:12px; }
+  .ce-launch-blockers, .ce-launch-artifacts { display:flex; flex-direction:column; gap:10px; padding:18px 20px; background:var(--card); border:1px solid var(--hairline); border-radius:12px; }
   .ce-launch-blockers ul { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:6px; }
   .ce-launch-blockers li { font-size:13px; line-height:1.45; }
   .ce-launch-blockers.is-clear p { margin:0; font-size:13px; color:var(--muted); }
@@ -1919,7 +1931,7 @@
   .ce-aud-mini-best span { font-size:11.5px; font-weight:700; color:var(--ink); }
   .ce-aud-mini-best small { font-size:10.5px; color:var(--faint); }
   .ce-launch-pulse { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:10px 14px; background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius-sm); }
-  .ce-aud-pulse-label { font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+  .ce-aud-pulse-label { font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-text); }
   .ce-aud-pulse-item { font-size:12px; color:var(--muted); display:inline-flex; align-items:center; gap:5px; }
   .ce-aud-pulse-item strong { color:var(--ink); font-weight:800; }
   .ce-aud-pulse-best { border:1px solid var(--card-border); background:transparent; color:var(--muted); font-size:12px; border-radius:8px; padding:4px 10px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
@@ -2222,15 +2234,15 @@
 <script src="./deck_index.js?v=fffb04a70e"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
-<link rel="stylesheet" href="./native-plan.css?v=3b8046a3b9" />
-<link rel="stylesheet" href="./native-saved.css?v=4070f3d29b" />
-<link rel="stylesheet" href="./native-studio.css?v=0a333e7ed3" />
+<link rel="stylesheet" href="./native-plan.css?v=ff35d2cb0a" />
+<link rel="stylesheet" href="./native-saved.css?v=0563340490" />
+<link rel="stylesheet" href="./native-studio.css?v=2fd9c6c043" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=1f483620a3" />
+<link rel="stylesheet" href="./ce-mobile.css?v=276d878a83" />
 <script src="./ce-touch-edit.js?v=b1efa2673c"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
@@ -15602,7 +15614,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                     +     '<button type="button" data-ce-launch-retire-day="' + day.idx + '" title="Remove this suggestion">Remove</button>'
                     +   '</div></details>'
                     + '</div>'
-                : '<div class="ce-launch-day-art" style="display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:11px;">Pick from Library</div>')
+                : '<div class="ce-launch-day-art" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;">Pick from Library</div>')
               + '</article>';
           }).join('')}
         </section>

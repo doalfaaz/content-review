@@ -38,7 +38,7 @@
   padding: 0 5px;
   border-radius: 999px;
   background: var(--accent-tint);
-  color: var(--accent);
+  color: var(--accent-text);
   font-size: 11px;
   font-weight: 800;
   line-height: 1;
@@ -166,7 +166,7 @@
   font-weight: 750;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .ce-next-best-name {
   font-size: 12px;
@@ -415,7 +415,7 @@
 .ce-type-pill.active {
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /* ── Saved Bank Grid & Pure Design Cards (No Clutter, No Labels) ── */
@@ -473,7 +473,7 @@
   font-weight: 750;
   border: 1px solid var(--accent-border);
   background: var(--accent-tint);
-  color: var(--accent);
+  color: var(--accent-text);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -554,7 +554,7 @@
   margin-top: 6px;
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   border: 1px solid var(--accent);
-  color: var(--accent);
+  color: var(--accent-text);
   font-size: 12.5px;
   font-weight: 700;
   padding: 7px 16px;

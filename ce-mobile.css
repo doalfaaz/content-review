@@ -1308,3 +1308,102 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-op
   max-height: none !important;
   overflow: visible !important;
 }
+
+/* ── Touch-target pass (audit 2026-09-12) ─────────────────────────────────────
+   The phone audit measured real control boxes: several interactive controls rendered
+   21-32px tall (rail toggle 36x21, saved type pill 37x23, plan bulk buttons 27,
+   rail arrows 28x28, sidebar/theme toggles 28-32). Apple's minimum is 44pt, and this
+   layer already uses 44/40/36 for nav — so the same scale is applied to the rest
+   instead of leaving sub-40 hit boxes. Heights only: no width/padding/colour change,
+   so the phone layout keeps its measure. */
+html.ce-phone #sidebar-toggle,
+html.ce-phone #theme-toggle,
+html.ce-phone #settings-toggle {
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+html.ce-phone .ce-rail-nav-btn {
+  min-width: 40px !important;
+  min-height: 40px !important;
+}
+html.ce-phone .ce-rail-toggle-btn,
+html.ce-phone .ce-ideas-filter,
+html.ce-phone .ce-saved-tab-btn,
+html.ce-phone .ce-write-kind button,
+html.ce-phone .ce-layout-toggle button,
+html.ce-phone .section-btn {
+  min-height: 40px !important;
+}
+html.ce-phone .ce-type-pill,
+html.ce-phone .ce-launch-board-range button,
+html.ce-phone .ce-launch-board-cadence button {
+  min-height: 36px !important;
+}
+html.ce-phone .write-history button,
+html.ce-phone #write-undo-btn,
+html.ce-phone #write-redo-btn {
+  min-height: 40px !important;
+  min-width: 44px !important;
+}
+html.ce-phone .ce-plan-bulk-btn,
+html.ce-phone #plan-schedule-all-ready-btn,
+html.ce-phone #plan-select-all-ready-btn,
+html.ce-phone #plan-auto-schedule-btn,
+html.ce-phone #plan-open-meta-btn {
+  min-height: 40px !important;
+}
+html.ce-phone input.search-input,
+html.ce-phone .search-input {
+  min-height: 40px !important;
+}
+
+/* ── Readiness grid + empty-state CTA (audit 2026-09-12) ──────────────────────
+   The 2x2 stat grid inherited a single-column border pass, so every cell kept a
+   bottom border and the last row drew a stray rule under a 2-column layout. Pin the
+   only-correct combination: bottom border on the TOP row only, no right border in the
+   right column, and the empty-state CTA raised out of the sub-40 hit box. */
+html.ce-phone .ce-readiness-row { grid-template-columns: repeat(2, 1fr); }
+html.ce-phone .ce-readiness-row > div {
+  border-right: 1px solid var(--card-border);
+  border-bottom: 1px solid var(--card-border);
+  padding: 14px 16px;
+}
+html.ce-phone .ce-readiness-row > div:nth-child(2n) { border-right: 0; }
+html.ce-phone .ce-readiness-row > div:nth-child(n+3) { border-bottom: 0; }
+html.ce-phone .ce-readiness-row > div:last-child { border-right: 0; border-bottom: 0; }
+html.ce-phone .ce-readiness-row strong { font-size: 23px; line-height: 1.05; }
+html.ce-phone .ce-saved-empty-cta { min-height: 40px !important; }
+
+/* ── Saved-Bank tab strip (audit 2026-09-12) ──────────────────────────────────
+   Three tabs with icons in a fixed-width pill made "Rejected / Archive" wrap to two
+   lines on a 402px phone, leaving the row visually uneven. Let the strip scroll
+   sideways instead of squeezing the labels: nowrap labels + an overflow container keeps
+   every tab on one line with no page-level horizontal overflow. */
+/* The strip shared a row with the type chips and was squeezed to 290px while the three
+   tabs need 359px, so the third label ran past the edge. Measure-then-fit: give the strip
+   its own full-width row (measured: 402 - padding = 370px >= 359px) so every tab sits on
+   one line, fully visible and tappable — no scroll strip, no clipped label. */
+html.ce-phone .ce-saved-filter-bar { gap: 8px; }
+html.ce-phone .ce-saved-subtabs {
+  flex: 0 0 100%;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  justify-content: space-between;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+html.ce-phone .ce-saved-subtabs::-webkit-scrollbar { display: none; }
+html.ce-phone .ce-saved-tab-btn { white-space: nowrap; flex: 0 0 auto; padding: 6px 8px; font-size: 11.5px; }
+/* Nested insets, not sibling competition, were starving the strip: viewport 402 gave the
+   workspace 354 and the header only 290, while the three tabs need 359. Trim the phone insets
+   (+48) and the tab padding (-24) so all three tabs fit on one line with no scroll/clip. */
+/* Root cause of the clipped tab: the phone inherited 24px (workspace) + 8px (header) of nested
+   inset = 32px per side on a 402px screen. The workspace already owns the phone inset, so the
+   header carries none and the workspace uses 16px: the strip gets 370px vs the 321px it needs. */
+html.ce-phone .ce-saved-workspace { padding-left: 16px; padding-right: 16px; }
+html.ce-phone .ce-saved-header { padding-left: 0; padding-right: 0; }
