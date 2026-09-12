@@ -5176,7 +5176,15 @@ function suggestLooks(card){
     const slides = (rootEl.classList && rootEl.classList.contains('slide'))
       ? [rootEl] : Array.prototype.slice.call(rootEl.querySelectorAll('.slide'));
     let fitted = 0;
-    slides.forEach(slide => {
+    /* AUTHORED-SPACE GUARD (2026-09-12, owner: "not showing the ideal designs"):
+       the app-wide sweep can reach a slide whose stage is ALREADY photocopy-scaled
+       (browse faces fitted by fitAll). Every metric below mixes
+       getBoundingClientRect() (scaled by the ancestor transform) with
+       clientHeight/offsetHeight (pre-transform layout px), so a good fit gets
+       re-clamped with garbage (measured live: max-height 160px over 839px of
+       content + a compounding zoom 0.7139). Neutralise the stage transform while
+       fitting, restore it after — the fitter always measures the authored 1080 box. */
+    const fitOneSlide = (slide) => {
       const mid = slide.querySelector('.mid');
       const content = slide.querySelector('.ce-render-block-content');
       if (!mid || !content) return;
@@ -5398,6 +5406,23 @@ function suggestLooks(card){
         }
         clampTranslate(el);
       });
+    };
+    slides.forEach(slide => {
+      // authored-space guard: neutralise the stage photocopy while fitting
+      const stage = slide.closest('.ce-carousel-slide-stage') || slide.parentElement;
+      let savedT = null, savedZ = null;
+      if (stage && stage.style) {
+        savedT = stage.style.transform || '';
+        savedZ = stage.style.zoom || '';
+        if (savedT || savedZ) { stage.style.transform = 'none'; stage.style.zoom = ''; }
+      }
+      try { fitOneSlide(slide); }
+      finally {
+        if (stage && stage.style && (savedT || savedZ)) {
+          stage.style.transform = savedT || '';
+          stage.style.zoom = savedZ || '';
+        }
+      }
     });
 
     // --- fixed-band copy fit (owner bug 2026-09-11) ----------------------------

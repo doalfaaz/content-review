@@ -1070,6 +1070,11 @@
     if (!editor) return;
     if (t.__ceToolsEditor === editor) {
       if (editor.classList.contains('ce-tools-open') && t.__ceToolsOpen) t.__ceToolsOpen();
+      /* If some other path closed the sheet (class removed without the toggle),
+         the portal must still come home — otherwise the dock stays a fixed
+         62vh overlay and the slide is covered with the TOOLS bar closed. */
+      if (!editor.classList.contains('ce-tools-open') && t.__ceToolsRestore) t.__ceToolsRestore();
+      if (t.__ceToolsCaptureHome) t.__ceToolsCaptureHome();
       t.style.setProperty('position', 'static', 'important');
       t.style.setProperty('display', 'flex', 'important');
       t.style.setProperty('width', '100%', 'important');
@@ -1077,17 +1082,39 @@
       t.style.setProperty('pointer-events', 'auto', 'important');
       return;
     }
-    var originalParent = dock;
-    var originalNext = dock.nextSibling;
-    var originalStyle = dock.getAttribute('style');
+    /* PORTAL HOME — captured from the dock's REAL parent, never from the dock itself.
+       (The previous owner wrote `originalParent = dock`, so restore() ran
+       dock.appendChild(dock) → HierarchyRequestError, the portal styles were never
+       cleared, and a closed Tools sheet stayed a 62vh fixed overlay covering the
+       slide — the owner's 2026-09-12 screenshot. The home is re-captured whenever
+       the studio legitimately re-renders the dock while it is NOT portaled.) */
+    var homeParent = dock.parentElement;
+    var homeNext = dock.nextSibling;
+    var homeStyle = dock.getAttribute('style');
     var portaled = false;
+    function captureHome() {
+      if (portaled) return;
+      homeParent = dock.parentElement;
+      homeNext = dock.nextSibling;
+      homeStyle = dock.getAttribute('style');
+    }
     function restore() {
       if (!portaled) return;
-      if (originalNext && originalNext.parentNode === originalParent) originalParent.insertBefore(dock, originalNext);
-      else originalParent.appendChild(dock);
-      if (originalStyle == null) dock.removeAttribute('style');
-      else dock.setAttribute('style', originalStyle);
+      try {
+        if (homeParent && homeParent !== dock) {
+          if (homeNext && homeNext.parentNode === homeParent) homeParent.insertBefore(dock, homeNext);
+          else homeParent.appendChild(dock);
+        } else if (dock.parentElement) {
+          dock.parentElement.insertBefore(dock, dock.nextSibling); // stay put, just drop portal
+        }
+      } catch (_e) { /* detached mid-teardown: styles still need clearing below */ }
+      dock.style.cssText = '';
+      if (homeStyle != null) dock.setAttribute('style', homeStyle);
       dock.classList.remove('ce-tools-sheet');
+      var scroll = dock.querySelector('.ce-inspector-scroll');
+      if (scroll) scroll.style.cssText = '';
+      var pinned = dock.querySelector('.ce-inspector-pinned');
+      if (pinned) pinned.style.cssText = '';
       portaled = false;
     }
     function openSheet() {
@@ -1148,6 +1175,7 @@
     t.__ceToolsEditor = editor;
     t.__ceToolsRestore = restore;
     t.__ceToolsOpen = openSheet;
+    t.__ceToolsCaptureHome = captureHome;
     t.style.setProperty('position', 'static', 'important');
     t.style.setProperty('display', 'flex', 'important');
     t.style.setProperty('align-items', 'center', 'important');

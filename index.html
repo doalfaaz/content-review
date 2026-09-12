@@ -1383,10 +1383,14 @@
      inset authored card is preferable to an indefinitely blank rail. */
   .ce-real-face:not(.ce-fit-ready) { visibility: visible; }
   .ce-real-face:not(.ce-fit-ready) > :first-child { transform: scale(0.3); }
+  /* The rail fallback used to be zoom:0.3 — that collapsed the authored layout
+     BEFORE the JS fit pass ran, so fitCarouselText measured a shrunken world and
+     wrote block heights that clipped once fitted (owner 2026-09-12: "not showing
+     the ideal designs"). Fallback is transform now: the authored 1080 box is what
+     every fitter sees, everywhere, always. */
   .ce-rail .ce-real-face:not(.ce-fit-ready) > :first-child,
   .ce-saved-design-slot .ce-real-face:not(.ce-fit-ready) > :first-child {
-    transform: none;
-    zoom: 0.3;
+    transform: scale(0.3);
   }
 
   /* Canon Card (For Ideas & System) */
@@ -2231,7 +2235,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=6702562e41"></script>
-<script src="./deck_index.js?v=fffb04a70e"></script>
+<script src="./deck_index.js?v=31432cab39"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
 <link rel="stylesheet" href="./native-plan.css?v=ff35d2cb0a" />
@@ -2243,7 +2247,7 @@ html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav b
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
 <link rel="stylesheet" href="./ce-mobile.css?v=276d878a83" />
-<script src="./ce-touch-edit.js?v=b1efa2673c"></script>
+<script src="./ce-touch-edit.js?v=f89692b20a"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -2675,17 +2679,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (face.__ceFittedWidth !== w) {
           face.__ceFittedWidth = w;
           var isBrowseFace = !!face.closest('.ce-rail, .ce-saved-design-slot, .deck-card, .pure-card, .ce-library-grid, .masonry-item');
+          /* ORDER (photocopy law): clear zoom/transform FIRST so the text fitter
+             measures the AUTHORED 1080 box, then fit, then apply the final scale.
+             Fitting while any zoom is active writes collapsed block heights that
+             clip the cover (owner 2026-09-12). */
+          inner.style.zoom = '';
+          inner.style.transform = 'none';
           // Library and Saved Designs are visual selection surfaces. Preserve
           // the authored 1080x1350 face, but never let its primary type collapse
           // below a readable optical floor before the whole canvas is scaled.
           fitCarouselText(face, { minSize: isBrowseFace ? 34 : 22 });
-          if (isBrowseFace) {
-            inner.style.transform = 'none';
-            inner.style.zoom = String(w / 1080);
-          } else {
-            inner.style.zoom = '';
-            inner.style.transform = 'scale(' + (w / 1080) + ')';
-          }
+          inner.style.transform = 'scale(' + (w / 1080) + ')';
+          inner.style.transformOrigin = 'left top';
+          face.style.clipPath = 'inset(0 round 12px)';
         }
         face.classList.add('ce-fit-ready');
       }
@@ -2704,12 +2710,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             face.__ceFittedWidth = w;
             pstage.style.transform = 'scale(' + (w / 1080) + ')';
             var isBrowsePost = !!face.closest('.ce-rail, .ce-saved-design-slot');
-            if (isBrowsePost) {
-              pstage.style.transform = 'none';
-              pstage.style.zoom = String(w / 1080);
-            } else {
-              pstage.style.zoom = '';
-            }
+            /* same photocopy law as carousel browse faces: zoom re-laid out the
+               authored post and clipped its type; scale + clip-path instead. */
+            pstage.style.zoom = '';
+            pstage.style.transformOrigin = 'left top';
+            face.style.clipPath = 'inset(0 round 12px)';
             window.PostCore.fitMounted(face, { minSize: isBrowsePost ? 48 : 18 });
           }
           face.classList.add('ce-fit-ready');
@@ -2913,8 +2918,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           var width = el.clientWidth || (face && face.clientWidth) || 0;
           if (face && stage && width > 0) {
             fitCarouselText(face, { minSize: 48 });
-            stage.style.transform = 'none';
-            stage.style.zoom = String(width / 1080);
+            /* photocopy law: scale, never zoom (zoom re-laid out the authored
+               face and clipped its type on the shelf — same defect class). */
+            stage.style.zoom = '';
+            stage.style.transform = 'scale(' + (width / 1080) + ')';
+            stage.style.transformOrigin = 'left top';
+            face.style.clipPath = 'inset(0 round 12px)';
             face.classList.add('ce-fit-ready');
           }
           if (frames > 0) requestAnimationFrame(function () { settleSavedFace(frames - 1); });
@@ -4105,6 +4114,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     planViewMode: localStorage.getItem('ce_plan_view_mode') || 'kanban',
     planSelectedIds: new Set(),
     savedItems: readStoredJSON('ce_saved_bank', []),
+    /* Bank deletes must travel (owner law 2026-09-12: same bank everywhere).
+       A deleted row is a tombstone `key -> updatedMs` so a stale copy on the
+       other surface can never resurrect it. */
+    savedBankTombstones: readStoredJSON('ce_saved_bank_tombstones', {}),
     savedFilter: 'shortlist',
     savedTypeFilter: 'all',
     sweepIndex: 0,
@@ -4114,6 +4127,174 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   };
   window.__CE_STATE__ = state;
   window.state = state;
+
+  /* ── Saved-Bank sync client (owner 2026-09-12: "no sync with the mobile version") ──
+     One bank everywhere: the Mac app and the phone pull/push the SAME shared store
+     on the deck-sync server (loopback :4145 for the app; the discovered
+     ce_sync_endpoint for the phone). Contract mirrors the deck sync the owner trusts:
+     per-entry last-write-wins by updatedMs, tombstones so deletes travel both ways
+     and a stale copy can never resurrect a row, key-gated writes (same ce_sync_key),
+     silent skip when no endpoint exists. Deletions are detected by key-set diff at
+     push time and persisted under ce_saved_bank_tombstones. */
+  /* Transport law (2026-09-13): the native app's CSP is connect-src 'none' — fetch is
+     closed there on purpose (deck sync already goes through ceBridge + URLSession). The
+     bank client follows the same rule: bridge in the app, fetch on the web/phone. */
+  function ceBankBridge() {
+    try {
+      if (window.__CE_NATIVE_APP__ && window.webkit && window.webkit.messageHandlers &&
+          window.webkit.messageHandlers.ceBridge &&
+          window.webkit.messageHandlers.ceBridge.postMessage) return true;
+    } catch (_e) {}
+    return false;
+  }
+  var __ceBankPending = {};
+  var __ceBankSeq = 0;
+  window.__CE_BANK_RESULT__ = function (b64) {
+    /* native callback: base64 JSON of {req: <id>, ok:, status:, data: {entries...}} */
+    var res = null;
+    try { res = JSON.parse(decodeURIComponent(escape(atob(String(b64 || ''))))); } catch (_e) { res = null; }
+    var reqId = res && res.req;
+    var cb = __ceBankPending[reqId];
+    if (cb) { delete __ceBankPending[reqId]; try { cb(res); } catch (_e) {} }
+  };
+  function ceBankRequest(action, bodyJson) {
+    /* returns Promise<{ok, status, data}> via the bridge in the app */
+    return new Promise(function (resolve) {
+      var reqId = 'bq' + (++__ceBankSeq) + '_' + Date.now();
+      var settled = false;
+      var done = function (r) { if (!settled) { settled = true; resolve(r || { ok: false }); } };
+      __ceBankPending[reqId] = done;
+      setTimeout(function () { done({ ok: false, timeout: true }); }, 9000);
+      try {
+        window.webkit.messageHandlers.ceBridge.postMessage({
+          action: action, req: reqId,
+          body: typeof bodyJson === 'string' ? bodyJson : ''
+        });
+      } catch (_e) { done({ ok: false }); }
+    });
+  }
+  function ceBankEndpoint() {
+    if (ceBankBridge()) return 'bridge';
+    if (window.__CE_BANK_ENDPOINT__) return String(window.__CE_BANK_ENDPOINT__);
+    try {
+      var ep = localStorage.getItem('ce_sync_endpoint');
+      if (ep) {
+        var clean = String(ep).replace(/\/+$/, '');
+        // A discovered endpoint ALREADY carries the capability path (P0-3 seeding
+        // law) — appending it twice 404s. Only add it when absent.
+        return clean.indexOf('39c4ee5650102ee027bd87bcc4e9a2ea') >= 0 ? clean : clean + '/39c4ee5650102ee027bd87bcc4e9a2ea';
+      }
+    } catch (_e) {}
+    return null;
+  }
+  function ceBankKey() { try { return localStorage.getItem('ce_sync_key') || ''; } catch (_e) { return ''; } }
+  function ceBankEntryKey(e) {
+    if (!e) return null;
+    var item = e.item || {};
+    var id = item.id || item.contentId || item.title || (typeof item.text === 'string' ? item.text.slice(0, 60) : '') || e.contentId || '';
+    if (!id) return null;
+    return String((e.type || 'piece') + '|' + id);
+  }
+  function ceBankUpdatedMs(e) {
+    var t = Date.parse((e && (e.updatedAt || e.savedAt)) || '');
+    return isFinite(t) ? t : 0;
+  }
+  function ceBankTombstones() {
+    try { return JSON.parse(localStorage.getItem('ce_saved_bank_tombstones') || '{}') || {}; } catch (_e) { return {}; }
+  }
+  function cePersistTombstones(t) { try { localStorage.setItem('ce_saved_bank_tombstones', JSON.stringify(t)); } catch (_e) {} }
+  function ceBankKnownKeys() {
+    try { return JSON.parse(localStorage.getItem('ce_saved_bank_keys') || '[]') || []; } catch (_e) { return []; }
+  }
+  function ceSavedBankPush(entriesArg) {
+    var ep = ceBankEndpoint(); if (!ep) return;
+    clearTimeout(window.__ceBankPushTimer);
+    window.__ceBankPushTimer = setTimeout(function () {
+      var src = Array.isArray(entriesArg) ? entriesArg : (state.savedItems || []);
+      var entries = [];
+      var liveKeys = {};
+      src.forEach(function (e) {
+        var k = ceBankEntryKey(e); if (!k) return;
+        liveKeys[k] = 1;
+        var out = {}; Object.keys(e).forEach(function (f) { out[f] = e[f]; });
+        out.key = k; out.updatedMs = ceBankUpdatedMs(e);
+        entries.push(out);
+      });
+      // diff-based tombstones: a key the last sync knew that is now locally gone was deleted
+      var tomb = ceBankTombstones();
+      var now = Date.now();
+      ceBankKnownKeys().forEach(function (k) {
+        if (!liveKeys[k] && !(k in tomb)) tomb[k] = now;
+      });
+      cePersistTombstones(tomb);
+      try { localStorage.setItem('ce_saved_bank_keys', JSON.stringify(Object.keys(liveKeys))); } catch (_e) {}
+      Object.keys(tomb).forEach(function (k) { entries.push({ key: k, status: 'deleted', updatedMs: tomb[k], updatedAt: new Date(tomb[k]).toISOString() }); });
+      if (!entries.length) return;
+      var payload = JSON.stringify({ entries: entries });
+      if (ep === 'bridge') { ceBankRequest('bankPush', payload).catch(function () {}); return; }
+      fetch(ep + '/bank', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': ceBankKey() }, body: payload })
+        .catch(function () {});
+    }, 900);
+  }
+  function ceSavedBankPull(forceRender) {
+    var ep = ceBankEndpoint(); if (!ep) return Promise.resolve(false);
+    var pullP = ep === 'bridge'
+      ? ceBankRequest('bankPull').then(function (r) { if (!r.ok) throw new Error('bank pull bridge'); return r.data || {}; })
+      : fetch(ep + '/bank', { headers: { 'X-CE-Sync-Key': ceBankKey() }, cache: 'no-store' })
+          .then(function (r) { if (!r.ok) throw new Error('bank pull ' + r.status); return r.json(); });
+    return pullP
+      .then(function (d) {
+        var remote = (d && d.entries) || {};
+        var tomb = ceBankTombstones();
+        var byKey = {};
+        (state.savedItems || []).forEach(function (e) { var k = ceBankEntryKey(e); if (k) byKey[k] = e; });
+        var changed = false;
+        Object.keys(remote).forEach(function (k) {
+          var re = remote[k] || {};
+          var rms = Number(re.updatedMs) || ceBankUpdatedMs(re);
+          if ((tomb[k] || 0) >= rms) return;                    // local delete wins over older remote
+          var le = byKey[k]; var lms = le ? ceBankUpdatedMs(le) : -1;
+          if (le && lms >= rms) return;                          // ours is newer or equal
+          if (re.status === 'deleted') {
+            tomb[k] = Math.max(tomb[k] || 0, rms);
+            cePersistTombstones(tomb);
+            if (le) { state.savedItems = (state.savedItems || []).filter(function (x) { return ceBankEntryKey(x) !== k; }); changed = true; }
+            return;
+          }
+          var entry = {}; Object.keys(re).forEach(function (f) { entry[f] = re[f]; });
+          delete entry.key; delete entry.updatedMs;
+          if (le) Object.keys(entry).forEach(function (f) { le[f] = entry[f]; });
+          else { (state.savedItems = state.savedItems || []).unshift(entry); }
+          changed = true;
+        });
+        if (changed) {
+          try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems || [])); } catch (_e) {}
+          try { if (state.activeTab === 'saved' && typeof renderMain === 'function') renderMain(); } catch (_e) {}
+          try { if (typeof updateTopbarSavedBadge === 'function') updateTopbarSavedBadge(); } catch (_e) {}
+        }
+        return changed;
+      })
+      .catch(function () { return false; });
+  }
+  window.__CE_SAVED_BANK_PULL__ = ceSavedBankPull;
+  window.__CE_SAVED_BANK_PUSH__ = ceSavedBankPush;
+  /* Arm only where a real channel exists (2026-09-13): the native harness and any
+     page whose CSP forbids connect fire a BLOCKED fetch that logs 2 console errors
+     per boot and fails every zero-error gate. Probe the page's own CSP meta: if it
+     says connect-src 'none' and there is no ceBridge, the bank client stays dark —
+     the phone bundle (connect-src lists :4145) and the app (bridge) both stay live. */
+  var __ceBankChannel = ceBankBridge();
+  if (!__ceBankChannel) {
+    try {
+      var csp = (document.querySelector('meta[http-equiv="Content-Security-Policy"]') || {}).content || '';
+      __ceBankChannel = /connect-src[^;]*4145/.test(csp);
+    } catch (_e) {}
+  }
+  if (__ceBankChannel) {
+    try { setTimeout(function () { ceSavedBankPull(true); }, 1500); setInterval(function () { ceSavedBankPull(false); }, 60000); } catch (_e) {}
+  }
+
+
 
   // User explicit instruction (2026-08-27): Move all existing queue items to Saved Bank
   try {
@@ -8543,22 +8724,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (__miniH > 60 && (scaleW * 1350) > __miniH) {
           scaleW = Math.min(scaleW, __miniH / 1350);
         }
-        // Design-picker minis (owner 2026-09-08 17:00): zoom() at 0.09–0.12
-        // REFLOWS letter-spaced kickers (@DOALFAAZ vs RAVIVAAR SUBAH collide,
-        // kickers wrap to 2 lines, titles pack) because zoom mutates used
-        // lengths. Post Studio cards look like true photocopies; carousel
-        // cards did not. Root fix: these stages are already position:absolute
-        // at 1080×1350, so layout at authored size (text-fit included) and
-        // photocopy with transform:scale. The card already has
-        // clip-path:inset(0 round 12px), which clips the composited layer
-        // (corner law). Library/browse rails stay on zoom() — they are
-        // width-driven and must not re-enter the transform shrink-loop.
-        if (inLookChoice) {
-          // Clear any leftover zoom BEFORE text-fit so measurers see the
-          // authored 1080 box, not a 0.09-zoom used-length world.
-          stage.style.zoom = '';
-          stage.style.transform = 'none';
-        }
+        // Photocopy law, unified 2026-09-12 (owner: "not showing the ideal designs
+        // in first slide"): EVERY stage — look-choice minis AND browse/library rails
+        // — must (1) clear zoom/transform BEFORE the text fit so measurers see the
+        // authored 1080 box, (2) fit, (3) photocopy with transform:scale. The old
+        // browse branch ran the text fit while a previous pass' stage zoom (or the
+        // CSS rail fallback) was still applied, so block heights were written in a
+        // shrunk world and clipped once the face was fitted at authored size.
+        stage.style.zoom = '';
+        stage.style.transform = 'none';
         if (window.__CE_FIT_CAROUSEL_TEXT__) window.__CE_FIT_CAROUSEL_TEXT__(stage);
         stage.style.transformOrigin = 'top left';
         var cornerW = Number(frame.getAttribute('data-ce-corner')) || (inLookChoice ? 12 : 16);
@@ -8568,12 +8742,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           sl.style.overflow = 'hidden';
           sl.style.borderRadius = cornerW + 'px';
         });
-        if (inLookChoice) {
-          stage.style.transform = 'scale(' + scaleW + ')';
-        } else {
-          stage.style.transform = 'none';
-          stage.style.zoom = String(scaleW);
-        }
+        stage.style.transform = 'scale(' + scaleW + ')';
+        /* corner law: a transformed stage escapes ancestor radius — the FRAME owns
+           the clip so browse corners stay square-free like the look minis. */
+        frame.style.clipPath = 'inset(0 round ' + cornerW + 'px)';
         frame.setAttribute('data-ce-mini-w', String(Math.round(w)));
         frame.classList.add('ce-fit-ready');
         return;
@@ -11813,7 +11985,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         }
         if (!sEntry.status) sEntry.status = 'saved';
         sEntry.updatedAt = new Date().toISOString();
-        try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); } catch (_e) {}
+        try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
         if (typeof updateTopbarSavedBadge === 'function') updateTopbarSavedBadge();
       }
     }
@@ -13016,7 +13188,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           addToQueue(saved.type, saved.item, saved.design);
           saved.status = 'in_progress';
         });
-        try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); } catch (_e) {}
+        try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
         state.savedSelectedIds.clear();
         updateTopbarSavedBadge();
         updateTopbarQueueBadge();
@@ -13151,7 +13323,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           e.stopPropagation();
           addToQueue(saved.type, itm, dsg);
           saved.status = 'in_progress';
-          try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); } catch (_e) {}
+          try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
           updateTopbarSavedBadge();
           showAppToast('Added to Plan calendar', { icon: 'calendar' });
           if (typeof navigateTo === 'function') navigateTo('plan');
@@ -15988,7 +16160,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       state.savedItems = poems.concat(other);
     }
 
-    try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); } catch (_e) {}
+    try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
     if (st === 'rejected' && Array.isArray(state.queueItems)) {
       state.queueItems = state.queueItems.filter(function (queued) {
         return !queued || getContentKey(queued.type, queued.item) !== key;
@@ -16014,7 +16186,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       entry.status = 'saved';
       entry.rejectedAt = null;
       entry.updatedAt = new Date().toISOString();
-      try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); } catch (_e) {}
+      try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
       updateTopbarSavedBadge();
       showAppToast('✓ Restored to Shortlist', { icon: 'star' });
       if (state.activeTab === 'saved' || state.activeTab === 'library') renderMain();
@@ -16029,7 +16201,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (idx >= 0) {
       if (!window.confirm('Delete this piece from your Saved Bank forever?\nThis cannot be undone.')) return false;
       state.savedItems.splice(idx, 1);
-      try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); } catch (_e) {}
+      try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
       updateTopbarSavedBadge();
       showAppToast('Deleted permanently from Saved Bank', { icon: 'delete' });
       if (state.activeTab === 'saved') renderMain();
