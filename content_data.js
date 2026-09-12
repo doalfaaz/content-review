@@ -186837,8 +186837,8 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:BpgRHgilWzc",
   "kind": "poem",
-  "title": "poem-BpgRHgilWzc",
-  "body": "तुमने भी थोड़ी देर कर दी आने में\nहमें भी फ़ुरसत कहाँ थी निभाने में!",
+  "title": "मोहब्बत करना ध्यान रहा,",
+  "body": "मोहब्बत करना ध्यान रहा,\nउसको जताना भूल गया!",
   "status": "posted",
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",

@@ -1056,7 +1056,11 @@
     var t = document.getElementById('ce-tools-toggle');
     var dock = document.querySelector('aside.ce-studio-inspector, .ce-studio-inspector');
     if (!t || !dock) return;
-    if (t.parentElement !== dock) dock.appendChild(t);
+    // Keep the toggle as the dock's first child. Appending it after the scroll
+    // content placed its 56px hit area outside the dock's 56px resting band;
+    // the finger hit then landed below the visible bar. The dock owns the
+    // ordering, while the sheet CSS makes the scroll content visible on open.
+    if (t.parentElement !== dock || dock.firstElementChild !== t) dock.insertBefore(t, dock.firstElementChild);
     t.style.setProperty('position', 'static', 'important');
     ['top', 'bottom', 'left', 'right'].forEach(function (k) { t.style.setProperty(k, 'auto', 'important'); });
     t.style.setProperty('display', 'flex', 'important');
