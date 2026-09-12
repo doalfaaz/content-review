@@ -23,96 +23,16 @@ body:not(.bright-theme) .ce-ideas-parity {
   --ideas-accent: #d4576b;
 }
 
-.ce-ideas-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin: 0 0 16px;
-}
-
-.ce-ideas-filter-group {
-  display: inline-flex;
-  gap: 5px;
-  align-items: center;
-  padding: 4px;
-  border: 1px solid var(--ideas-line);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--ideas-surface) 88%, var(--ideas-accent) 12%);
-}
-
-.ce-ideas-filter,
-.ce-ideas-filter-menu,
-.ce-ideas-action,
-.ce-ideas-menu-item {
-  appearance: none;
-  border: 1px solid var(--ideas-line);
-  background: var(--ideas-surface);
-  color: var(--ideas-muted);
-  border-radius: 999px;
-  padding: 8px 14px;
-  font: 700 12.5px/1.1 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-  cursor: pointer;
-  transition: border-color .16s ease, background .16s ease, color .16s ease, transform .16s ease;
-}
-
-.ce-ideas-filter-group .ce-ideas-filter {
-  border-color: transparent;
-  padding-inline: 14px;
-}
-
-.ce-ideas-filter:hover,
-.ce-ideas-filter-menu:hover,
-.ce-ideas-action:hover,
-.ce-ideas-menu-item:hover {
-  border-color: color-mix(in srgb, var(--ideas-accent) 50%, var(--ideas-line));
-  color: var(--ideas-ink);
-  transform: translateY(-1px);
-}
-
-.ce-ideas-filter.is-active,
-.ce-ideas-filter-menu.is-active,
-.ce-ideas-menu-item.is-active {
-  background: var(--ideas-ink);
-  border-color: var(--ideas-ink);
-  color: var(--ideas-surface);
-}
-
-/* One active language across both facets (deep visual audit 2026-09-07): the
-   category pills selected as filled ink while the language pills selected as
-   accent-outline — two "active" vocabularies in one row read as incoherent.
-   Both now use the same ink fill; the facet separation is carried by the
-   divider below, not by a different selection style. */
-.ce-ideas-language .ce-ideas-filter.is-active {
-  background: var(--ideas-ink);
-  border-color: var(--ideas-ink);
-  color: var(--ideas-surface);
-}
-.ce-ideas-language {
-  position: relative;
-  margin-left: 14px;
-}
-.ce-ideas-language::before {
-  content: "";
-  position: absolute;
-  left: -8px;
-  top: 15%;
-  bottom: 15%;
-  width: 1px;
-  background: color-mix(in srgb, var(--ideas-line) 70%, var(--ideas-muted));
-}
-
-.ce-ideas-filter-menu-wrap {
-  position: relative;
-  margin-left: 6px;
-}
-
-.ce-ideas-filter-menu {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: transparent;
-}
+.ce-ideas-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding-bottom:14px;border-bottom:1px solid var(--ideas-line)}
+.ce-ideas-filter-group{display:inline-flex;gap:4px;align-items:center;padding:3px;border:1px solid var(--ideas-line);border-radius:10px;background:color-mix(in srgb,var(--ideas-surface) 94%,var(--ideas-accent) 6%)}
+.ce-ideas-filter,.ce-ideas-filter-menu,.ce-ideas-action,.ce-ideas-menu-item{appearance:none;border:1px solid transparent;background:transparent;color:var(--ideas-muted);border-radius:8px;padding:9px 12px;min-height:38px;font:650 12px/1.1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;cursor:pointer;transition:border-color .16s ease,background .16s ease,color .16s ease,transform .16s ease}
+.ce-ideas-filter-group .ce-ideas-filter{border-color:transparent;padding-inline:12px}
+.ce-ideas-filter:hover,.ce-ideas-filter-menu:hover,.ce-ideas-action:hover,.ce-ideas-menu-item:hover{border-color:color-mix(in srgb,var(--ideas-accent) 50%,var(--ideas-line));color:var(--ideas-ink);transform:translateY(-1px)}
+.ce-ideas-filter.is-active,.ce-ideas-filter-menu.is-active,.ce-ideas-menu-item.is-active{background:var(--ideas-ink);border-color:var(--ideas-ink);color:var(--ideas-surface)}
+.ce-ideas-language{position:relative;margin-left:10px}.ce-ideas-language::before{content:"";position:absolute;left:-6px;top:18%;bottom:18%;width:1px;background:var(--ideas-line)}
+.ce-ideas-filter-menu-wrap{position:relative;margin-left:auto}.ce-ideas-filter-menu{display:inline-flex;align-items:center;gap:7px;border-color:var(--ideas-line);background:var(--ideas-surface)}
+.ce-ideas-summary{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 15px;color:var(--ideas-muted);font-size:11px;font-weight:650}
+.ce-ideas-action{min-width:44px;border-radius:8px}.ce-ideas-action.is-primary{background:var(--ideas-ink);border-color:var(--ideas-ink);color:var(--ideas-surface)}
 
 .ce-ideas-filter-menu::after {
   content: "";

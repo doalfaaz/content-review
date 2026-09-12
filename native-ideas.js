@@ -218,6 +218,7 @@
       (pending ? '<div class="ce-ideas-card-pending">Structured outline pending for this idea.</div>' : '') +
       '<div class="ce-ideas-card-actions">' +
       '<button type="button" class="ce-ideas-action is-primary" data-ce-idea-forward="' + esc(item.id || title) + '">Take forward</button>' +
+      '<button type="button" class="ce-ideas-action" data-ce-idea-schedule="' + esc(item.id || title) + '">Schedule</button>' +
       '<button type="button" class="ce-ideas-action" data-ce-idea-copy="' + esc(item.id || title) + '">Copy</button>' +
       '<span class="ce-ideas-action-status" aria-live="polite"></span>' +
       '</div></article>';
@@ -274,6 +275,45 @@
     setStatus(button, '⚠ Unavailable', false);
   }
 
+  function scheduleIdeaItem(item, button) {
+    if (!item) return;
+    var existing = document.getElementById('ce-idea-schedule-modal');
+    if (existing) existing.remove();
+    var now = new Date();
+    var today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
+    var modal = document.createElement('div');
+    modal.id = 'ce-idea-schedule-modal';
+    modal.className = 'ce-idea-schedule-modal';
+    modal.innerHTML = '<div class="ce-idea-schedule-card" role="dialog" aria-modal="true" aria-labelledby="ce-idea-schedule-title">' +
+      '<div class="ce-idea-schedule-head"><div><strong id="ce-idea-schedule-title">Schedule idea</strong><span>' + esc(titleOf(item)) + '</span></div><button type="button" data-ce-idea-schedule-close aria-label="Close">×</button></div>' +
+      '<p class="ce-idea-schedule-note">This keeps the idea as a Draft in Plan. Shape it in Write before publishing.</p>' +
+      '<label>Date<input type="date" data-ce-idea-schedule-date min="' + today + '" value="' + today + '"></label>' +
+      '<label>Time<input type="time" data-ce-idea-schedule-time value="21:00"></label>' +
+      '<div class="ce-idea-schedule-actions"><button type="button" data-ce-idea-schedule-cancel>Cancel</button><button type="button" class="is-primary" data-ce-idea-schedule-save>Schedule draft</button></div>' +
+      '</div>';
+    document.body.appendChild(modal);
+    var close = function () { modal.remove(); };
+    modal.querySelector('[data-ce-idea-schedule-close]').onclick = close;
+    modal.querySelector('[data-ce-idea-schedule-cancel]').onclick = close;
+    modal.addEventListener('click', function (event) { if (event.target === modal) close(); });
+    modal.querySelector('[data-ce-idea-schedule-save]').onclick = function () {
+      var date = modal.querySelector('[data-ce-idea-schedule-date]').value;
+      var time = modal.querySelector('[data-ce-idea-schedule-time]').value;
+      if (!date || !time) return;
+      var parts = time.split(':').map(Number);
+      var h = parts[0], minute = parts[1];
+      var label = (h % 12 || 12) + ':' + String(minute).padStart(2, '0') + ' ' + (h >= 12 ? 'PM' : 'AM');
+      var bridge = window.__CE_ADD_TO_QUEUE__;
+      var row = bridge && bridge('idea', item, { ideaSource: 'ideas' }, { scheduleDate: date, scheduleTime: label, scheduled: true, readyToPost: false });
+      if (row !== false) {
+        if (typeof window.__CE_IDEA_SCHEDULED__ === 'function') window.__CE_IDEA_SCHEDULED__(item, date, label);
+        setStatus(button, '✓ Scheduled', true);
+        close();
+      }
+    };
+    var input = modal.querySelector('[data-ce-idea-schedule-date]');
+    if (input) input.focus();
+  }
   // Take forward: the canon action for an idea. Shape it into a post/poem first
   // (Write); Queue stays the staging lane for finished artifacts.
   function takeForwardItem(item, button) {
@@ -327,6 +367,13 @@
   function handleClick(event) {
     var target = event.target && event.target.closest ? event.target.closest('#view.ce-ideas-parity *') : null;
     if (!target) return;
+    var scheduleButton = target.closest('[data-ce-idea-schedule]');
+    if (scheduleButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      scheduleIdeaItem(findItem(scheduleButton.getAttribute('data-ce-idea-schedule')), scheduleButton);
+      return;
+    }
     var filterButton = target.closest('[data-ce-ideas-filter]');
     if (filterButton) {
       event.preventDefault();
@@ -384,6 +431,13 @@
       copyItem(findItem(copyButton.getAttribute('data-ce-idea-copy')), copyButton);
       return;
     }
+    var scheduleButton = target.closest('[data-ce-idea-schedule]');
+    if (scheduleButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      scheduleIdeaItem(findItem(scheduleButton.getAttribute('data-ce-idea-schedule')), scheduleButton);
+      return;
+    }
     var forwardButton = target.closest('[data-ce-idea-forward]');
     if (forwardButton) {
       event.preventDefault();
@@ -392,7 +446,27 @@
     }
   }
 
-  document.addEventListener('click', handleClick, true);
+  document.addEventListener('click', handleClick, false);
+
+  window.__CE_IDEA_SCHEDULED__ = function (item, date, label) {
+    try {
+      var st = window.__CE_STATE__ || window.state;
+      if (!st || !Array.isArray(st.queueItems)) return;
+      var key = String(item && (item.id || item.name || item.topic) || '');
+      var row = st.queueItems.find(function (q) {
+        return q && q.type === 'idea' && String(q.item && (q.item.id || q.item.name || q.item.topic) || '') === key;
+      });
+      if (!row) return;
+      row.auditStatus = 'DRAFT';
+      row.statusReason = 'Scheduled draft idea — shape it in Write before it can post.';
+      row.readyToPost = false;
+      row.scheduled = true;
+      row.scheduleSlot = String(date) + ' · ' + String(label);
+      try { localStorage.setItem('ce_queue_items', JSON.stringify(st.queueItems)); } catch (_e) {}
+      if (typeof window.__CE_UPDATE_TOPBAR_QUEUE__ === 'function') window.__CE_UPDATE_TOPBAR_QUEUE__();
+    } catch (_e2) {}
+  };
+
   mounted = true;
   window.__CE_IDEAS_RENDER__ = render;
   window.__CE_IDEAS_RENDERER__ = { render: render, setContext: function (nextContext) { context = nextContext || {}; } };

@@ -53,7 +53,13 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
 .ce-staged-open{min-width:0;display:grid;grid-template-columns:8px minmax(160px,1fr) auto;align-items:center;gap:10px;padding:5px 0;border:0;background:transparent;color:var(--ink);cursor:pointer;text-align:left}
 .ce-staged-open strong{overflow:hidden;font-size:11.5px;font-weight:720;text-overflow:ellipsis;white-space:nowrap}
 .ce-staged-open small{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.035em;text-transform:uppercase;white-space:nowrap}
-.ce-plan-empty.is-compact{min-height:150px}
+.ce-plan-inbox{margin:0 0 24px;padding:16px;border:1px solid var(--card-border);border-radius:16px;background:color-mix(in srgb,var(--card) 84%,transparent)}
+.ce-plan-inbox-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 2px 12px;border-bottom:1px solid var(--card-border)}
+.ce-plan-inbox-head>div{display:grid;gap:3px}.ce-plan-inbox-head strong{color:var(--ink);font-size:14px;font-weight:800}.ce-plan-inbox-head span{color:var(--muted);font-size:10.5px}.ce-plan-inbox-head>.ce-kanban-col-count{color:var(--ink);font-size:11px;font-weight:800}.ce-plan-inbox-list .ce-staged-row--inbox{display:grid;grid-template-columns:112px minmax(0,1fr);gap:14px;align-items:center;padding:12px 14px;margin:0;border:1px solid var(--card-border);border-radius:12px;background:color-mix(in srgb,var(--card) 70%,transparent);box-shadow:none}.ce-staged-row--inbox .ce-staged-face-preview{width:112px;height:140px}.ce-staged-row--inbox .ce-staged-copy{min-width:0;display:grid;gap:12px}.ce-staged-row--inbox .ce-staged-open{display:flex;align-items:flex-start;gap:8px;min-width:0;padding:0;border:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer}.ce-staged-row--inbox .ce-staged-open strong{display:block;overflow:hidden;font-size:14px;font-weight:740;text-overflow:ellipsis;white-space:nowrap}.ce-staged-row--inbox .ce-staged-open small{display:block;margin-top:4px;color:var(--muted);font-size:10px;line-height:1.4}.ce-staged-actions{display:flex;align-items:center;gap:8px}.ce-staged-actions .queue-open-studio-btn{padding:6px 10px;border:1px solid var(--card-border);border-radius:7px;background:var(--card);color:var(--ink);font-size:11px;font-weight:700;cursor:pointer}.ce-staged-actions .queue-del-btn{width:28px;height:28px}.ce-plan-inbox-list .ce-queue-missing{min-height:140px}
+@media(max-width:700px){.ce-plan-inbox-list .ce-staged-row--inbox{grid-template-columns:86px minmax(0,1fr);gap:12px;padding:10px}.ce-staged-row--inbox .ce-staged-face-preview{width:86px;height:108px}.ce-staged-row--inbox .ce-staged-open strong{font-size:13px}}
+.ce-idea-schedule-modal{position:fixed;inset:0;z-index:2200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.64);backdrop-filter:blur(12px)}
+.ce-idea-schedule-card{width:min(390px,92vw);display:grid;gap:13px;padding:20px;border:1px solid var(--card-border);border-radius:16px;background:var(--sidebar-bg);box-shadow:0 24px 70px rgba(0,0,0,.42);color:var(--ink)}
+.ce-idea-schedule-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.ce-idea-schedule-head>div{display:grid;gap:4px}.ce-idea-schedule-head strong{font-size:17px;font-weight:800}.ce-idea-schedule-head span{color:var(--muted);font-size:11px;line-height:1.35}.ce-idea-schedule-head>button{width:28px;height:28px;border:0;border-radius:8px;background:rgba(255,255,255,.08);color:var(--ink);font-size:20px;cursor:pointer}.ce-idea-schedule-note{margin:0;color:var(--muted);font-size:11px;line-height:1.45}.ce-idea-schedule-card>label{display:grid;gap:6px;color:var(--muted);font-size:11px;font-weight:700}.ce-idea-schedule-card input{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--card-border);border-radius:9px;background:rgba(255,255,255,.06);color:var(--ink);font:inherit}.ce-idea-schedule-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}.ce-idea-schedule-actions button{padding:8px 12px;border:1px solid var(--card-border);border-radius:8px;background:rgba(255,255,255,.07);color:var(--ink);font-size:11px;font-weight:700;cursor:pointer}.ce-idea-schedule-actions button.is-primary{border-color:var(--accent);background:var(--accent);color:#fff}
 .ce-surface-button{min-height:36px;padding:0 14px;border:1px solid var(--card-border);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer;font-size:11.5px;font-weight:750;transition:transform .15s ease,border-color .15s ease,background .15s ease}
 .ce-surface-button:hover{transform:translateY(-1px);border-color:var(--accent)}
 .ce-surface-button.is-primary{border-color:transparent;background:var(--grad-accent);color:#fff;box-shadow:0 2px 10px var(--accent-glow),inset 0 1px 0 rgba(255,255,255,0.22)}
@@ -956,4 +962,28 @@ body.bright-theme .ce-launch-board-cadence {
 }
 
 /* 2026-09-06 audit: collapsed Waitlist details looked like an orphaned pill — add context */
-.ce-launch-wl-hint{margin-left:10px;font-size:11.5px;color:var(--muted);font-weight:500;}
+/* Product hierarchy pass: Today is the working surface; Inbox is quiet staging. */
+.ce-plan-shell{--plan-accent:var(--accent)}
+.ce-plan-shell .ce-plan-heading{font-size:clamp(26px,3vw,40px);letter-spacing:-.045em}
+.ce-plan-shell .ce-plan-intro{padding-bottom:18px;border-bottom:1px solid var(--card-border)}
+.ce-plan-shell .ce-kanban-board{align-items:start;gap:12px}
+.ce-plan-shell .ce-kanban-col{border-color:var(--card-border);background:color-mix(in srgb,var(--card) 70%,transparent);box-shadow:none}
+.ce-plan-shell .ce-kanban-col:first-child{border-color:color-mix(in srgb,var(--accent) 38%,var(--card-border));box-shadow:inset 0 2px 0 var(--accent)}
+.ce-plan-shell .ce-kanban-col:first-child .ce-kanban-col-title{color:var(--ink);font-weight:850}
+.ce-plan-shell .ce-kanban-card{box-shadow:0 8px 22px rgba(0,0,0,.10);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.ce-plan-shell .ce-kanban-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.14)}
+.ce-plan-inbox{background:color-mix(in srgb,var(--bg) 72%,var(--card) 28%);border-style:dashed;box-shadow:none}
+@media(max-width:700px){.ce-plan-shell{margin-top:52px;padding:0 14px 54px}.ce-plan-shell .ce-plan-intro{padding-bottom:14px}.ce-plan-shell .ce-kanban-board{display:flex;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:10px;margin-inline:-14px;padding-inline:14px}.ce-plan-shell .ce-kanban-col{min-width:286px;scroll-snap-align:start}.ce-plan-inbox-list{grid-template-columns:1fr}.ce-plan-inbox{margin-top:18px}}
+/* Workbench hierarchy pass: one purpose per surface, quiet secondary diagnostics. */
+.ce-ops-shell{max-width:1440px;margin-top:52px;padding:0 28px 64px}
+.ce-ops-hero{border-color:color-mix(in srgb,var(--accent) 28%,var(--card-border));background:linear-gradient(135deg,color-mix(in srgb,var(--card) 92%,var(--accent) 8%),var(--card));box-shadow:0 14px 34px rgba(0,0,0,.14)}
+.ce-ops-hero-copy h2{font-size:clamp(26px,3vw,40px)!important;letter-spacing:-.045em}
+.ce-ops-actions{display:flex;gap:8px;flex-wrap:wrap}.ce-ops-actions .ce-surface-button{min-height:40px;padding-inline:16px}
+.ce-readiness-row{border:1px solid var(--card-border);border-radius:14px;background:color-mix(in srgb,var(--card) 64%,transparent);box-shadow:none}
+.ce-readiness-row>div{padding:18px 20px}.ce-readiness-row strong{font-variant-numeric:tabular-nums}
+.ce-ops-panel{box-shadow:none}.ce-section-heading h3{font-size:18px;letter-spacing:-.025em}
+.ce-grow-column{margin-top:26px}.ce-grow-colhead{display:flex;align-items:center;gap:10px;padding:0 2px 8px;border-bottom:1px solid var(--card-border)}.ce-grow-stepnum{color:var(--accent);font-size:10px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+.ce-launch-workbench{max-width:1440px;margin-top:52px;padding:0 28px 64px}.ce-launch-board-head{border-color:color-mix(in srgb,var(--accent) 28%,var(--card-border));background:linear-gradient(135deg,color-mix(in srgb,var(--card) 92%,var(--accent) 8%),var(--card));box-shadow:0 14px 34px rgba(0,0,0,.14)}
+.ce-launch-board-title{font-size:clamp(26px,3vw,40px)!important;letter-spacing:-.045em}.ce-launch-board-cadence{margin-top:6px}
+.ce-launch-day{box-shadow:none;transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}.ce-launch-day:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.14)}.ce-launch-day:first-child{border-color:color-mix(in srgb,var(--accent) 38%,var(--card-border));box-shadow:inset 0 2px 0 var(--accent)}
+@media(max-width:700px){.ce-ops-shell,.ce-launch-workbench{margin-top:52px;padding:0 14px 54px}.ce-ops-hero{padding:20px}.ce-readiness-row{grid-template-columns:repeat(2,1fr)}.ce-launch-board-head{padding:18px}.ce-launch-day{min-width:272px}}

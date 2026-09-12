@@ -2221,8 +2221,8 @@
 <script src="./content_data.js?v=6702562e41"></script>
 <script src="./deck_index.js?v=fffb04a70e"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
-<link rel="stylesheet" href="./native-ideas.css?v=da5ebfb062" />
-<link rel="stylesheet" href="./native-plan.css?v=75cf64169d" />
+<link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
+<link rel="stylesheet" href="./native-plan.css?v=ac8da9e86f" />
 <link rel="stylesheet" href="./native-saved.css?v=4070f3d29b" />
 <link rel="stylesheet" href="./native-studio.css?v=0a333e7ed3" />
 <style id="ce-share-trim">
@@ -2296,7 +2296,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 </script>
 
 <script src="./share-decks.js?v=5e7d79ee88"></script>
-<script src="./native-ideas.js?v=f0d91c6246"></script>
+<script src="./native-ideas.js?v=db2bf7df5f"></script>
 <script src="./ce-insights.js?v=e30373b449"></script>
 <script src="./legacy-renderers/renderers.js"></script>
 
@@ -14134,6 +14134,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         return hay.includes(query);
       }
       var planVisible = state.queueItems.map(function (q, idx) { return { q: q, idx: idx }; }).filter(function (row) { return queueMatchesPlanSearch(row.q); });
+      var planInbox = planVisible.filter(function (row) { return getQueueItemDay(row.q) === 'unassigned'; });
+      var planCalendarVisible = planVisible.filter(function (row) { return getQueueItemDay(row.q) !== 'unassigned'; });
       const planReady = state.queueItems.filter(function (q) { return q && q.readyToPost; }).length;
       const planScheduled = state.queueItems.filter(function (q) { return q && q.scheduled && q.scheduleTime; }).length;
       const planExported = state.queueItems.filter(q => q.exportStatus === 'EXPORTED').length;
@@ -14501,7 +14503,24 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         `;
       }
 
-      var kanbanColsHtml = kanbanDays.map(function(col) {
+      function renderInboxRow(q, idx) {
+        return `<div class="ce-staged-row ce-staged-row--inbox ce-kanban-card" data-queue-index="${idx}">
+          <div class="ce-staged-art-wrap" data-idx="${idx}" title="Open in Studio" aria-label="Open ${escapeHtml(queueDisplayTitle(q))} in Studio">
+            <div class="ce-staged-face-preview">${queuePreviewHtml(q, idx)}</div>
+          </div>
+          <div class="ce-staged-copy">
+            <button class="ce-staged-open" data-idx="${idx}" type="button">
+            <span class="ce-status-dot"></span><span><strong>${escapeHtml(queueDisplayTitle(q))}</strong><small>${escapeHtml(queueTypeLabel(q))} · Inbox · ${escapeHtml(q.statusReason || 'Waiting for a day')}${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''}</small></span>
+            </button>
+            <div class="ce-staged-actions">
+              <button class="queue-open-studio-btn" data-idx="${idx}" type="button">Edit in Studio</button>
+              <button class="queue-del-btn" data-idx="${idx}" type="button" aria-label="Remove from queue" title="Remove from queue">×</button>
+            </div>
+          </div>
+        </div>`;
+      }
+
+      var kanbanColsHtml = kanbanDays.filter(function (col) { return !col.isPool; }).map(function(col) {
         var itemsInCol = state.queueItems.map((item, originalIdx) => ({ item, originalIdx })).filter(function (entry) {
           return getQueueItemDay(entry.item) === col.id && queueMatchesPlanSearch(entry.item);
         });
@@ -14614,9 +14633,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               <span style="display:block; font-size:13px; max-width:480px; margin:0 auto; line-height:1.5;">Nothing staged matches that search. Clear search or stage it here.</span>
             </div>
           ` : ''}
-          ${planMode === 'list' && state.queueItems.length > 0 && planVisible.length > 0 ? `
+          ${planMode === 'list' && state.queueItems.length > 0 && planCalendarVisible.length > 0 ? `
             <div class="ce-staged-list">
-              ${planVisible.map(({ q, idx }) => `
+              ${planCalendarVisible.map(({ q, idx }) => `
                 <div class="ce-staged-row${state.planSelectedIds && state.planSelectedIds.has(q.id) ? ' is-selected' : ''}" data-queue-index="${idx}" style="display:flex; flex-direction:row; align-items:stretch; gap:18px; padding:16px 18px; margin-bottom:14px; border-radius:14px; background:var(--card-bg, rgba(255,255,255,0.04)); border:1px solid var(--border-color, rgba(120,120,150,0.18)); box-shadow:0 2px 10px rgba(0,0,0,0.06); position:relative;">
                   <button type="button" class="ce-plan-select-toggle ce-plan-select-toggle--list${state.planSelectedIds && state.planSelectedIds.has(q.id) ? ' is-selected' : ''}" data-idx="${idx}" aria-label="Select for batch action" title="Select for batch action">${state.planSelectedIds && state.planSelectedIds.has(q.id) ? '<span class="ce-ic ce-ic--check ce-ic--11"></span>' : ''}</button>
                   <div class="ce-staged-art-wrap" data-idx="${idx}" style="flex:0 0 112px; width:112px; height:140px; border-radius:10px; overflow:hidden; background:#111; border:1px solid rgba(255,255,255,0.12); cursor:pointer; position:relative; box-shadow:0 4px 14px rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center;" title="Click to edit in Studio">
@@ -14631,7 +14650,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                         <span class="ce-status-dot" style="width:10px; height:10px; border-radius:50%; background:${q.scheduled ? 'var(--ink)' : (q.exportStatus === 'EXPORTED' ? 'var(--muted)' : 'var(--faint)')}; flex-shrink:0; margin-top:4px;"></span>
                         <div style="min-width:0;">
                           <strong style="display:block; font-size:16.5px; font-weight:680; letter-spacing:-0.01em; color:var(--ink); line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(queueDisplayTitle(q))}</strong>
-                          <small style="color:var(--muted); font-size:12px; margin-top:3px; display:block;">${escapeHtml(queueTypeLabel(q))} · <span style="color:${q.scheduled && q.scheduleTime ? 'var(--ink)' : 'var(--muted)'}; font-weight:700;">${escapeHtml(q.scheduled && q.scheduleTime ? (q.scheduleSlot || q.scheduleTime) : (q.readyToPost ? 'Ready, schedule to place' : 'Inbox, tick Ready when final'))}</span>${q.exportStatus === 'EXPORTED' ? ' · <span style="color:#34d399; font-weight:700;">' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') + '</span>' : ''} ${ceMetaChip(q)}</small>
+                          <small style="color:var(--muted); font-size:12px; margin-top:3px; display:block;">${escapeHtml(queueTypeLabel(q))} · <span style="color:${q.scheduled && q.scheduleTime ? 'var(--ink)' : 'var(--muted)'}; font-weight:700;">${escapeHtml(q.scheduled && q.scheduleTime ? (q.scheduleSlot || q.scheduleTime) : (q.readyToPost ? 'Ready, schedule to place' : 'Inbox, tick Ready when final'))}</span>${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''} ${ceMetaChip(q)}</small>
                         </div>
                       </button>
                       <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
@@ -14670,6 +14689,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               ${kanbanColsHtml}
             </div>
           `}
+          ${planInbox.length ? `
+            <section class="ce-plan-inbox" aria-label="Inbox staging">
+              <div class="ce-plan-inbox-head"><div><strong>Inbox</strong><span>Unscheduled drafts and pieces waiting for a day</span></div><span class="ce-kanban-col-count">${planInbox.length}</span></div>
+              <div class="ce-plan-inbox-list">${planInbox.slice().sort(function (a, b) { return (b.q.exportStatus === 'EXPORTED' ? 1 : 0) - (a.q.exportStatus === 'EXPORTED' ? 1 : 0); }).map(({ q, idx }) => renderInboxRow(q, idx)).join('')}</div>
+            </section>
+          ` : ''}
         </section>
       `;
       view.appendChild(planBox);
