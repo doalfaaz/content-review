@@ -786,27 +786,36 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
   z-index: 20 !important;
 }
 /* Summoned state: the SAME panels, as a sheet over the gallery. */
-html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-studio-inspector {
-  position: absolute !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  top: auto !important;
-  max-height: 62vh !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  z-index: 40 !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
-  background: rgba(12, 13, 18, 0.96) !important;
-  backdrop-filter: blur(28px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-  box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.55) !important;
+html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-studio-inspector,
+@media (max-width: 700px) {
+  .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-studio-inspector {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    height: auto !important;
+    max-height: 62vh !important;
+    min-height: 180px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    z-index: 40 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
+    background: rgba(12, 13, 18, 0.96) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.55) !important;
+  }
 }
 html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-inspector-scroll,
-html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-inspector-pinned {
-  overflow-y: visible !important;
-  max-height: none !important;
+html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-inspector-pinned,
+@media (max-width: 700px) {
+  .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-inspector-scroll,
+  .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-inspector-pinned {
+    overflow-y: visible !important;
+    max-height: none !important;
+  }
 }
 
 /* The toggle itself: 44px hit, calm type, chevron that flips. */
@@ -865,7 +874,7 @@ html.ce-phone .ce-carousel-editor.ce-tools-open .ce-tools-toggle::after {
 @media (max-width: 700px) {
   .ce-rail-track > * { width: min(44vw, 190px) !important; }
   .ce-rail-track { gap: 14px !important; }
-  .ce-rail-track .ce-shelf-kicker { max-width: 100% !important; }
+  .ce-rail-track .ce-shelf-kicker { display: none !important; }
 }
 /* Owner 2026-09-11 (recursive re-audit, W5): the shelf must keep the
    two-up glance AND honestly promise a swipe. Cards start at x=40 (main
@@ -876,7 +885,7 @@ html.ce-phone .ce-carousel-editor.ce-tools-open .ce-tools-toggle::after {
    402 -> 150, 390 -> 144; 44vw still binds below ~340px). */
 html.ce-phone .ce-rail-track > * { width: min(44vw, 190px, calc((100vw - 102px) / 2)) !important; }
 html.ce-phone .ce-rail-track { gap: 14px !important; }
-html.ce-phone .ce-rail-track .ce-shelf-kicker { max-width: 100% !important; }
+html.ce-phone .ce-rail-track .ce-shelf-kicker { display: none !important; }
 
 
 /* ---------------------------------------------------------------------------
@@ -1038,6 +1047,22 @@ html.ce-phone #studio-dock .ce-tools-toggle { display: flex !important; }
    (filmstrip box spans the full column). z-index cannot fix an orphaned sticky
    child; give the row a real box inside the inspector and lift that box above
    the filmstrip layer. */
+html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track,
+html.ce-phone .studio-workspace.is-carousel-mode #ce-carousel-slide-scroll,
+@media (max-width: 700px) {
+  .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track,
+  .studio-workspace.is-carousel-mode #ce-carousel-slide-scroll {
+    margin: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 10px 12px !important;
+    gap: 12px !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+}
+
 html.ce-phone .studio-workspace.is-carousel-mode .ce-inspector-scroll {
   position: relative !important;
   z-index: 6 !important;
@@ -1051,16 +1076,70 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-inspector-scroll {
    the filmstrip (track 137-805). That is why no position/z-index rule ever helped: the row
    was never in its dock's band. Let the dock size to its content so both children lay out
    INSIDE 818-874. */
-html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
-  height: auto !important;
+/* In phone mode, the dock sits as a compact bottom bar with Tools toggle at 56px resting height.
+   The inspector scroll container must NOT spill its 300px+ content over the track. */
+html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-tools-open) .ce-studio-inspector {
+  height: 56px !important;
+  max-height: 56px !important;
   min-height: 56px !important;
-  overflow: visible !important;
-  justify-content: flex-start !important;
+  overflow: hidden !important;
+  position: relative !important;
+  z-index: 25 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: rgba(12, 13, 18, 0.96) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
+html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-tools-open) .ce-studio-inspector .ce-inspector-scroll {
+  height: 56px !important;
+  max-height: 56px !important;
+  overflow: hidden !important;
+}
+html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-tools-open) .ce-studio-inspector .ce-dock-column {
+  display: none !important;
+}
+html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-tools-open) .ce-studio-inspector .ce-inspector-pinned {
+  display: none !important;
+}
+
+@media (max-width: 700px) {
+  .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-tools-open) .ce-studio-inspector {
+    height: 56px !important;
+    max-height: 56px !important;
+    min-height: 56px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    z-index: 25 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: rgba(12, 13, 18, 0.96) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-tools-open) .ce-studio-inspector .ce-inspector-scroll {
+    height: 56px !important;
+    max-height: 56px !important;
+    overflow: hidden !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-tools-open) .ce-studio-inspector .ce-dock-column {
+    display: none !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-tools-open) .ce-studio-inspector .ce-inspector-pinned {
+    display: none !important;
+  }
+}
+
 html.ce-phone .studio-workspace.is-carousel-mode .ce-tools-toggle {
   position: relative !important;
   top: auto !important;
   z-index: 7 !important;
+  width: 100% !important;
+  height: 56px !important;
+  min-height: 56px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 16px !important;
+  background: transparent !important;
+  cursor: pointer !important;
 }
 html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
   position: relative !important;
@@ -1069,9 +1148,6 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
 html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery {
   position: relative !important;
   z-index: 1 !important;
-  /* The cards paint OUTSIDE this container's box into the inspector band below,
-     covering the Tools row (audit B1). Clip the bleed while keeping the track's
-     own horizontal scrolling intact. */
   overflow: hidden !important;
 }
 html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock .ce-tools-toggle::after {

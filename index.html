@@ -1292,32 +1292,11 @@
      so mixed authored/static shelves read as one designed set. pointer-events
      none: the chip never eats the card click. */
   .ce-shelf-kicker {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 5;
-    max-width: calc(100% - 76px);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 6px;
-    background: rgba(10,10,14,0.72);
-    border: 1px solid rgba(255,255,255,0.16);
-    color: rgba(255,255,255,0.92);
-    -webkit-backdrop-filter: blur(4px);
-    backdrop-filter: blur(4px);
-    pointer-events: none;
+    display: none !important;
   }
-  /* B1.3: the static cover path paints its own kicker in its head row — the
-     shelf chip would duplicate it. Suppress when a static kicker is present. */
   .pure-card.deck-card:has(.ce-static-cover-kicker) .ce-shelf-kicker,
   .pure-card.deck-card:has(.ce-queue-post-kicker) .ce-shelf-kicker {
-    display: none;
+    display: none !important;
   }
   /* The Queued/Saved status chip owns the same corner but only on hover —
      the kicker hands the corner over while actions are up. */
@@ -2251,7 +2230,7 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=417fe368c3" />
+<link rel="stylesheet" href="./ce-mobile.css?v=004a9e6b2a" />
 <script src="./ce-touch-edit.js?v=0dfbeeb716"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
