@@ -2347,8 +2347,8 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:poem-17854316497159677",
   "kind": "poem",
-  "title": "poem-17854316497159677",
-  "body": "कभी जो मेरी पसंद पर शक हो तुम्हें\nआइना देख कर गुमान कर लेना",
+  "title": "या तो हाथ थामो और चल दो",
+  "body": "या तो हाथ थामो और चल दो\nया फिर अपने जैसे बदल दो।",
   "pillar": "Poetry",
   "status": "posted",
   "metadata": {
@@ -2374,7 +2374,27 @@ window.ALL_CONTENT_DATA = [
   "updatedAt": "2026-08-31 06:49:28",
   "revision": 2,
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "fontFamily": "kohinoor",
+   "canvasRatio": "4/3",
+   "useOriginal": false,
+   "align": "left",
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "densityVersion": 2,
+   "lineHeight": 1.78,
+   "fontWeight": 520,
+   "pos": "top",
+   "type": "photo",
+   "textShadow": true,
+   "photoIdx": 0,
+   "originalStillShortcode": "",
+   "textColor": "",
+   "fontSize": 21
+  }
  },
  {
   "id": "poem:poem-17868220768110097",
@@ -187030,24 +187050,24 @@ window.ALL_CONTENT_DATA = [
   "rank": "1.3677",
   "look_id": "",
   "poemStyle": {
-   "textShadow": true,
-   "fontSize": 21,
    "pos": "mid",
-   "fontFamily": "kohinoor",
-   "textColor": "",
    "useOriginal": false,
-   "align": "left",
+   "lineHeight": 1.78,
+   "textColor": "",
    "fontWeight": 520,
-   "photoIdx": 5,
    "type": "photo",
+   "densityVersion": 2,
+   "originalStillShortcode": "",
    "offset": {
     "x": 0,
     "y": 0
    },
+   "photoIdx": 5,
+   "textShadow": true,
+   "fontSize": 21,
+   "align": "left",
    "canvasRatio": "4/3",
-   "densityVersion": 2,
-   "lineHeight": 1.78,
-   "originalStillShortcode": ""
+   "fontFamily": "kohinoor"
   }
  },
  {
