@@ -2246,7 +2246,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=abcaa326d9"></script>
-<script src="./deck_index.js?v=605effc273"></script>
+<script src="./deck_index.js?v=d299460416"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
 <link rel="stylesheet" href="./native-plan.css?v=90394d767b" />
@@ -5498,6 +5498,96 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var err = info.error || (Array.isArray(info.results) && info.results.map(function (r) { return r && r.error; }).filter(Boolean)[0]) || 'Graph did not schedule.';
       showQueueToast(err + ' Composer is a last resort — use Open Meta Composer only if you must.', true);
     }
+  };
+  /* ── Unschedule from Meta's clock (owner order 2026-09-13) ────────────────────
+     He asked for this twice without knowing it did not exist: "then you have to
+     delete it also". Until now the ONLY thing the app could do to a scheduled
+     piece was move it back to the Saved Bank — the Meta post stayed armed and
+     would still fire. This is the client half of the real delete; the native half
+     is CEMetaPublisher.handleUnschedule, which DELETEs the graph id and then
+     re-reads Meta's own scheduled_posts so the claim is checked against the fact. */
+  function ceArmedQueueItems() {
+    return (state.queueItems || []).filter(function (q) { return q && q.metaGraphId; });
+  }
+  function ceUnscheduleQueueItems(items, opts) {
+    var targets = (items || []).filter(function (q) { return q && q.metaGraphId; });
+    if (!targets.length) {
+      showAppToast('Nothing is on Meta\u2019s clock', {
+        icon: 'info', variant: 'warn',
+        detail: 'These pieces are only on your local board \u2014 there is nothing on Meta to remove.'
+      });
+      return 0;
+    }
+    var ids = targets.map(function (q) { return String(q.metaGraphId); });
+    var n = targets.length;
+    var confirmed = window.confirm(
+      'Remove ' + n + ' piece' + (n === 1 ? '' : 's') + ' from Meta\u2019s clock?\n\n'
+      + 'This deletes the scheduled post' + (n === 1 ? '' : 's') + ' on Meta so ' + (n === 1 ? 'it' : 'they')
+      + ' can never go live. Your piece stays on the board and in the Saved Bank.\n\n'
+      + 'OK = remove from Meta.  Cancel = leave everything as it is.');
+    if (!confirmed) {
+      showAppToast('Nothing was removed from Meta', { icon: 'info', variant: 'warn', detail: 'Your scheduled ' + (n === 1 ? 'post is' : 'posts are') + ' untouched.' });
+      return 0;
+    }
+    var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
+    if (!br) {
+      showAppToast('This needs the Mac app', {
+        isError: true, variant: 'warn',
+        detail: 'Removing a post from Meta\u2019s clock runs through the native bridge, which the browser preview does not have.'
+      });
+      return 0;
+    }
+    try { br.postMessage({ action: 'unscheduleMeta', graphIds: ids }); } catch (_e) {}
+    window.__CE_UNSCHEDULE_PENDING__ = ids;
+    showAppToast('Removing ' + n + ' from Meta\u2019s clock\u2026', { detail: 'Waiting for Meta to confirm.', duration: 2200 });
+    return n;
+  }
+  window.__CE_UNSCHEDULE_ARMED__ = ceUnscheduleQueueItems;
+
+  window.__CE_META_UNSCHEDULE_RESULT__ = function (ok, mode, detail) {
+    var info = detail;
+    if (typeof detail === 'string') { try { info = JSON.parse(detail); } catch (_e) { info = { raw: detail }; } }
+    if (!info || typeof info !== 'object') info = {};
+    var pending = window.__CE_UNSCHEDULE_PENDING__ || [];
+    if (mode === 'needs_connect' || mode === 'probe_failed' || mode === 'no_ids') {
+      showAppToast('Could not reach Meta', {
+        isError: true, variant: 'warn',
+        detail: String(info.error || 'Nothing was changed.') + ' Your pieces are still scheduled, exactly as they were.'
+      });
+      return;
+    }
+    var cleared = {};
+    (info.rows || []).forEach(function (r) { if (r && r.deleted && r.graphId) cleared[String(r.graphId)] = true; });
+    var released = 0;
+    (state.queueItems || []).forEach(function (q) {
+      if (!q || !q.metaGraphId) return;
+      if (!cleared[String(q.metaGraphId)]) return;
+      q.metaGraphId = '';
+      q.metaGraphState = '';
+      q.metaState = 'local';
+      q.metaError = '';
+      q.metaAt = Date.now();
+      released++;
+    });
+    if (released) {
+      try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+      try { renderMain(); } catch (_e) {}
+    }
+    var still = Array.isArray(info.stillOnMeta) ? info.stillOnMeta.length : 0;
+    if (still) {
+      showAppToast(still + ' STILL on Meta\u2019s clock', {
+        isError: true, variant: 'warn',
+        detail: 'Meta refused to remove ' + still + ' post' + (still === 1 ? '' : 's') + '. They are still scheduled and will fire \u2014 review them on Meta.'
+      });
+      return;
+    }
+    if (released) {
+      showAppToast(released === 1 ? 'Removed from Meta\u2019s clock' : 'Removed ' + released + ' from Meta\u2019s clock', {
+        detail: 'Checked against Meta\u2019s own scheduled list \u2014 ' + (released === 1 ? 'it is' : 'they are') + ' gone. The piece' + (released === 1 ? '' : 's') + ' stay on your board.'
+      });
+      return;
+    }
+    showAppToast('Nothing was removed', { icon: 'info', variant: 'warn', detail: String(info.error || 'Meta did not confirm a deletion.') });
   };
   (function () {
     var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
@@ -15100,6 +15190,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                 <span class="ce-status-dot" style="width:7px; height:7px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
                 <span class="ce-kanban-id">${ceMetaChip(q)}</span>
                 <span class="ce-kanban-id-acts">
+                  ${q.metaGraphId ? `<button class="queue-unschedule-btn" data-idx="${idx}" type="button" aria-label="Remove from Meta's clock" title="Remove this post from Meta's clock so it can never go live" style="border:none; background:rgba(251,191,36,0.16); color:#fbbf24; width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--clock ce-ic--11"></span></button>` : ''}
                   <button class="queue-save-bank-btn" data-idx="${idx}" type="button" aria-label="Send to Saved Bank" title="Move back to Saved Bank (Shortlist)" style="border:none; background:var(--accent-tint); color:var(--accent); width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--star ce-ic--11"></span></button>
                   <button class="queue-del-btn" data-idx="${idx}" type="button" aria-label="Remove from queue" title="Remove from queue" style="border:none; background:color-mix(in srgb, var(--ink) 8%, transparent); color:color-mix(in srgb, var(--ink) 62%, transparent); width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--close ce-ic--11"></span></button>
                 </span>
@@ -15812,6 +15903,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         };
       });
 
+      planBox.querySelectorAll('.queue-unschedule-btn').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const idx = Number(btn.getAttribute('data-idx'));
+          const q = state.queueItems && state.queueItems[idx];
+          if (q) ceUnscheduleQueueItems([q]);
+        };
+      });
       planBox.querySelectorAll('.queue-save-bank-btn').forEach(btn => {
         btn.onclick = (e) => {
           e.stopPropagation();
@@ -16802,6 +16901,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
 
   function removeQueueItemToSaved(queueIdx, rejectInstead) {
+    var q = state.queueItems && state.queueItems[queueIdx];
+    if (!q) return false;
+    /* Owner order 2026-09-13: removing an ARMED piece from the board used to leave the Meta post
+       scheduled — it would still fire, with nothing on the board pointing at it. Say so, and offer
+       the real delete, instead of silently orphaning a live post. */
+    if (q.metaGraphId) {
+      showAppToast('This piece is still on Meta\u2019s clock', {
+        isError: true, variant: 'warn',
+        detail: 'Removing it here would leave the scheduled Meta post armed \u2014 it would still go live. Remove it from Meta first.',
+        action: {
+          label: 'Remove from Meta',
+          onClick: function () { ceUnscheduleQueueItems([q]); }
+        },
+        onUndo: function () { removeQueueItemToSavedForce(queueIdx, rejectInstead); }
+      });
+      return false;
+    }
+    return removeQueueItemToSavedForce(queueIdx, rejectInstead);
+  }
+  function removeQueueItemToSavedForce(queueIdx, rejectInstead) {
     var q = state.queueItems && state.queueItems[queueIdx];
     if (!q) return false;
     var targetStatus = rejectInstead ? 'rejected' : 'saved';
