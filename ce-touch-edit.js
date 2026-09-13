@@ -193,9 +193,24 @@
       if (t.clientX - edgeStart.x <= 40) return;
       edgeFired = true;
       edgeStart = null;
-      var wentBack = false;
-      try { if (typeof window.__CE_APP_BACK__ === 'function') wentBack = !!window.__CE_APP_BACK__(); } catch (_b) {}
-      if (wentBack) return;
+      /* Owner law 2026-09-13 (deep audit P1-4). This used to call the MUTATING
+         __CE_APP_BACK__() and `return` on its truthiness, so the drawer branch below
+         was UNREACHABLE whenever history was non-empty — the nav drawer could only be
+         opened by an edge swipe right after boot, or after a previous back had
+         consumed the single entry. A mis-swipe near the left edge also silently
+         navigated him out of the panel he was reading, and the swipe that followed
+         opened the drawer instead of undoing it.
+         Ask the READ-ONLY depth query first (window.__CE_NAV_HISTORY_DEPTH__, exposed
+         for exactly this purpose and, until now, called from nowhere): with a step to
+         undo, undo it; with nothing to undo, the swipe opens the drawer. The drawer is
+         therefore never contingent on navigation state. */
+      var navDepth = 0;
+      try { if (typeof window.__CE_NAV_HISTORY_DEPTH__ === 'function') navDepth = Number(window.__CE_NAV_HISTORY_DEPTH__()) || 0; } catch (_dep) {}
+      if (navDepth > 0) {
+        var wentBack = false;
+        try { if (typeof window.__CE_APP_BACK__ === 'function') wentBack = !!window.__CE_APP_BACK__(); } catch (_b) {}
+        if (wentBack) return;
+      }
       var sb = document.querySelector('.sidebar');
       if (sb && sb.classList.contains('collapsed')) {
         var tg = document.getElementById('sidebar-toggle');

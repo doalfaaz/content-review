@@ -2376,24 +2376,24 @@ window.ALL_CONTENT_DATA = [
   "rank": "0.0",
   "look_id": "",
   "poemStyle": {
-   "fontFamily": "kohinoor",
-   "canvasRatio": "4/3",
    "useOriginal": false,
-   "align": "left",
+   "lineHeight": 1.78,
+   "pos": "top",
+   "fontWeight": 520,
+   "type": "photo",
+   "textColor": "",
+   "densityVersion": 2,
+   "originalStillShortcode": "",
    "offset": {
     "x": 0,
     "y": 0
    },
-   "densityVersion": 2,
-   "lineHeight": 1.78,
-   "fontWeight": 520,
-   "pos": "top",
-   "type": "photo",
-   "textShadow": true,
    "photoIdx": 0,
-   "originalStillShortcode": "",
-   "textColor": "",
-   "fontSize": 21
+   "textShadow": true,
+   "fontSize": 21,
+   "canvasRatio": "4/3",
+   "align": "left",
+   "fontFamily": "kohinoor"
   }
  },
  {
@@ -188079,13 +188079,33 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:CCJDeOUjqD2",
   "kind": "poem",
-  "title": "प्रेम में पड़ जाना सरल होता है ,",
+  "title": "प्रेम में पड़ जाना सरल होता है,",
   "body": "प्रेम में पड़ जाना सरल होता है,\nउसी प्रेम में पड़े रहना मुश्किल",
   "status": "posted",
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "fontWeight": 520,
+   "offset": {
+    "x": -1,
+    "y": -76
+   },
+   "canvasRatio": "4/3",
+   "textShadow": true,
+   "align": "left",
+   "fontFamily": "kohinoor",
+   "densityVersion": 2,
+   "pos": "mid",
+   "textColor": "",
+   "lineHeight": 1.78,
+   "photoIdx": 5,
+   "originalStillShortcode": "",
+   "fontSize": 21,
+   "useOriginal": false,
+   "type": "photo"
+  }
  },
  {
   "id": "poem:CCJd8-MDHq-",

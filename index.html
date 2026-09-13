@@ -1940,6 +1940,8 @@
   .ce-aud-gaps ul li { font-size:11.5px; color:var(--muted); }
   .ce-aud-gaps ul li strong { color:var(--ink); font-weight:700; }
   .ce-aud-gaps-how { color:var(--muted); font-size:11px; line-height:1.4; }
+  /* Audit P2-10: the gaps box's actions. It used to end in prose with no way to act. */
+  .ce-aud-gaps-acts { display:flex; align-items:center; gap:8px; margin-top:2px; flex-wrap:wrap; }
   .ce-aud-mini-row { display:flex; align-items:baseline; gap:8px; font-size:12px; color:var(--muted); }
   .ce-aud-mini-row strong { font-size:16px; font-weight:800; color:var(--ink); }
   .ce-aud-mini-best { display:flex; flex-direction:column; gap:2px; padding:8px 10px; background:var(--card); border:1px solid var(--card-border); border-radius:8px; }
@@ -2245,11 +2247,11 @@
 </div>
 
 <!-- Embedded Data Scripts -->
-<script src="./content_data.js?v=abcaa326d9"></script>
-<script src="./deck_index.js?v=d299460416"></script>
+<script src="./content_data.js?v=41a267fc6e"></script>
+<script src="./deck_index.js?v=3c22dc1899"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
-<link rel="stylesheet" href="./native-plan.css?v=90394d767b" />
+<link rel="stylesheet" href="./native-plan.css?v=0c5c6a7fc3" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
 <link rel="stylesheet" href="./native-studio.css?v=4917829aaf" />
 <style id="ce-share-trim">
@@ -2258,7 +2260,7 @@ html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav b
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
 <link rel="stylesheet" href="./ce-mobile.css?v=8f16304a60" />
-<script src="./ce-touch-edit.js?v=fd8fbd4c04"></script>
+<script src="./ce-touch-edit.js?v=67a0fd1606"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -4799,14 +4801,23 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
      carousels/posts are authored surfaces and carry the @doalfaaz brand. The
      Plan row metadata line renders this at a fixed legible size OUTSIDE the
      photocopied stage, so the name no longer shrinks to a painted 14px ghost. */
+  /* Audit P2-6: the author token was harvested straight from the artwork's own
+     authored signature line ("- तुषार"), so every accessible name read
+     "POEM, - तुषार, …" — a stray leading hyphen joined with ", " as if it were a
+     field. Strip the decorative prefix ONCE, here, so every surface that calls
+     queueCreatorLabel (board card, Inbox row, List row) inherits a clean token
+     that matches /^[^-@\s]/. */
+  function ceCleanAuthorToken(raw) {
+    return String(raw == null ? '' : raw).replace(/^[\s\-–—·•|,]+/, '').replace(/\s+/g, ' ').trim();
+  }
   function queueCreatorLabel(queueItem) {
     try {
       const item = queueItem && queueItem.item && typeof queueItem.item === 'object' ? queueItem.item : {};
       const type = String(queueItem && queueItem.type || item.kind || item.type || '').toLowerCase();
-      if (item.author && String(item.author).trim()) return String(item.author).trim();
+      if (item.author && String(item.author).trim()) return ceCleanAuthorToken(item.author);
       if (type === 'poem' && typeof cePoemAuthorSignature === 'function') {
-        const sig = String(cePoemAuthorSignature(item, '- तुषार') || '').trim();
-        return sig || '';
+        const sig = ceCleanAuthorToken(cePoemAuthorSignature(item, '- तुषार'));
+        return sig || 'तुषार';
       }
       return '@doalfaaz';
     } catch (_e) { return ''; }
@@ -5925,7 +5936,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         + '<ul>' + vm.gaps.map(function (g) {
             return '<li><strong>' + escapeHtml(g.unlocks) + '</strong> <code>' + escapeHtml(g.permission) + '</code> <span class="ce-aud-gap-status">' + escapeHtml(g.status) + '</span></li>';
           }).join('') + '</ul>'
-        + '<small class="ce-aud-gaps-how">Add them to the CE Scheduler system-user token in Meta Business Suite, then press Refresh.</small></div>'
+        + '<small class="ce-aud-gaps-how">Add them to the CE Scheduler system-user token in Meta Business Suite, then press Refresh.</small>'
+        /* Audit P2-10: this box named two missing permissions and stopped — the one
+           panel that ended in prose against the owner's standing "no dead-ends" rule
+           (measured 0 buttons, 0 links). It now carries the two actions the sentence
+           describes: open the permission surface, or re-pull the numbers. */
+        + '<div class="ce-aud-gaps-acts">'
+        +   '<button type="button" class="ce-surface-button" data-ce-permalink="https://business.facebook.com/settings/system-users" title="Open Meta Business Suite → Business settings → Users → System users, add the permission to the CE Scheduler token, then Refresh">Open Meta permissions</button>'
+        +   '<button type="button" class="ce-surface-button" data-ce-insights-refresh title="Re-pull the stored Meta insights">Refresh numbers</button>'
+        + '</div></div>'
       : '';
     return head
       + '<div class="ce-aud-rollup">'
@@ -6003,6 +6022,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (!url) return;
         var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
         if (br) br.postMessage({ action: 'openURL', url: url });
+        /* Audit P2-10: on the phone bundle there is no bridge, so this control was a
+           dead end there. Open the same URL in a new tab. */
+        else window.open(url, '_blank', 'noopener');
       };
     });
   }
@@ -14846,6 +14868,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       /* Dynamic queue law: reflow stale-dated pieces into the best next queue
          before the board renders, so Ready work is never parked on the past. */
       try { if (typeof ceReflowStaleQueue === 'function') ceReflowStaleQueue(); } catch (_reflow) {}
+      /* P0-1: populate the week BEFORE anything partitions on it. The canonical
+         `var kanbanDays = getKanbanDays();` further down is hoisted, so early
+         readers (the Inbox partition immediately below) saw `undefined`. */
+      kanbanDays = getKanbanDays();
       function queueMatchesPlanSearch(q) {
         if (!query) return true;
         var item = q && q.item || {};
@@ -14907,12 +14933,27 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         return ceGetKanbanWeekDays();
       }
 
+      /* P0-1 ROOT FIX (deep audit 2026-09-13). This function used to read the
+         hoisted `var kanbanDays`, which is still `undefined` at the Inbox
+         partition (~line 14647) but a real 9-entry array ~400 lines later when
+         the board columns are built. ONE synchronous render therefore classified
+         the SAME queue by TWO different rules, which produced a double-rendered
+         card AND a piece that rendered nowhere at all while the counts balanced
+         at 14/14 and hid it. Classification must never depend on render order:
+         resolve the week here when the cache is not populated yet. */
+      function ceKanbanDaysSafe() {
+        return (Array.isArray(kanbanDays) && kanbanDays.length) ? kanbanDays : ceGetKanbanWeekDays();
+      }
       function getQueueItemDay(q) {
-        if (q && q.scheduleDate && Array.isArray(kanbanDays)) {
-          var dated = kanbanDays.find(function (d) { return d.dateKey === q.scheduleDate; });
+        if (q && q.scheduleDate) {
+          var days = ceKanbanDaysSafe();
+          var dated = days.find(function (d) { return d.dateKey === q.scheduleDate; });
           if (dated) return dated.id;
-          /* Dynamic queue law: a real date the week board doesn't show = Later
-             pool (beyond-week or stale-past — never its own column) */
+          /* Dynamic queue law: a real date the week board doesn't show = 'later'
+             (beyond-week or past-dated). Owner law 2026-09-13: 'later' MUST be
+             renderable — the board draws a Later column whenever a piece lands
+             here. A value no renderer consumes is how the one piece live on Meta
+             went invisible from its own planning board. */
           if (/^\d{4}-\d{2}-\d{2}$/.test(q.scheduleDate)) return 'later';
         }
         if (q && q.scheduledDay) return q.scheduledDay;
@@ -15226,12 +15267,60 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         `;
       }
 
+      /* Audit P2-2/P2-3 (owner's own words: "why would you even keep there the poem
+         and Tushar title in below there… isn't it already visible"). These poems'
+         titles ARE their first lines and the artwork already paints them, so the
+         chrome title repeated the first line verbatim on 13 of 14 rows. Suppress it
+         when the artwork carries it; keep it when it does not (a POST, a carousel,
+         or a poem whose first painted line differs from its title). */
+      function ceArtworkShowsTitle(q) {
+        try {
+          var title = String(queueDisplayTitle(q) || '').trim();
+          if (!title) return false;
+          var body = String((q && q.item && (q.item.text || q.item.body)) || '');
+          var first = body.split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean)[0] || '';
+          if (!first) return false;
+          var norm = function (s) { return s.replace(/[\s।.,!?"'—-]+$/g, '').trim(); };
+          return norm(first) === norm(title);
+        } catch (_e) { return false; }
+      }
+      /* Audit P2-3: the staging default ("Staged in posting queue; ready for review
+         and export.") was stamped onto every entry, so six consecutive rows painted
+         the identical 60-char sentence — and because it sat inside the button it was
+         also the accessible name. Derive a short per-state chip instead, and keep any
+         genuinely specific reason verbatim. */
+      var CE_GENERIC_STATUS_REASON = /^(staged in posting queue; ready for review and export\.?|waiting for a day)$/i;
+      function ceQueueStateChip(q) {
+        if (!q) return 'Waiting for a day';
+        if (q.exportStatus === 'EXPORTED') return q.type === 'carousel' ? 'Slides exported' : 'Export ready';
+        if (q.readyToPost) return 'Ready to post';
+        if (q.auditStatus === 'DRAFT') return 'Draft · design in Studio';
+        return 'Waiting for a day';
+      }
+      function ceInboxStatusLine(q) {
+        /* The state is what the row must SHOW; a specific reason is detail, and detail
+           belongs in the tooltip. Showing the raw reason here re-introduced the audit's
+           P2-3 defect (a 60-char sentence on six consecutive rows, and inside the button
+           it WAS the accessible name) and it also hid the export state: the exporter
+           writes "Full-resolution PNG export receipt recorded by the native exporter.",
+           which never says "Export ready". */
+        return ceQueueStateChip(q);
+      }
+      function ceInboxStatusDetail(q) {
+        var raw = String((q && q.statusReason) || '').trim();
+        if (raw && !CE_GENERIC_STATUS_REASON.test(raw)) return raw;
+        return '';
+      }
       function renderInboxRow(q, idx) {
         /* Owner law 2026-09-13 (same rule as the board card): the piece's identity
            belongs to the piece. The type/creator used to float as a detached line in
            the row's copy block, so Inbox rows contradicted the board's new rail. The
            thumbnail and its identity rail are now one object here too. */
         var creatorLabel = queueCreatorLabel(q);
+        var dupTitle = ceArtworkShowsTitle(q);
+        var statusLine = ceInboxStatusLine(q);
+        var statusDetail = ceInboxStatusDetail(q);
+        var rowTitle = queueDisplayTitle(q) + ' · ' + queueTypeLabel(q) + (creatorLabel ? ' · ' + creatorLabel : '') + (statusDetail ? ' · ' + statusDetail : '');
         return `<div class="ce-staged-row ce-staged-row--inbox ce-kanban-card" data-queue-index="${idx}" role="listitem" aria-label="${escapeHtml(queueTypeLabel(q))}${creatorLabel ? ', ' + escapeHtml(creatorLabel) : ''}, ${escapeHtml(queueDisplayTitle(q))}">
           <div class="ce-kanban-art-block">
             <div class="ce-staged-art-wrap" data-idx="${idx}" title="Open in Studio" aria-label="Open ${escapeHtml(queueDisplayTitle(q))} in Studio">
@@ -15239,8 +15328,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             </div>
           </div>
           <div class="ce-staged-copy">
-            <button class="ce-staged-open" data-idx="${idx}" type="button">
-            <span><strong>${escapeHtml(queueDisplayTitle(q))}</strong><small>Inbox · ${escapeHtml(q.statusReason || 'Waiting for a day')}${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''}</small></span>
+            <button class="ce-staged-open" data-idx="${idx}" type="button" title="${escapeHtml(rowTitle)}">
+            <span>${dupTitle ? '' : `<strong>${escapeHtml(queueDisplayTitle(q))}</strong>`}<small>${escapeHtml(statusLine)}</small></span>
             </button>
             <div class="ce-staged-actions">
               <button class="queue-open-studio-btn" data-idx="${idx}" type="button">Edit in Studio</button>
@@ -15250,7 +15339,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         </div>`;
       }
 
-      var kanbanColsHtml = kanbanDays.filter(function (col) { return !col.isPool; }).map(function(col) {
+      /* Owner law 2026-09-13 (audit P0-1): 'later' gets a real bucket. It used to
+         be a value no renderer consumed, so a past-dated piece — including the one
+         piece live on Meta — rendered on NO column at all while its `LIVE ✓` chip
+         was only reachable by switching to List. The column is appended LAST (the
+         week keeps its rhythm) and only when it actually holds a matching card. */
+      var ceKanbanCols = kanbanDays.filter(function (col) { return !col.isPool; });
+      var ceLaterRows = planCalendarVisible.filter(function (row) {
+        return getQueueItemDay(row.q) === 'later' && queueMatchesPlanSearch(row.q);
+      });
+      if (ceLaterRows.length) {
+        ceKanbanCols = ceKanbanCols.concat([{
+          id: 'later', label: 'Later', sub: 'Past-dated or beyond this week', isPool: false
+        }]);
+      }
+      var kanbanColsHtml = ceKanbanCols.map(function(col) {
         var itemsInCol = state.queueItems.map((item, originalIdx) => ({ item, originalIdx })).filter(function (entry) {
           return getQueueItemDay(entry.item) === col.id && queueMatchesPlanSearch(entry.item);
         });
@@ -15381,7 +15484,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                       <button class="ce-staged-open" data-idx="${idx}" type="button" style="background:none; border:none; color:inherit; text-align:left; cursor:pointer; display:flex; align-items:flex-start; gap:10px; flex:1; min-width:0; padding:0;">
                         <span class="ce-status-dot" style="width:10px; height:10px; border-radius:50%; background:${q.scheduled ? 'var(--ink)' : (q.exportStatus === 'EXPORTED' ? 'var(--muted)' : 'var(--faint)')}; flex-shrink:0; margin-top:4px;"></span>
                         <div style="min-width:0;">
-                          <strong style="display:block; font-size:16.5px; font-weight:680; letter-spacing:-0.01em; color:var(--ink); line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(queueDisplayTitle(q))}</strong>
+                          ${ceArtworkShowsTitle(q) ? '' : `<strong style="display:block; font-size:16.5px; font-weight:680; letter-spacing:-0.01em; color:var(--ink); line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(queueDisplayTitle(q))}</strong>`}
                           <small style="color:var(--muted); font-size:12px; margin-top:3px; display:block;"><span style="color:${q.scheduled && q.scheduleTime ? 'var(--ink)' : 'var(--muted)'}; font-weight:700;">${escapeHtml(q.scheduled && q.scheduleTime ? (q.scheduleSlot || q.scheduleTime) : (q.readyToPost ? 'Ready, schedule to place' : 'Inbox, tick Ready when final'))}</span>${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''} ${ceMetaChip(q)}</small>
                         </div>
                       </button>
@@ -16639,16 +16742,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var s = String(msg == null ? '' : msg).replace(/^[✓✔]\s*/, '').trim();
     if (s.length <= 96) return { title: s, detail: '' };
     // prefer a sentence break, else an em-dash clause break, else a clause comma
-    var cut = -1;
     var m = s.match(/^(.{25,96}?[.!?])\s+(.+)$/);
     if (m) { return { title: m[1], detail: m[2] }; }
     m = s.match(/^(.{25,96}?)\s+[—–]\s+(.+)$/);
     if (m) { return { title: m[1], detail: m[2] }; }
     m = s.match(/^(.{25,96}?),\s+(.+)$/);
     if (m) { return { title: m[1] + '.', detail: m[2] }; }
-    cut = s.slice(0, 92).lastIndexOf(' ');
-    if (cut < 20) cut = 92;
-    return { title: s.slice(0, cut).replace(/[\s,;:—-]+$/, '') + '…', detail: s.slice(cut).trim() };
+    /* Audit P2-1: no sentence, dash or comma boundary exists in this message, so do
+       NOT invent one. The old 92-char budget cut orphaned the tail — the title ended
+       mid-phrase ("…and the caption is") and the "detail" began with a stranded word
+       ("missing so please open it in Studio…"): one sentence chopped in half, which
+       is precisely what this splitter exists to prevent. Return the whole message as
+       a single title; the toast title is line-clamped to 3 lines. */
+    return { title: s, detail: '' };
   }
 
   function showAppToast(msg, options) {
@@ -16696,7 +16802,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
     var t = document.createElement('span');
     t.textContent = title;
-    t.style.cssText = 'display:block; font-weight:700; font-size:13px; color:#fff; letter-spacing:-0.005em;';
+    /* Audit P2-1: the title must be clampable. ceToastSplit now returns the WHOLE
+       message as the title when no semantic boundary exists, so a single clamped
+       block reads correctly where a budget-cut title + orphaned tail did not. */
+    t.style.cssText = 'display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; font-weight:700; font-size:13px; color:#fff; letter-spacing:-0.005em;';
     body.appendChild(t);
 
     if (detail) {

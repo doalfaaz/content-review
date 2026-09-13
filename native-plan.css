@@ -55,7 +55,7 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
 .ce-staged-open small{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.035em;text-transform:uppercase;white-space:nowrap}
 .ce-plan-inbox{margin:0 0 24px;padding:16px;border:1px solid var(--card-border);border-radius:16px;background:color-mix(in srgb,var(--card) 84%,transparent)}
 .ce-plan-inbox-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 2px 12px;border-bottom:1px solid var(--card-border)}
-.ce-plan-inbox-head>div{display:grid;gap:3px}.ce-plan-inbox-head strong{color:var(--ink);font-size:14px;font-weight:800}.ce-plan-inbox-head span{color:var(--muted);font-size:10.5px}.ce-plan-inbox-head>.ce-kanban-col-count{color:var(--ink);font-size:11px;font-weight:800}.ce-plan-inbox-list .ce-staged-row--inbox{display:grid;grid-template-columns:112px minmax(0,1fr);gap:14px;align-items:center;padding:12px 14px;margin:0;border:1px solid var(--card-border);border-radius:12px;background:color-mix(in srgb,var(--card) 70%,transparent);box-shadow:none}.ce-staged-row--inbox .ce-staged-face-preview{width:112px;height:140px}.ce-staged-row--inbox .ce-staged-copy{min-width:0;display:grid;gap:12px}.ce-staged-row--inbox .ce-staged-open{display:flex;align-items:flex-start;gap:8px;min-width:0;padding:0;border:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer}.ce-staged-row--inbox .ce-staged-open strong{display:block;overflow:hidden;font-size:14px;font-weight:740;text-overflow:ellipsis;white-space:nowrap}.ce-staged-row--inbox .ce-staged-open small{display:block;margin-top:4px;color:var(--muted);font-size:10px;line-height:1.4}.ce-staged-actions{display:flex;align-items:center;gap:8px}.ce-staged-actions .queue-open-studio-btn{padding:6px 10px;border:1px solid var(--card-border);border-radius:7px;background:var(--card);color:var(--ink);font-size:11px;font-weight:700;cursor:pointer}.ce-staged-actions .queue-del-btn{width:28px;height:28px}.ce-plan-inbox-list .ce-queue-missing{min-height:140px}
+.ce-plan-inbox-head>div{display:grid;gap:3px}.ce-plan-inbox-head strong{color:var(--ink);font-size:14px;font-weight:800}.ce-plan-inbox-head span{color:var(--muted);font-size:10.5px}.ce-plan-inbox-head>.ce-kanban-col-count{color:var(--ink);font-size:11px;font-weight:800}.ce-plan-inbox-list .ce-staged-row--inbox{display:grid;grid-template-columns:112px minmax(0,1fr);gap:14px;align-items:center;padding:12px 14px;margin:0;border:1px solid var(--card-border);border-radius:12px;background:color-mix(in srgb,var(--card) 70%,transparent);box-shadow:none;min-height:164px}.ce-staged-row--inbox .ce-staged-face-preview{width:112px;height:140px}.ce-staged-row--inbox .ce-staged-copy{min-width:0;display:grid;gap:12px}.ce-staged-row--inbox .ce-staged-open{display:flex;align-items:flex-start;gap:8px;min-width:0;padding:0;border:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer;justify-self:start}.ce-staged-row--inbox .ce-staged-open strong{display:block;overflow:hidden;font-size:14px;font-weight:740;text-overflow:ellipsis;white-space:nowrap}.ce-staged-row--inbox .ce-staged-open small{display:block;margin-top:4px;color:var(--muted);font-size:10px;line-height:1.4}.ce-staged-actions{display:flex;align-items:center;gap:8px}.ce-staged-actions .queue-open-studio-btn{padding:6px 10px;border:1px solid var(--card-border);border-radius:7px;background:var(--card);color:var(--ink);font-size:11px;font-weight:700;cursor:pointer}.ce-staged-actions .queue-del-btn{width:28px;height:28px}.ce-plan-inbox-list .ce-queue-missing{min-height:140px}
 @media(max-width:700px){.ce-plan-inbox-list .ce-staged-row--inbox{grid-template-columns:86px minmax(0,1fr);gap:12px;padding:10px}.ce-staged-row--inbox .ce-staged-face-preview{width:86px;height:108px}.ce-staged-row--inbox .ce-staged-open strong{font-size:13px}}
 .ce-idea-schedule-modal{position:fixed;inset:0;z-index:2200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.64);backdrop-filter:blur(12px)}
 .ce-idea-schedule-card{width:min(390px,92vw);display:grid;gap:13px;padding:20px;border:1px solid var(--card-border);border-radius:16px;background:var(--sidebar-bg);box-shadow:0 24px 70px rgba(0,0,0,.42);color:var(--ink)}
@@ -129,7 +129,12 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
   align-items: flex-start;
   min-height: 520px;
   -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
+  /* Audit P2-7: this was `x mandatory` while the phone board (:1089) and the
+     launch strip (:460) both use `proximity`. Under `mandatory` WebKit treats a
+     wheel gesture as a discrete move to the adjacent snap point and discards the
+     delta magnitude, so a measured 30px nudge jumped a whole 345px day (11.5x)
+     and fine positioning or momentum was impossible. One law, one behaviour. */
+  scroll-snap-type: x proximity;
   scroll-padding-left: 4px;
 }
 .ce-kanban-board::-webkit-scrollbar {
@@ -177,6 +182,10 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Audit P2-11: heads measured 29px on populated columns and 27px on empty ones
+     (the Select button + count only exist when a column has cards), so the row of
+     header pills had a 2px saw-tooth. Pin the height so every head agrees. */
+  min-height: 29px;
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(120, 120, 150, 0.14);
 }
@@ -302,6 +311,12 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
   border: 0;
   border-radius: 0;
   box-shadow: none;
+  /* Audit P2-4: the wrap measured 222px tall while the preview inside it was only
+     212px, so the artwork left 10px of its own box empty (the wrap's `align-items`
+     was centering a shorter child). Stretch the child so the piece fills the box the
+     card gives it — art share 0.700 -> 0.733 at unchanged card, column and control
+     sizes. */
+  align-items: stretch;
 }
 .ce-kanban-id-rail {
   display: flex;
