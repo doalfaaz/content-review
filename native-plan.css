@@ -1,5 +1,5 @@
 /* Creator workflow surfaces: Plan, Grow, and Launch. */
-.ce-plan-shell,.ce-ops-shell{width:100%;max-width:1560px;margin:52px auto 0;padding-bottom:48px} /* margin-top clears the floating topbar (owner 2026-09-03) */
+.ce-plan-shell,.ce-ops-shell{width:100%;max-width:1560px;margin:0 auto;padding-bottom:48px} /* Owner 2026-09-13: the old `margin-top:52px` here DUPLICATED the topbar clearance that .main-content already reserves as `padding-top:var(--topbar-h)` — 66 + 52 = 118px of dead band above the panel header while the topbar itself is only 42px tall ("the plan and queue part is still not on the top, there is still so much space in between"). The clearance is owned in ONE place now; the <=700px phone block keeps its own 52px. */
 .ce-eyebrow{display:block;margin-bottom:8px;color:var(--accent-text);font-size:10px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
 .ce-plan-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px}
 .ce-plan-heading{margin:0;color:var(--ink);font-size:clamp(22px,2.4vw,34px);font-weight:780;line-height:1.08;letter-spacing:-.035em}
@@ -47,7 +47,7 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
 .ce-plan-empty strong{color:var(--ink);font-size:18px}.ce-plan-empty span{max-width:360px;font-size:12px}
 .ce-saved-design-grid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
 .ce-saved-design-card .ce-queue-footer{min-height:72px}
-.ce-staged-queue{margin-top:34px;padding-top:28px;border-top:1px solid var(--card-border)}
+.ce-staged-queue{margin-top:34px;padding-top:12px;border-top:1px solid var(--card-border)} /* Owner 2026-09-13: was padding-top:28px, which stacked on the intro's 12px margin-bottom and the board's own padding to leave ~58px of air between the "Plan & Queue" header row and the column heads. The border-top is the separator; it needs 12px under it, not 28. */
 .ce-staged-list{display:grid;gap:7px;margin-top:14px}
 .ce-staged-row{display:grid;grid-template-columns:minmax(0,1fr) 36px;align-items:center;gap:8px;padding:6px 8px 6px 12px;border:1px solid var(--card-border);border-radius:11px;background:var(--card)}
 .ce-staged-open{min-width:0;display:grid;grid-template-columns:8px minmax(160px,1fr) auto;align-items:center;gap:10px;padding:5px 0;border:0;background:transparent;color:var(--ink);cursor:pointer;text-align:left}
@@ -1111,7 +1111,7 @@ body.bright-theme .ce-launch-board-cadence {
 @media(max-width:700px){.ce-plan-shell{margin-top:52px;padding:0 14px 54px}.ce-plan-shell .ce-plan-intro{padding-bottom:14px}.ce-plan-shell .ce-kanban-board{display:flex;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:10px;margin-inline:-14px;padding-inline:14px}.ce-plan-shell .ce-kanban-col{min-width:286px;scroll-snap-align:start}.ce-plan-inbox-list{grid-template-columns:1fr}.ce-plan-inbox{margin-top:18px}}
 .ce-launch-day-art .ce-render-block-content{max-height:100%!important;overflow:hidden!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:8!important;line-height:1.35!important}
 /* Workbench hierarchy pass: one purpose per surface, quiet secondary diagnostics. */
-.ce-ops-shell{max-width:1440px;margin-top:52px;padding:0 28px 64px}
+.ce-ops-shell{max-width:1440px;margin-top:0;padding:0 28px 64px} /* Owner 2026-09-13: same double-counted topbar clearance as the Plan shell — .main-content already reserves it. */
 .ce-ops-hero{border-color:color-mix(in srgb,var(--accent) 28%,var(--card-border));background:linear-gradient(135deg,color-mix(in srgb,var(--card) 92%,var(--accent) 8%),var(--card));box-shadow:0 14px 34px rgba(0,0,0,.14)}
 .ce-ops-hero-copy h2{font-size:clamp(26px,3vw,40px)!important;letter-spacing:-.045em}
 .ce-ops-actions{display:flex;gap:8px;flex-wrap:wrap}.ce-ops-actions .ce-surface-button{min-height:40px;padding-inline:16px}
@@ -1119,7 +1119,7 @@ body.bright-theme .ce-launch-board-cadence {
 .ce-readiness-row>div{padding:18px 20px}.ce-readiness-row strong{font-variant-numeric:tabular-nums}
 .ce-ops-panel{box-shadow:none}.ce-section-heading h3{font-size:18px;letter-spacing:-.025em}
 .ce-grow-column{margin-top:26px}.ce-grow-colhead{display:flex;align-items:center;gap:10px;padding:0 2px 8px;border-bottom:1px solid var(--card-border)}.ce-grow-stepnum{color:var(--accent-text);font-size:10px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
-.ce-launch-workbench{max-width:1440px;margin-top:52px;padding:0 28px 64px}.ce-launch-board-head{border-color:color-mix(in srgb,var(--accent) 28%,var(--card-border));background:linear-gradient(135deg,color-mix(in srgb,var(--card) 92%,var(--accent) 8%),var(--card));box-shadow:0 14px 34px rgba(0,0,0,.14)}
+.ce-launch-workbench{max-width:1440px;margin-top:0;padding:0 28px 64px} /* Owner 2026-09-13: same double-counted topbar clearance as the Plan shell — .main-content already reserves it. */.ce-launch-board-head{border-color:color-mix(in srgb,var(--accent) 28%,var(--card-border));background:linear-gradient(135deg,color-mix(in srgb,var(--card) 92%,var(--accent) 8%),var(--card));box-shadow:0 14px 34px rgba(0,0,0,.14)}
 .ce-launch-board-title{font-size:clamp(26px,3vw,40px)!important;letter-spacing:-.045em}.ce-launch-board-cadence{margin-top:6px}
 .ce-launch-day{box-shadow:none;transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}.ce-launch-day:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.14)}.ce-launch-day:first-child{border-color:color-mix(in srgb,var(--accent) 38%,var(--card-border));box-shadow:inset 0 2px 0 var(--accent)}
 @media(max-width:700px){.ce-ops-shell,.ce-launch-workbench{margin-top:52px;padding:0 14px 54px}.ce-ops-hero{padding:20px}.ce-readiness-row{grid-template-columns:repeat(2,1fr)}.ce-launch-board-head{padding:18px}.ce-launch-day{min-width:272px}}

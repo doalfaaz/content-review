@@ -1172,6 +1172,26 @@
     font-weight: 700;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   }
+  /* Owner 2026-09-13: the Shuffle control beside Photo|Paper. Same visual weight as a
+     section button, but it is an ACTION (deal a fresh set), not a mode, so it carries its
+     own card frame and never takes .active. */
+  .ce-poem-shuffle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    cursor: pointer;
+  }
+  .ce-poem-shuffle:hover {
+    color: var(--ink);
+    border-color: var(--accent);
+  }
 
   /* Compact Icon Theme Toggle */
   .theme-toggle-btn {
@@ -2087,6 +2107,13 @@
         <button class="section-btn" data-sec="paper">Paper</button>
       </div>
 
+      <!-- Owner 2026-09-13: the library is a select/reject feed, so it needs one obvious
+           control for "deal me a fresh set" instead of waiting for a relaunch. -->
+      <button class="section-btn ce-poem-shuffle" id="poem-shuffle" type="button"
+              title="Deal a fresh set of poems" aria-label="Deal a fresh set of poems">
+        <span class="ce-ic ce-ic--sparkles ce-ic--14" aria-hidden="true"></span> Shuffle
+      </button>
+
       <!-- Saved/Queue launchers live in the sidebar only — topbar duplicates were cut -->
 
       <div class="topbar-meta" id="meta" style="display:none;"></div>
@@ -2248,10 +2275,10 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=6a6a2fab06"></script>
+<script src="./deck_index.js?v=f9f9614971"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
-<link rel="stylesheet" href="./native-plan.css?v=998ec82033" />
+<link rel="stylesheet" href="./native-plan.css?v=b0c2adc855" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
 <link rel="stylesheet" href="./native-studio.css?v=4917829aaf" />
 <style id="ce-share-trim">
@@ -6374,6 +6401,72 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return out;
   }
 
+  /* Owner 2026-09-13: "whenever I open the poem tab, or whenever the app opens, it always
+     shows me the same poem... we designed this app in a way to just select or reject a poem
+     if it goes or not... each time when I open it, it should show a new set, and then I can
+     decide what to do with it."
+     The library is a curation feed, so its order must be a fresh DRAW per session instead of
+     always the same DB-ordered first 24. Seeded once per app launch — so the grid is stable
+     across re-renders and never reshuffles under his cursor mid-review — and re-seeded on
+     demand from the Shuffle control in the poem topbar. It is applied to the INPUT of
+     mixViralOlder, not after it, so his viral/older cadence ratio is preserved: only which
+     poems fall into each pool changes, never the cadence he designed. */
+  function cePoemShuffleSeed() {
+    if (!window.__CE_POEM_SEED__) {
+      window.__CE_POEM_SEED__ = ((Date.now() & 0xffffffff) ^ ((Math.random() * 0x7fffffff) | 0)) >>> 0;
+    }
+    return window.__CE_POEM_SEED__;
+  }
+  function ceShufflePoemList(list) {
+    var out = Array.isArray(list) ? list.slice() : [];
+    if (out.length < 2) return out;
+    // mulberry32 — deterministic for a given seed, so one session renders one stable order
+    // and a relaunch (or a Shuffle tap) deals a genuinely different set.
+    var s = cePoemShuffleSeed() >>> 0;
+    function rnd() {
+      s = (s + 0x6D2B79F5) | 0;
+      var t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+    for (var i = out.length - 1; i > 0; i--) {
+      var j = Math.floor(rnd() * (i + 1));
+      var tmp = out[i]; out[i] = out[j]; out[j] = tmp;
+    }
+    return out;
+  }
+  function ceReshufflePoems() {
+    window.__CE_POEM_SEED__ = 0;          // force a new seed
+    cePoemShuffleSeed();
+    if (typeof renderMain === 'function') renderMain();
+    if (typeof showAppToast === 'function') showAppToast('Fresh set dealt');
+  }
+  /* Owner 2026-09-13 (follow-up, measured): shuffling the INPUT cannot survive mixViralOlder.
+     Its bucket sorts break equal-date ties on a per-poem key (the like index, then the repeat
+     count), so the input order is ALWAYS discarded and every launch drew the identical feed —
+     verified: two launches had different seeds (2352691902 vs 2453590617) and byte-identical
+     rendered order. So the variety has to come from the sort itself: randomise WITHIN each
+     equal-primary-key group. That keeps his cadence law intact — the primary key IS "how long
+     since this poem last posted", so the most-due poems still lead — while changing WHICH of
+     the equally-due poems is drawn. Ordering by a key is never disturbed; only ties are. */
+  function ceShuffleWithinTies(arr, keyOf) {
+    if (!Array.isArray(arr) || arr.length < 2) return arr;
+    var i = 0;
+    while (i < arr.length) {
+      var k = keyOf(arr[i]);
+      var j = i + 1;
+      if (k !== null && k !== undefined && k !== '') {
+        while (j < arr.length && keyOf(arr[j]) === k) j++;
+      }
+      if (j - i > 1) {
+        var drawn = ceShufflePoemList(arr.slice(i, j));
+        for (var m = 0; m < drawn.length; m++) arr[i + m] = drawn[m];
+      }
+      i = j;
+    }
+    return arr;
+  }
+
   function allCleanPoems() {
     // Native mode: use the injected native poems array as sole authority.
     // Never fall back to static catalog data when native.
@@ -6745,6 +6838,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (da !== db) return da.localeCompare(db);
         return String(a.id || '').localeCompare(String(b.id || ''));
       });
+
+      /* Owner 2026-09-13: vary the DRAW within each equally-due group. Without this the tie
+         breaker (like index, then repeat count) made every launch render the identical feed,
+         no matter what seed the session drew — see ceShuffleWithinTies for the measurement. */
+      if (typeof ceShuffleWithinTies === 'function') {
+        ceShuffleWithinTies(viral, function (p) { return String(p.__ceLatestPostedDate || '9999-99-99'); });
+        ceShuffleWithinTies(gems, function (p) { return String(p.__ceOldestPostedDate || '2021-01-01'); });
+      }
 
       // Interleave within this era: 1 Era-Viral Anchor -> 2 Deep Archive Gems
       var vi = 0, gi = 0;
@@ -14073,10 +14174,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             poemBase = allNativePoemRows().filter(function (p) { return cePoemMatchesEra(p, era); });
           } else if (era === 'all') {
             var allSansLong = cleanAll.filter(function (p) { return cePoemMatchesEra(p, 'all'); });
-            poemBase = (typeof mixViralOlder === 'function') ? mixViralOlder(allSansLong) : allSansLong;
+            /* Owner 2026-09-13: fresh draw per session (see ceShufflePoemList). Shuffled
+               BEFORE the mix so the viral/older cadence ratio is untouched. */
+            var allDrawn = (typeof ceShufflePoemList === 'function') ? ceShufflePoemList(allSansLong) : allSansLong;
+            poemBase = (typeof mixViralOlder === 'function') ? mixViralOlder(allDrawn) : allDrawn;
           } else {
             var sliced = cleanAll.filter(function (p) { return cePoemMatchesEra(p, era); });
-            poemBase = (typeof mixViralOlder === 'function') ? mixViralOlder(sliced) : sliced;
+            var slicedDrawn = (typeof ceShufflePoemList === 'function') ? ceShufflePoemList(sliced) : sliced;
+            poemBase = (typeof mixViralOlder === 'function') ? mixViralOlder(slicedDrawn) : slicedDrawn;
           }
         } catch (_era) { poemBase = cleanAll || []; }
         var poems = poemBase.filter(p => {
@@ -18606,6 +18711,22 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var btn = document.querySelector('#poem-sections button[data-sec="' + sec + '"]');
       if (btn) btn.click();
     };
+
+    // Owner 2026-09-13: "deal a fresh set" — a new shuffle seed plus a re-render, so he can
+    // keep curating without relaunching the app. Exposed for QA as __CE_SHUFFLE_POEMS__.
+    (function bindPoemShuffle() {
+      var shuffleBtn = document.getElementById('poem-shuffle');
+      if (shuffleBtn) shuffleBtn.onclick = function () { ceReshufflePoems(); };
+      window.__CE_SHUFFLE_POEMS__ = function () { ceReshufflePoems(); return window.__CE_POEM_SEED__; };
+      /* Test seam (owner 2026-09-13): the shuffle's real contract, asserted without depending on
+         the poem grid rendering — same seed => same order, new seed => new order, and ALWAYS a
+         true permutation (never drop or duplicate a poem). */
+      window.__CE_SHUFFLE_PROBE__ = function (n) {
+        var list = [];
+        for (var i = 0; i < (n || 40); i++) list.push({ id: 'probe-' + i });
+        return ceShufflePoemList(list).map(function (p) { return p.id; });
+      };
+    })();
 
     let searchDebounce = null;
     const searchInput = document.getElementById('search');
