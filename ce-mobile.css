@@ -1098,8 +1098,26 @@ html.ce-phone #studio-dock .ce-tools-toggle { display: flex !important; }
    (filmstrip box spans the full column). z-index cannot fix an orphaned sticky
    child; give the row a real box inside the inspector and lift that box above
    the filmstrip layer. */
+/* STRUCTURAL REPAIR (owner law 2026-09-13): this block used to read
+   `SEL_A, SEL_B, @media (max-width: 700px) { ... }` — an @media nested inside a
+   selector LIST. CSS forbids that, so the parser dropped the whole construct:
+   brace-counting and grep both passed while BOTH intended rules were dead (verified
+   against the browser's own CSSOM — `html.ce-phone ... #ce-carousel-slide-scroll` was
+   declared in the file and present in ZERO parsed rules). The lost part was
+   `mask-image: none`, so the phone studio gallery kept the edge fade the author had
+   deliberately removed and the neighbouring slides faded into the background, reading
+   as empty dark slabs. Same rule, written as the two rules it always meant to be. */
 html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track,
-html.ce-phone .studio-workspace.is-carousel-mode #ce-carousel-slide-scroll,
+html.ce-phone .studio-workspace.is-carousel-mode #ce-carousel-slide-scroll {
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 10px 12px !important;
+  gap: 12px !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
 @media (max-width: 700px) {
   .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track,
   .studio-workspace.is-carousel-mode #ce-carousel-slide-scroll {
@@ -1469,4 +1487,31 @@ html.ce-phone .topbar .search-input {
   width: auto !important;
   flex: 1 1 90px;
   min-width: 0;
+}
+
+/* ── Phone topbar VERTICAL budget (owner law 2026-09-13) ──────────────────────
+   The row was a fixed 52px with 4px/4px padding — a 44px content box authored
+   for the 28px chip set. The phone touch law then forces .section-btn to
+   40px, so the Photo/Paper switch needs 40 + 2*2 (its own padding) + 2*1 (its
+   own border) = 46px and no longer fit: the bar clipped ~4px with
+   overflow:hidden, cutting the control's descenders ("Paper"'s p). The row
+   must size to its own content, never a height authored for smaller chrome. */
+html.ce-phone .topbar,
+html.ce-phone .app-topbar {
+  height: auto !important;
+  min-height: calc(54px + env(safe-area-inset-top, 0px)) !important;
+  max-height: none !important;
+}
+
+/* The bar-control hit-area expander (`::before { inset: -8px }`, authored when the
+   visual chip was 28px) pokes 8px outside the button. On the phone the button already
+   MEETS the 44px law on its own, so the expansion is redundant — and because the bar
+   clips with overflow:hidden, it was half-dead anyway while contributing the phantom
+   `scrollHeight > clientHeight` that made the bar read as "labels are cut". Keep it
+   inside the button on phones; the desktop-narrow expander is untouched. */
+html.ce-phone .topbar .sidebar-toggle-btn::before,
+html.ce-phone .topbar .theme-toggle-btn::before,
+html.ce-phone .app-topbar .sidebar-toggle-btn::before,
+html.ce-phone .app-topbar .theme-toggle-btn::before {
+  inset: 0 !important;
 }

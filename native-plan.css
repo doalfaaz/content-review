@@ -282,6 +282,89 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
   pointer-events: none;
 }
 
+/* ── Content-first plan card (owner law 2026-09-13) ────────────────────────
+   The card's object is the PIECE. Before this, a detached metadata row
+   ("POEM — तुषार" + star/X chrome) sat ABOVE the artwork, so every card read
+   as a small picture inside a big empty shell the owner described as
+   "so weirdly big". Now the artwork leads, the identity+actions ride a rail
+   ATTACHED to the artwork's own box, and the controls below collapse into a
+   single compact row — so more of the card's height is the piece itself.
+   The authored stage is never overlaid: the rail is a footer under it. */
+.ce-kanban-art-block {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+.ce-kanban-card .ce-kanban-art-block > .ce-staged-art-wrap {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.ce-kanban-id-rail {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 4px 7px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+.ce-kanban-id-rail .ce-plan-select-toggle {
+  position: static;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+}
+.ce-kanban-id {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.ce-kanban-type {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.92;
+  white-space: nowrap;
+}
+.ce-kanban-author {
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.ce-kanban-id-acts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.ce-kanban-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ce-kanban-actions .queue-caption-select {
+  flex: 1 1 118px;
+}
+@media (max-width: 420px) {
+  .ce-kanban-actions .kanban-time-select { width: 82px; }
+  .ce-kanban-actions .queue-caption-select { flex: 1 1 96px; }
+}
+
 
 
 /* ── Launch board reset: calm decision surface ─────────────────────── */

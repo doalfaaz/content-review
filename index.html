@@ -1048,9 +1048,6 @@
     align-self: flex-start;
     margin-top: 4px;
   }
-  .ce-kanban-card-head {
-    padding-left: 30px;
-  }
   .ce-kanban-card .ce-staged-art-wrap {
     width: 100%!important;
     height: auto!important;
@@ -2238,7 +2235,7 @@
 <script src="./deck_index.js?v=7338b4cca7"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
-<link rel="stylesheet" href="./native-plan.css?v=f691727eea" />
+<link rel="stylesheet" href="./native-plan.css?v=121db6756b" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
 <link rel="stylesheet" href="./native-studio.css?v=4917829aaf" />
 <style id="ce-share-trim">
@@ -2246,7 +2243,7 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=bdcb7ae4a1" />
+<link rel="stylesheet" href="./ce-mobile.css?v=8f16304a60" />
 <script src="./ce-touch-edit.js?v=fd8fbd4c04"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
@@ -4227,8 +4224,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return String((e.type || 'piece') + '|' + id);
   }
   function ceBankUpdatedMs(e) {
-    var t = Date.parse((e && (e.updatedAt || e.savedAt)) || '');
-    return isFinite(t) ? t : 0;
+    var numeric = Number(e && e.updatedMs);
+    var parsed = Date.parse((e && (e.updatedAt || e.savedAt)) || '');
+    var out = (isFinite(numeric) && numeric > 0) ? numeric : 0;
+    if (isFinite(parsed) && parsed > out) out = parsed;
+    return out;
+  }
+  function ceTouchSavedBankEntry(e, now) {
+    if (!e) return 0;
+    var ms = Number(now) || Date.now();
+    if (!isFinite(ms) || ms <= 0) ms = Date.now();
+    e.updatedMs = ms;
+    e.updatedAt = new Date(ms).toISOString();
+    return ms;
   }
   function ceBankTombstones() {
     try { return JSON.parse(localStorage.getItem('ce_saved_bank_tombstones') || '{}') || {}; } catch (_e) { return {}; }
@@ -4316,7 +4324,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             return;
           }
           var entry = {}; Object.keys(re).forEach(function (f) { entry[f] = re[f]; });
-          delete entry.key; delete entry.updatedMs;
+          delete entry.key;
+          entry.updatedMs = rms;
           if (le) Object.keys(entry).forEach(function (f) { le[f] = entry[f]; });
           else { (state.savedItems = state.savedItems || []).unshift(entry); }
           changed = true;
@@ -8970,7 +8979,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // real clientHeight. Measure the track fresh; never trust a cached cap.
       var byTrack = Infinity;
       if (track && track.clientHeight > 120) {
-        var trackPadV = 28, cardPadV = 20;
+        /* Owner law 2026-09-13: the chrome budget was two hardcoded numbers
+           (trackPadV 28, cardPadV 20). The track's real vertical padding is
+           18+18 = 36, so the fitter overspent 8px: the card stood 405px inside a
+           397px content box, got centred, and lost 4px off its TOP and 4px off
+           its BOTTOM — the filmstrip cards' rounded corners were amputated into
+           square ends (the 2026-09-06 class, back through a stale constant).
+           Read the paddings from the live DOM so this cannot drift again. */
+        var tcs = getComputedStyle(track);
+        var trackPadV = (parseFloat(tcs.paddingTop) || 0) + (parseFloat(tcs.paddingBottom) || 0);
+        var cardPadV = 20;
+        var cardEl = track.querySelector('.ce-filmstrip-card');
+        if (cardEl) {
+          var ccs = getComputedStyle(cardEl);
+          cardPadV = (parseFloat(ccs.paddingTop) || 0) + (parseFloat(ccs.paddingBottom) || 0);
+        }
         var availH = track.clientHeight - trackPadV - cardPadV;
         if (availH > 120) byTrack = availH / 1350;
       }
@@ -12199,7 +12222,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           }
         }
         if (!sEntry.status) sEntry.status = 'saved';
-        sEntry.updatedAt = new Date().toISOString();
+        ceTouchSavedBankEntry(sEntry);
         try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
         if (typeof updateTopbarSavedBadge === 'function') updateTopbarSavedBadge();
       }
@@ -12493,17 +12516,131 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return true;
   }
 
+  /* ── Navigation history (owner law 2026-09-13) ──────────────────────────────
+     Owner, verbatim: "when I'm in Saved Bank and I move back, the screen moves to
+     the home screen weirdly — its entire routing is totally wrong, you cannot
+     even move from one panel to the other ideally without missing it."
+     Cause: appNavigateBack() hardcoded `state.activeTab = 'library'`. EVERY back
+     press — from Saved Bank, Plan, Write, Grow, Launch, or a Library sub-view —
+     dumped the owner on the Library root and threw away the panel, the filter and
+     the scroll position of the place he came from. Nothing in the app recorded
+     where he had been, so "back" was not a step back; it was a jump home.
+     Now every surface switch pushes a snapshot (renderMain is the single funnel
+     all of them already call) and back pops exactly one level. Only when there is
+     genuinely nothing to pop does it decline — the phone edge swipe still asks
+     first, so the drawer keeps its gesture. */
+  var __ceNavHistory = [];
+  var __ceNavLast = null;
+  var __ceNavRestoring = false;
+
+  function ceNavSnapshot() {
+    var v = document.getElementById('view');
+    return {
+      tab: state.activeTab || 'library',
+      libraryType: state.libraryType || 'poems',
+      poemSection: state.poemSection || 'photo',
+      poemEra: state.poemEra || 'all',
+      savedFilter: state.savedFilter || 'shortlist',
+      savedTypeFilter: state.savedTypeFilter || 'all',
+      planViewMode: state.planViewMode || 'kanban',
+      writeType: state.writeType || '',
+      scrollTop: (v && v.scrollTop) || 0
+    };
+  }
+  function ceNavKey(s) {
+    return [s.tab, s.libraryType, s.poemSection, s.poemEra, s.savedFilter,
+      s.savedTypeFilter, s.planViewMode, s.writeType].join('|');
+  }
+  /* Called at the TOP of renderMain: `state` already holds the surface being
+     ENTERED, so whatever __ceNavLast holds is the surface being LEFT — that is
+     the entry back must return to. */
+  function ceNavTrack() {
+    var now = ceNavSnapshot();
+    if (__ceNavRestoring) { __ceNavLast = now; return; }
+    if (__ceNavLast && ceNavKey(now) !== ceNavKey(__ceNavLast)) {
+      __ceNavHistory.push(__ceNavLast);
+      if (__ceNavHistory.length > 40) __ceNavHistory.shift();
+    }
+    __ceNavLast = now;
+  }
+  window.__CE_NAV_HISTORY_DEPTH__ = function () { return __ceNavHistory.length; };
+
+  function ceNavApply(snap) {
+    if (!snap) return false;
+    state.activeTab = snap.tab;
+    state.libraryType = snap.libraryType;
+    state.poemSection = snap.poemSection;
+    state.poemEra = snap.poemEra;
+    state.savedFilter = snap.savedFilter;
+    state.savedTypeFilter = snap.savedTypeFilter;
+    state.planViewMode = snap.planViewMode;
+    if (snap.writeType) state.writeType = snap.writeType;
+    // Static chrome that the render pass does not re-derive from state.
+    try {
+      document.querySelectorAll('#sidebar-nav button[data-tab]').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-tab') === state.activeTab);
+      });
+      document.querySelectorAll('#library-filters > button[data-lib]').forEach(function (b) {
+        b.classList.toggle('active', state.activeTab === 'library' && b.getAttribute('data-lib') === state.libraryType);
+      });
+      document.querySelectorAll('#poem-sections button[data-sec]').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-sec') === state.poemSection);
+      });
+      document.querySelectorAll('#poem-eras button[data-poem-era]').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-poem-era') === state.poemEra);
+      });
+    } catch (_navChrome) {}
+    return true;
+  }
+
   function appNavigateBack() {
     var studio = document.getElementById('studio');
     if (studio && studio.classList.contains('open')) {
       return closeStudio();
     }
-    if (state.activeTab !== 'library') {
-      state.activeTab = 'library';
-      document.querySelectorAll('#sidebar-nav button[data-tab]').forEach(function (button) {
-        button.classList.toggle('active', button.getAttribute('data-tab') === 'library');
-      });
-      renderMain();
+    /* Dismiss an OPEN OVERLAY before popping a panel (auditor report 2026-09-13, grok-4.6:
+       "if he is in Launch and hits back from a nested sheet, you will lose Launch-specific
+       state"). A sheet that is on top of a panel is one level deeper than that panel, so
+       back must close it first — otherwise the press silently changed the panel underneath
+       a modal the owner was still reading. */
+    try {
+      var settings = document.getElementById('ce-settings-modal');
+      if (settings && !settings.hasAttribute('hidden') && getComputedStyle(settings).display !== 'none') {
+        if (typeof ceCloseSettingsModal === 'function') { ceCloseSettingsModal(); return true; }
+      }
+      var reels = document.querySelector('.ce-reel-proxy-modal');
+      if (reels && !reels.hasAttribute('hidden') && getComputedStyle(reels).display !== 'none') {
+        if (typeof ceCloseReelProxy === 'function') { ceCloseReelProxy(); return true; }
+      }
+      var sched = document.getElementById('ce-idea-schedule-modal');
+      if (sched) {
+        var schedClose = sched.querySelector('[data-ce-idea-schedule-close]');
+        if (schedClose) { schedClose.click(); return true; }
+        sched.remove(); return true;
+      }
+    } catch (_navOverlay) {}
+    if (__ceNavHistory.length) {
+      var prev = __ceNavHistory.pop();
+      __ceNavRestoring = true;
+      try {
+        ceNavApply(prev);
+        renderMain();
+      } finally {
+        __ceNavRestoring = false;
+      }
+      __ceNavLast = ceNavSnapshot();
+      /* A re-render resets #view.scrollTop to 0 — restore where he was, after the
+         DOM has its real height (same law as the studio's own origin restore).
+         `typeof === 'number'` not truthiness: a surface he had scrolled and then
+         returned to the top of has scrollTop 0, and `if (snap.scrollTop)` cannot tell
+         that apart from "never scrolled" (grok-4.6 audit, 2026-09-13). */
+      if (typeof prev.scrollTop === 'number') {
+        var __restoreBackScroll = function () {
+          var v = document.getElementById('view');
+          if (v) v.scrollTop = prev.scrollTop;
+        };
+        requestAnimationFrame(function () { __restoreBackScroll(); setTimeout(__restoreBackScroll, 120); });
+      }
       return true;
     }
     return false;
@@ -13581,6 +13718,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           e.stopPropagation();
           addToQueue(saved.type, itm, dsg);
           saved.status = 'in_progress';
+          ceTouchSavedBankEntry(saved);
           try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
           updateTopbarSavedBadge();
           showAppToast('Added to Plan calendar', { icon: 'calendar' });
@@ -13712,6 +13850,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
   // Main Render View
   function renderMain() {
+    /* Navigation history (owner law 2026-09-13): every surface switch in this app
+       funnels through renderMain, so this single call is what makes Back a real
+       step back instead of a jump to the Library root. See ceNavTrack above. */
+    try { ceNavTrack(); } catch (_navTrack) {}
     try { __ceRenderMainImpl(); } catch (_renderErr) { console.error('RENDER_MAIN_ERROR:', _renderErr); }
     // Slide fit sweep (owner 2026-09-10): .mid is a fixed 1049px box with
     // overflow:hidden, and the density relief that was meant to keep text inside
@@ -14892,68 +15034,88 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var currentTime = q.scheduleTime || '';
         var dotColor = q.scheduled && q.scheduleTime ? 'var(--accent)' : (q.readyToPost ? '#f59e0b' : (q.exportStatus === 'EXPORTED' ? '#34d399' : 'var(--faint)'));
         var isPlanSelected = state.planSelectedIds && state.planSelectedIds.has(q.id);
+        var typeLabel = escapeHtml(queueTypeLabel(q));
+        var creatorLabel = queueCreatorLabel(q);
+        /* Owner law 2026-09-13 (Plan & Queue craft): the card's object is the PIECE,
+           so the piece leads and its identity belongs to it. The detached metadata
+           row that sat ABOVE the artwork ("POEM — तुषार" floating over an empty
+           shell) is gone: one identity rail is attached to the bottom of the
+           artwork, carrying selection + type + author + the piece's own actions.
+           Authored artwork is never overlaid — the rail is a footer, not a badge. */
         return `
           <div class="ce-kanban-card${isPlanSelected ? ' is-selected' : ''}" data-queue-index="${idx}" draggable="true">
-            <button type="button" class="ce-plan-select-toggle${isPlanSelected ? ' is-selected' : ''}" data-idx="${idx}" aria-label="${isPlanSelected ? 'Deselect' : 'Select'} for batch action" title="${isPlanSelected ? 'Deselect' : 'Select for batch action'}">${isPlanSelected ? '<span class="ce-ic ce-ic--check ce-ic--11"></span>' : ''}</button>
-            <div class="ce-kanban-card-head" style="display:flex; align-items:center; justify-content:space-between; width:100%; margin-bottom:6px;">
-              <div style="display:flex; align-items:center; gap:6px;">
-                <span class="ce-status-dot" style="width:7px; height:7px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
-                <span style="font-size:10px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink); opacity:0.85;">${escapeHtml(queueTypeLabel(q))}</span>
-                ${queueCreatorLabel(q) ? `<span style="font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.01em;">${escapeHtml(queueCreatorLabel(q))}</span>` : ''}
-                ${ceMetaChip(q)}
+            <div class="ce-kanban-art-block">
+              <div class="ce-staged-art-wrap ce-staged-open" data-idx="${idx}" title="Click to edit in Studio" style="cursor:pointer;">
+                <div class="ce-staged-face-preview">
+                  ${queuePreviewHtml(q, idx)}
+                </div>
               </div>
-              <div style="display:flex; align-items:center; gap:4px;">
-                <button class="queue-save-bank-btn" data-idx="${idx}" type="button" aria-label="Send to Saved Bank" title="Move back to Saved Bank (Shortlist)" style="border:none; background:var(--accent-tint); color:var(--accent); width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--star ce-ic--11"></span></button>
-                <button class="queue-del-btn" data-idx="${idx}" type="button" aria-label="Remove from queue" title="Remove from queue" style="border:none; background:color-mix(in srgb, var(--ink) 8%, transparent); color:color-mix(in srgb, var(--ink) 62%, transparent); width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--close ce-ic--11"></span></button>
+              <div class="ce-kanban-id-rail">
+                <button type="button" class="ce-plan-select-toggle${isPlanSelected ? ' is-selected' : ''}" data-idx="${idx}" aria-label="${isPlanSelected ? 'Deselect' : 'Select'} for batch action" title="${isPlanSelected ? 'Deselect' : 'Select for batch action'}">${isPlanSelected ? '<span class="ce-ic ce-ic--check ce-ic--11"></span>' : ''}</button>
+                <span class="ce-kanban-id">
+                  <span class="ce-status-dot" style="width:7px; height:7px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
+                  <span class="ce-kanban-type">${typeLabel}</span>
+                  ${creatorLabel ? `<span class="ce-kanban-author">${escapeHtml(creatorLabel)}</span>` : ''}
+                  ${ceMetaChip(q)}
+                </span>
+                <span class="ce-kanban-id-acts">
+                  <button class="queue-save-bank-btn" data-idx="${idx}" type="button" aria-label="Send to Saved Bank" title="Move back to Saved Bank (Shortlist)" style="border:none; background:var(--accent-tint); color:var(--accent); width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--star ce-ic--11"></span></button>
+                  <button class="queue-del-btn" data-idx="${idx}" type="button" aria-label="Remove from queue" title="Remove from queue" style="border:none; background:color-mix(in srgb, var(--ink) 8%, transparent); color:color-mix(in srgb, var(--ink) 62%, transparent); width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--close ce-ic--11"></span></button>
+                </span>
               </div>
             </div>
 
-            <div class="ce-staged-art-wrap ce-staged-open" data-idx="${idx}" title="Click to edit in Studio" style="cursor:pointer;">
-              <div class="ce-staged-face-preview">
-                ${queuePreviewHtml(q, idx)}
-              </div>
-            </div>
-
-            <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+            <div class="ce-kanban-actions">
               <!-- Owner law 2026-09-10: the column header IS the date — no day
                    select on the card; and the time appears ONCE (the dashed
-                   chip + a dropdown was a duplicate). One compact row. -->
-              <div style="display:flex; align-items:center; gap:6px;">
-                <select class="kanban-time-select" data-idx="${idx}" title="Posting time on ${escapeHtml(col ? col.label : 'this day')}" aria-label="Posting time" style="flex:1; min-width:0; font-size:11px; padding:4px 4px; border:1px solid var(--border); border-radius:6px; background:rgba(255,255,255,0.06); color:var(--ink); cursor:pointer;">
-                  <option value=""${!currentTime ? ' selected' : ''}>Pick time…</option>
-                  ${['9:00 AM','10:30 AM','11:30 AM','1:00 PM','3:00 PM','5:00 PM','6:30 PM','8:00 PM','9:00 PM'].map(function(t){ return '<option' + (t === currentTime ? ' selected' : '') + '>' + t + '</option>'; }).join('')}
-                </select>
-                <label style="display:flex; align-items:center; cursor:pointer;" title="Ready to publish">
-                  <input type="checkbox" class="queue-ready-topost" data-idx="${idx}" ${q.readyToPost ? 'checked' : ''} style="cursor:pointer; width:13px; height:13px; accent-color:var(--accent);">
-                </label>
-              </div>
-
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; padding-top:4px;">
-                <!-- Owner law 2026-09-10: caption is a DROPDOWN of the saved
-                     caption bank (his 8 groups, all 45 lines) — pick one and it
-                     becomes this piece's caption. No more blind copy button. -->
-                ${ceCaptionPickerHtml(q, idx)}
-                <button class="queue-open-composer-btn" data-idx="${idx}" type="button" aria-label="${window.__CE_META_HAS_TOKEN__ ? 'Schedule to @doalfaaz' : 'Prep and open in Studio'}" style="background:rgba(120,120,150,0.08); border:1px solid rgba(120,120,150,0.14); color:var(--ink); width:26px; height:24px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; flex:0 0 auto;" title="${window.__CE_META_HAS_TOKEN__ ? 'Schedule this piece to @doalfaaz at its board date/time (confirm first)' : 'Copy caption, open slides in Finder, and open Creator Studio (manual handoff)'}">
-                  <span class="ce-ic ce-ic--share ce-ic--12"></span>
-                </button>
-                <!-- Owner law 2026-09-10: graphical, no text button. -->
-                <button class="queue-open-studio-btn" data-idx="${idx}" type="button" aria-label="Edit in Studio" title="Edit in Studio" style="background:rgba(120,120,150,0.08); border:1px solid rgba(120,120,150,0.14); color:var(--ink); width:26px; height:24px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; flex:0 0 auto;">
-                  <span class="ce-ic ce-ic--arrow-up-right ce-ic--12"></span>
-                </button>
-              </div>
+                   chip + a dropdown was a duplicate). One compact row.
+                   Owner law 2026-09-13: one row, not two — every extra row was
+                   chrome the artwork paid for. -->
+              <select class="kanban-time-select" data-idx="${idx}" title="Posting time on ${escapeHtml(col ? col.label : 'this day')}" aria-label="Posting time" style="flex:0 0 auto; width:88px; font-size:11px; padding:4px 4px; border:1px solid var(--border); border-radius:6px; background:rgba(255,255,255,0.06); color:var(--ink); cursor:pointer;">
+                <option value=""${!currentTime ? ' selected' : ''}>Pick time…</option>
+                ${['9:00 AM','10:30 AM','11:30 AM','1:00 PM','3:00 PM','5:00 PM','6:30 PM','8:00 PM','9:00 PM'].map(function(t){ return '<option' + (t === currentTime ? ' selected' : '') + '>' + t + '</option>'; }).join('')}
+              </select>
+              <label style="display:flex; align-items:center; cursor:pointer;" title="Ready to publish" aria-label="Mark ready to publish">
+                <input type="checkbox" class="queue-ready-topost" data-idx="${idx}" ${q.readyToPost ? 'checked' : ''} style="cursor:pointer; width:13px; height:13px; accent-color:var(--accent);">
+              </label>
+              <!-- Owner law 2026-09-10: caption is a DROPDOWN of the saved
+                   caption bank (his 8 groups, all 45 lines) — pick one and it
+                   becomes this piece's caption. No more blind copy button. -->
+              ${ceCaptionPickerHtml(q, idx)}
+              <button class="queue-open-composer-btn" data-idx="${idx}" type="button" aria-label="${window.__CE_META_HAS_TOKEN__ ? 'Schedule to @doalfaaz' : 'Prep and open in Studio'}" style="background:rgba(120,120,150,0.08); border:1px solid rgba(120,120,150,0.14); color:var(--ink); width:26px; height:24px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; flex:0 0 auto;" title="${window.__CE_META_HAS_TOKEN__ ? 'Schedule this piece to @doalfaaz at its board date/time (confirm first)' : 'Copy caption, open slides in Finder, and open Creator Studio (manual handoff)'}">
+                <span class="ce-ic ce-ic--share ce-ic--12"></span>
+              </button>
+              <!-- Owner law 2026-09-10: graphical, no text button. -->
+              <button class="queue-open-studio-btn" data-idx="${idx}" type="button" aria-label="Edit in Studio" title="Edit in Studio" style="background:rgba(120,120,150,0.08); border:1px solid rgba(120,120,150,0.14); color:var(--ink); width:26px; height:24px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; flex:0 0 auto;">
+                <span class="ce-ic ce-ic--arrow-up-right ce-ic--12"></span>
+              </button>
             </div>
           </div>
         `;
       }
 
       function renderInboxRow(q, idx) {
+        /* Owner law 2026-09-13 (same rule as the board card): the piece's identity
+           belongs to the piece. The type/creator used to float as a detached line in
+           the row's copy block, so Inbox rows contradicted the board's new rail. The
+           thumbnail and its identity rail are now one object here too. */
+        var creatorLabel = queueCreatorLabel(q);
         return `<div class="ce-staged-row ce-staged-row--inbox ce-kanban-card" data-queue-index="${idx}">
-          <div class="ce-staged-art-wrap" data-idx="${idx}" title="Open in Studio" aria-label="Open ${escapeHtml(queueDisplayTitle(q))} in Studio">
-            <div class="ce-staged-face-preview">${queuePreviewHtml(q, idx)}</div>
+          <div class="ce-kanban-art-block">
+            <div class="ce-staged-art-wrap" data-idx="${idx}" title="Open in Studio" aria-label="Open ${escapeHtml(queueDisplayTitle(q))} in Studio">
+              <div class="ce-staged-face-preview">${queuePreviewHtml(q, idx)}</div>
+            </div>
+            <div class="ce-kanban-id-rail">
+              <span class="ce-kanban-id">
+                <span class="ce-status-dot" style="width:7px; height:7px; border-radius:50%; background:var(--faint); flex-shrink:0;"></span>
+                <span class="ce-kanban-type">${escapeHtml(queueTypeLabel(q))}</span>
+                ${creatorLabel ? `<span class="ce-kanban-author">${escapeHtml(creatorLabel)}</span>` : ''}
+              </span>
+            </div>
           </div>
           <div class="ce-staged-copy">
             <button class="ce-staged-open" data-idx="${idx}" type="button">
-            <span class="ce-status-dot"></span><span><strong>${escapeHtml(queueDisplayTitle(q))}</strong><small>${escapeHtml(queueTypeLabel(q))}${queueCreatorLabel(q) ? ' · ' + escapeHtml(queueCreatorLabel(q)) : ''} · Inbox · ${escapeHtml(q.statusReason || 'Waiting for a day')}${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''}</small></span>
+            <span><strong>${escapeHtml(queueDisplayTitle(q))}</strong><small>Inbox · ${escapeHtml(q.statusReason || 'Waiting for a day')}${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''}</small></span>
             </button>
             <div class="ce-staged-actions">
               <button class="queue-open-studio-btn" data-idx="${idx}" type="button">Edit in Studio</button>
@@ -15081,9 +15243,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               ${planCalendarVisible.map(({ q, idx }) => `
                 <div class="ce-staged-row${state.planSelectedIds && state.planSelectedIds.has(q.id) ? ' is-selected' : ''}" data-queue-index="${idx}" style="display:flex; flex-direction:row; align-items:stretch; gap:18px; padding:16px 18px; margin-bottom:14px; border-radius:14px; background:var(--card-bg, rgba(255,255,255,0.04)); border:1px solid var(--border-color, rgba(120,120,150,0.18)); box-shadow:0 2px 10px rgba(0,0,0,0.06); position:relative;">
                   <button type="button" class="ce-plan-select-toggle ce-plan-select-toggle--list${state.planSelectedIds && state.planSelectedIds.has(q.id) ? ' is-selected' : ''}" data-idx="${idx}" aria-label="Select for batch action" title="Select for batch action">${state.planSelectedIds && state.planSelectedIds.has(q.id) ? '<span class="ce-ic ce-ic--check ce-ic--11"></span>' : ''}</button>
-                  <div class="ce-staged-art-wrap" data-idx="${idx}" style="flex:0 0 112px; width:112px; height:140px; border-radius:10px; overflow:hidden; background:#111; border:1px solid rgba(255,255,255,0.12); cursor:pointer; position:relative; box-shadow:0 4px 14px rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center;" title="Click to edit in Studio">
-                    <div class="ce-staged-face-preview" style="width:112px; height:140px; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:10px; position:relative;">
-                      ${queuePreviewHtml(q, idx)}
+                  <div class="ce-kanban-art-block" style="flex:0 0 112px;">
+                    <div class="ce-staged-art-wrap" data-idx="${idx}" style="width:112px; height:140px; border-radius:0; overflow:hidden; background:#111; border:0; cursor:pointer; position:relative; display:flex; align-items:center; justify-content:center;" title="Click to edit in Studio">
+                      <div class="ce-staged-face-preview" style="width:112px; height:140px; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:0; position:relative;">
+                        ${queuePreviewHtml(q, idx)}
+                      </div>
+                    </div>
+                    <div class="ce-kanban-id-rail" style="padding:3px 6px; min-height:26px;">
+                      <span class="ce-kanban-id">
+                        <span class="ce-kanban-type">${escapeHtml(queueTypeLabel(q))}</span>
+                        ${queueCreatorLabel(q) ? `<span class="ce-kanban-author">${escapeHtml(queueCreatorLabel(q))}</span>` : ''}
+                      </span>
                     </div>
                   </div>
 
@@ -15093,7 +15263,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                         <span class="ce-status-dot" style="width:10px; height:10px; border-radius:50%; background:${q.scheduled ? 'var(--ink)' : (q.exportStatus === 'EXPORTED' ? 'var(--muted)' : 'var(--faint)')}; flex-shrink:0; margin-top:4px;"></span>
                         <div style="min-width:0;">
                           <strong style="display:block; font-size:16.5px; font-weight:680; letter-spacing:-0.01em; color:var(--ink); line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(queueDisplayTitle(q))}</strong>
-                          <small style="color:var(--muted); font-size:12px; margin-top:3px; display:block;">${escapeHtml(queueTypeLabel(q))}${queueCreatorLabel(q) ? ' · ' + escapeHtml(queueCreatorLabel(q)) : ''} · <span style="color:${q.scheduled && q.scheduleTime ? 'var(--ink)' : 'var(--muted)'}; font-weight:700;">${escapeHtml(q.scheduled && q.scheduleTime ? (q.scheduleSlot || q.scheduleTime) : (q.readyToPost ? 'Ready, schedule to place' : 'Inbox, tick Ready when final'))}</span>${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''} ${ceMetaChip(q)}</small>
+                          <small style="color:var(--muted); font-size:12px; margin-top:3px; display:block;"><span style="color:${q.scheduled && q.scheduleTime ? 'var(--ink)' : 'var(--muted)'}; font-weight:700;">${escapeHtml(q.scheduled && q.scheduleTime ? (q.scheduleSlot || q.scheduleTime) : (q.readyToPost ? 'Ready, schedule to place' : 'Inbox, tick Ready when final'))}</span>${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''} ${ceMetaChip(q)}</small>
                         </div>
                       </button>
                       <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
@@ -16442,7 +16612,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       state.savedItems[existingIdx].status = st;
       state.savedItems[existingIdx].item = item;
       if (design) state.savedItems[existingIdx].design = Object.assign({}, state.savedItems[existingIdx].design || {}, design);
-      state.savedItems[existingIdx].updatedAt = new Date().toISOString();
+      ceTouchSavedBankEntry(state.savedItems[existingIdx]);
       if (st === 'rejected') state.savedItems[existingIdx].rejectedAt = new Date().toISOString();
       else state.savedItems[existingIdx].rejectedAt = null;
     } else {
@@ -16454,6 +16624,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         status: st,
         savedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        updatedMs: Date.now(),
         rejectedAt: st === 'rejected' ? new Date().toISOString() : null
       });
     }
@@ -16501,7 +16672,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (entry) {
       entry.status = 'saved';
       entry.rejectedAt = null;
-      entry.updatedAt = new Date().toISOString();
+      ceTouchSavedBankEntry(entry);
       try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
       updateTopbarSavedBadge();
       showAppToast('✓ Restored to Shortlist', { icon: 'star' });
