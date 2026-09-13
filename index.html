@@ -2235,7 +2235,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=b2760a0084"></script>
-<script src="./deck_index.js?v=cf27acfe17"></script>
+<script src="./deck_index.js?v=f6077f15d8"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
 <link rel="stylesheet" href="./native-plan.css?v=f691727eea" />
@@ -4200,6 +4200,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   function ceBankEndpoint() {
     if (ceBankBridge()) return 'bridge';
+    /* Key law (2026-09-13): the bank routes are key-gated BOTH ways, so a surface
+       without a stored write key cannot read or write — probing anyway logged a
+       403 console error on every boot of the public door (the auditor's 403 class,
+       root-caused: it is the auth law working, and the client being polite about
+       it). No key + no bridge => the bank client stays dark. */
+    if (!ceBankKey()) return null;
     if (window.__CE_BANK_ENDPOINT__) return String(window.__CE_BANK_ENDPOINT__);
     try {
       var ep = localStorage.getItem('ce_sync_endpoint');
