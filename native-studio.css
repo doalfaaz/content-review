@@ -285,6 +285,10 @@
   min-width: 150px; padding: 6px; border: 1px solid var(--border); border-radius: 10px;
   background: var(--surface); box-shadow: 0 16px 36px rgba(0,0,0,.28);
 }
+/* closed-disclosure law (D-1 class, 2026-09-13): display:grid here beat the UA's
+   closed-details hiding, so the invisible menu covered the studio right rail —
+   the "occluded dock controls" the precision audit kept counting. */
+.studio-more-actions:not([open]) > .studio-more-menu { display: none; }
 .studio-more-menu .pill-btn { width: 100%; justify-content: flex-start; white-space: nowrap; }
 
 .studio-icon-btn {
@@ -551,7 +555,9 @@
   border-radius: 8px;
   color: var(--muted);
   background: transparent;
-  font: 650 10px/1 system-ui, sans-serif;
+  /* 10px/1 collapsed innerText on WebKit (segment buttons read as unnamed) and is
+     under the house dense floor; 12px fixes both (auditor D-4/M-2, 2026-09-13). */
+  font: 650 12px/1.2 system-ui, sans-serif;
   cursor: pointer;
 }
 

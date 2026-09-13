@@ -1407,3 +1407,66 @@ html.ce-phone .ce-saved-tab-btn { white-space: nowrap; flex: 0 0 auto; padding: 
    header carries none and the workspace uses 16px: the strip gets 370px vs the 321px it needs. */
 html.ce-phone .ce-saved-workspace { padding-left: 16px; padding-right: 16px; }
 html.ce-phone .ce-saved-header { padding-left: 0; padding-right: 0; }
+
+/* ── Phone tap-target completion (auditor M-2, 2026-09-13) ─────────────────────
+   The D-1 sweep listed the controls genuinely under the house dense floor (36):
+   plan toolbar buttons (26-27 tall), view toggles (23-24), the card select
+   toggles (24x24), queue save/del (22x22), saved-card actions (30x30), the
+   promote pill (30 tall) and the column select (18 tall). Bumped to the 36
+   dense tier on PHONE only — desktop keeps its documented 28-32px convention. */
+html.ce-phone #plan-schedule-all-ready-btn,
+html.ce-phone #plan-select-all-ready-btn,
+html.ce-phone #plan-auto-schedule-btn,
+html.ce-phone #plan-open-meta-btn,
+html.ce-phone #plan-open-calendar-btn,
+html.ce-phone #plan-clear-all-btn,
+html.ce-phone #plan-move-to-saved-btn,
+html.ce-phone .ce-plan-more-actions > div button {
+  min-height: 36px !important;
+}
+html.ce-phone #plan-view-kanban-btn,
+html.ce-phone #plan-view-list-btn {
+  min-height: 32px !important;
+}
+html.ce-phone .ce-plan-select-toggle {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+}
+html.ce-phone .kanban-col-select-btn {
+  min-height: 36px !important;
+}
+html.ce-phone .queue-save-bank-btn,
+html.ce-phone .queue-del-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 9px !important;
+}
+html.ce-phone .ce-action-studio-btn,
+html.ce-phone .ce-action-save-btn,
+html.ce-phone .ce-action-reject-btn {
+  width: 36px !important;
+  height: 36px !important;
+}
+html.ce-phone .ce-action-promote-pill {
+  min-height: 36px !important;
+}
+
+/* ── Phone topbar width budget (auditor M-3, 2026-09-13) ──────────────────────
+   The search input is fixed 210px inside a margin-left:auto flex wrapper that
+   cannot shrink below content, so the Photo/Paper segmented control was starved
+   to 47px while its content needs 124px — the overflow was invisible (the
+   switch clips), but the labels were cut mid-word. Phone rule: the switch keeps
+   its natural width; the search field becomes the flexible one. */
+html.ce-phone .topbar .section-switch {
+  flex: 0 0 auto;
+}
+html.ce-phone .topbar > div[style*="margin-left:auto"] {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+html.ce-phone .topbar .search-input {
+  width: auto !important;
+  flex: 1 1 90px;
+  min-width: 0;
+}

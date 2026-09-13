@@ -430,6 +430,7 @@ body.bright-theme .ce-launch-board-range { background: rgba(0, 0, 0, 0.03); }
   min-width: 120px; padding: 6px; border: 1px solid var(--card-border); border-radius: 8px;
   background: var(--surface, var(--card)); box-shadow: 0 12px 28px rgba(0,0,0,.22);
 }
+.ce-launch-day-more:not([open]) > div { display: none; } /* closed-disclosure law (D-1 class) */
 .ce-launch-day-more > div button { width: 100%; text-align: left; white-space: nowrap; }
 
 .ce-launch-board-foot {
@@ -556,6 +557,12 @@ body.bright-theme .ce-launch-wl-row { background: rgba(0,0,0,0.02); }
   display: grid; gap: 4px; border: 1px solid var(--card-border); border-radius: 9px;
   background: var(--surface, var(--card)); box-shadow: 0 12px 28px rgba(0,0,0,.22);
 }
+/* Closed-disclosure law (auditor D-1, 2026-09-13): the author `display:grid` above overrides
+   the UA's closed-<details> hiding, so the panel stayed laid out while invisible — its buttons
+   occupied the hit area and swallowed clicks meant for the queue below ("Clear plan" could
+   never be clicked; the Launch day menu had the same orphaned-buttons finding). A closed
+   disclosure must render NOTHING. */
+.ce-plan-more-actions:not([open]) > div { display: none; }
 .ce-plan-more-actions > div button {
   border: 0; border-radius: 6px; background: transparent; color: var(--muted); padding: 7px 8px;
   text-align: left; font-size: 11px; font-weight: 650; cursor: pointer;
