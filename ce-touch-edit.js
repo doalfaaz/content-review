@@ -972,22 +972,36 @@
         var __m = __bg.match(/url\((['"]?)([^'")]+)\1\)/);
         var __photoUrl = __m ? (/^data:/.test(__m[2]) ? __m[2] : ABS(__m[2])) : null;
         if (__photoUrl) {
-          __photoImg = await new Promise(function (res) {
-            var im = new Image();
-            im.onload = function () { res(im); };
-            im.onerror = function () { res(null); };
-            im.src = __photoUrl;
-            setTimeout(function () { res(im.complete && im.naturalWidth ? im : null); }, 6000);
-          });
+          /* Decode through fetch/FileReader first. A direct remote Image can silently
+             fail in iOS WebKit even when fetch() is 200; the SVG then succeeds but the
+             pre-painted photo never exists, producing the owner's black text-only PNG. */
+          __photoImg = await fetchAsDataUrl(__photoUrl).then(function (dataUrl) {
+            return new Promise(function (res) {
+              var im = new Image();
+              im.onload = function () { res(im); };
+              im.onerror = function () { res(null); };
+              im.src = dataUrl;
+              setTimeout(function () { res(im.complete && im.naturalWidth ? im : null); }, 6000);
+            });
+          }).catch(function () { return null; });
           if (__photoImg) {
             var __cl = clone.querySelector('.ce-poem-photo-layer');
             if (__cl) {
               __cl.style.setProperty('background-image', 'none', 'important');
               __cl.style.setProperty('background-color', 'transparent', 'important');
             }
+            /* `active-studio-canvas` carries a background SHORTHAND (`background:#111`),
+               so changing only background-color leaves the opaque black paint over the
+               pre-painted photo in WebKit's SVG composite. Clear the shorthand at every
+               outer canvas/frame layer, then the SVG text/shade remains translucent over
+               the real raster ground. */
+            clone.style.setProperty('background', 'transparent', 'important');
             clone.style.setProperty('background-color', 'transparent', 'important');
             var __st = clone.querySelector('.ce-poem-stage, .ce-poem-canvas');
-            if (__st) __st.style.setProperty('background-color', 'transparent', 'important');
+            if (__st) {
+              __st.style.setProperty('background', 'transparent', 'important');
+              __st.style.setProperty('background-color', 'transparent', 'important');
+            }
           }
         }
       }

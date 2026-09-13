@@ -2247,7 +2247,7 @@ html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav b
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
 <link rel="stylesheet" href="./ce-mobile.css?v=bdcb7ae4a1" />
-<script src="./ce-touch-edit.js?v=525a5c99cd"></script>
+<script src="./ce-touch-edit.js?v=fd8fbd4c04"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -8842,7 +8842,56 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     };
   }
 
-  window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__ = function () { try { fitCarouselEditorSlides(); } catch (_e) {} };
+  /* Design-picker mini owner (2026-09-13): these stages are rendered after the
+     gallery fit pass and are not in the filmstrip track. Their authored child is
+     1080x1350, while the picker frame is ~174x218. Fit the CHILD explicitly to
+     the frame, clip only at the frame, and never let a nested slide's own
+     overflow/transform decide the miniature's paint bounds. */
+  function fitDesignPickerMinis() {
+    /* The dock can be rendered before fitAll has inserted the production CarouselCore
+       stylesheet. Without SLIDE_BASE_CSS + each look's nsCSS, inline colors paint but
+       the look's authored graphics/typography do not: one therapylab card shows its
+       inline grid while haldi/baarish/oracle are flat swatches. The mini owner owns
+       this dependency, so it cannot race page boot. */
+    var core = window.CarouselCore;
+    if (core && core.SLIDE_BASE_CSS && !document.getElementById('ce-carousel-base-css')) {
+      var cssNode = document.createElement('style');
+      cssNode.id = 'ce-carousel-base-css';
+      var allLooks = '';
+      Object.keys(core.LOOKS || {}).forEach(function (lookId) {
+        if (!core.isActive || core.isActive(lookId)) allLooks += '\n' + core.nsCSS(core.LOOKS[lookId].css || '', lookId);
+      });
+      cssNode.textContent = core.SLIDE_BASE_CSS + '\n' + allLooks + '\n' + (typeof core.blockCSS === 'function' ? core.blockCSS() : '');
+      document.head.appendChild(cssNode);
+    }
+    document.querySelectorAll('.ce-look-choice .ce-post-template-stage').forEach(function (frame) {
+      var stage = frame.querySelector('[data-ce-carousel-stage]');
+      if (!stage || !frame.clientWidth || !frame.clientHeight) return;
+      var scale = Math.min(frame.clientWidth / 1080, frame.clientHeight / 1350);
+      stage.style.zoom = '';
+      stage.style.width = '1080px';
+      stage.style.height = '1350px';
+      stage.style.position = 'absolute';
+      stage.style.left = '0';
+      stage.style.top = '0';
+      stage.style.transformOrigin = 'left top';
+      stage.style.transform = 'none';
+      /* Design minis contain full CarouselCore slide markup, not just a text block.
+         fitCarouselEditorSlides only applies the outer transform; the authored
+         slide's own band/typography fit must run first or complex looks paint as
+         a flat corner/partial fragment in the 180x218 card. Use the production
+         fitter, then photocopy the complete authored result. */
+      try { if (window.CarouselCore && typeof window.CarouselCore.fitSlides === 'function') window.CarouselCore.fitSlides(stage); } catch (_fitMini) {}
+      stage.style.transform = 'scale(' + scale.toFixed(6) + ')';
+      stage.style.overflow = 'hidden';
+      stage.style.borderRadius = '12px';
+      frame.style.overflow = 'hidden';
+      frame.style.clipPath = 'inset(0 round 12px)';
+      frame.setAttribute('data-ce-mini-fitted', 'true');
+    });
+  }
+  window.__CE_FIT_DESIGN_PICKER_MINIS__ = fitDesignPickerMinis;
+  window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__ = function () { try { fitCarouselEditorSlides(); fitDesignPickerMinis(); } catch (_e) {} };
   function fitCarouselEditorSlides() {
     document.querySelectorAll('[data-ce-carousel-stage]').forEach(function (stage) {
       var frame = stage.parentElement;
