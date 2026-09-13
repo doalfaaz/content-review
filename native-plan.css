@@ -307,11 +307,17 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
   display: flex;
   align-items: center;
   gap: 7px;
-  min-height: 30px;
-  padding: 4px 7px;
+  min-height: 26px;
+  padding: 3px 7px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background: color-mix(in srgb, var(--ink) 7%, transparent);
 }
+/* Owner law 2026-09-13 (second pass): the rail no longer repeats what the artwork
+   already shows. "POEM — तुषार" under a poem whose own text carries the signature was
+   clutter he asked to remove; the type and author now live in the card's aria-label
+   (announced, not painted), and the rail carries only the status chip plus the
+   piece's own two actions. An empty chip must not reserve a band. */
+.ce-kanban-id-rail .ce-kanban-id:empty { display: none; }
 .ce-kanban-id-rail .ce-plan-select-toggle {
   position: static;
   flex: 0 0 auto;
@@ -364,6 +370,19 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
   .ce-kanban-actions .kanban-time-select { width: 82px; }
   .ce-kanban-actions .queue-caption-select { flex: 1 1 96px; }
 }
+
+/* ── Plan vertical budget (owner law 2026-09-13, second pass) ─────────────────
+   "you have left so much empty space on top and everywhere." Measured on the
+   owner's 1440x900 window: the first column header sat 210px down. 42px of that
+   is the topbar clearance (not reclaimable), the rest was stacked chrome: a 48px
+   intro band, a 49px gap, and 19px of board padding before any card. Tighten all
+   three so the work starts higher; the 24px heading stays, the air around it does
+   not need to be a third of the screen. */
+.ce-plan-intro { margin-bottom: 12px !important; padding-bottom: 12px !important; }
+.ce-kanban-board { padding-top: 2px !important; padding-bottom: 8px !important; }
+.ce-kanban-col-head { margin-bottom: 6px !important; }
+.ce-kanban-col-cards { gap: 10px !important; }
+.ce-kanban-card { gap: 8px !important; padding: 8px !important; }
 
 
 

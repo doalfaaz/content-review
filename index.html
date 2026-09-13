@@ -1926,6 +1926,20 @@
   .ce-aud-gap-status { font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--warn); }
   .ce-aud-gaps small { font-size:10.5px; color:var(--faint); }
   .ce-aud-mini { display:flex; flex-direction:column; gap:8px; }
+  /* Owner law 2026-09-13 (Grow pass): the headline number needs to lead, and the
+     gaps alert needs its heading and its "how" line to read as structure rather
+     than one long sentence. */
+  .ce-aud-mini-hero { font-size:26px; font-weight:800; letter-spacing:-0.03em; color:var(--ink); font-variant-numeric:tabular-nums; line-height:1.05; }
+  .ce-aud-mini-best { display:flex; flex-direction:column; gap:3px; }
+  .ce-aud-mini-cap { color:var(--ink); font-size:12.5px; font-weight:600; line-height:1.35; }
+  .ce-aud-mini-best small { color:var(--muted); font-size:11px; font-variant-numeric:tabular-nums; }
+  .ce-aud-gaps-head { display:flex; flex-direction:column; gap:2px; }
+  .ce-aud-gaps-head strong { color:var(--ink); font-size:13px; font-weight:750; }
+  .ce-aud-gaps-head small { color:var(--muted); font-size:11px; line-height:1.4; }
+  .ce-aud-gaps ul { margin:2px 0 0; padding-left:16px; display:flex; flex-direction:column; gap:3px; }
+  .ce-aud-gaps ul li { font-size:11.5px; color:var(--muted); }
+  .ce-aud-gaps ul li strong { color:var(--ink); font-weight:700; }
+  .ce-aud-gaps-how { color:var(--muted); font-size:11px; line-height:1.4; }
   .ce-aud-mini-row { display:flex; align-items:baseline; gap:8px; font-size:12px; color:var(--muted); }
   .ce-aud-mini-row strong { font-size:16px; font-weight:800; color:var(--ink); }
   .ce-aud-mini-best { display:flex; flex-direction:column; gap:2px; padding:8px 10px; background:var(--card); border:1px solid var(--card-border); border-radius:8px; }
@@ -2232,10 +2246,10 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=abcaa326d9"></script>
-<script src="./deck_index.js?v=522b8fd6ee"></script>
+<script src="./deck_index.js?v=605effc273"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
-<link rel="stylesheet" href="./native-plan.css?v=121db6756b" />
+<link rel="stylesheet" href="./native-plan.css?v=90394d767b" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
 <link rel="stylesheet" href="./native-studio.css?v=4917829aaf" />
 <style id="ce-share-trim">
@@ -5813,12 +5827,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       : '';
     var top = vm.igPosts.slice(0, 6);
     var fbTop = vm.fbPosts.slice(0, 5);
+    // derive it: the VM exposes hasFbPosts but not whether FB counts came back readable
+    var fbHasEng = (vm.fbPosts || []).some(function (p) { return p && p.eng != null && p.eng > 0; });
     var gapsHtml = vm.gaps.length
-      ? '<div class="ce-aud-gaps"><strong>Scope gaps — numbers Meta has but this token cannot read:</strong>'
+      ? '<div class="ce-aud-gaps"><div class="ce-aud-gaps-head"><strong>One permission away from the full picture</strong>'
+        + '<small>Meta holds these numbers; this token cannot read them yet.</small></div>'
         + '<ul>' + vm.gaps.map(function (g) {
-            return '<li><code>' + escapeHtml(g.permission) + '</code> → ' + escapeHtml(g.unlocks) + ' <span class="ce-aud-gap-status">' + escapeHtml(g.status) + '</span></li>';
+            return '<li><strong>' + escapeHtml(g.unlocks) + '</strong> <code>' + escapeHtml(g.permission) + '</code> <span class="ce-aud-gap-status">' + escapeHtml(g.status) + '</span></li>';
           }).join('') + '</ul>'
-        + '<small>Add these on the CE Scheduler system-user token in Meta Business Suite, then Save &amp; test again.</small></div>'
+        + '<small class="ce-aud-gaps-how">Add them to the CE Scheduler system-user token in Meta Business Suite, then press Refresh.</small></div>'
       : '';
     return head
       + '<div class="ce-aud-rollup">'
@@ -5830,24 +5847,40 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       + (vm.hasIgPosts
         ? '<div class="ce-aud-split"><div class="ce-aud-col"><div class="ce-aud-colhead"><strong>Best recent posts</strong><small>Instagram · ranked by real likes + comments</small></div>'
           + top.map(function (p, i) { return cePostRowHtml(p, i, {}); }).join('')
-          + (vm.stats.cadence ? '<div class="ce-aud-cadence">Posting cadence: ' + escapeHtml(vm.stats.cadence) + ' · ' + vm.stats.postsInWindow + ' posts analyzed</div>' : '')
           + '</div>'
-          + '<div class="ce-aud-col"><div class="ce-aud-colhead"><strong>Facebook stream</strong><small>' + (vm.hasFbPosts ? 'latest Page posts — counts need pages_read_user_content' : 'no posts returned') + '</small></div>'
-          + (fbTop.length ? fbTop.map(function (p, i) { return cePostRowHtml(p, i, { noEngNote: 'counts need scope' }); }).join('') : '<div class="ce-aud-state"><em>No Facebook posts in this window.</em></div>')
+          + '<div class="ce-aud-col"><div class="ce-aud-colhead"><strong>Latest on Facebook</strong><small>' + (vm.hasFbPosts
+              ? (fbHasEng ? 'Page posts, newest first' : 'Page posts, newest first · engagement needs one more permission')
+              : 'no posts returned') + '</small></div>'
+          // Owner law 2026-09-13: the FB stream used to print the SAME placeholder sentence six
+          // times down the column ("counts need scope"), which is an error state repeated as
+          // content. Say it ONCE in the column head and leave the rows aligned and quiet.
+          + (fbTop.length ? fbTop.map(function (p, i) { return cePostRowHtml(p, i, {}); }).join('') : '<div class="ce-aud-state"><em>No Facebook posts in this window.</em></div>')
           + '</div></div>'
         : '<div class="ce-aud-state"><em>No Instagram posts returned in this window.</em></div>')
+      + (vm.stats.cadence ? '<div class="ce-aud-cadence">Posting cadence: ' + escapeHtml(vm.stats.cadence) + ' · ' + vm.stats.postsInWindow + ' posts analyzed</div>' : '')
       + gapsHtml;
   }
   function ceAudienceCardHtml() {
     var vm = ceInsightsVm();
     if (!vm) return '<div class="ce-chart-card"><div class="ce-chart-head"><strong>Audience signal</strong><span>' + (window.__CE_META_HAS_TOKEN__ ? 'syncing' : 'connect Meta') + '</span></div>' + ceInsightStateHtml() + '</div>';
     var best = vm.stats.bestPost;
-    return '<div class="ce-chart-card"><div class="ce-chart-head"><strong>Audience signal</strong><span>' + escapeHtml(vm.syncedIst || 'live') + '</span></div>'
+    /* Owner law 2026-09-13 (second pass, Grow de-duplication). This card used to repeat the
+       IG and FB follower counts AND the engagement trend that the "Audience" panel directly
+       below already shows - the same three numbers twice on one screen. It now owns only what
+       nothing else on the tab says: the single best recent post, and the trend, stated once. */
+    return '<div class="ce-chart-card"><div class="ce-chart-head"><strong>Best recent post</strong><span>' + escapeHtml(vm.syncedIst || 'live') + '</span></div>'
       + '<div class="ce-aud-mini">'
-      + '<div class="ce-aud-mini-row"><strong>' + ceFmtFollowers(vm.followers.ig) + '</strong><span>IG followers ' + ceDeltaChip(vm.followers.igDelta) + '</span></div>'
-      + '<div class="ce-aud-mini-row"><strong>' + ceFmtFollowers(vm.followers.fb) + '</strong><span>FB followers ' + ceDeltaChip(vm.followers.fbDelta) + '</span></div>'
-      + (best ? '<div class="ce-aud-mini-best"><span>Best recent: ' + best.eng.toLocaleString() + ' engagements</span><small>' + escapeHtml(String(best.caption || '').split('\n')[0].slice(0, 60)) + '</small></div>' : '')
-      + (vm.stats.deltaPct != null ? '<div class="ce-aud-mini-row"><span>Trend</span>' + (vm.stats.deltaPct >= 0 ? '<span class="ce-aud-delta is-up">+' + vm.stats.deltaPct + '%</span>' : '<span class="ce-aud-delta is-down">' + vm.stats.deltaPct + '%</span>') + '<small>vs prior ' + vm.stats.priorWindowN + ' posts</small></div>' : '')
+      + (best
+        ? '<div class="ce-aud-mini-best"><strong class="ce-aud-mini-hero">' + best.eng.toLocaleString() + '</strong>'
+          + '<span class="ce-aud-mini-cap">' + escapeHtml(String(best.caption || '').split('\n')[0].slice(0, 64)) + '</span>'
+          + '<small>' + (best.likes != null ? best.likes.toLocaleString() + ' likes · ' : '') + (best.comments != null ? best.comments.toLocaleString() + ' comments' : '') + '</small>'
+          + '</div>'
+        : '<div class="ce-chart-empty">No posts returned in this window yet.</div>')
+      + (vm.stats.deltaPct != null
+        ? '<div class="ce-aud-mini-row"><span>Engagement trend</span>'
+          + (vm.stats.deltaPct >= 0 ? '<span class="ce-aud-delta is-up">+' + vm.stats.deltaPct + '%</span>' : '<span class="ce-aud-delta is-down">' + vm.stats.deltaPct + '%</span>')
+          + '<small>vs the prior ' + vm.stats.priorWindowN + ' posts</small></div>'
+        : '')
       + '</div></div>';
   }
   function ceLaunchPulseHtml() {
@@ -12553,13 +12586,25 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   /* Called at the TOP of renderMain: `state` already holds the surface being
      ENTERED, so whatever __ceNavLast holds is the surface being LEFT — that is
-     the entry back must return to. */
+     the entry back must return to.
+     Owner law 2026-09-13 (second pass): "I open the plan queue, open a post, and
+     when I move back it moves me into some other tab I opened earlier — a huge
+     mismatch." A full session trail was wrong: sidebar tabs are PEERS, not a
+     stack to replay. A tab change now REPLACES the trail with the single tab he
+     came from, so back is one contextual step — Plan -> (post) -> back = Plan —
+     and a second press declines instead of walking him through history. Drills
+     INSIDE a tab (era, saved filter, board/list) still stack one level, because
+     those are genuine descents. */
   function ceNavTrack() {
     var now = ceNavSnapshot();
     if (__ceNavRestoring) { __ceNavLast = now; return; }
     if (__ceNavLast && ceNavKey(now) !== ceNavKey(__ceNavLast)) {
-      __ceNavHistory.push(__ceNavLast);
-      if (__ceNavHistory.length > 40) __ceNavHistory.shift();
+      if (now.tab !== __ceNavLast.tab) {
+        __ceNavHistory = [__ceNavLast];          // tab hop: remember ONE tab back
+      } else {
+        __ceNavHistory.push(__ceNavLast);        // in-tab descent: stack it
+        if (__ceNavHistory.length > 40) __ceNavHistory.shift();
+      }
     }
     __ceNavLast = now;
   }
@@ -15043,7 +15088,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
            artwork, carrying selection + type + author + the piece's own actions.
            Authored artwork is never overlaid — the rail is a footer, not a badge. */
         return `
-          <div class="ce-kanban-card${isPlanSelected ? ' is-selected' : ''}" data-queue-index="${idx}" draggable="true">
+          <div class="ce-kanban-card${isPlanSelected ? ' is-selected' : ''}" data-queue-index="${idx}" draggable="true" role="listitem" aria-label="${typeLabel}${creatorLabel ? ', ' + escapeHtml(creatorLabel) : ''}${queueDisplayTitle(q) ? ', ' + escapeHtml(queueDisplayTitle(q)) : ''}">
             <div class="ce-kanban-art-block">
               <div class="ce-staged-art-wrap ce-staged-open" data-idx="${idx}" title="Click to edit in Studio" style="cursor:pointer;">
                 <div class="ce-staged-face-preview">
@@ -15052,12 +15097,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               </div>
               <div class="ce-kanban-id-rail">
                 <button type="button" class="ce-plan-select-toggle${isPlanSelected ? ' is-selected' : ''}" data-idx="${idx}" aria-label="${isPlanSelected ? 'Deselect' : 'Select'} for batch action" title="${isPlanSelected ? 'Deselect' : 'Select for batch action'}">${isPlanSelected ? '<span class="ce-ic ce-ic--check ce-ic--11"></span>' : ''}</button>
-                <span class="ce-kanban-id">
-                  <span class="ce-status-dot" style="width:7px; height:7px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
-                  <span class="ce-kanban-type">${typeLabel}</span>
-                  ${creatorLabel ? `<span class="ce-kanban-author">${escapeHtml(creatorLabel)}</span>` : ''}
-                  ${ceMetaChip(q)}
-                </span>
+                <span class="ce-status-dot" style="width:7px; height:7px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
+                <span class="ce-kanban-id">${ceMetaChip(q)}</span>
                 <span class="ce-kanban-id-acts">
                   <button class="queue-save-bank-btn" data-idx="${idx}" type="button" aria-label="Send to Saved Bank" title="Move back to Saved Bank (Shortlist)" style="border:none; background:var(--accent-tint); color:var(--accent); width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--star ce-ic--11"></span></button>
                   <button class="queue-del-btn" data-idx="${idx}" type="button" aria-label="Remove from queue" title="Remove from queue" style="border:none; background:color-mix(in srgb, var(--ink) 8%, transparent); color:color-mix(in srgb, var(--ink) 62%, transparent); width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--close ce-ic--11"></span></button>
@@ -15100,17 +15141,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
            the row's copy block, so Inbox rows contradicted the board's new rail. The
            thumbnail and its identity rail are now one object here too. */
         var creatorLabel = queueCreatorLabel(q);
-        return `<div class="ce-staged-row ce-staged-row--inbox ce-kanban-card" data-queue-index="${idx}">
+        return `<div class="ce-staged-row ce-staged-row--inbox ce-kanban-card" data-queue-index="${idx}" role="listitem" aria-label="${escapeHtml(queueTypeLabel(q))}${creatorLabel ? ', ' + escapeHtml(creatorLabel) : ''}, ${escapeHtml(queueDisplayTitle(q))}">
           <div class="ce-kanban-art-block">
             <div class="ce-staged-art-wrap" data-idx="${idx}" title="Open in Studio" aria-label="Open ${escapeHtml(queueDisplayTitle(q))} in Studio">
               <div class="ce-staged-face-preview">${queuePreviewHtml(q, idx)}</div>
-            </div>
-            <div class="ce-kanban-id-rail">
-              <span class="ce-kanban-id">
-                <span class="ce-status-dot" style="width:7px; height:7px; border-radius:50%; background:var(--faint); flex-shrink:0;"></span>
-                <span class="ce-kanban-type">${escapeHtml(queueTypeLabel(q))}</span>
-                ${creatorLabel ? `<span class="ce-kanban-author">${escapeHtml(creatorLabel)}</span>` : ''}
-              </span>
             </div>
           </div>
           <div class="ce-staged-copy">
@@ -15221,7 +15255,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
         ${planBulkBarHtml}
 
-        <section class="ce-staged-queue" aria-label="Staged posting queue" style="margin-top: 20px;">
+        <section class="ce-staged-queue" aria-label="Staged posting queue" style="margin-top: 8px;">
           ${state.queueItems.length === 0 ? `
             <div class="ce-plan-empty-banner ce-plan-empty">
               <strong style="display:block; font-size:16px; font-weight:700; margin-bottom:6px; color:var(--ink);">Nothing staged yet</strong>
@@ -15241,19 +15275,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           ${planMode === 'list' && state.queueItems.length > 0 && planCalendarVisible.length > 0 ? `
             <div class="ce-staged-list">
               ${planCalendarVisible.map(({ q, idx }) => `
-                <div class="ce-staged-row${state.planSelectedIds && state.planSelectedIds.has(q.id) ? ' is-selected' : ''}" data-queue-index="${idx}" style="display:flex; flex-direction:row; align-items:stretch; gap:18px; padding:16px 18px; margin-bottom:14px; border-radius:14px; background:var(--card-bg, rgba(255,255,255,0.04)); border:1px solid var(--border-color, rgba(120,120,150,0.18)); box-shadow:0 2px 10px rgba(0,0,0,0.06); position:relative;">
+                <div class="ce-staged-row${state.planSelectedIds && state.planSelectedIds.has(q.id) ? ' is-selected' : ''}" data-queue-index="${idx}" role="listitem" aria-label="${escapeHtml(queueTypeLabel(q))}${queueCreatorLabel(q) ? ', ' + escapeHtml(queueCreatorLabel(q)) : ''}, ${escapeHtml(queueDisplayTitle(q))}${q.scheduled && q.scheduleTime ? ', ' + escapeHtml(q.scheduleSlot || q.scheduleTime) : ''}" style="display:flex; flex-direction:row; align-items:stretch; gap:18px; padding:16px 18px; margin-bottom:14px; border-radius:14px; background:var(--card-bg, rgba(255,255,255,0.04)); border:1px solid var(--border-color, rgba(120,120,150,0.18)); box-shadow:0 2px 10px rgba(0,0,0,0.06); position:relative;">
                   <button type="button" class="ce-plan-select-toggle ce-plan-select-toggle--list${state.planSelectedIds && state.planSelectedIds.has(q.id) ? ' is-selected' : ''}" data-idx="${idx}" aria-label="Select for batch action" title="Select for batch action">${state.planSelectedIds && state.planSelectedIds.has(q.id) ? '<span class="ce-ic ce-ic--check ce-ic--11"></span>' : ''}</button>
                   <div class="ce-kanban-art-block" style="flex:0 0 112px;">
                     <div class="ce-staged-art-wrap" data-idx="${idx}" style="width:112px; height:140px; border-radius:0; overflow:hidden; background:#111; border:0; cursor:pointer; position:relative; display:flex; align-items:center; justify-content:center;" title="Click to edit in Studio">
                       <div class="ce-staged-face-preview" style="width:112px; height:140px; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:0; position:relative;">
                         ${queuePreviewHtml(q, idx)}
                       </div>
-                    </div>
-                    <div class="ce-kanban-id-rail" style="padding:3px 6px; min-height:26px;">
-                      <span class="ce-kanban-id">
-                        <span class="ce-kanban-type">${escapeHtml(queueTypeLabel(q))}</span>
-                        ${queueCreatorLabel(q) ? `<span class="ce-kanban-author">${escapeHtml(queueCreatorLabel(q))}</span>` : ''}
-                      </span>
                     </div>
                   </div>
 
@@ -15423,20 +15451,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (planBatchDate) planBatchDate.onchange = function () { state.planBatchDate = planBatchDate.value || ''; };
       var planBatchSchedule = document.getElementById('ce-plan-batch-schedule-btn');
       if (planBatchSchedule) planBatchSchedule.onclick = function () {
+        /* One refusal for one button. This used to carry its own second, different
+           message ("Select cards first (checkbox) — or use Schedule all ready, which
+           offers to send them."), so the same dead end read differently depending on
+           which path you were on. Both now go through the one actionable refusal. */
         if (window.__CE_META_HAS_TOKEN__) {
-          var sel = cePlanSelectedItems().filter(function (qq) { return qq && qq.readyToPost; });
-          if (!sel.length) {
-            showQueueToast('Select cards first (checkbox) — or use Schedule all ready, which offers to send them.', true);
-            return;
-          }
-          ceDispatchMetaGraphSchedule(false, false, sel);
+          ceDispatchMetaGraphSchedule(false, false);
           return;
         }
         var n = ceBatchScheduleSelected();
         if (!n) return;
         ceBatchPublishPrepSelected();
         openMetaComposer();
-        showQueueToast('Dates held · captions copied · Creator Studio opened for final review.');
+        showAppToast('Ready to hand off', {
+          detail: 'Dates held, captions copied, Creator Studio opened for a final look before you post.'
+        });
       };
       var planPostNow = document.getElementById('ce-plan-post-now-btn');
       if (planPostNow) planPostNow.onclick = function () { ceDispatchMetaGraphSchedule(false, true); };
@@ -16496,58 +16525,127 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return el;
   }
 
+  /* ── Notification UI (owner order 2026-09-13) ────────────────────────────────
+     "the notification thing it gives when a post succeeds or fails is very weirdly
+     coded away, so its UI should be a clean format — design it even better."
+     What was actually wrong: every toast was ONE run-on sentence, so a two-clause
+     instruction ("✓ Caption copied & slides folder open. Composer opened — manual
+     handoff: paste (⌘V) + drag slides. Connect Meta in Publishing settings…") arrived
+     as a paragraph in a pill, and refusals arrived as dead ends that named a control
+     without offering it. The toast is now a small structured card: a bold TITLE, an
+     optional muted DETAIL line, and an optional one-click ACTION. Legacy callers that
+     pass a single long string are split automatically, so no call site can regress
+     into a wall of text. */
+  function ceToastSplit(msg) {
+    var s = String(msg == null ? '' : msg).replace(/^[✓✔]\s*/, '').trim();
+    if (s.length <= 96) return { title: s, detail: '' };
+    // prefer a sentence break, else an em-dash clause break, else a clause comma
+    var cut = -1;
+    var m = s.match(/^(.{25,96}?[.!?])\s+(.+)$/);
+    if (m) { return { title: m[1], detail: m[2] }; }
+    m = s.match(/^(.{25,96}?)\s+[—–]\s+(.+)$/);
+    if (m) { return { title: m[1], detail: m[2] }; }
+    m = s.match(/^(.{25,96}?),\s+(.+)$/);
+    if (m) { return { title: m[1] + '.', detail: m[2] }; }
+    cut = s.slice(0, 92).lastIndexOf(' ');
+    if (cut < 20) cut = 92;
+    return { title: s.slice(0, cut).replace(/[\s,;:—-]+$/, '') + '…', detail: s.slice(cut).trim() };
+  }
+
   function showAppToast(msg, options) {
+    var opts = options || {};
     var toast = document.getElementById('ce-app-toast') || document.getElementById('ce-queue-toast');
     if (!toast) {
       toast = document.createElement('div');
       toast.id = 'ce-app-toast';
-      toast.setAttribute('role', 'status');
-      toast.setAttribute('aria-live', 'polite');
-      toast.setAttribute('aria-atomic', 'true');
       document.body.appendChild(toast);
-    } else {
-      if (!toast.getAttribute('role')) toast.setAttribute('role', 'status');
-      if (!toast.getAttribute('aria-live')) toast.setAttribute('aria-live', 'polite');
-      if (!toast.getAttribute('aria-atomic')) toast.setAttribute('aria-atomic', 'true');
     }
-    var isErr = options && options.isError;
-    toast.style.cssText = 'position:fixed; bottom:28px; right:28px; z-index:99999; width:max-content; max-width:min(480px,calc(100vw - 48px)); padding:12px 18px; border-radius:12px; font-size:13px; line-height:1.45; font-weight:600; box-shadow:0 20px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08); transition:transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease; opacity:0; transform:translateY(12px) scale(0.98); display:flex; align-items:center; gap:12px; white-space:normal; overflow-wrap:anywhere; box-sizing:border-box; font-family:var(--font-ui); pointer-events:auto; background:' + (isErr ? 'rgba(153, 27, 27, 0.95)' : 'rgba(18, 17, 24, 0.95)') + '; backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); color:#ffffff; border:1px solid ' + (isErr ? 'rgba(239, 68, 68, 0.4)' : 'rgba(255, 255, 255, 0.12)') + ';';
+    if (!toast.getAttribute('role')) toast.setAttribute('role', 'status');
+    if (!toast.getAttribute('aria-live')) toast.setAttribute('aria-live', 'polite');
+    if (!toast.getAttribute('aria-atomic')) toast.setAttribute('aria-atomic', 'true');
+
+    var isErr = !!opts.isError;
+    var variant = opts.variant || (isErr ? 'error' : (opts.tone === 'warn' ? 'warn' : 'ok'));
+    var parts = ceToastSplit(msg);
+    var title = opts.title != null ? String(opts.title) : parts.title;
+    var detail = opts.detail != null ? String(opts.detail) : parts.detail;
+
+    var accent = variant === 'error' ? '#f87171' : (variant === 'warn' ? '#fbbf24' : '#34d399');
+    toast.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:99999;'
+      + 'width:min(392px, calc(100vw - 40px)); box-sizing:border-box;'
+      + 'padding:13px 14px 13px 13px; border-radius:14px;'
+      + 'background:rgba(19,18,24,0.94); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%);'
+      + 'border:1px solid rgba(255,255,255,0.11); box-shadow:0 18px 44px rgba(0,0,0,0.6);'
+      + 'color:#fff; font-family:var(--font-ui); font-size:13px; line-height:1.4;'
+      + 'display:flex; align-items:flex-start; gap:11px; text-align:left;'
+      + 'transition:transform 0.22s cubic-bezier(0.16,1,0.3,1), opacity 0.22s ease;'
+      + 'opacity:0; transform:translateY(12px) scale(0.98); pointer-events:auto;';
     toast.innerHTML = '';
 
-    var iconName = (options && options.icon) || (isErr ? 'warning' : 'sparkles');
-    if (iconName === '✓' || iconName === 'check') iconName = 'check';
-    else if (iconName === '⚠️' || iconName === 'warning') iconName = 'warning';
-    else if (iconName === 'ℹ️' || iconName === 'ℹ' || iconName === 'info') iconName = 'info';
-    var icon = ceIcon(iconName);
-    toast.appendChild(icon);
+    var iconName = opts.icon || (variant === 'error' ? 'warning' : (variant === 'warn' ? 'info' : 'check'));
+    if (iconName === '✓') iconName = 'check';
+    if (iconName === '⚠️' || iconName === 'warning') iconName = 'warning';
+    if (iconName === '✨' || iconName === 'sparkles') iconName = 'sparkles';
+    var chip = document.createElement('span');
+    chip.style.cssText = 'flex:0 0 auto; width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center;'
+      + 'background:color-mix(in srgb, ' + accent + ' 18%, transparent); color:' + accent + '; margin-top:1px;';
+    try { chip.appendChild(ceIcon(iconName)); } catch (_ic) { chip.textContent = variant === 'error' ? '!' : '✓'; }
+    toast.appendChild(chip);
 
-    var text = document.createElement('span');
-    text.textContent = msg;
-    text.style.cssText = 'flex:1;';
-    toast.appendChild(text);
+    var body = document.createElement('span');
+    body.style.cssText = 'flex:1 1 auto; min-width:0; display:block;';
 
-    if (options && typeof options.onUndo === 'function') {
-      var undoBtn = document.createElement('button');
-      undoBtn.type = 'button';
-      undoBtn.textContent = 'Undo';
-      undoBtn.className = 'ce-toast-undo';
-      undoBtn.style.cssText = 'background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.22); color:#fff; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; margin-left:8px;';
-      undoBtn.onclick = function (e) {
-        e.stopPropagation();
-        options.onUndo();
+    var t = document.createElement('span');
+    t.textContent = title;
+    t.style.cssText = 'display:block; font-weight:700; font-size:13px; color:#fff; letter-spacing:-0.005em;';
+    body.appendChild(t);
+
+    if (detail) {
+      var d = document.createElement('span');
+      d.textContent = detail;
+      d.setAttribute('title', detail);
+      d.style.cssText = 'display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;'
+        + 'margin-top:6px; font-weight:500; font-size:12px; line-height:1.42; color:rgba(255,255,255,0.64);';
+      body.appendChild(d);
+    }
+    toast.appendChild(body);
+
+    var acts = document.createElement('span');
+    acts.style.cssText = 'flex:0 0 auto; display:flex; align-items:center; gap:6px; align-self:center;';
+    var mkBtn = function (label, primary, fn) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.style.cssText = 'border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; padding:6px 11px; white-space:nowrap;'
+        + (primary
+          ? 'background:var(--accent); border:1px solid var(--accent); color:#fff;'
+          : 'background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.20); color:#fff;');
+      b.onclick = function (e) { e.stopPropagation(); fn(); };
+      return b;
+    };
+    if (opts.action && typeof opts.action.onClick === 'function') {
+      acts.appendChild(mkBtn(String(opts.action.label || 'Fix'), opts.action.primary !== false, function () {
+        try { opts.action.onClick(); } finally { toast.style.opacity = '0'; toast.style.transform = 'translateY(12px) scale(0.98)'; }
+      }));
+    }
+    if (typeof opts.onUndo === 'function') {
+      acts.appendChild(mkBtn('Undo', false, function () {
+        opts.onUndo();
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(12px) scale(0.98)';
-      };
-      toast.appendChild(undoBtn);
+      }));
     }
+    if (acts.childNodes.length) toast.appendChild(acts);
 
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0) scale(1)';
     clearTimeout(toast.__timer);
+    // A toast carrying an action needs time to be read and clicked.
+    var hold = opts.duration || (opts.action || opts.onUndo ? 9000 : (detail ? 4200 : 2800));
     toast.__timer = setTimeout(function () {
       toast.style.opacity = '0';
       toast.style.transform = 'translateY(12px) scale(0.98)';
-    }, (options && options.duration) || 2800);
+    }, hold);
   }
 
   function showQueueToast(msg, isError) {
@@ -16915,12 +17013,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function ceBatchScheduleSelected() {
     var selected = cePlanSelectedItems();
     if (!selected.length) {
-      showQueueToast('Select staged pieces first (checkbox on each card)', true);
+      showAppToast('No pieces selected', {
+        isError: true, variant: 'warn',
+        detail: 'Tick the red square on a card to select it, then set a date and press Schedule again.'
+      });
       return 0;
     }
     var ready = selected.filter(function (q) { return q && q.readyToPost; });
     if (!ready.length) {
-      showQueueToast('Tick Ready on selected pieces before batch scheduling', true);
+      showAppToast(selected.length === 1 ? '1 piece is not Ready yet' : selected.length + ' pieces are not Ready yet', {
+        isError: true, variant: 'warn',
+        detail: 'Ready is the approval gate. Nothing is scheduled until it is ticked.',
+        action: {
+          label: 'Mark ' + selected.length + ' ready',
+          onClick: function () {
+            var n = ceMarkPiecesReady(selected);
+            renderMain();
+            if (n) ceBatchScheduleSelected();
+          }
+        }
+      });
       return 0;
     }
     ready.forEach(function (q) {
@@ -17051,6 +17163,27 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (Array.isArray(raw)) return raw.filter(Boolean);
     return String(raw).split(/[,\n;]+/).map(function (s) { return s.trim(); }).filter(Boolean);
   }
+  /* Owner order 2026-09-13: "see why it's showing that it needs to be ready and some
+     sort of errors — fix it the right way." The refusal was correct (Ready IS the
+     approval gate) but it was a DEAD END: it named the small ☐ without offering it, so
+     the only way forward was to hunt the control on each card. The gate stays; the
+     refusal now carries the repair as one click. */
+  function ceMarkPiecesReady(items) {
+    var n = 0;
+    (items || []).forEach(function (q) {
+      if (!q || q.readyToPost) return;
+      q.readyToPost = true;
+      n++;
+    });
+    // Persist exactly the way the per-card Ready checkbox does (that is the only
+    // writer of the queue store) — a flag that does not survive a repaint is worse
+    // than no repair at all.
+    if (n) {
+      try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+    }
+    return n;
+  }
+
   function ceDispatchMetaGraphSchedule(dryRun, publishNow, explicitItems) {
     var selected = (Array.isArray(explicitItems) ? explicitItems : cePlanSelectedItems());
     var readySel = selected.filter(function (q) { return q && q.readyToPost; });
@@ -17059,17 +17192,47 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // marks Ready — they looked like one thing and the old toast blamed the
       // wrong box. Name the exact control + offer the one-click repair.
       var unready = selected.length;
-      var msg = unready
-        ? 'Selected ' + unready + ' piece' + (unready === 1 ? '' : 's') + ' but none are Ready — tick the small ☐ "Ready" at the card\u2019s bottom-right, or press Schedule all ready.'
-        : 'Select pieces first (red \u25A1 on the card), then tick Ready (small \u2611 bottom-right).';
-      showQueueToast(msg, true);
+      if (unready) {
+        showAppToast(unready === 1 ? '1 piece is not Ready yet' : unready + ' pieces are not Ready yet', {
+          isError: true,
+          variant: 'warn',
+          detail: 'Ready is the approval gate. Nothing is scheduled until it is ticked.',
+          action: {
+            label: 'Mark ' + unready + ' ready',
+            onClick: function () {
+              var n = ceMarkPiecesReady(selected);
+              renderMain();
+              if (!n) return;
+              showQueueToast(n + ' marked Ready — continuing');
+              try { ceDispatchMetaGraphSchedule(dryRun, publishNow, selected); } catch (_re) {}
+            }
+          }
+        });
+      } else {
+        showAppToast('No pieces selected', {
+          isError: true,
+          variant: 'warn',
+          detail: 'Tick the red square on the card to select it, then press this again.'
+        });
+      }
       return 0;
     }
     if (readySel.length !== selected.length) {
-      showQueueToast(readySel.length + ' of ' + selected.length + ' selected are Ready — sending the ' + readySel.length + ' Ready ones.', true);
+      showAppToast(readySel.length + ' of ' + selected.length + ' selected are Ready', {
+        variant: 'warn',
+        detail: 'Sending only the ' + readySel.length + ' Ready piece' + (readySel.length === 1 ? '' : 's') + '. The rest stay local.'
+      });
     }
     selected = readySel;
     if (publishNow && !dryRun) {
+      if (!window.__CE_META_HAS_TOKEN__) {
+        showAppToast('Publishing is not connected', {
+          isError: true,
+          variant: 'warn',
+          detail: 'Post now needs your Meta publishing token. Open Settings → Publishing to connect it, then try again. Nothing was published.'
+        });
+        return 0;
+      }
       var first = selected[0];
       var slides = 0;
       try {
@@ -17081,7 +17244,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         + String(first && first.type || '') + ' · ' + String(first && first.item && (first.item.title || first.item.name) || '').slice(0, 48)
         + (slides > 1 ? ' · all ' + slides + ' slides' : '')
         + '\n\nThis publishes live immediately. Cancel to keep it local.';
-      if (!window.confirm(confirmMsg)) return 0;
+      if (!window.confirm(confirmMsg)) {
+        // Owner report: "when I tried Post now it didn't talk" — cancelling the sheet
+        // produced NO response at all, so the app looked dead. Say what happened.
+        showAppToast('Post now cancelled — nothing was published', {
+          variant: 'warn',
+          icon: 'info',
+          detail: 'Your pieces are untouched and still local.'
+        });
+        return 0;
+      }
     }
     selected.forEach(function (q) {
       if (!q || q.type !== 'poem') return;
@@ -17314,7 +17486,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (combinedCaptions.length && typeof copyPlainText === 'function') {
       copyPlainText(combinedCaptions.join('\n\n\n'));
     }
-    showQueueToast('Publish prep for ' + prepped + ' piece' + (prepped === 1 ? '' : 's') + ' (' + (channel === 'all' ? 'All Channels' : channel.toUpperCase()) + ') copied, exports revealed');
+    showAppToast('Prep ready for ' + prepped + ' piece' + (prepped === 1 ? '' : 's'), {
+      detail: 'Captions copied and slide folders revealed in Finder' + (channel === 'all' ? ' (all channels).' : ' for ' + String(channel).toUpperCase() + '.')
+    });
     return prepped;
   }
   window.__CE_BATCH_PUBLISH_PREP_SELECTED__ = ceBatchPublishPrepSelected;
