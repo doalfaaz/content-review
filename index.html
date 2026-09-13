@@ -2248,10 +2248,10 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=3c22dc1899"></script>
+<script src="./deck_index.js?v=6a6a2fab06"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
-<link rel="stylesheet" href="./native-plan.css?v=0c5c6a7fc3" />
+<link rel="stylesheet" href="./native-plan.css?v=998ec82033" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
 <link rel="stylesheet" href="./native-studio.css?v=4917829aaf" />
 <style id="ce-share-trim">
@@ -15284,17 +15284,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           return norm(first) === norm(title);
         } catch (_e) { return false; }
       }
-      /* Audit P2-3: the staging default ("Staged in posting queue; ready for review
-         and export.") was stamped onto every entry, so six consecutive rows painted
-         the identical 60-char sentence — and because it sat inside the button it was
-         also the accessible name. Derive a short per-state chip instead, and keep any
-         genuinely specific reason verbatim. */
+      /* Audit P2-3: the staging default ("Staged in posting queue; ready for review and
+         export.") was stamped onto every entry, so six consecutive rows painted the
+         identical 60-char sentence — and because it sat inside the button it was also the
+         accessible name. This derives a short, state-precise chip instead. It is
+         deliberately NOT varied to look busier: when several pieces really are in the same
+         state they read the same, because that is the truth. */
       var CE_GENERIC_STATUS_REASON = /^(staged in posting queue; ready for review and export\.?|waiting for a day)$/i;
       function ceQueueStateChip(q) {
         if (!q) return 'Waiting for a day';
         if (q.exportStatus === 'EXPORTED') return q.type === 'carousel' ? 'Slides exported' : 'Export ready';
         if (q.readyToPost) return 'Ready to post';
         if (q.auditStatus === 'DRAFT') return 'Draft · design in Studio';
+        if (q.design) return 'Designed · needs a day';
         return 'Waiting for a day';
       }
       function ceInboxStatusLine(q) {

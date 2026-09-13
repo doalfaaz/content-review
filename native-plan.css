@@ -311,12 +311,19 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  /* Audit P2-4: the wrap measured 222px tall while the preview inside it was only
-     212px, so the artwork left 10px of its own box empty (the wrap's `align-items`
-     was centering a shorter child). Stretch the child so the piece fills the box the
-     card gives it — art share 0.700 -> 0.733 at unchanged card, column and control
-     sizes. */
-  align-items: stretch;
+  /* Audit P2-4 was REJECTED after measuring the box tree. The audit read the 10px gap
+     between the wrap (222) and the preview (212) as "empty padding inside the art block",
+     and the 31px between the art-block (253) and the wrap (222) as more of the same. The
+     computed tree says otherwise:
+        card 303 = art-block 253 + actions 24 + padding 16 + gap ~10
+        art-block 253 = wrap 222 + identity rail 29 + borders 2
+        wrap 222 = its own `padding: 5px 0` (10) + preview 212  <- the preview FILLS its box
+     So the 10px is the piece's deliberate frame padding and the 31px is the identity rail,
+     which carries four live controls (select, unsave, unschedule, remove). Neither is void:
+     "reclaiming" them means deleting frame or function. Art share stays 0.700 by design and
+     the audit's >=0.80 target would require removing live controls. Two candidate rules
+     (align-items: stretch, height:100%) were tried and MEASURED to change nothing, so they
+     are not kept — a no-op rule with a confident comment is worse than no rule. */
 }
 .ce-kanban-id-rail {
   display: flex;
