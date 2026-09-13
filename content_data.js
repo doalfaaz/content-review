@@ -3,7 +3,7 @@ window.ALL_CONTENT_DATA = [
   "id": "poem:ac29735b-e58a-44ed-aec3-72da32d5645b",
   "kind": "poem",
   "title": "poem-17842307743268772",
-  "body": "एक क़र्ज़ है जो दिल से उतारना चाहता हूँ\nएक दर्द है जो मुझ से बयान नहीं होता।",
+  "body": "एक क़र्ज़ है जो दिल से उतारना चाहता हूँ\nएक दर्द है जो मुझ से बयान नहीं होता ।",
   "pillar": "Poetry",
   "status": "saved",
   "metadata": {
@@ -28,7 +28,25 @@ window.ALL_CONTENT_DATA = [
   "updatedAt": "2026-08-31 06:49:28",
   "revision": 3,
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "pos": "top",
+   "lineHeight": 1.78,
+   "textColor": "",
+   "type": "photo",
+   "fontWeight": 520,
+   "densityVersion": 2,
+   "offset": {
+    "x": -14,
+    "y": 66
+   },
+   "photoIdx": 0,
+   "fontSize": 21,
+   "textShadow": true,
+   "align": "left",
+   "canvasRatio": "4/3",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "idea:570167a2-5f8e-4ebb-8429-0842951622c4",
@@ -1114,7 +1132,20 @@ window.ALL_CONTENT_DATA = [
   "updatedAt": "2026-08-31 06:49:28",
   "revision": 2,
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "fontSize": 21,
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "canvasRatio": "4/5",
+   "photoIdx": 0,
+   "align": "left",
+   "type": "notebook",
+   "pos": "top",
+   "densityVersion": 2
+  }
  },
  {
   "id": "poem:poem-17868052714070347",
@@ -1562,7 +1593,20 @@ window.ALL_CONTENT_DATA = [
   "updatedAt": "2026-08-31 06:49:28",
   "revision": 2,
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "fontSize": 21,
+   "photoIdx": 4,
+   "canvasRatio": "4/3",
+   "offset": {
+    "x": -2,
+    "y": -71
+   },
+   "align": "left",
+   "type": "photo",
+   "pos": "mid",
+   "densityVersion": 2
+  }
  },
  {
   "id": "poem:poem-17875538878024247",
@@ -6522,7 +6566,25 @@ window.ALL_CONTENT_DATA = [
   "updatedAt": "2026-08-31 06:49:28",
   "revision": 2,
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "pos": "top",
+   "lineHeight": 1.78,
+   "fontWeight": 520,
+   "type": "photo",
+   "textColor": "",
+   "densityVersion": 2,
+   "offset": {
+    "x": 0,
+    "y": 5
+   },
+   "photoIdx": 4,
+   "fontSize": 21,
+   "textShadow": true,
+   "canvasRatio": "4/3",
+   "align": "left",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:poem-17917606153025989",
@@ -20187,7 +20249,10 @@ window.ALL_CONTENT_DATA = [
   "updatedAt": "2026-08-31 06:49:28",
   "revision": 2,
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "useOriginal": false
+  }
  },
  {
   "id": "poem:poem-17851018861715461",
@@ -185633,7 +185698,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "pos": "top",
+   "useOriginal": false,
+   "lineHeight": 1.78,
+   "textColor": "",
+   "fontWeight": 520,
+   "type": "photo",
+   "densityVersion": 2,
+   "originalStillShortcode": "",
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "photoIdx": 0,
+   "textShadow": true,
+   "fontSize": 21,
+   "align": "left",
+   "canvasRatio": "4/3",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:B94EVeYnj7s",
@@ -186150,7 +186235,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "useOriginal": false,
+   "pos": "mid",
+   "lineHeight": 1.78,
+   "textColor": "",
+   "type": "notebook-margin",
+   "fontWeight": 520,
+   "densityVersion": 2,
+   "originalStillShortcode": "",
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "photoIdx": 0,
+   "textShadow": false,
+   "fontSize": 21,
+   "canvasRatio": "4/3",
+   "align": "left",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:BcyqQA5BGtT",
@@ -186260,7 +186365,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "pos": "top",
+   "lineHeight": 1.78,
+   "useOriginal": false,
+   "textColor": "",
+   "type": "notebook",
+   "fontWeight": 520,
+   "densityVersion": 2,
+   "originalStillShortcode": "",
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "photoIdx": 2,
+   "textShadow": true,
+   "fontSize": 21,
+   "canvasRatio": "4/3",
+   "align": "left",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:Bg6DogaBKQ1",
@@ -186557,7 +186682,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "pos": "top",
+   "lineHeight": 1.78,
+   "useOriginal": false,
+   "textColor": "",
+   "type": "photo",
+   "fontWeight": 520,
+   "densityVersion": 2,
+   "originalStillShortcode": "",
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "photoIdx": 3,
+   "textShadow": true,
+   "fontSize": 21,
+   "canvasRatio": "4/3",
+   "align": "left",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:BkMTlL6h8UV",
@@ -186568,7 +186713,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
   "rank": "1.0056",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "pos": "top",
+   "lineHeight": 1.78,
+   "useOriginal": false,
+   "textColor": "",
+   "type": "photo",
+   "fontWeight": 520,
+   "densityVersion": 2,
+   "originalStillShortcode": "",
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "photoIdx": 3,
+   "textShadow": true,
+   "fontSize": 21,
+   "canvasRatio": "4/3",
+   "align": "left",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:Bk_w9VshrHI",
@@ -186579,7 +186744,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "pos": "top",
+   "lineHeight": 1.78,
+   "useOriginal": false,
+   "textColor": "",
+   "type": "photo",
+   "fontWeight": 520,
+   "densityVersion": 2,
+   "originalStillShortcode": "",
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "photoIdx": 0,
+   "textShadow": true,
+   "fontSize": 21,
+   "canvasRatio": "4/3",
+   "align": "left",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:BkfI2zEBTmi",
@@ -186843,7 +187028,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
   "rank": "1.3677",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "textShadow": true,
+   "fontSize": 21,
+   "pos": "mid",
+   "fontFamily": "kohinoor",
+   "textColor": "",
+   "useOriginal": false,
+   "align": "left",
+   "fontWeight": 520,
+   "photoIdx": 5,
+   "type": "photo",
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "canvasRatio": "4/3",
+   "densityVersion": 2,
+   "lineHeight": 1.78,
+   "originalStillShortcode": ""
+  }
  },
  {
   "id": "poem:Bpj5Eegl4aN",
@@ -186854,7 +187059,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "useOriginal": false,
+   "lineHeight": 1.78,
+   "pos": "top",
+   "fontWeight": 520,
+   "type": "photo",
+   "textColor": "",
+   "densityVersion": 2,
+   "originalStillShortcode": "",
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "photoIdx": 4,
+   "textShadow": true,
+   "fontSize": 21,
+   "canvasRatio": "1/1",
+   "align": "left",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:BpzSjjyFDaZ",
@@ -186909,7 +187134,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "useOriginal": false,
+   "pos": "top",
+   "lineHeight": 1.78,
+   "textColor": "",
+   "type": "photo",
+   "fontWeight": 520,
+   "densityVersion": 2,
+   "originalStillShortcode": "",
+   "offset": {
+    "x": 0,
+    "y": 4
+   },
+   "photoIdx": 4,
+   "textShadow": true,
+   "fontSize": 21,
+   "canvasRatio": "4/3",
+   "align": "left",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:BquNOuUlSZ6",
@@ -186997,7 +187242,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "pos": "top",
+   "lineHeight": 1.78,
+   "useOriginal": false,
+   "fontWeight": 520,
+   "textColor": "",
+   "type": "ivory",
+   "densityVersion": 2,
+   "originalStillShortcode": "",
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "photoIdx": 1,
+   "fontSize": 21,
+   "textShadow": true,
+   "canvasRatio": "4/3",
+   "align": "left",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:Brm6JiXlJQ4",
@@ -199834,7 +200099,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Apple Notes",
   "updatedAt": "2026-08-30 20:27:13",
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "useOriginal": false,
+   "lineHeight": 1.78,
+   "pos": "top",
+   "textColor": "",
+   "fontWeight": 520,
+   "type": "photo",
+   "densityVersion": 2,
+   "originalStillShortcode": "",
+   "offset": {
+    "x": -405,
+    "y": -258
+   },
+   "photoIdx": 1,
+   "fontSize": 21,
+   "textShadow": true,
+   "canvasRatio": "4/3",
+   "align": "left",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:an_2487",
@@ -199911,7 +200196,27 @@ window.ALL_CONTENT_DATA = [
   "pillar": "Apple Notes",
   "updatedAt": "2026-08-30 20:27:13",
   "rank": "0.0",
-  "look_id": ""
+  "look_id": "",
+  "poemStyle": {
+   "useOriginal": false,
+   "lineHeight": 1.78,
+   "pos": "top",
+   "fontWeight": 520,
+   "textColor": "",
+   "type": "photo",
+   "densityVersion": 2,
+   "originalStillShortcode": "",
+   "offset": {
+    "x": 0,
+    "y": 0
+   },
+   "photoIdx": 6,
+   "fontSize": 21,
+   "textShadow": true,
+   "align": "left",
+   "canvasRatio": "4/3",
+   "fontFamily": "kohinoor"
+  }
  },
  {
   "id": "poem:an_2507",

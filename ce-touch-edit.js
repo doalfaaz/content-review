@@ -956,6 +956,41 @@
     try {
       var css = await collectCss();
       await inlineAssets(canvas, clone);
+      /* WebKit/Safari does not load raster images referenced from inside an
+         SVG-as-<img> foreignObject (the carousel pack survives because its looks
+         are pure CSS gradients). Photo poems therefore rasterized as text on
+         black — the owner's "exports without any theme or background".
+         Ground-truth fix: paint the photo with drawImage onto the output canvas
+         BEFORE the SVG pass, and make the photo layer + canvas root transparent
+         in the clone so the SVG composites over the photo (scrim/shadows are
+         CSS and survive inside the SVG). Targeted: only when a raster photo
+         actually backs the stage; paper poems keep their CSS-painted ground. */
+      var __photoImg = null;
+      var __photoLayer = canvas.querySelector('.ce-poem-photo-layer');
+      if (__photoLayer) {
+        var __bg = getComputedStyle(__photoLayer).backgroundImage || '';
+        var __m = __bg.match(/url\((['"]?)([^'")]+)\1\)/);
+        var __photoUrl = __m ? (/^data:/.test(__m[2]) ? __m[2] : ABS(__m[2])) : null;
+        if (__photoUrl) {
+          __photoImg = await new Promise(function (res) {
+            var im = new Image();
+            im.onload = function () { res(im); };
+            im.onerror = function () { res(null); };
+            im.src = __photoUrl;
+            setTimeout(function () { res(im.complete && im.naturalWidth ? im : null); }, 6000);
+          });
+          if (__photoImg) {
+            var __cl = clone.querySelector('.ce-poem-photo-layer');
+            if (__cl) {
+              __cl.style.setProperty('background-image', 'none', 'important');
+              __cl.style.setProperty('background-color', 'transparent', 'important');
+            }
+            clone.style.setProperty('background-color', 'transparent', 'important');
+            var __st = clone.querySelector('.ce-poem-stage, .ce-poem-canvas');
+            if (__st) __st.style.setProperty('background-color', 'transparent', 'important');
+          }
+        }
+      }
       var styleTag = document.createElement('style');
       /* Inside an XML document, <style> content is character data: raw '<' or
          '&' in the page CSS (content:"<", media queries aside) makes the SVG
@@ -1003,6 +1038,16 @@
       var cx = out.getContext('2d');
       cx.fillStyle = '#ffffff';
       cx.fillRect(0, 0, W, H);
+      /* photo ground first (cover-fit, same law as the on-screen layer), then the
+         SVG pass composites text + scrim over it. Without this, WebKit's
+         no-raster-in-foreignObject rule silently drops the background and the
+         export lands as plain text on black (owner 2026-09-13). */
+      if (__photoImg) {
+        var iw = __photoImg.naturalWidth || 1, ih = __photoImg.naturalHeight || 1;
+        var s = Math.max(W / iw, H / ih);
+        var dw = iw * s, dh = ih * s;
+        cx.drawImage(__photoImg, (W - dw) / 2, (H - dh) / 2, dw, dh);
+      }
       cx.drawImage(img, 0, 0, W, H);
       var dataUrl = out.toDataURL('image/png');
 
@@ -1128,8 +1173,11 @@
       dock.style.setProperty('width', '100vw', 'important');
       dock.style.setProperty('min-width', '0', 'important');
       dock.style.setProperty('max-width', 'none', 'important');
-      dock.style.setProperty('height', 'min(62vh, 560px)', 'important');
-      dock.style.setProperty('max-height', 'min(62vh, 560px)', 'important');
+      /* Sheet height law (owner 2026-09-13): the slide must stay the majority of the
+         canvas while tools are open. 62vh left the hero a ~180px sliver on a 874px
+         phone; 50vh keeps ~430px of editor. The grid scrolls inside its own viewport. */
+      dock.style.setProperty('height', 'min(50vh, 460px)', 'important');
+      dock.style.setProperty('max-height', 'min(50vh, 460px)', 'important');
       dock.style.setProperty('min-height', '180px', 'important');
       dock.style.setProperty('display', 'block', 'important');
       dock.style.setProperty('overflow', 'hidden', 'important');
@@ -1144,11 +1192,14 @@
         scroll.style.setProperty('display', 'block', 'important');
         scroll.style.setProperty('overflow-y', 'auto', 'important');
         scroll.style.setProperty('overflow-x', 'hidden', 'important');
-        scroll.style.setProperty('width', '100vw', 'important');
+        /* The portal dock is already full-bleed at x=0; 100vw here re-introduced a
+           1px sideways clip the audit flagged (auditor order 9, 2026-09-13). */
+        scroll.style.setProperty('width', '100%', 'important');
+        scroll.style.setProperty('box-sizing', 'border-box', 'important');
         scroll.querySelectorAll('.ce-dock-column').forEach(function (column) {
           column.style.setProperty('position', 'static', 'important');
           column.style.setProperty('display', 'block', 'important');
-          column.style.setProperty('width', '100vw', 'important');
+          column.style.setProperty('width', '100%', 'important');
           column.style.setProperty('height', 'auto', 'important');
           column.style.setProperty('overflow', 'visible', 'important');
         });
@@ -1170,6 +1221,12 @@
       var label = t.querySelector('.ce-tools-toggle-label');
       if (label) label.textContent = open ? 'Close tools' : 'Tools';
       if (open) openSheet(); else restore();
+      /* This capture-phase owner stopImmediatePropagation()s the app's own toggle
+         handler, which used to run fitCarouselEditorSlides() — with it gone, the
+         freshly-portal'd design-picker minis stayed unscaled 1080x1350 in 180x225
+         windows and painted as flat corner swatches (owner 2026-09-13). The fit
+         pass belongs to the sheet, not the click path that was removed. */
+      try { if (window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__) requestAnimationFrame(window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__); } catch (_fitErr) {}
     }
     t.addEventListener('click', toggle, true);
     t.__ceToolsEditor = editor;

@@ -2234,8 +2234,8 @@
 </div>
 
 <!-- Embedded Data Scripts -->
-<script src="./content_data.js?v=6702562e41"></script>
-<script src="./deck_index.js?v=31432cab39"></script>
+<script src="./content_data.js?v=b2760a0084"></script>
+<script src="./deck_index.js?v=66e6df696d"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
 <link rel="stylesheet" href="./native-plan.css?v=ff35d2cb0a" />
@@ -2247,7 +2247,7 @@ html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav b
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
 <link rel="stylesheet" href="./ce-mobile.css?v=276d878a83" />
-<script src="./ce-touch-edit.js?v=f89692b20a"></script>
+<script src="./ce-touch-edit.js?v=525a5c99cd"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -3861,8 +3861,33 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (!Array.isArray(window.__NATIVE_POSTS__)) window.__NATIVE_POSTS__ = [];
         if (!Array.isArray(window.__NATIVE_POEMS__)) window.__NATIVE_POEMS__ = [];
         if (!window.__NATIVE_POEM_DESIGNS__ || typeof window.__NATIVE_POEM_DESIGNS__ !== 'object') {
-          window.__NATIVE_POEM_DESIGNS__ = {};
+          /* The phone has no native injection; studio saves persist designs to
+             localStorage ce_poem_designs but boot never read them back — phone-side
+             poem themes vanished on every reload (owner 2026-09-13: "exporting
+             without any theme"). Restore them here; poem_designs.js (web bundle)
+             seeds the Mac-authored set when present. */
+          var __pdLs = null;
+          try { __pdLs = JSON.parse(localStorage.getItem('ce_poem_designs') || 'null'); } catch (_pdErr) { __pdLs = null; }
+          window.__NATIVE_POEM_DESIGNS__ = (__pdLs && typeof __pdLs === 'object' && !Array.isArray(__pdLs)) ? __pdLs : {};
         }
+        /* Mac-authored designs travel folded into the content catalog
+           (row.poemStyle, regen 2026-09-13). Seed them in — without overwriting a
+           newer phone-side localStorage entry — so the phone paints and exports
+           the same theme the Mac Studio shows. */
+        try {
+          if (Array.isArray(window.ALL_CONTENT_DATA)) {
+            window.ALL_CONTENT_DATA.forEach(function (row) {
+              if (!row || row.kind !== 'poem' || !row.poemStyle) return;
+              var rid = String(row.id || '');
+              if (!rid) return;
+              var cur = window.__NATIVE_POEM_DESIGNS__[rid];
+              var curT = cur && Date.parse(cur.updatedAt || ''); var rowT = Date.parse(row.updatedAt || '');
+              if (!cur || (isFinite(rowT) && (!isFinite(curT) || rowT >= curT))) {
+                window.__NATIVE_POEM_DESIGNS__[rid] = { text: row.body || (cur && cur.text) || '', style: row.poemStyle, title: row.title || (cur && cur.title) || '', updatedAt: row.updatedAt || '' };
+              }
+            });
+          }
+        } catch (_seedErr) {}
         applyPoemDesignOverlays();
         rebuildLookupMaps();
         window.__INIT_ERROR__ = null;
@@ -4208,26 +4233,48 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   function ceSavedBankPush(entriesArg) {
     var ep = ceBankEndpoint(); if (!ep) return;
+    /* Pull-epoch gate (auditor order 3): a surface that has never completed a pull
+       does not know the shared state and must not write — reads first, then push.
+       The boot arm below sets __CE_BANK_PULLED_ONCE__ after the first pull settles. */
+    if (!window.__CE_BANK_PULLED_ONCE__ && !(window.__CE_NATIVE_APP__ || ceBankBridge())) return;
     clearTimeout(window.__ceBankPushTimer);
     window.__ceBankPushTimer = setTimeout(function () {
-      var src = Array.isArray(entriesArg) ? entriesArg : (state.savedItems || []);
+      var isFullBankPush = !Array.isArray(entriesArg);
+      var src = isFullBankPush ? (state.savedItems || []) : entriesArg;
       var entries = [];
       var liveKeys = {};
+      var tomb = ceBankTombstones();
+      var nowMs = Date.now();
+      var healed = 0;
       src.forEach(function (e) {
         var k = ceBankEntryKey(e); if (!k) return;
         liveKeys[k] = 1;
         var out = {}; Object.keys(e).forEach(function (f) { out[f] = e[f]; });
         out.key = k; out.updatedMs = ceBankUpdatedMs(e);
+        /* A live local row beats any tombstone for its own key — this device holds
+           the row, so a tombstone here is stale (the bogus-110 incident, 2026-09-13).
+           Drop it and bump the row's clock so the newer timestamp overwrites the
+           server's stale 'deleted' entry too (LWW), healing every surface. */
+        if (tomb[k]) { delete tomb[k]; out.updatedMs = nowMs; healed++; }
         entries.push(out);
       });
-      // diff-based tombstones: a key the last sync knew that is now locally gone was deleted
-      var tomb = ceBankTombstones();
-      var now = Date.now();
-      ceBankKnownKeys().forEach(function (k) {
-        if (!liveKeys[k] && !(k in tomb)) tomb[k] = now;
-      });
-      cePersistTombstones(tomb);
-      try { localStorage.setItem('ce_saved_bank_keys', JSON.stringify(Object.keys(liveKeys))); } catch (_e) {}
+      if (healed) cePersistTombstones(tomb);
+      /* TOMBSTONE CONTRACT (auditor P0-1 residual, 2026-09-13): a diff may NEVER
+         mint tombstones — an empty/partial/stale local read must not mass-delete
+         the shared bank (the bogus-110 incident). Tombstones exist only from an
+         EXPLICIT delete event via ceSavedBankDeleted(). The key snapshot is still
+         maintained for observability, never for destruction. */
+      if (isFullBankPush) {
+        try { localStorage.setItem('ce_saved_bank_keys', JSON.stringify(Object.keys(liveKeys))); } catch (_e) {}
+      }
+      /* Safety cap: a single push carrying >25 tombstones is a red flag, not a
+         sync — drop them all and keep the live rows (explicit deletes arrive in
+         ones/twos from the UI; mass tombstones can only come from corruption). */
+      var __tombOut = entries.filter(function (e) { return e.status === 'deleted'; });
+      if (__tombOut.length > 25) {
+        entries = entries.filter(function (e) { return e.status !== 'deleted'; });
+        try { console.warn('[ce-bank] suppressed mass-tombstone push of', __tombOut.length, 'rows'); } catch (_c) {}
+      }
       Object.keys(tomb).forEach(function (k) { entries.push({ key: k, status: 'deleted', updatedMs: tomb[k], updatedAt: new Date(tomb[k]).toISOString() }); });
       if (!entries.length) return;
       var payload = JSON.stringify({ entries: entries });
@@ -4245,6 +4292,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return pullP
       .then(function (d) {
         var remote = (d && d.entries) || {};
+        window.__CE_BANK_REMOTE_COUNT__ = Object.keys(remote).filter(function (k) { return (remote[k] || {}).status !== 'deleted'; }).length;
         var tomb = ceBankTombstones();
         var byKey = {};
         (state.savedItems || []).forEach(function (e) { var k = ceBankEntryKey(e); if (k) byKey[k] = e; });
@@ -4276,6 +4324,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       })
       .catch(function () { return false; });
   }
+  /* Explicit deletion event → tombstone. Called ONLY from the real delete UI path. */
+  function ceSavedBankDeleted(keys) {
+    var tomb = ceBankTombstones();
+    var now = Date.now();
+    (Array.isArray(keys) ? keys : [keys]).forEach(function (k) { if (k) tomb[String(k)] = now; });
+    cePersistTombstones(tomb);
+    ceSavedBankPush();
+  }
+  window.__CE_SAVED_BANK_DELETED__ = ceSavedBankDeleted;
   window.__CE_SAVED_BANK_PULL__ = ceSavedBankPull;
   window.__CE_SAVED_BANK_PUSH__ = ceSavedBankPush;
   /* Arm only where a real channel exists (2026-09-13): the native harness and any
@@ -4291,14 +4348,40 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     } catch (_e) {}
   }
   if (__ceBankChannel) {
-    try { setTimeout(function () { ceSavedBankPull(true); }, 1500); setInterval(function () { ceSavedBankPull(false); }, 60000); } catch (_e) {}
+    try {
+      /* Seed law (2026-09-13, corrected by the audit): pull FIRST and only then may
+         this surface write. The seed-push runs once, after a completed pull, and
+         only when the remote store is empty while we hold rows (fresh-server case).
+         A failed pull leaves the surface read-only — it proves nothing about remote
+         state, and writing blind is how the bank got destroyed once. */
+      setTimeout(function () {
+        ceSavedBankPull(true).then(function () {
+          window.__CE_BANK_PULLED_ONCE__ = true;
+          try {
+            if (window.__CE_BANK_SEEDED__) return;
+            window.__CE_BANK_SEEDED__ = true;
+            var remoteCount = Number(window.__CE_BANK_REMOTE_COUNT__ || 0);
+            if (remoteCount === 0 && Array.isArray(state.savedItems) && state.savedItems.length) ceSavedBankPush();
+          } catch (_sp) {}
+        }).catch(function () { window.__CE_BANK_PULL_FAILED__ = true; });
+      }, 1500);
+      setInterval(function () {
+        ceSavedBankPull(false).then(function () { window.__CE_BANK_PULLED_ONCE__ = true; }).catch(function () {});
+      }, 60000);
+    } catch (_e) {}
   }
 
 
 
   // User explicit instruction (2026-08-27): Move all existing queue items to Saved Bank
+  // Re-arm guard (auditor P2-3, 2026-09-13): the marker lives in the same localStorage
+  // that just proved it can lose rows; if it ever drops while the board holds staged
+  // work, this one-shot migration would silently empty the Plan board into the bank.
+  // It may now fire ONLY when the bank is also empty (the true cold-migration shape);
+  // a damaged marker with a populated bank skips, and the skip is observable.
   try {
-    if (!navigator.webdriver && !localStorage.getItem('ce_queue_migrated_v1') && Array.isArray(state.queueItems) && state.queueItems.length > 0) {
+    if (!navigator.webdriver && !localStorage.getItem('ce_queue_migrated_v1') && Array.isArray(state.queueItems) && state.queueItems.length > 0
+        && Array.isArray(state.savedItems) && state.savedItems.length === 0) {
       state.queueItems.forEach(function (q) {
         if (!q || !q.item) return;
         var qKey = (q.type || '') + ':' + (q.item.id || q.item.title || q.item.text || '');
@@ -4677,6 +4760,27 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       ? queueItem.item
       : {};
     return String(queueItem && queueItem.type || item.kind || item.type || 'item').trim().toUpperCase();
+  }
+
+  /* Canonical creator identity for every queue projection (auditor order 7 +
+     P1-3, 2026-09-13): structured provenance FIRST — authorship tier and the
+     item's own author field — never body-text scraping at render time. Poems
+     resolve through cePoemAuthorSignature (it already honors the tiers:
+     confirmed_other suppressed, to_check flagged, owner content '- तुषार');
+     carousels/posts are authored surfaces and carry the @doalfaaz brand. The
+     Plan row metadata line renders this at a fixed legible size OUTSIDE the
+     photocopied stage, so the name no longer shrinks to a painted 14px ghost. */
+  function queueCreatorLabel(queueItem) {
+    try {
+      const item = queueItem && queueItem.item && typeof queueItem.item === 'object' ? queueItem.item : {};
+      const type = String(queueItem && queueItem.type || item.kind || item.type || '').toLowerCase();
+      if (item.author && String(item.author).trim()) return String(item.author).trim();
+      if (type === 'poem' && typeof cePoemAuthorSignature === 'function') {
+        const sig = String(cePoemAuthorSignature(item, '- तुषार') || '').trim();
+        return sig || '';
+      }
+      return '@doalfaaz';
+    } catch (_e) { return ''; }
   }
 
   // Canonical poem preset index derivation: deterministic and identity-grounded.
@@ -5404,6 +5508,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     window.__CE_SCHEDULE_REQ_STATE__ = Array.isArray(rows) ? rows : [];
     if (prev !== JSON.stringify(window.__CE_SCHEDULE_REQ_STATE__) && state.activeTab === 'plan' && typeof renderMain === 'function') renderMain();
   };
+  /* Retry/Remove feedback (auditor order 6): the native bridge answers with the
+     outcome; on success we re-pull the rows so __CE_SCHEDULE_REQUESTS__ re-renders
+     the board with the new state. On refusal we say so — never a silent no-op. */
+  window.__CE_SCHEDULE_REQ_RESULT__ = function (ok, kind) {
+    try {
+      if (ok) {
+        var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
+        if (br) br.postMessage({ action: 'getScheduleRequests' });
+      } else {
+        showAppToast(kind === 'retry'
+          ? 'Retry refused — this row already started or is not a failed booking.'
+          : 'Remove refused — this booking may already be in flight.', true);
+      }
+    } catch (_e) {}
+  };
   function ceScheduleReqStripHtml() {
     var rows = window.__CE_SCHEDULE_REQ_STATE__ || [];
     if (!rows.length) return '';
@@ -5424,18 +5543,35 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     };
     // Newest first; terminal rows older than a day don't need board real estate.
     var dayMs = 24 * 3600 * 1000;
-    var visible = rows.slice().sort(function (a, b) {
-      return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
-    }).filter(function (r) {
+    /* Relay hygiene (auditor order 6, 2026-09-13): the primary strip showed QA
+       residue — 'deleted-test' synthetic rows, 'relay-neg-*' negative controls,
+       and stale failures — as if they were creator work. Now: only LIVE work
+       (pending/queued/scheduling) rides the strip; failures go to a collapsed
+       "Needs attention" list with real Retry/Remove; proven-synthetic and old
+       terminal rows never reach the owner surface at all. */
+    var isSynthetic = function (r) {
+      var id = String(r.id || ''); var st = String(r.state || '');
+      return st === 'deleted-test' || /^(relay-neg|test-|qa-|e2e-|probe-)/i.test(id) || /(^|:)test(:|$)/i.test(id);
+    };
+    var isTerminalFresh = function (r) {
       var st = String(r.state || '');
-      if (st === 'scheduled' || st === 'published' || st === 'superseded') {
-        var t = Number(r.processedAt ? Date.parse(r.processedAt) : (Number(r.createdAt) || 0) * (r.createdAt && r.createdAt < 1e12 ? 1000 : 1));
-        return !t || (Date.now() - t < dayMs);
-      }
-      return true;
-    }).slice(0, 8);
-    if (!visible.length) return '';
-    var items = visible.map(function (r) {
+      if (st !== 'scheduled' && st !== 'published' && st !== 'superseded') return false;
+      var t = Number(r.processedAt ? Date.parse(r.processedAt) : (Number(r.createdAt) || 0) * (r.createdAt && r.createdAt < 1e12 ? 1000 : 1));
+      return !t || (Date.now() - t < dayMs);
+    };
+    var live = [], attention = [];
+    rows.slice().sort(function (a, b) {
+      return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+    }).forEach(function (r) {
+      if (isSynthetic(r)) return;                       // audit log keeps it, board never shows it
+      var st = String(r.state || '');
+      if (st === 'failed' || st === 'needs_verification') attention.push(r);
+      else if (st === 'pending' || st === 'queued' || st === 'scheduling') live.push(r);
+      else if (isTerminalFresh(r)) live.push(r);
+    });
+    live = live.slice(0, 8);
+    if (!live.length && !attention.length) return '';
+    var chipHtml = function (r, actionable) {
       var st = String(r.state || 'pending');
       var label = STATE_LABEL[st] || st;
       var color = STATE_COLOR[st] || 'var(--muted)';
@@ -5452,6 +5588,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var icon = st === 'failed' ? '✕' : (st === 'scheduled' || st === 'published' ? '✓' : '•');
       var badgeBg = st === 'failed' ? 'rgba(239, 68, 68, 0.14)' : (st === 'scheduled' ? 'rgba(59, 130, 246, 0.14)' : 'rgba(255, 255, 255, 0.05)');
       var borderC = st === 'failed' ? 'rgba(239, 68, 68, 0.3)' : (st === 'scheduled' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0.1)');
+      var rid = escapeHtml(String(r.id || ''));
+      var actions = actionable && rid
+        ? '<button type="button" class="ce-sched-req-retry" data-req-id="' + rid + '" title="Re-queue this failed booking" style="margin-left:4px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:var(--ink);border-radius:5px;font-size:9.5px;font-weight:700;padding:2px 7px;cursor:pointer;">Retry</button>'
+        + '<button type="button" class="ce-sched-req-remove" data-req-id="' + rid + '" title="Remove this row from the board" style="border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:800;padding:2px 6px;cursor:pointer;">×</button>'
+        : '';
       return '<span class="ce-sched-req-chip" title="' + escapeHtml(deckId + (err ? ' — ' + err : '')) + '" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;border:1px solid ' + borderC + ';background:' + badgeBg + ';color:' + color + ';backdrop-filter:blur(8px);box-shadow:0 2px 6px rgba(0,0,0,0.2);">'
         + '<span style="font-size:10px;font-weight:800;color:' + color + ';">' + icon + '</span>'
         + '<span style="font-weight:700;color:var(--ink);">' + escapeHtml(short) + '</span>'
@@ -5459,10 +5600,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         + '<span style="text-transform:uppercase;font-size:9.5px;letter-spacing:0.04em;">' + escapeHtml(platform === 'instagram' ? 'Instagram' : 'Facebook') + '</span>'
         + (when ? ' <span style="opacity:0.75;font-variant-numeric:tabular-nums;">' + escapeHtml(when) + '</span>' : '')
         + '<span style="padding:1px 6px;border-radius:4px;background:rgba(255,255,255,0.06);font-size:10px;font-weight:600;">' + escapeHtml(label) + '</span>'
+        + actions
         + '</span>';
-    }).join('');
-    return '<div class="ce-sched-req-strip" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0;width:100%;">'
-      + '<span style="font-size:10.5px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);"></span>Sync Relay</span>' + items + '</div>';
+    };
+    var items = live.map(function (r) { return chipHtml(r, false); }).join('');
+    var attentionHtml = attention.length
+      ? '<details class="ce-sched-req-attention" style="width:100%;margin-top:4px;">'
+        + '<summary style="list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:#f87171;padding:3px 0;">'
+        + '<span style="font-size:11px;">!</span>Needs attention (' + attention.length + ')</summary>'
+        + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:4px;">'
+        + attention.slice(0, 6).map(function (r) { return chipHtml(r, true); }).join('')
+        + '</div></details>'
+      : '';
+    return (items ? '<div class="ce-sched-req-strip" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0;width:100%;">'
+      + '<span style="font-size:10.5px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);"></span>Sync Relay</span>' + items + '</div>' : '')
+      + attentionHtml;
   }
   /* Meta's own scheduled_posts list, normalized so a graphId can be checked
      against it. The chip below claims "On Meta clock" — 2026-09-10 audit A-1:
@@ -8684,6 +8836,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     };
   }
 
+  window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__ = function () { try { fitCarouselEditorSlides(); } catch (_e) {} };
   function fitCarouselEditorSlides() {
     document.querySelectorAll('[data-ce-carousel-stage]').forEach(function (stage) {
       var frame = stage.parentElement;
@@ -10962,6 +11115,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (label) label.hidden = true;
     if (!totalSlides || !slides || !slides.length) {
       dockControls.innerHTML = '<span style="font-size:11px; color:var(--muted);">Loading verified authored carousel…</span>';
+      try { if (window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__) requestAnimationFrame(window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__); } catch (_fitQ) {}
       return;
     }
     var selected = Math.max(0, Math.min(totalSlides - 1, state.currentSlideIdx));
@@ -11206,6 +11360,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
       dockControls.className = 'dock-row ce-carousel-dock';
       dockControls.innerHTML = captionSection + postLooksRail + textInspector;
+      try { if (window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__) requestAnimationFrame(window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__); } catch (_fitQ) {}
     } else {
       if (leftRail) leftRail.style.display = 'none';
       if (workspaceEl) {
@@ -11254,6 +11409,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       dockControls.innerHTML = dockToggleMarkup
         + '<div class="ce-inspector-scroll">' + presentationColumn + slideColumn + contentColumn + '</div>'
         + '<div class="ce-inspector-pinned">' + captionSection + '</div>';
+      try { if (window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__) requestAnimationFrame(window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__); } catch (_fitQ) {}
       if (phoneDock) {
         var toolsToggleBtn = dockControls.querySelector('#ce-tools-toggle');
         var toolsEditorEl = dockControls.closest('.ce-carousel-editor') || document.querySelector('.ce-carousel-editor');
@@ -11637,7 +11793,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       libraryType: state.libraryType || 'poems',
       poemSection: state.poemSection || 'photo',
       queueIndex: (options && options.queueIndex != null) ? options.queueIndex : null,
-      savedId: (options && options.savedId != null) ? options.savedId : null
+      savedId: (options && options.savedId != null) ? options.savedId : null,
+      /* Navigation controller contract (auditor order 8, 2026-09-13): capture the
+         originating surface's scroll so Back returns to the SAME place, not a
+         re-rendered top. #view is the .main-content scroll container. */
+      scrollTop: (function () { try { var v = document.getElementById('view'); return v ? (v.scrollTop || 0) : 0; } catch (_s) { return 0; } })()
     };
 
     if (!state.studioNavSource.savedId && Array.isArray(state.savedItems)) {
@@ -12180,13 +12340,28 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
     try {
       if (state.studioDirty) {
+        var __saveOk = false;
         if (state.currentType === 'poem' && state.currentItem) {
-          try { studioSavePoem(); } catch (_savePoem) {}
+          try { __saveOk = studioSavePoem() !== false; } catch (_savePoem) { __saveOk = false; }
         } else if (state.currentType === 'carousel' || state.currentType === 'post') {
           try {
             var deck = studioDeck();
-            if (deck && !deck.__synth) studioSaveDeck(deck, deck.slides || []);
-          } catch (_saveDeck) {}
+            if (deck && !deck.__synth) __saveOk = studioSaveDeck(deck, deck.slides || []) !== false;
+            else __saveOk = true;   // nothing to persist for a synthetic deck
+          } catch (_saveDeck) { __saveOk = false; }
+        } else {
+          __saveOk = true;
+        }
+        /* Save truthfulness (auditor order 10, 2026-09-13): the overlay ALWAYS
+           closes (a swallowed save must never trap the creator), but a failed
+           save no longer masquerades as success — studioDirty stays set and the
+           owner is told, so the originating card is not shown as the new version
+           it never became. */
+        if (!__saveOk) {
+          state.studioSavePending = true;
+          try { if (typeof showAppToast === 'function') showAppToast('Changes could not be saved — reopen this piece to try again', true); } catch (_t) {}
+        } else {
+          state.studioSavePending = false;
         }
       }
     } catch (_dirtySave) {}
@@ -12222,7 +12397,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }
     window.__CE_LOOK_PREVIEW__ = null;
     window.__CE_LOOK_OVERRIDE__ = null;
-    state.studioDirty = false;
+    /* Only clear the dirty flag when the close-time save actually landed; a failed
+       save keeps the piece marked dirty (auditor order 10). */
+    if (!state.studioSavePending) state.studioDirty = false;
     try { studioUpdateHistoryControls(); } catch (_hist) {}
 
     try {
@@ -12245,6 +12422,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     try { renderMain(); } catch (_rm) {
       try { if (typeof updateLibraryNestCounts === 'function') updateLibraryNestCounts(); } catch (_uc) {}
     }
+    /* Restore the originating surface's scroll AFTER render + the fit passes settle,
+       so the DOM has its real height and the position lands where the owner left it
+       (auditor order 8). A re-render resets scrollTop to 0; restore it deliberately. */
+    try {
+      var __navSrc = state.studioNavSource;
+      if (__navSrc && __navSrc.scrollTop) {
+        var __restoreScroll = function () {
+          var v = document.getElementById('view');
+          if (v) v.scrollTop = __navSrc.scrollTop;
+        };
+        requestAnimationFrame(function () { __restoreScroll(); setTimeout(__restoreScroll, 120); });
+      }
+    } catch (_sr) {}
     return true;
   }
 
@@ -12283,11 +12473,22 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // the studio mid-browse.
       var studio = document.getElementById('studio');
       if (studio && studio.classList.contains('open')) return;
-      var horizontalSurface = event.target && event.target.closest && event.target.closest('.ce-carousel-slide-scroll, [data-ce-horizontal-scroll]');
-      // Rails own INTERIOR sweeps; but at a rail's left edge a rightward
-      // two-finger swipe chains into app back (Apple overscroll) instead of
-      // dead-ending (owner 2026-09-06: back was "stopped" in other pools).
-      if (horizontalSurface && horizontalSurface.scrollLeft > 1) return;
+      /* Computed ownership (auditor P0-2a, 2026-09-13): the old allowlist named
+         [data-ce-horizontal-scroll] — an attribute on ZERO elements — and missed
+         .ce-kanban-board entirely, so a normal trackpad flick across the Plan
+         board teleported the owner to Library mid-scroll. Rule: ANY horizontally
+         scrollable ancestor that can still consume THIS delta owns the gesture.
+         No enumeration, no marker attribute — measure the DOM. */
+      var hOwner = null;
+      for (var hn = event.target; hn && hn !== document.documentElement; hn = hn.parentElement) {
+        if (hn.scrollWidth > hn.clientWidth + 1) {
+          var hMax = hn.scrollWidth - hn.clientWidth;
+          var hdx = Number(event.deltaX) || 0;
+          if (hdx > 0 ? hn.scrollLeft < hMax - 1 : hn.scrollLeft > 1) { hOwner = hn; break; }
+          if (hdx === 0) { hOwner = hn; break; }
+        }
+      }
+      if (hOwner) return;
       var dx = Number(event.deltaX) || 0;
       var dy = Number(event.deltaY) || 0;
       if (gestureReset) clearTimeout(gestureReset);
@@ -12297,8 +12498,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         gestureX = 0;
         gestureY = 0;
         gestureReset = 0;
-      }, 160);
-      if (gestureX > -76 || Math.abs(gestureX) <= Math.abs(gestureY) * 1.15) return;
+      }, 240);
+      /* Threshold raised -76 → -160 with a stricter direction ratio: a casual
+         trackpad flick (~80px) must never change screens; a deliberate pull does. */
+      if (gestureX > -160 || Math.abs(gestureX) <= Math.abs(gestureY) * 1.6) return;
       var now = Date.now();
       if (now - lastBack < 650) return;
       if (appNavigateBack()) {
@@ -14641,6 +14844,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               <div style="display:flex; align-items:center; gap:6px;">
                 <span class="ce-status-dot" style="width:7px; height:7px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
                 <span style="font-size:10px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink); opacity:0.85;">${escapeHtml(queueTypeLabel(q))}</span>
+                ${queueCreatorLabel(q) ? `<span style="font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.01em;">${escapeHtml(queueCreatorLabel(q))}</span>` : ''}
                 ${ceMetaChip(q)}
               </div>
               <div style="display:flex; align-items:center; gap:4px;">
@@ -14694,7 +14898,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           </div>
           <div class="ce-staged-copy">
             <button class="ce-staged-open" data-idx="${idx}" type="button">
-            <span class="ce-status-dot"></span><span><strong>${escapeHtml(queueDisplayTitle(q))}</strong><small>${escapeHtml(queueTypeLabel(q))} · Inbox · ${escapeHtml(q.statusReason || 'Waiting for a day')}${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''}</small></span>
+            <span class="ce-status-dot"></span><span><strong>${escapeHtml(queueDisplayTitle(q))}</strong><small>${escapeHtml(queueTypeLabel(q))}${queueCreatorLabel(q) ? ' · ' + escapeHtml(queueCreatorLabel(q)) : ''} · Inbox · ${escapeHtml(q.statusReason || 'Waiting for a day')}${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''}</small></span>
             </button>
             <div class="ce-staged-actions">
               <button class="queue-open-studio-btn" data-idx="${idx}" type="button">Edit in Studio</button>
@@ -14834,7 +15038,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                         <span class="ce-status-dot" style="width:10px; height:10px; border-radius:50%; background:${q.scheduled ? 'var(--ink)' : (q.exportStatus === 'EXPORTED' ? 'var(--muted)' : 'var(--faint)')}; flex-shrink:0; margin-top:4px;"></span>
                         <div style="min-width:0;">
                           <strong style="display:block; font-size:16.5px; font-weight:680; letter-spacing:-0.01em; color:var(--ink); line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(queueDisplayTitle(q))}</strong>
-                          <small style="color:var(--muted); font-size:12px; margin-top:3px; display:block;">${escapeHtml(queueTypeLabel(q))} · <span style="color:${q.scheduled && q.scheduleTime ? 'var(--ink)' : 'var(--muted)'}; font-weight:700;">${escapeHtml(q.scheduled && q.scheduleTime ? (q.scheduleSlot || q.scheduleTime) : (q.readyToPost ? 'Ready, schedule to place' : 'Inbox, tick Ready when final'))}</span>${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''} ${ceMetaChip(q)}</small>
+                          <small style="color:var(--muted); font-size:12px; margin-top:3px; display:block;">${escapeHtml(queueTypeLabel(q))}${queueCreatorLabel(q) ? ' · ' + escapeHtml(queueCreatorLabel(q)) : ''} · <span style="color:${q.scheduled && q.scheduleTime ? 'var(--ink)' : 'var(--muted)'}; font-weight:700;">${escapeHtml(q.scheduled && q.scheduleTime ? (q.scheduleSlot || q.scheduleTime) : (q.readyToPost ? 'Ready, schedule to place' : 'Inbox, tick Ready when final'))}</span>${q.exportStatus === 'EXPORTED' ? ' · ' + (q.type === 'carousel' ? 'Slides Exported' : 'Export ready') : ''} ${ceMetaChip(q)}</small>
                         </div>
                       </button>
                       <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
@@ -14890,7 +15094,64 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         setTimeout(function () {
           window.__CE_FIT_QUEUE_PREVIEWS__(planBox);
         }, 100);
-      }
+        }
+
+        /* Board scroll persistence (auditor P0-2b, 2026-09-13): renderMain() rebuilds
+           the kanban DOM, so the owner's column position reset to day-one on every
+           queue edit, sync pull, and tab hop. Capture before rebuild, restore after
+           render/fit settles, clipped to the current max. */
+        var __board = planBox ? planBox.querySelector('.ce-kanban-board') : null;
+        if (__board) {
+          try {
+            var __saved = Number(localStorage.getItem('ce_plan_board_scroll') || 0);
+            if (__saved > 0) {
+              var __max = __board.scrollWidth - __board.clientWidth;
+              __board.scrollLeft = Math.max(0, Math.min(__saved, __max > 0 ? __max : __saved));
+            }
+          } catch (_bs) {}
+          var __bsTimer = 0;
+          __board.addEventListener('scroll', function () {
+            clearTimeout(__bsTimer);
+            __bsTimer = setTimeout(function () {
+              try { localStorage.setItem('ce_plan_board_scroll', String(Math.round(__board.scrollLeft))); } catch (_e) {}
+            }, 220);
+          }, { passive: true });
+        }
+
+      /* Needs-attention Retry/Remove (auditor order 6): both go through the app
+         bridge (the page CSP forbids direct fetch to :4145). The server enforces
+         its own state rules; the Mac relay re-executes retried rows on its 30s
+         timer through the full engine gate. */
+      planBox.querySelectorAll('.ce-sched-req-retry').forEach(function (btn) {
+        btn.onclick = function (ev) {
+          ev.stopPropagation();
+          var rid = btn.getAttribute('data-req-id') || '';
+          if (!rid) return;
+          try {
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge) {
+              window.webkit.messageHandlers.ceBridge.postMessage({ action: 'retryScheduleRequest', id: rid });
+              showAppToast('Re-queued — the Mac picks it up on its next relay pass', { icon: 'calendar' });
+            } else {
+              showAppToast('Retry needs the Mac app running', true);
+            }
+          } catch (_e) { showAppToast('Retry failed to reach the Mac', true); }
+        };
+      });
+      planBox.querySelectorAll('.ce-sched-req-remove').forEach(function (btn) {
+        btn.onclick = function (ev) {
+          ev.stopPropagation();
+          var rid = btn.getAttribute('data-req-id') || '';
+          if (!rid) return;
+          try {
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge) {
+              window.webkit.messageHandlers.ceBridge.postMessage({ action: 'removeScheduleRequest', id: rid });
+              showAppToast('Row removed from the board', { icon: 'check' });
+            } else {
+              showAppToast('Remove needs the Mac app running', true);
+            }
+          } catch (_e) { showAppToast('Remove failed to reach the Mac', true); }
+        };
+      });
 
       var pLibrary = document.getElementById('plan-browse-library');
       if (pLibrary) pLibrary.onclick = function () { navigateTo('library'); setLibraryType('carousels'); };
@@ -16200,8 +16461,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var idx = state.savedItems.findIndex(function (s) { return s && s.id === savedId; });
     if (idx >= 0) {
       if (!window.confirm('Delete this piece from your Saved Bank forever?\nThis cannot be undone.')) return false;
+      var __gone = state.savedItems[idx];
       state.savedItems.splice(idx, 1);
-      try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
+      /* Explicit deletion event (tombstone contract 2026-09-13): THIS is the only
+         place a tombstone may be minted — a confirmed user delete, never a diff. */
+      var __goneKey = null;
+      try { if (window.__CE_SAVED_BANK_DELETED__) { var it = (__gone && __gone.item) || {}; var id = it.id || (__gone && __gone.contentId) || ''; if (id) __goneKey = String((__gone && __gone.type) || 'piece') + '|' + id; } } catch (_dk) {}
+      try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); } catch (_e) {}
+      try { if (__goneKey && window.__CE_SAVED_BANK_DELETED__) window.__CE_SAVED_BANK_DELETED__([__goneKey]); else if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
       updateTopbarSavedBadge();
       showAppToast('Deleted permanently from Saved Bank', { icon: 'delete' });
       if (state.activeTab === 'saved') renderMain();
