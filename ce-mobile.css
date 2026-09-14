@@ -479,6 +479,15 @@ html.ce-phone #sidebar .nav-btn { min-height: 44px; }
 html.ce-phone #sidebar .nav-sub-btn { min-height: 40px; color: var(--muted); }
 html.ce-phone #sidebar .nav-nest-btn { min-height: 36px; color: var(--muted); }
 html.ce-phone .sidebar-edge-trigger { display: none !important; }
+/* The touch drawer is a full-height fixed panel. Its desktop `overflow:hidden`
+   made the final nav row (Launch) stop halfway below the 874px phone viewport;
+   the owner could not reach it even though the drawer itself was open. Let the
+   drawer scroll internally while keeping the page behind it locked. */
+html.ce-phone #sidebar.collapsed.peek {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
 
 html.ce-phone /* Dock buttons: 38px visual + padding => >=44px hit area (F-14).
    The twin previously lacked the padding + box-sizing, so in 980px-layout
@@ -1341,8 +1350,8 @@ html.ce-phone #settings-toggle {
   min-height: 44px !important;
 }
 html.ce-phone .ce-rail-nav-btn {
-  min-width: 40px !important;
-  min-height: 40px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
 }
 html.ce-phone .ce-rail-toggle-btn,
 html.ce-phone .ce-ideas-filter,
@@ -1350,17 +1359,17 @@ html.ce-phone .ce-saved-tab-btn,
 html.ce-phone .ce-write-kind button,
 html.ce-phone .ce-layout-toggle button,
 html.ce-phone .section-btn {
-  min-height: 40px !important;
+  min-height: 44px !important;
 }
 html.ce-phone .ce-type-pill,
 html.ce-phone .ce-launch-board-range button,
 html.ce-phone .ce-launch-board-cadence button {
-  min-height: 36px !important;
+  min-height: 44px !important;
 }
 html.ce-phone .write-history button,
 html.ce-phone #write-undo-btn,
 html.ce-phone #write-redo-btn {
-  min-height: 40px !important;
+  min-height: 44px !important;
   min-width: 44px !important;
 }
 html.ce-phone .ce-plan-bulk-btn,
@@ -1368,7 +1377,7 @@ html.ce-phone #plan-schedule-all-ready-btn,
 html.ce-phone #plan-select-all-ready-btn,
 html.ce-phone #plan-auto-schedule-btn,
 html.ce-phone #plan-open-meta-btn {
-  min-height: 40px !important;
+  min-height: 44px !important;
 }
 html.ce-phone input.search-input,
 html.ce-phone .search-input {
@@ -1440,34 +1449,34 @@ html.ce-phone #plan-open-calendar-btn,
 html.ce-phone #plan-clear-all-btn,
 html.ce-phone #plan-move-to-saved-btn,
 html.ce-phone .ce-plan-more-actions > div button {
-  min-height: 36px !important;
+  min-height: 44px !important;
 }
 html.ce-phone #plan-view-kanban-btn,
 html.ce-phone #plan-view-list-btn {
-  min-height: 32px !important;
+  min-height: 44px !important;
 }
 html.ce-phone .ce-plan-select-toggle {
-  width: 36px !important;
-  height: 36px !important;
+  width: 44px !important;
+  height: 44px !important;
   border-radius: 10px !important;
 }
 html.ce-phone .kanban-col-select-btn {
-  min-height: 36px !important;
+  min-height: 44px !important;
 }
 html.ce-phone .queue-save-bank-btn,
 html.ce-phone .queue-del-btn {
-  width: 36px !important;
-  height: 36px !important;
+  width: 44px !important;
+  height: 44px !important;
   border-radius: 9px !important;
 }
 html.ce-phone .ce-action-studio-btn,
 html.ce-phone .ce-action-save-btn,
 html.ce-phone .ce-action-reject-btn {
-  width: 36px !important;
-  height: 36px !important;
+  width: 44px !important;
+  height: 44px !important;
 }
 html.ce-phone .ce-action-promote-pill {
-  min-height: 36px !important;
+  min-height: 44px !important;
 }
 
 /* Mobile Studio artifact-first composition (audit 2026-09-14). Centering a
@@ -1495,6 +1504,104 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip-track {
   align-items: flex-start !important;
   padding-top: 12px !important;
 }
+
+/* Final selector-strength pass: the legacy phone block above intentionally
+   names several controls at higher specificity. Repeat the 44px contract after
+   all legacy declarations so a later min-height:40/36 cannot win the cascade. */
+html.ce-phone .ce-rail-nav-btn,
+html.ce-phone .ce-rail-toggle-btn,
+html.ce-phone .ce-ideas-filter,
+html.ce-phone .ce-ideas-filter-menu,
+html.ce-phone .ce-ideas-action,
+html.ce-phone .ce-saved-tab-btn,
+html.ce-phone .ce-type-pill,
+html.ce-phone .ce-write-kind button,
+html.ce-phone .ce-layout-toggle button,
+html.ce-phone .section-btn,
+html.ce-phone .write-history button,
+html.ce-phone .ce-plan-bulk-btn,
+html.ce-phone .ce-plan-more-actions button,
+html.ce-phone .ce-surface-button,
+html.ce-phone .ce-launch-board-range button,
+html.ce-phone .ce-launch-board-cadence button,
+html.ce-phone .ce-saved-empty-cta,
+html.ce-phone .ce-icon-tool,
+html.ce-phone .ce-icon-action,
+html.ce-phone .studio-icon-btn,
+html.ce-phone .pill-btn,
+html.ce-phone input.search-input,
+html.ce-phone .search-input,
+html.ce-phone input[type="date"],
+html.ce-phone input[type="time"],
+html.ce-phone textarea,
+html.ce-phone select {
+  min-height: 44px !important;
+}
+html.ce-phone .ce-rail-nav-btn,
+html.ce-phone .ce-rail-toggle-btn,
+html.ce-phone .ce-icon-tool,
+html.ce-phone .ce-icon-action,
+html.ce-phone .studio-icon-btn,
+html.ce-phone input[type="color"] {
+  min-width: 44px !important;
+}
+
+/* POEM LIBRARY TOPBAR WIDTH CONTRACT (recursive re-audit 2026-09-14).
+   At 402px the Photo/Paper switch (124px), Shuffle (89px), Search and the two
+   utility buttons cannot all remain in one 54px row. The old flex shrink left
+   Search at 26px: its placeholder vanished and the field was not practically
+   usable. Give the poem library a two-row phone budget; Ideas/Plan/etc. keep the
+   single-row chrome. The main scroll surface reserves the measured bar height. */
+html.ce-phone.ce-poem-library .topbar {
+  flex-wrap: wrap !important;
+  height: auto !important;
+  min-height: calc(108px + env(safe-area-inset-top, 0px)) !important;
+  align-content: center !important;
+  row-gap: 6px !important;
+  padding-top: calc(4px + env(safe-area-inset-top, 0px)) !important;
+  padding-bottom: 6px !important;
+}
+html.ce-phone.ce-poem-library .topbar #poem-sections,
+html.ce-phone.ce-poem-library .topbar #poem-shuffle { order: 1 !important; }
+html.ce-phone.ce-poem-library .topbar > div[style*="margin-left:auto"] {
+  order: 2 !important;
+  flex: 1 1 100% !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  min-width: 0 !important;
+}
+html.ce-phone.ce-poem-library .topbar .search-input {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+}
+html.ce-phone.ce-poem-library .topbar #poem-sections .section-btn,
+html.ce-phone.ce-poem-library .topbar #poem-shuffle {
+  min-height: 44px !important;
+}
+html.ce-phone.ce-poem-library .main-content { padding-top: calc(108px + env(safe-area-inset-top, 0px)) !important; }
+
+/* PHONE CONTROL FLOOR (recursive re-audit 2026-09-14). The earlier pass grew
+   only selected toolbars to 36–40px and relied on pseudo-element hit extenders;
+   the measured control boxes still fell below the app's stated 44px law in
+   Ideas, Plan, Saved, Studio and the scheduler. Make the actual native hit
+   boxes honest on the phone. Art faces and non-interactive labels are untouched;
+   compact visual styling is retained by the controls' existing padding/font. */
+html.ce-phone button,
+html.ce-phone a,
+html.ce-phone input,
+html.ce-phone select,
+html.ce-phone textarea,
+html.ce-phone [role="button"] {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+}
+/* Range/color controls need the same reachable box without changing their
+   authored track thickness or swatch treatment. */
+html.ce-phone input[type="range"] { min-height: 44px !important; }
+html.ce-phone input[type="color"] { min-width: 44px !important; min-height: 44px !important; }
 html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
   align-items: flex-start !important;
   padding-top: 12px !important;

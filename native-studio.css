@@ -363,6 +363,15 @@
   z-index: 10;
 }
 
+/* The poem dock is a vertical scroll surface. Its sections must keep their
+   authored contents instead of shrinking into one another at 900px-tall
+   windows (typography controls used to sit under the Style swatches). */
+.studio-dock > .dock-section,
+.studio-dock > [id^="dock-sep-"] {
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
 /* Studio inspector primitives: compact, visual, and shared by every authoring
    surface. Visible labels describe groups; individual controls use native SF
    Symbol masks plus title/aria text, so capability does not become a wall of
@@ -497,6 +506,11 @@
 .ce-poem-typography > summary .ce-tool-icon { width: 15px; height: 15px; }
 .ce-poem-disclosure { margin-left: auto; transition: transform .15s ease; }
 .ce-poem-typography[open] .ce-poem-disclosure { transform: rotate(180deg); }
+/* The shared reset makes <details> children displayable in some WebKit
+   compositions. Keep the closed typography panel out of the hit-test tree;
+   otherwise its Weight/Spacing controls paint over the Style swatches at the
+   owner's 1440×900 window. */
+.ce-poem-typography:not([open]) > .ce-poem-typography-panel { display: none; }
 
 .ce-poem-typography-panel {
   display: grid;
@@ -5477,6 +5491,19 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   border: 1px solid var(--border); border-radius: 8px;
   background: rgba(255,255,255,0.04); color: var(--ink, #e8e6e3);
   cursor: pointer; transition: background 140ms ease, color 140ms ease;
+}
+
+/* Recursive collision repair (2026-09-15): the dock's structure column can be
+   narrower than the old 128px disclosure floor plus four 30px slide actions.
+   Grid then lets the first action paint underneath the Add-slide summary. Let
+   the disclosure yield to the action row instead of overlapping it. */
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-structure-stack {
+  grid-template-columns: minmax(0, 1fr) max-content !important;
+  column-gap: 8px !important;
+}
+.studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-disclosure {
+  min-width: 0 !important;
+  max-width: 100% !important;
 }
 .ce-icon-action:hover { background: rgba(255,255,255,0.09); }
 .ce-icon-action:disabled { opacity: 0.35; cursor: default; }

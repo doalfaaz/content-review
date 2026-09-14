@@ -278,12 +278,20 @@
   function scheduleIdeaItem(item, button) {
     if (!item) return;
     var existing = document.getElementById('ce-idea-schedule-modal');
-    if (existing) existing.remove();
+    if (existing) {
+      try { if (typeof window.__CE_SET_MODAL_BACKGROUND__ === 'function') window.__CE_SET_MODAL_BACKGROUND__(false); } catch (_oldModalBg) {}
+      existing.remove();
+    }
     var now = new Date();
     var today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
     var modal = document.createElement('div');
     modal.id = 'ce-idea-schedule-modal';
     modal.className = 'ce-idea-schedule-modal';
+    modal.dataset.ceScheduleTarget = String(item.id || titleOf(item) || '');
+    try {
+      var scheduleState = window.__CE_STATE__ || window.state;
+      if (scheduleState) scheduleState.scheduleTarget = { id: String(item.id || ''), title: titleOf(item), date: today, time: '9:00 PM' };
+    } catch (_scheduleState) {}
     modal.innerHTML = '<div class="ce-idea-schedule-card" role="dialog" aria-modal="true" aria-labelledby="ce-idea-schedule-title">' +
       '<div class="ce-idea-schedule-head"><div><strong id="ce-idea-schedule-title">Schedule idea</strong><span>' + esc(titleOf(item)) + '</span></div><button type="button" data-ce-idea-schedule-close aria-label="Close">×</button></div>' +
       '<p class="ce-idea-schedule-note">This keeps the idea as a Draft in Plan. Shape it in Write before publishing.</p>' +
@@ -292,7 +300,15 @@
       '<div class="ce-idea-schedule-actions"><button type="button" data-ce-idea-schedule-cancel>Cancel</button><button type="button" class="is-primary" data-ce-idea-schedule-save>Schedule draft</button></div>' +
       '</div>';
     document.body.appendChild(modal);
-    var close = function () { modal.remove(); };
+    try { if (typeof window.__CE_SET_MODAL_BACKGROUND__ === 'function') window.__CE_SET_MODAL_BACKGROUND__(true); } catch (_modalBg) {}
+    var close = function () {
+      try {
+        var scheduleState = window.__CE_STATE__ || window.state;
+        if (scheduleState) scheduleState.scheduleTarget = null;
+      } catch (_scheduleClear) {}
+      try { if (typeof window.__CE_SET_MODAL_BACKGROUND__ === 'function') window.__CE_SET_MODAL_BACKGROUND__(false); } catch (_modalBgClose) {}
+      modal.remove();
+    };
     modal.querySelector('[data-ce-idea-schedule-close]').onclick = close;
     modal.querySelector('[data-ce-idea-schedule-cancel]').onclick = close;
     modal.addEventListener('click', function (event) { if (event.target === modal) close(); });
@@ -300,6 +316,10 @@
       var date = modal.querySelector('[data-ce-idea-schedule-date]').value;
       var time = modal.querySelector('[data-ce-idea-schedule-time]').value;
       if (!date || !time) return;
+      try {
+        var scheduleState = window.__CE_STATE__ || window.state;
+        if (scheduleState) scheduleState.scheduleTarget = { id: String(item.id || ''), title: titleOf(item), date: date, time: time };
+      } catch (_scheduleUpdate) {}
       var parts = time.split(':').map(Number);
       var h = parts[0], minute = parts[1];
       var label = (h % 12 || 12) + ':' + String(minute).padStart(2, '0') + ' ' + (h >= 12 ? 'PM' : 'AM');
