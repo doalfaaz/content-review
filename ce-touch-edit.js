@@ -1191,6 +1191,17 @@
       if (pinned) pinned.style.cssText = '';
       portaled = false;
     }
+    function reset() {
+      /* Studio can be destroyed by a route switch while the inspector is
+         portaled to <body>.  Closing the editor must close the sheet first;
+         otherwise the detached editor remains the portal's owner and the
+         next Studio item inherits a fixed "Close tools" panel. */
+      try { editor.classList.remove('ce-tools-open'); } catch (_e) {}
+      try { t.setAttribute('aria-expanded', 'false'); } catch (_e2) {}
+      var label = t.querySelector('.ce-tools-toggle-label');
+      if (label) label.textContent = 'Tools';
+      restore();
+    }
     function openSheet() {
       if (!portaled) { document.body.appendChild(dock); portaled = true; }
       dock.classList.add('ce-tools-sheet');
@@ -1261,7 +1272,9 @@
     t.__ceToolsEditor = editor;
     t.__ceToolsRestore = restore;
     t.__ceToolsOpen = openSheet;
+    t.__ceToolsReset = reset;
     t.__ceToolsCaptureHome = captureHome;
+    window.__CE_RESET_PHONE_TOOLS__ = reset;
     t.style.setProperty('position', 'static', 'important');
     t.style.setProperty('display', 'flex', 'important');
     t.style.setProperty('align-items', 'center', 'important');

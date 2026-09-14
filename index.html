@@ -2275,7 +2275,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=d321ee2200"></script>
+<script src="./deck_index.js?v=9414aacf07"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
 <link rel="stylesheet" href="./native-plan.css?v=96c13083bb" />
@@ -2286,8 +2286,8 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=8f16304a60" />
-<script src="./ce-touch-edit.js?v=67a0fd1606"></script>
+<link rel="stylesheet" href="./ce-mobile.css?v=41a162f2f0" />
+<script src="./ce-touch-edit.js?v=b5ef48807a"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -4850,8 +4850,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     } catch (_e) { return ''; }
   }
 
-  // Canonical poem preset index derivation: deterministic and identity-grounded.
-  // Never changes when the library list is searched, filtered, or paginated.
+  // Canonical poem preset index derivation: deterministic, identity-grounded,
+  // and visually balanced. Never changes when the library list is searched,
+  // filtered, or paginated. Paper has four romantic and three serious looks,
+  // while the corpus itself is romantic-heavy; keeping a hard tone-only pool
+  // made Gallery Ivory repeat 2x as often as Banaras Ghat and hid two looks
+  // from the first draw. One stable 1-in-5 romantic crossover preserves the
+  // tone language while keeping every authored treatment in the feed.
   function cePoemTone(poem) {
     var txt = String((poem && (poem.text || poem.body || poem.t)) || '');
     var romantic = (txt.match(/इश्क़|इश्क|मोहब्बत|मुहब्बत|प्यार|प्रेम|दिल|चाहत|संम|सनम|जुल्फ़|ज़ुल्फ़|नज़र|नजर|चूम|गले|साथ|तेरे|तुझे|तुझसे|जानां|जानाँ|यार|हुस्न/g) || []).length;
@@ -4870,20 +4875,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var tone = cePoemTone(poem);
     var lines = cePoemLineCount((poem && (poem.text || poem.body || poem.t)) || '');
     var needWide = lines >= 5;
-    var pool = [];
+    var preferredPool = [];
+    var alternatePool = [];
+    var allPool = [];
     for (var i = 0; i < presets.length; i++) {
       var preset = presets[i];
-      if ((preset.tone || 'romantic') !== tone) continue;
-      if (needWide && preset.room === 'tight') continue;
-      pool.push(i);
-    }
-    if (!pool.length) {
-      for (var j = 0; j < presets.length; j++) {
-        if (!needWide || presets[j].room !== 'tight') pool.push(j);
-      }
-    }
-    if (!pool.length) {
-      for (var k = 0; k < presets.length; k++) pool.push(k);
+      if (section !== 'paper' && needWide && preset.room === 'tight') continue;
+      allPool.push(i);
+      if ((preset.tone || 'romantic') === tone) preferredPool.push(i);
+      else alternatePool.push(i);
     }
     var src = (poem && poem.source) || poem || {};
     var pId = String(poem.content_id || poem.id || src.content_id || src.id || 'poem');
@@ -4892,6 +4892,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       hash = ((hash << 5) - hash) + pId.charCodeAt(k);
       hash |= 0;
     }
+    var pool = preferredPool.length ? preferredPool : allPool;
+    // Keep photo tone/room semantics strict; only paper needs this corpus-level
+    // correction because all seven paper looks are editorially valid for either
+    // emotional register. The id hash makes the crossover stable across reload,
+    // search, pagination, and the phone surface.
+    if (section === 'paper' && tone === 'romantic' && alternatePool.length && Math.abs(hash) % 5 === 0) {
+      pool = alternatePool;
+    }
+    if (!pool.length) pool = allPool.length ? allPool : presets.map(function (_p, index) { return index; });
     return pool[Math.abs(hash) % pool.length];
   }
   window.canonicalPoemPresetIndex = canonicalPoemPresetIndex;
@@ -5248,6 +5257,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
 
   function goToCreatorSurface(tab, libraryType) {
+    ceDismissRouteOverlays();
     if (closeStudio() === false) return false;
     ceApplySurfaceTransition(tab);
     state.activeTab = tab;
@@ -5414,6 +5424,35 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       modal.__ceEscHandler = null;
     }
   }
+  // Route transitions are a hard ownership boundary. A sheet opened from one
+  // surface must never remain painted over a different panel after the owner
+  // taps a peer route. Back still dismisses one overlay at a time; this helper
+  // is only for an explicit destination change and closes every route-owned
+  // overlay deterministically before the new surface renders.
+  function ceDismissRouteOverlays() {
+    var dismissed = false;
+    try {
+      var settings = document.getElementById('ce-settings-modal');
+      if (settings && !settings.hidden && getComputedStyle(settings).display !== 'none') {
+        ceCloseSettingsModal();
+        dismissed = true;
+      }
+      var reels = document.getElementById('ce-reel-proxy-modal');
+      if (reels && !reels.hidden && getComputedStyle(reels).display !== 'none') {
+        ceCloseReelProxy();
+        dismissed = true;
+      }
+      var schedule = document.getElementById('ce-idea-schedule-modal');
+      if (schedule) {
+        var close = schedule.querySelector('[data-ce-idea-schedule-close], [data-ce-idea-schedule-cancel]');
+        if (close) close.click();
+        if (schedule.isConnected) schedule.remove();
+        dismissed = true;
+      }
+    } catch (_routeOverlay) {}
+    return dismissed;
+  }
+  window.__CE_DISMISS_ROUTE_OVERLAYS__ = ceDismissRouteOverlays;
   document.addEventListener('click', function (e) {
     var t = e.target && e.target.closest ? e.target.closest('#ce-meta-token-save,#ce-meta-token-help,#ce-meta-token-explorer,#ce-meta-token-clear') : null;
     if (!t) return;
@@ -9187,6 +9226,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var track = stage.closest('.ce-filmstrip-track, #ce-carousel-slide-scroll');
       var stripEl = track && track.closest('.ce-filmstrip');
       var inStudioGallery = !!(track && stripEl && stripEl.getAttribute('data-ce-authored-w'));
+      // Phone composition is owned by the runtime fitter, not a fragile cascade
+      // between native-studio.css and the generated ce-mobile layer. Anchor the
+      // first authored card to the top of the rail so the artifact leads the
+      // viewport; the tools row remains below the gallery.
+      if (track && inStudioGallery && (((window.innerWidth || 1440) <= 700) || document.documentElement.classList.contains('ce-phone'))) {
+        track.style.setProperty('align-items', 'flex-start', 'important');
+        track.style.setProperty('padding-top', '12px', 'important');
+      }
       if (!inStudioGallery) {
         // Browse/library/mini surfaces: the LAYOUT owns the frame size (rails
         // set width:100% + aspect-ratio). This fitter only scales the 1080x1350
@@ -12693,6 +12740,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (!force && (!activeStudio || !activeStudio.classList.contains('open'))) {
       return true;
     }
+    // The phone carousel inspector is temporarily portaled to <body}. Restore
+    // that portal before removing Studio's canvas so a fixed Tools sheet cannot
+    // survive into the next route or Studio item.
+    try { if (typeof window.__CE_RESET_PHONE_TOOLS__ === 'function') window.__CE_RESET_PHONE_TOOLS__(); } catch (_phoneToolsReset) {}
     try {
       if (state.currentType === 'poem' && state.studioPoemEditing) poemFinishTextEdit();
     } catch (_finishEdit) {}
@@ -18123,6 +18174,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var dk = String(q.scheduleDate || '').trim();
       var t = String(q.scheduleTime || '').trim();
       if (!dk) return; /* Inbox rows stay in Inbox — that is the staging flow */
+      /* A drag onto a calendar day is an explicit day placement even when the
+         creator has not chosen a time yet. Preserve that visible day instead
+         of treating the blank time as a passed 11:30 AM slot and silently
+         moving the piece to tomorrow on the next render. The publish rail
+         still refuses the item until a real time is selected. */
+      if (!t && /^\d{4}-\d{2}-\d{2}$/.test(dk) && !isPastDate(dk)) {
+        if (q.scheduledDay && !validDays[q.scheduledDay]) {
+          var dfixNoTime = dateKeys[dk];
+          if (dfixNoTime) q.scheduledDay = dfixNoTime.id;
+        }
+        return;
+      }
       /* Today-column law (2026-09-10): a today row whose minute has passed is
          stale — reflow it to the next open slot like any dead day. */
       var todayPassed = isTodayKey(dk) && ceIstUnix(dk, t || '11:30 AM') < Math.floor(Date.now() / 1000) + 1200;
@@ -18343,6 +18406,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   window.__CE_UPDATE_LIBRARY_NEST_COUNTS__ = updateLibraryNestCounts;
 
   function navigateTo(tab) {
+    ceDismissRouteOverlays();
     if (closeStudio() === false) return false;
     ceApplySurfaceTransition(tab);
     document.querySelectorAll('#sidebar-nav button[data-tab]').forEach(function(b) { b.classList.remove('active'); });
@@ -18371,6 +18435,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return true;
   }
   function setLibraryType(type) {
+    ceDismissRouteOverlays();
     if (closeStudio() === false) return false;
     document.querySelectorAll('#sidebar-nav button[data-tab]').forEach(function(b) { b.classList.remove('active'); });
     var libraryButton = document.querySelector('#sidebar-nav button[data-tab="library"]');
@@ -18704,6 +18769,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
     document.querySelectorAll('#sidebar-nav button[data-tab]').forEach(btn => {
       btn.onclick = () => {
+        ceDismissRouteOverlays();
         if (closeStudio() === false) return;
         document.querySelectorAll('#sidebar-nav button[data-tab]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -18719,6 +18785,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     document.querySelectorAll('#library-filters > button[data-lib]').forEach(btn => {
       btn.onclick = (e) => {
         e.stopPropagation();
+        ceDismissRouteOverlays();
         if (closeStudio() === false) return;
         document.querySelectorAll('#library-filters > button[data-lib]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -18740,6 +18807,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     document.querySelectorAll('#poem-eras [data-poem-era]').forEach(function (btn) {
       btn.onclick = function (e) {
         e.stopPropagation();
+        ceDismissRouteOverlays();
         if (closeStudio() === false) return;
         state.poemEra = btn.getAttribute('data-poem-era') || 'all';
         try { localStorage.setItem('ce_poem_era', state.poemEra); } catch (_e) {}
@@ -18771,6 +18839,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     // Poem Section Switcher (Photo Designs vs Paper Themes)
     document.querySelectorAll('#poem-sections button[data-sec]').forEach(btn => {
       btn.onclick = () => {
+        ceDismissRouteOverlays();
         document.querySelectorAll('#poem-sections button[data-sec]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         state.poemSection = btn.getAttribute('data-sec');
@@ -19231,6 +19300,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   window.navigateTo = navigateTo;
   window.goToCreatorSurface = goToCreatorSurface;
   window.setLibraryType = function(type) {
+    ceDismissRouteOverlays();
     if (closeStudio() === false) return;
     document.querySelectorAll('#library-filters > button[data-lib]').forEach(b => b.classList.remove('active'));
     var btn = document.querySelector('#library-filters > button[data-lib="' + type + '"]');

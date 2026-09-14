@@ -1470,6 +1470,36 @@ html.ce-phone .ce-action-promote-pill {
   min-height: 36px !important;
 }
 
+/* Mobile Studio artifact-first composition (audit 2026-09-14). Centering a
+   4:3 poem canvas in the full stage left ~207px of empty lead space above the
+   authored work; the carousel rail left ~101px before its first slide. On a
+   phone the artwork is the task, so anchor it to the top field and keep the
+   tools row below it. Desktop composition is untouched. */
+@media (max-width: 700px) {
+  .studio-workspace:not(.is-carousel-mode) .studio-stage {
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding-top: 12px !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-filmstrip-track {
+    align-items: flex-start !important;
+    padding-top: 12px !important;
+  }
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-stage {
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  padding-top: 12px !important;
+}
+html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip-track {
+  align-items: flex-start !important;
+  padding-top: 12px !important;
+}
+html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-track {
+  align-items: flex-start !important;
+  padding-top: 12px !important;
+}
+
 /* ── Phone topbar width budget (auditor M-3, 2026-09-13) ──────────────────────
    The search input is fixed 210px inside a margin-left:auto flex wrapper that
    cannot shrink below content, so the Photo/Paper segmented control was starved
@@ -1514,4 +1544,27 @@ html.ce-phone .topbar .theme-toggle-btn::before,
 html.ce-phone .app-topbar .sidebar-toggle-btn::before,
 html.ce-phone .app-topbar .theme-toggle-btn::before {
   inset: 0 !important;
+}
+
+/* Final mobile Studio artifact-first override: keep this after every legacy
+   alignment rule so later desktop/mobile twins cannot re-center the canvas. */
+@media (max-width: 700px) {
+  .studio-workspace:not(.is-carousel-mode) .studio-stage {
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding-top: 12px !important;
+  }
+  .studio-workspace.is-carousel-mode .ce-filmstrip-track {
+    align-items: flex-start !important;
+    padding-top: 12px !important;
+  }
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-stage {
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  padding-top: 12px !important;
+}
+html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip-track {
+  align-items: flex-start !important;
+  padding-top: 12px !important;
 }
