@@ -2275,10 +2275,10 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=b26c3e69dc"></script>
+<script src="./deck_index.js?v=f7ee32d5ff"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
-<link rel="stylesheet" href="./native-plan.css?v=b0c2adc855" />
+<link rel="stylesheet" href="./native-plan.css?v=1562feffbc" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
 <link rel="stylesheet" href="./native-studio.css?v=4917829aaf" />
 <style id="ce-share-trim">
@@ -5434,8 +5434,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }
   });
   window.__CE_META_HAS_TOKEN__ = false;
+  window.__CE_META_PUBLISH_ALLOWED__ = false;
   function ceSyncMetaConnectChrome() {
     var btn = document.getElementById('ce-plan-batch-schedule-btn');
+    var postBtn = document.getElementById('ce-plan-post-now-btn');
+    if (postBtn) {
+      var liveAllowed = !!window.__CE_META_PUBLISH_ALLOWED__;
+      postBtn.textContent = liveAllowed ? 'Post now' : 'Preview post';
+      postBtn.title = liveAllowed
+        ? 'Publish the selected Ready pieces live to @doalfaaz now (confirm first).'
+        : 'Validate the Post now payload without sending anything. Nothing will be published.';
+    }
     if (!btn) return;
     if (window.__CE_META_HAS_TOKEN__) {
       var n = (state.queueItems || []).filter(function (q) {
@@ -5466,6 +5475,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   window.__CE_META_TOKEN_RECEIVED__ = function (hasToken) { ceSetMetaTokenState(hasToken); };
   window.__CE_META_TOKEN_SAVED__ = function (hasToken) { ceSetMetaTokenState(hasToken); };
+  window.__CE_META_PUBLISH_STATUS__ = function (allowed) {
+    window.__CE_META_PUBLISH_ALLOWED__ = !!allowed;
+    ceSyncMetaConnectChrome();
+    if (typeof renderMain === 'function' && state.activeTab === 'plan') renderMain();
+  };
   window.__CE_META_SCHEDULE_RESULT__ = function (ok, mode, detail) {
     var info = detail;
     if (typeof detail === 'string') {
@@ -5479,6 +5493,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var status = document.getElementById('ce-meta-token-status');
       if (status) status.textContent = 'Graph ok. Page ' + (info.pageId || '') + ' / IG @' + who + '.';
       if (info.note) showQueueToast(String(info.note));
+      return;
+    }
+    if (mode === 'publish_refused') {
+      showAppToast('Post now was not sent', {
+        variant: 'warn',
+        icon: 'info',
+        detail: 'Nothing was published. ' + String(info.error || 'Native publishing consent is not armed. Use Schedule + Prep instead.'),
+        action: {
+          label: 'Preview payload',
+          onClick: function () { ceDispatchMetaGraphSchedule(true, true); }
+        }
+      });
       return;
     }
     if (mode === 'needs_connect' || mode === 'probe_failed') {
@@ -5631,6 +5657,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
     if (br) {
       br.postMessage({ action: 'getMetaToken' });
+      br.postMessage({ action: 'getMetaPublishStatus' });
       br.postMessage({ action: 'getIgQueue' });
       br.postMessage({ action: 'getScheduleRequests' });
     }
@@ -15428,7 +15455,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var statusLine = ceInboxStatusLine(q);
         var statusDetail = ceInboxStatusDetail(q);
         var rowTitle = queueDisplayTitle(q) + ' · ' + queueTypeLabel(q) + (creatorLabel ? ' · ' + creatorLabel : '') + (statusDetail ? ' · ' + statusDetail : '');
-        return `<div class="ce-staged-row ce-staged-row--inbox ce-kanban-card" data-queue-index="${idx}" role="listitem" aria-label="${escapeHtml(queueTypeLabel(q))}${creatorLabel ? ', ' + escapeHtml(creatorLabel) : ''}, ${escapeHtml(queueDisplayTitle(q))}">
+        return `<div class="ce-staged-row ce-staged-row--inbox ce-plan-inbox-card ce-kanban-card" data-queue-index="${idx}" draggable="true" role="listitem" aria-label="${escapeHtml(queueTypeLabel(q))}${creatorLabel ? ', ' + escapeHtml(creatorLabel) : ''}, ${escapeHtml(queueDisplayTitle(q))}">
           <div class="ce-kanban-art-block">
             <div class="ce-staged-art-wrap" data-idx="${idx}" title="Open in Studio" aria-label="Open ${escapeHtml(queueDisplayTitle(q))} in Studio">
               <div class="ce-staged-face-preview">${queuePreviewHtml(q, idx)}</div>
@@ -15483,6 +15510,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       }).join('');
 
       var planSelectedCount = state.planSelectedIds ? state.planSelectedIds.size : 0;
+      var planMetaReadyCount = (state.queueItems || []).filter(function (q) {
+        return q && q.readyToPost && state.planSelectedIds && state.planSelectedIds.has(q.id);
+      }).length;
+      var planPostNowLabel = window.__CE_META_PUBLISH_ALLOWED__ ? 'Post now' : 'Preview post';
+      var planScheduleLabel = window.__CE_META_HAS_TOKEN__ ? 'Schedule to Meta' + (planMetaReadyCount ? ' (' + planMetaReadyCount + ')' : '') : 'Schedule + Prep';
+      var planScheduleTitle = window.__CE_META_HAS_TOKEN__
+        ? "Send the selected Ready pieces to Meta's clock at their board dates/times (confirm first). Facebook schedules natively; Instagram fires from this Mac at the minute."
+        : 'Keep assigned dates, copy captions, reveal exports and open Meta Business Suite for final review.';
       var planBulkBarHtml = '';
       if (planSelectedCount > 0) {
         planBulkBarHtml = '<div class="ce-plan-bulk-bar">'
@@ -15497,8 +15532,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           + '<option value="youtube">YouTube Community</option>'
           + '</select>'
           + '<label class="ce-plan-bulk-date" style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--muted);"><span>On</span><input type="date" id="ce-plan-batch-date" value="' + (state.planBatchDate || '') + '" style="background:rgba(255,255,255,0.08);color:var(--ink);border:1px solid rgba(255,255,255,0.14);padding:5px 8px;border-radius:8px;font-size:12px;"></label>'
-          + '<button type="button" class="ce-plan-bulk-btn is-primary" id="ce-plan-post-now-btn" title="Publish the selected Ready pieces live to @doalfaaz now (confirm first). Same pipeline as Schedule.">Post now</button>'
-          + '<button type="button" class="ce-plan-bulk-btn" id="ce-plan-batch-schedule-btn" title="Keep assigned dates, copy captions, reveal exports and open Meta Business Suite for final review.">Schedule + Prep</button>'
+          + '<button type="button" class="ce-plan-bulk-btn is-primary" id="ce-plan-post-now-btn" title="' + (window.__CE_META_PUBLISH_ALLOWED__ ? 'Publish the selected Ready pieces live to @doalfaaz now (confirm first).' : 'Validate the Post now payload without sending anything. Nothing will be published.') + '">' + planPostNowLabel + '</button>'
+          + '<button type="button" class="ce-plan-bulk-btn" id="ce-plan-batch-schedule-btn" title="' + planScheduleTitle + '">' + planScheduleLabel + '</button>'
           + '<button type="button" class="ce-plan-bulk-btn" id="ce-plan-batch-prep-btn" title="Copy captions & reveal slides folder in Finder">Prep for Creator Studio</button>'
           + '<button type="button" class="ce-plan-bulk-btn" id="ce-plan-batch-clear-btn">Deselect All</button>'
           + '</div></div>';
@@ -15555,6 +15590,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         </div>
 
         ${planBulkBarHtml}
+
+        ${planInbox.length ? `
+          <section class="ce-plan-inbox ce-plan-inbox--rail" data-col-id="unassigned" aria-label="Unscheduled pieces">
+            <div class="ce-plan-inbox-head">
+              <div><strong>Unscheduled</strong><span>Drag a piece onto a day to place it on the calendar</span></div>
+              <span class="ce-kanban-col-count">${planInbox.length}</span>
+            </div>
+            <div class="ce-plan-inbox-list" data-col-id="unassigned" role="list">
+              ${planInbox.slice().sort(function (a, b) { return (b.q.exportStatus === 'EXPORTED' ? 1 : 0) - (a.q.exportStatus === 'EXPORTED' ? 1 : 0); }).map(({ q, idx }) => renderInboxRow(q, idx)).join('')}
+            </div>
+          </section>
+        ` : ''}
 
         <section class="ce-staged-queue" aria-label="Staged posting queue" style="margin-top: 8px;">
           ${state.queueItems.length === 0 ? `
@@ -15631,12 +15678,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               ${kanbanColsHtml}
             </div>
           `}
-          ${planInbox.length ? `
-            <section class="ce-plan-inbox" aria-label="Inbox staging">
-              <div class="ce-plan-inbox-head"><div><strong>Inbox</strong><span>Unscheduled drafts and pieces waiting for a day</span></div><span class="ce-kanban-col-count">${planInbox.length}</span></div>
-              <div class="ce-plan-inbox-list">${planInbox.slice().sort(function (a, b) { return (b.q.exportStatus === 'EXPORTED' ? 1 : 0) - (a.q.exportStatus === 'EXPORTED' ? 1 : 0); }).map(({ q, idx }) => renderInboxRow(q, idx)).join('')}</div>
-            </section>
-          ` : ''}
         </section>
       `;
       view.appendChild(planBox);
@@ -15769,7 +15810,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         });
       };
       var planPostNow = document.getElementById('ce-plan-post-now-btn');
-      if (planPostNow) planPostNow.onclick = function () { ceDispatchMetaGraphSchedule(false, true); };
+      if (planPostNow) planPostNow.onclick = function () {
+        if (!window.__CE_META_HAS_TOKEN__) {
+          showAppToast('Preview needs Meta connection', {
+            isError: true,
+            variant: 'warn',
+            detail: 'Connect Meta in Publishing settings to validate the payload. Nothing was published.'
+          });
+          return;
+        }
+        if (!window.__CE_META_PUBLISH_ALLOWED__) {
+          showAppToast('Previewing Post now — nothing will be published', {
+            variant: 'warn',
+            icon: 'info',
+            detail: 'The native live-publish consent is not armed. This checks the payload only.'
+          });
+          ceDispatchMetaGraphSchedule(true, true);
+          return;
+        }
+        ceDispatchMetaGraphSchedule(false, true);
+      };
       planBox.querySelectorAll('.kanban-col-select-btn').forEach(function (btn) {
         btn.onclick = function (e) {
           e.stopPropagation();
@@ -16045,35 +16105,50 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         };
         card.ondragend = function () {
           card.classList.remove('is-dragging');
-          planBox.querySelectorAll('.ce-kanban-col').forEach(c => c.classList.remove('is-drop-target'));
+          planBox.querySelectorAll('.ce-kanban-col, .ce-plan-inbox').forEach(function (zone) { zone.classList.remove('is-drop-target'); });
         };
       });
 
-      planBox.querySelectorAll('.ce-kanban-col').forEach(col => {
-        col.ondragover = function (e) {
+      /* Plan uses one transfer loop for both directions: Unscheduled is the
+         source rail above the calendar and also a real drop target, so placing
+         and unplacing a piece share one obvious spatial model. */
+      planBox.querySelectorAll('.ce-kanban-col, .ce-plan-inbox').forEach(function (dropZone) {
+        var visualZone = dropZone.closest('.ce-kanban-col, .ce-plan-inbox') || dropZone;
+        dropZone.ondragover = function (e) {
           e.preventDefault();
           e.dataTransfer.dropEffect = 'move';
-          col.classList.add('is-drop-target');
+          visualZone.classList.add('is-drop-target');
         };
-        col.ondragleave = function (e) {
-          if (!col.contains(e.relatedTarget)) {
-            col.classList.remove('is-drop-target');
-          }
+        dropZone.ondragleave = function (e) {
+          if (!visualZone.contains(e.relatedTarget)) visualZone.classList.remove('is-drop-target');
         };
-        col.ondrop = function (e) {
+        dropZone.ondrop = function (e) {
           e.preventDefault();
-          col.classList.remove('is-drop-target');
+          visualZone.classList.remove('is-drop-target');
           var queueIdx = Number(e.dataTransfer.getData('text/plain'));
-          var targetColId = col.getAttribute('data-col-id');
-          if (!isNaN(queueIdx) && state.queueItems[queueIdx] && targetColId) {
-            state.queueItems[queueIdx].scheduledDay = targetColId;
+          var targetColId = dropZone.getAttribute('data-col-id') || visualZone.getAttribute('data-col-id');
+          var queued = state.queueItems[queueIdx];
+          if (isNaN(queueIdx) || !queued || !targetColId) return;
+          if (targetColId === 'unassigned') {
+            if (queued.metaGraphId || queued.metaState === 'scheduled') {
+              showQueueToast('Remove this piece from Meta’s clock before returning it to Unscheduled', true);
+              return;
+            }
+            queued.scheduledDay = 'unassigned';
+            queued.scheduleDate = '';
+            queued.scheduleTime = '';
+            queued.scheduleSlot = '';
+            queued.scheduled = false;
+            showQueueToast('Moved to Unscheduled');
+          } else {
+            queued.scheduledDay = targetColId;
             var droppedDay = kanbanDays.find(function (d) { return d.id === targetColId; });
-            state.queueItems[queueIdx].scheduleDate = droppedDay && droppedDay.dateKey ? droppedDay.dateKey : null;
-            localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
-            var matchedDay = kanbanDays.find(d => d.id === targetColId);
+            queued.scheduleDate = droppedDay && droppedDay.dateKey ? droppedDay.dateKey : null;
+            var matchedDay = kanbanDays.find(function (d) { return d.id === targetColId; });
             showQueueToast('✓ Moved to ' + (matchedDay ? matchedDay.label : targetColId));
-            renderMain();
           }
+          localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+          renderMain();
         };
       });
 
@@ -16916,6 +16991,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     body.appendChild(t);
 
     if (detail) {
+      body.appendChild(document.createTextNode(' '));
       var d = document.createElement('span');
       d.textContent = detail;
       d.setAttribute('title', detail);
@@ -16950,7 +17026,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         toast.style.transform = 'translateY(12px) scale(0.98)';
       }));
     }
-    if (acts.childNodes.length) toast.appendChild(acts);
+    if (acts.childNodes.length) {
+      toast.appendChild(document.createTextNode(' '));
+      toast.appendChild(acts);
+    }
 
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0) scale(1)';
@@ -17520,6 +17599,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
 
   function ceDispatchMetaGraphSchedule(dryRun, publishNow, explicitItems) {
+    if (window.__CE_AUDIT_READ_ONLY__ && !dryRun) dryRun = true;
     var selected = (Array.isArray(explicitItems) ? explicitItems : cePlanSelectedItems());
     var readySel = selected.filter(function (q) { return q && q.readyToPost; });
     if (!readySel.length) {
