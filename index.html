@@ -2275,10 +2275,10 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=f7ee32d5ff"></script>
+<script src="./deck_index.js?v=d321ee2200"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
-<link rel="stylesheet" href="./native-plan.css?v=1562feffbc" />
+<link rel="stylesheet" href="./native-plan.css?v=96c13083bb" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
 <link rel="stylesheet" href="./native-studio.css?v=4917829aaf" />
 <style id="ce-share-trim">
@@ -5440,10 +5440,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var postBtn = document.getElementById('ce-plan-post-now-btn');
     if (postBtn) {
       var liveAllowed = !!window.__CE_META_PUBLISH_ALLOWED__;
-      postBtn.textContent = liveAllowed ? 'Post now' : 'Preview post';
+      postBtn.textContent = 'Post now';
       postBtn.title = liveAllowed
         ? 'Publish the selected Ready pieces live to @doalfaaz now (confirm first).'
-        : 'Validate the Post now payload without sending anything. Nothing will be published.';
+        : 'Post now is in preview mode until native live consent is armed. Nothing will be published.';
     }
     if (!btn) return;
     if (window.__CE_META_HAS_TOKEN__) {
@@ -10003,6 +10003,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (state.currentType !== 'poem' || !state.currentItem) return null;
     const el = document.getElementById('studio-editable-text');
     if (!el) return state.currentItem.text || '';
+    // A closed Studio keeps its DOM around. When the next poem opens, the old
+    // editable node can still be present for the first render pass; never let
+    // that stale text overwrite the newly selected poem. The marker is written
+    // on every canvas render and only same-poem edits may flow back into state.
+    var activePoemId = String(el.getAttribute('data-ce-poem-id') || '');
+    var currentPoemId = String((typeof cePoemStableId === 'function' ? cePoemStableId(state.currentItem) : (state.currentItem.id || state.currentItem.content_id || '')) || '');
+    if (activePoemId && currentPoemId && activePoemId !== currentPoemId) {
+      return String(state.currentItem.text || '');
+    }
     let live = String(el.innerText || '')
       .replace(/^[\u2800-\u28FF\u22EE\u22EF\u2026\u22EE]+\s*Move\s*/i, '')
       .replace(/\u00a0/g, ' ')
@@ -10287,7 +10296,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             <div class="ce-poem-margin-line" style="position:absolute; left:32px; top:0; bottom:0; width:2px; display:${hasMargin ? 'block' : 'none'}; background:#d4a58c; opacity:0.8; z-index:1;"></div>
             <div id="studio-draggable-container" class="ce-draggable-box${state.studioPoemSelected ? ' is-selected' : ''}${state.studioPoemEditing ? ' is-editing' : ''}" tabindex="0" role="group" aria-label="Poem text box. Drag to move; double-click or press Enter to edit." style="position:absolute; z-index:2; left:${leftPad}; ${textBoxWidthStyle} ${topStyle}">
               <div class="ce-drag-handle-bar" title="Drag to reposition text with magnetic snapping" aria-hidden="true" contenteditable="false" style="user-select:none; -webkit-user-select:none;">⋮⋮ Move</div>
-              <div id="studio-editable-text" contenteditable="${state.studioPoemEditing ? 'true' : 'false'}" spellcheck="false" style="font-family:${fontFamily}; font-size:${glyphPx}px; line-height:${lineHeight}; font-weight:${fontWeight}; color:${textColor}; text-align:${state.studioAlign}; text-shadow:${textShadow}; outline:none; cursor:${state.studioPoemEditing ? 'text' : 'grab'}; user-select:${state.studioPoemEditing ? 'text' : 'none'}; -webkit-user-select:${state.studioPoemEditing ? 'text' : 'none'};">
+              <div id="studio-editable-text" data-ce-poem-id="${escapeHtml(cePoemStableId(poem))}" contenteditable="${state.studioPoemEditing ? 'true' : 'false'}" spellcheck="false" style="font-family:${fontFamily}; font-size:${glyphPx}px; line-height:${lineHeight}; font-weight:${fontWeight}; color:${textColor}; text-align:${state.studioAlign}; text-shadow:${textShadow}; outline:none; cursor:${state.studioPoemEditing ? 'text' : 'grab'}; user-select:${state.studioPoemEditing ? 'text' : 'none'}; -webkit-user-select:${state.studioPoemEditing ? 'text' : 'none'};">
                 ${formattedLines}
               </div>
             </div>
@@ -15340,6 +15349,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       function renderKanbanCard(q, idx, col) {
         var currentDay = getQueueItemDay(q);
         var currentTime = q.scheduleTime || '';
+        var isUnscheduled = !!(col && col.id === 'unassigned');
         var dotColor = q.scheduled && q.scheduleTime ? 'var(--accent)' : (q.readyToPost ? '#f59e0b' : (q.exportStatus === 'EXPORTED' ? '#34d399' : 'var(--faint)'));
         var isPlanSelected = state.planSelectedIds && state.planSelectedIds.has(q.id);
         var typeLabel = escapeHtml(queueTypeLabel(q));
@@ -15351,7 +15361,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
            artwork, carrying selection + type + author + the piece's own actions.
            Authored artwork is never overlaid — the rail is a footer, not a badge. */
         return `
-          <div class="ce-kanban-card${isPlanSelected ? ' is-selected' : ''}" data-queue-index="${idx}" draggable="true" role="listitem" aria-label="${typeLabel}${creatorLabel ? ', ' + escapeHtml(creatorLabel) : ''}${queueDisplayTitle(q) ? ', ' + escapeHtml(queueDisplayTitle(q)) : ''}">
+          <div class="ce-kanban-card${isUnscheduled ? ' ce-plan-inbox-card ce-staged-row--inbox' : ''}${isPlanSelected ? ' is-selected' : ''}" data-queue-index="${idx}" draggable="true" role="listitem" aria-label="${typeLabel}${creatorLabel ? ', ' + escapeHtml(creatorLabel) : ''}${queueDisplayTitle(q) ? ', ' + escapeHtml(queueDisplayTitle(q)) : ''}">
             <div class="ce-kanban-art-block">
               <div class="ce-staged-art-wrap ce-staged-open" data-idx="${idx}" title="Click to edit in Studio" style="cursor:pointer;">
                 <div class="ce-staged-face-preview">
@@ -15450,27 +15460,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
            belongs to the piece. The type/creator used to float as a detached line in
            the row's copy block, so Inbox rows contradicted the board's new rail. The
            thumbnail and its identity rail are now one object here too. */
-        var creatorLabel = queueCreatorLabel(q);
-        var dupTitle = ceArtworkShowsTitle(q);
-        var statusLine = ceInboxStatusLine(q);
-        var statusDetail = ceInboxStatusDetail(q);
-        var rowTitle = queueDisplayTitle(q) + ' · ' + queueTypeLabel(q) + (creatorLabel ? ' · ' + creatorLabel : '') + (statusDetail ? ' · ' + statusDetail : '');
-        return `<div class="ce-staged-row ce-staged-row--inbox ce-plan-inbox-card ce-kanban-card" data-queue-index="${idx}" draggable="true" role="listitem" aria-label="${escapeHtml(queueTypeLabel(q))}${creatorLabel ? ', ' + escapeHtml(creatorLabel) : ''}, ${escapeHtml(queueDisplayTitle(q))}">
-          <div class="ce-kanban-art-block">
-            <div class="ce-staged-art-wrap" data-idx="${idx}" title="Open in Studio" aria-label="Open ${escapeHtml(queueDisplayTitle(q))} in Studio">
-              <div class="ce-staged-face-preview">${queuePreviewHtml(q, idx)}</div>
-            </div>
-          </div>
-          <div class="ce-staged-copy">
-            <button class="ce-staged-open" data-idx="${idx}" type="button" title="${escapeHtml(rowTitle)}">
-            <span>${dupTitle ? '' : `<strong>${escapeHtml(queueDisplayTitle(q))}</strong>`}<small>${escapeHtml(statusLine)}</small></span>
-            </button>
-            <div class="ce-staged-actions">
-              <button class="queue-open-studio-btn" data-idx="${idx}" type="button">Edit in Studio</button>
-              <button class="queue-del-btn" data-idx="${idx}" type="button" aria-label="Remove from queue" title="Remove from queue">×</button>
-            </div>
-          </div>
-        </div>`;
+        return renderKanbanCard(q, idx, { id: 'unassigned', label: 'Unscheduled' });
       }
 
       /* Owner law 2026-09-13 (audit P0-1): 'later' gets a real bucket. It used to
@@ -15513,7 +15503,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var planMetaReadyCount = (state.queueItems || []).filter(function (q) {
         return q && q.readyToPost && state.planSelectedIds && state.planSelectedIds.has(q.id);
       }).length;
-      var planPostNowLabel = window.__CE_META_PUBLISH_ALLOWED__ ? 'Post now' : 'Preview post';
+      var planPostNowLabel = 'Post now';
       var planScheduleLabel = window.__CE_META_HAS_TOKEN__ ? 'Schedule to Meta' + (planMetaReadyCount ? ' (' + planMetaReadyCount + ')' : '') : 'Schedule + Prep';
       var planScheduleTitle = window.__CE_META_HAS_TOKEN__
         ? "Send the selected Ready pieces to Meta's clock at their board dates/times (confirm first). Facebook schedules natively; Instagram fires from this Mac at the minute."
@@ -15532,7 +15522,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           + '<option value="youtube">YouTube Community</option>'
           + '</select>'
           + '<label class="ce-plan-bulk-date" style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--muted);"><span>On</span><input type="date" id="ce-plan-batch-date" value="' + (state.planBatchDate || '') + '" style="background:rgba(255,255,255,0.08);color:var(--ink);border:1px solid rgba(255,255,255,0.14);padding:5px 8px;border-radius:8px;font-size:12px;"></label>'
-          + '<button type="button" class="ce-plan-bulk-btn is-primary" id="ce-plan-post-now-btn" title="' + (window.__CE_META_PUBLISH_ALLOWED__ ? 'Publish the selected Ready pieces live to @doalfaaz now (confirm first).' : 'Validate the Post now payload without sending anything. Nothing will be published.') + '">' + planPostNowLabel + '</button>'
+          + '<button type="button" class="ce-plan-bulk-btn is-primary" id="ce-plan-post-now-btn" title="' + (window.__CE_META_PUBLISH_ALLOWED__ ? 'Publish the selected Ready pieces live to @doalfaaz now (confirm first).' : 'Post now is in preview mode until native live consent is armed. Nothing will be published.') + '">' + planPostNowLabel + '</button>'
           + '<button type="button" class="ce-plan-bulk-btn" id="ce-plan-batch-schedule-btn" title="' + planScheduleTitle + '">' + planScheduleLabel + '</button>'
           + '<button type="button" class="ce-plan-bulk-btn" id="ce-plan-batch-prep-btn" title="Copy captions & reveal slides folder in Finder">Prep for Creator Studio</button>'
           + '<button type="button" class="ce-plan-bulk-btn" id="ce-plan-batch-clear-btn">Deselect All</button>'
@@ -15820,10 +15810,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           return;
         }
         if (!window.__CE_META_PUBLISH_ALLOWED__) {
-          showAppToast('Previewing Post now — nothing will be published', {
+          showAppToast('Post now is in preview mode — nothing will be published', {
             variant: 'warn',
             icon: 'info',
-            detail: 'The native live-publish consent is not armed. This checks the payload only.'
+            detail: 'Native live-publish consent is not armed. This checks the payload only.'
           });
           ceDispatchMetaGraphSchedule(true, true);
           return;
