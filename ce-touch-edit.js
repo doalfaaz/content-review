@@ -23,8 +23,14 @@
 
   function armTouchEditing(container) {
     if (!container) return;
-    var stage = container.querySelector('#ce-real-stage') || container;
-    var editables = container.querySelectorAll('[data-ce-block="content"], [data-ce-block="hook"], [data-ce-block="body"], .kickline[data-ce-edit]');
+    /* Only the active authored canvas is editable. The old fallback to the
+       whole #studio armed filmstrip thumbnails and look-picker minis; their
+       text blocks then received touch-action:none and a long-press wrote into
+       state.currentSlideIdx (the selected slide, not the thumbnail's slide).
+       A missing stage is safer than arming a preview node. */
+    var stage = container.querySelector('#ce-real-stage, .ce-carousel-slide-stage, .ce-postcore-stage, .ce-poem-stage, .ce-studio-post-frame, #active-studio-canvas');
+    if (!stage) return;
+    var editables = stage.querySelectorAll('[data-ce-block="content"], [data-ce-block="hook"], [data-ce-block="body"], .kickline[data-ce-edit]');
     editables.forEach(function (el) {
       if (el.__ceTouchArmed) return;
       el.__ceTouchArmed = true;
@@ -193,6 +199,7 @@
       if (t.clientX - edgeStart.x <= 40) return;
       edgeFired = true;
       edgeStart = null;
+      try { e.preventDefault(); } catch (_) {}
       /* Owner law 2026-09-13 (deep audit P1-4). This used to call the MUTATING
          __CE_APP_BACK__() and `return` on its truthiness, so the drawer branch below
          was UNREACHABLE whenever history was non-empty — the nav drawer could only be
@@ -206,6 +213,16 @@
          therefore never contingent on navigation state. */
       var navDepth = 0;
       try { if (typeof window.__CE_NAV_HISTORY_DEPTH__ === 'function') navDepth = Number(window.__CE_NAV_HISTORY_DEPTH__()) || 0; } catch (_dep) {}
+      /* Studio is itself the topmost route even when its tab trail is empty.
+         A fresh card-open therefore has navDepth=0; sending that edge swipe to
+         the drawer branch opened an invisible z-115 drawer beneath Studio z-200
+         and stripped the Studio background inert state. Close Studio first. */
+      var studioOpen = false;
+      try { studioOpen = !!document.querySelector('#studio.open'); } catch (_studioProbe) {}
+      if (studioOpen) {
+        try { if (typeof window.__CE_APP_BACK__ === 'function') window.__CE_APP_BACK__(); } catch (_studioBack) {}
+        return;
+      }
       if (navDepth > 0) {
         var wentBack = false;
         try { if (typeof window.__CE_APP_BACK__ === 'function') wentBack = !!window.__CE_APP_BACK__(); } catch (_b) {}
@@ -216,7 +233,7 @@
         var tg = document.getElementById('sidebar-toggle');
         tg && tg.click();
       }
-    }, { passive: true });
+    }, { passive: false });
     var edgeReset = function () { edgeStart = null; };
     document.addEventListener('touchend', edgeReset, { passive: true });
     document.addEventListener('touchcancel', edgeReset, { passive: true });
@@ -793,7 +810,12 @@
     armTouchEditing(studio);
     armScheduleButton();
   }
-  var mo = new MutationObserver(function () { setTimeout(armSweep, 120); });
+  var armTimer = 0;
+  var scheduleArmSweep = function () {
+    if (armTimer) return;
+    armTimer = setTimeout(function () { armTimer = 0; armSweep(); }, 120);
+  };
+  var mo = new MutationObserver(scheduleArmSweep);
   mo.observe(document.documentElement, { childList: true, subtree: true });
   var veilPoll = setInterval(function () {
     /* A7-P1-6: skeletons are .pure-card.deck-card too (aria-hidden) — the

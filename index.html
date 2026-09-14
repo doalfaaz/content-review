@@ -2275,7 +2275,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=0c00bb000d"></script>
+<script src="./deck_index.js?v=cc3a70909b"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=5d2d3226d0" />
 <link rel="stylesheet" href="./native-plan.css?v=96c13083bb" />
@@ -2286,8 +2286,8 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=e60b844cef" />
-<script src="./ce-touch-edit.js?v=b5ef48807a"></script>
+<link rel="stylesheet" href="./ce-mobile.css?v=6dc8a16605" />
+<script src="./ce-touch-edit.js?v=827c564151"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -5488,7 +5488,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (schedule) {
         var close = schedule.querySelector('[data-ce-idea-schedule-close], [data-ce-idea-schedule-cancel]');
         if (close) close.click();
+        else if (typeof ceSetModalBackground === 'function') ceSetModalBackground(false);
         if (schedule.isConnected) schedule.remove();
+        dismissed = true;
+      }
+      var palette = document.querySelector('.ce-palette-overlay.open');
+      if (palette) {
+        if (typeof window.__CE_CLOSE_PALETTE__ === 'function') window.__CE_CLOSE_PALETTE__();
+        else palette.classList.remove('open');
+        dismissed = true;
+      }
+      var addBlock = document.getElementById('ce-add-block-menu');
+      if (addBlock && addBlock.classList.contains('open')) {
+        addBlock.classList.remove('open');
         dismissed = true;
       }
     } catch (_routeOverlay) {}
@@ -12164,9 +12176,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
 
   function openStudio(type, item, options) {
+    const __studioAlreadyOpen = !!(document.getElementById('studio') && document.getElementById('studio').classList.contains('open'));
+    const __preserveStudioOrigin = __studioAlreadyOpen && !!state.studioNavSource;
     // Owner 2026-09-05: studios auto-collapse the sidebar by default; the
     // edge trigger / toggle reopens it on demand.
-    try { if (window.__CE_SIDEBAR_COLLAPSE__) window.__CE_SIDEBAR_COLLAPSE__(); } catch (_e) {}
+    try { if (!__studioAlreadyOpen && window.__CE_SIDEBAR_COLLAPSE__) window.__CE_SIDEBAR_COLLAPSE__(); } catch (_e) {}
     const studio = document.getElementById('studio');
     if (studio) {
       studio.classList.add('open');
@@ -12181,13 +12195,20 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     // in practice and showed up as 8–17 occluded buttons in the surface census.
     // #studio is a SIBLING of #view inside <main class="workspace">.
     try {
+      /* A Studio hop must keep the original background block record. Re-recording
+         already-inert nodes poisons the restore snapshot and leaves the whole app
+         dead after Close. Route-owned sheets are dismissed before the first block
+         so their inert record cannot be captured as Studio's original state. */
+      if (!__studioAlreadyOpen && typeof ceDismissRouteOverlays === 'function') ceDismissRouteOverlays();
       const __view = document.getElementById('view');
       const __sidebar = document.getElementById('sidebar');
       const __topbar = document.querySelector('.workspace > .topbar');
       const __edge = document.getElementById('sidebar-edge-trigger');
-      window.__CE_STUDIO_BG__ = (typeof ceBlockBackground === 'function')
-        ? ceBlockBackground([__view, __sidebar, __topbar, __edge])
-        : [];
+      if (!__studioAlreadyOpen || !window.__CE_STUDIO_BG__) {
+        window.__CE_STUDIO_BG__ = (typeof ceBlockBackground === 'function')
+          ? ceBlockBackground([__view, __sidebar, __topbar, __edge])
+          : [];
+      }
     } catch (_e) {}
     if (type === 'poem' && item) {
       // Native content rows use `body`; Studio's editable poem contract uses
@@ -12200,8 +12221,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (item.body) item.body = String(item.body).replace(/[\u2800-\u28FF\u22EE\u22EF\u2026\u22EE]*\s*Move[\s-]*/gi, '').replace(/\u00a0/g, ' ').trim();
       if (item.title) item.title = String(item.title).replace(/[\u2800-\u28FF\u22EE\u22EF\u2026\u22EE]*\s*Move[\s-]*/gi, '').replace(/\u00a0/g, ' ').trim();
     }
-    var __studioOriginType = state.currentType || '';
-    var __studioOriginItem = state.currentItem || null;
+    var __studioOriginType = __preserveStudioOrigin ? (state.studioNavSource.currentType || '') : (state.currentType || '');
+    var __studioOriginItem = __preserveStudioOrigin ? (state.studioNavSource.currentItem || null) : (state.currentItem || null);
     state.currentType = type;
     state.currentItem = item;
     if (type === 'carousel' && item) {
@@ -12240,7 +12261,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     state.studioRedoStack = [];
     state.studioShowAllSlides = false;   // audit A4: never leak the view mode between carousels
     state.studioOriginalSnapshot = null;
-    state.studioNavSource = {
+    if (!__preserveStudioOrigin) state.studioNavSource = {
       tab: state.activeTab || 'library',
       libraryType: state.libraryType || 'poems',
       poemSection: state.poemSection || 'photo',
@@ -12262,7 +12283,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       scrollTop: (function () { try { var v = document.getElementById('view'); return v ? (v.scrollTop || 0) : 0; } catch (_s) { return 0; } })()
     };
 
-    if (!state.studioNavSource.savedId && Array.isArray(state.savedItems)) {
+    if (!__preserveStudioOrigin && !state.studioNavSource.savedId && Array.isArray(state.savedItems)) {
       var itemKey = (typeof getContentKey === 'function') ? getContentKey(type, item) : String(item && (item.id || item.content_id || item.title) || '');
       var matchSaved = state.savedItems.find(function (s) {
         return s && (s.id === itemKey || (typeof getContentKey === 'function' && getContentKey(s.type, s.item) === itemKey) || (s.item && (s.item.id === item.id || (item.title && s.item.title === item.title))));
@@ -12272,7 +12293,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       }
     }
 
-    if (state.studioNavSource.queueIndex == null && Array.isArray(state.queueItems)) {
+    if (!__preserveStudioOrigin && state.studioNavSource.queueIndex == null && Array.isArray(state.queueItems)) {
       var itemKeyQ = (typeof getContentKey === 'function') ? getContentKey(type, item) : String(item && (item.id || item.content_id || item.title) || '');
       var qIdx = state.queueItems.findIndex(function (q) {
         return q && (q.id === itemKeyQ || (typeof getContentKey === 'function' && getContentKey(q.type, q.item) === itemKeyQ) || (q.item && (q.item.id === item.id || (item.title && q.item.title === item.title))));
@@ -12907,7 +12928,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
        so the DOM has its real height and the position lands where the owner left it
        (auditor order 8). A re-render resets scrollTop to 0; restore it deliberately. */
     try {
-      var __navSrc = state.studioNavSource;
+      var __navSrc = __navOrigin;
       if (__navSrc && __navSrc.scrollTop) {
         var __restoreScroll = function () {
           var v = document.getElementById('view');
@@ -12951,7 +12972,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       savedTypeFilter: state.savedTypeFilter || 'all',
       planViewMode: state.planViewMode || 'kanban',
       writeType: state.writeType || '',
+      writeDesignIdx: Number(state.writeDesignIdx || 0),
+      searchQuery: state.searchQuery || '',
       shelfDensity: shelfDensity,
+      savedSelectedIds: Array.from(state.savedSelectedIds || []),
+      planSelectedIds: Array.from(state.planSelectedIds || []),
       currentType: state.currentType || '',
       currentItem: item ? {
         id: item.id || item.content_id || '',
@@ -12963,7 +12988,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       studioNavSource: origin ? {
         tab: origin.tab || '', libraryType: origin.libraryType || '', poemSection: origin.poemSection || '',
         shelfDensity: origin.shelfDensity || '', queueIndex: origin.queueIndex == null ? null : origin.queueIndex,
-        savedId: origin.savedId || ''
+        savedId: origin.savedId || '',
+        currentType: origin.currentType || '',
+        currentItem: origin.currentItem || null,
+        scheduleTarget: origin.scheduleTarget || null,
+        scrollTop: typeof origin.scrollTop === 'number' ? origin.scrollTop : 0
       } : null,
       scheduleTarget: scheduleTarget ? {
         id: scheduleTarget.id || '', title: scheduleTarget.title || '', date: scheduleTarget.date || '', time: scheduleTarget.time || ''
@@ -12977,6 +13006,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var target = s.scheduleTarget || {};
     return [s.tab, s.libraryType, s.poemSection, s.poemEra, s.savedFilter,
       s.savedTypeFilter, s.planViewMode, s.writeType, s.shelfDensity,
+      s.writeDesignIdx, s.searchQuery,
+      (s.savedSelectedIds || []).join(','), (s.planSelectedIds || []).join(','),
       s.currentType, item.id || item.content_id || item.title || '',
       origin.tab || '', origin.libraryType || '', origin.poemSection || '',
       target.id || target.title || '', target.date || '', target.time || ''].join('|');
@@ -12994,6 +13025,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
      those are genuine descents. */
   function ceNavTrack() {
     var now = ceNavSnapshot();
+    /* Studio-internal paints (deck hydration, shelf-cover refresh, save sync)
+       are not navigation. Never let their currentItem/origin churn become a
+       phantom Back snapshot after the editor closes. */
+    var __studioNow = document.getElementById('studio');
+    if (__studioNow && __studioNow.classList.contains('open')) return;
     if (__ceNavRestoring) { __ceNavLast = now; return; }
     if (__ceNavLast && ceNavKey(now) !== ceNavKey(__ceNavLast)) {
       if (now.tab !== __ceNavLast.tab) {
@@ -13017,6 +13053,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     state.savedTypeFilter = snap.savedTypeFilter;
     state.planViewMode = snap.planViewMode;
     state.writeType = snap.writeType || '';
+    state.writeDesignIdx = Number(snap.writeDesignIdx || 0);
+    state.searchQuery = snap.searchQuery || '';
+    state.savedSelectedIds = new Set(snap.savedSelectedIds || []);
+    state.planSelectedIds = new Set(snap.planSelectedIds || []);
     state.shelfDensity = snap.shelfDensity || 'comfy';
     state.currentType = snap.currentType || '';
     state.currentItem = snap.currentItem || null;
@@ -13038,6 +13078,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       document.querySelectorAll('#poem-eras button[data-poem-era]').forEach(function (b) {
         b.classList.toggle('active', b.getAttribute('data-poem-era') === state.poemEra);
       });
+      var searchInput = document.getElementById('search');
+      if (searchInput) searchInput.value = state.searchQuery;
+      if (typeof syncLibrarySidebar === 'function') syncLibrarySidebar();
     } catch (_navChrome) {}
     return true;
   }
@@ -13065,7 +13108,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (sched) {
         var schedClose = sched.querySelector('[data-ce-idea-schedule-close]');
         if (schedClose) { schedClose.click(); return true; }
+        if (typeof ceSetModalBackground === 'function') ceSetModalBackground(false);
         sched.remove(); return true;
+      }
+      var phoneSched = document.getElementById('ce-sched-sheet');
+      if (phoneSched && getComputedStyle(phoneSched).display !== 'none') {
+        var phoneCancel = phoneSched.querySelector('[data-ce-schedule-cancel], [data-ce-sched-cancel], button[aria-label="Close"]');
+        if (phoneCancel) phoneCancel.click(); else phoneSched.remove();
+        return true;
       }
     } catch (_navOverlay) {}
     if (__ceNavHistory.length) {
@@ -18512,11 +18562,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (!Array.isArray(hiddenEras)) hiddenEras = [];
       var hideEmpty = era !== 'all' && n === 0;
       var hideUser = era !== 'all' && hiddenEras.indexOf(era) !== -1;
-      btn.hidden = hideEmpty || hideUser;
-      if (btn.hidden && (state.poemEra || 'all') === era) {
-        state.poemEra = 'all';
-        try { localStorage.setItem('ce_poem_era', 'all'); } catch (_e) {}
-      }
+      /* Keep the owner's selected chip visible even when its bucket is
+         temporarily empty. Silently rewriting the live era to `all` inside a
+         counts pass destroys the route snapshot and makes Back appear broken;
+         the shelf renderer owns the honest empty state instead. */
+      btn.hidden = (hideEmpty || hideUser) && (state.poemEra || 'all') !== era;
     });
     } catch (_updateCounts) {}
   }
@@ -18962,11 +19012,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     document.querySelectorAll('#poem-sections button[data-sec]').forEach(btn => {
       btn.onclick = () => {
         ceDismissRouteOverlays();
+        if (closeStudio() === false) return;
         ceApplySurfaceTransition('library');
         document.querySelectorAll('#poem-sections button[data-sec]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         state.poemSection = btn.getAttribute('data-sec');
         renderMain();
+        hideCollapsedSidebar();
       };
     });
     window.__CE_SET_POEM_SECTION__ = function(sec) {
@@ -19422,21 +19474,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   window.renderSavedBankTab = renderSavedBankTab;
   window.navigateTo = navigateTo;
   window.goToCreatorSurface = goToCreatorSurface;
-  window.setLibraryType = function(type) {
-    ceDismissRouteOverlays();
-    if (closeStudio() === false) return;
-    ceApplySurfaceTransition('library');
-    document.querySelectorAll('#library-filters > button[data-lib]').forEach(b => b.classList.remove('active'));
-    var btn = document.querySelector('#library-filters > button[data-lib="' + type + '"]');
-    if (btn) btn.classList.add('active');
-    state.libraryType = type;
-    state.activeTab = 'library';
-    document.querySelectorAll('#sidebar-nav button[data-tab]').forEach(b => b.classList.remove('active'));
-    var libBtn = document.querySelector('#sidebar-nav button[data-tab="library"]');
-    if (libBtn) libBtn.classList.add('active');
-    if (typeof syncLibrarySidebar === 'function') syncLibrarySidebar();
-    renderMain();
-  };
+  window.setLibraryType = setLibraryType;
 
 
   // ── Command palette (⌘K): global quick actions; keyboard-initiated, instant. ──
@@ -19488,6 +19526,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       input.value = ''; filter = '';
       document.removeEventListener('keydown', onKey, true);
     }
+    window.__CE_CLOSE_PALETTE__ = close;
     function open() {
       if (!overlay) {
         overlay = document.createElement('div');
