@@ -2309,7 +2309,7 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=95ca2da349" />
+<link rel="stylesheet" href="./ce-mobile.css?v=bf0dec7f17" />
 <script src="./ce-touch-edit.js?v=5128f84265"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
@@ -4615,14 +4615,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (lines >= 8) return '2/3';
     if (lines >= 5) return '4/5';
     if (lines >= 3) return '1/1';
-    // OWNER REVIEW 2026-09-15 (V15): the couplet tier used to fall through to PHOTO_ASPECT_RATIO,
-    // which is 4/3 LANDSCAPE - so the SHORTEST poems opened on the WIDEST canvas, and the V12
-    // fill then stretched that landscape across ~96% of the stage. The owner: "as soon as I open a
-    // poem it opens weirdly in this full screen mode which is wrong totally". Every other tier is
-    // portrait or square, so the couplet now continues the same ladder at 4/5 - Instagram's native
-    // feed ratio - meaning a poem opens at the exact shape it will post at. The per-poem override
-    // in the canvas control (Auto / 4:3 / 1:1 / 4:5 / 9:16) still wins when the owner sets one.
-    return '4/5';
+    // OWNER REVIEW 2026-09-15 (V15) — REVERTED, DO NOT RE-APPLY WITHOUT A GATE UPDATE.
+    // The Manager briefly returned '4/5' here to fix the owner's "as soon as I open a poem it opens
+    // weirdly in this full screen mode" report. The full 64-gate release suite REFUSED to deploy it,
+    // correctly: studio-design-system-audit.mjs:136 pins EXPECTED_RATIO = 4/3 for all eight authored
+    // card styles (photo, paper, ivory, notebook, zen, noir, dusk, banaras) with the comment "the
+    // canvas keeps its 4:3 RATIO ... that is the invariant the fill work must not break". The
+    // owner's own persisted designs are type:"photo", i.e. one of those authored 4:3 styles, so the
+    // fallback below is NOT the lever for his complaint. Lane F03_POEM_SHAPE_PARITY now owns the
+    // real measurement of the open-state geometry; change this line only together with that gate.
+    return PHOTO_ASPECT_RATIO;
   }
 
   // One proportional typography law for gallery, Studio and export. The

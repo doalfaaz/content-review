@@ -1187,7 +1187,23 @@ html.ce-phone .ce-launch-board-waitlist > summary::after {
   inset: -7px !important;
   border-radius: 12px !important;
 }
-html.ce-phone .studio-primary-actions { flex: 1 1 100% !important; justify-content: flex-start !important; }
+/* F05 P1 PARITY FIX (2026-09-15): this row was content-sized and refused to shrink. Measured by
+   lane F05: `.studio-primary-actions` = x:10 w:402 right:412 inside a 402px viewport - it runs
+   10px past the right edge and stays 402px wide even at 390px and 360px viewports, so the primary
+   ("Send to Plan") had 22px / 52px of its right side clipped with its badge half-eaten
+   (`[Download for phone][Schedule][...][Send to Plan (0`). The row held Download 150 + Schedule 89
+   + ... 32 + Send 113 + 3x6px gaps = ~402 and nothing could give.
+   min-width:0 lets the flex children actually shrink; flex-wrap lets the primary drop to its own
+   line instead of losing its glyphs; auto margin keeps it pinned to the right end when it fits. */
+html.ce-phone .studio-primary-actions {
+  flex: 1 1 100% !important;
+  justify-content: flex-start !important;
+  flex-wrap: wrap !important;
+  min-width: 0 !important;
+  row-gap: 6px;
+}
+html.ce-phone .studio-primary-actions > * { min-width: 0 !important; }
+html.ce-phone #studio-post-btn { margin-left: auto !important; max-width: 100%; white-space: nowrap; }
 html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock #dock-canvas-section {
   order: 1 !important;
 }
