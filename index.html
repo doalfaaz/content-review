@@ -6121,10 +6121,25 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var badgeBg = st === 'failed' ? 'rgba(239, 68, 68, 0.14)' : (st === 'scheduled' ? 'rgba(59, 130, 246, 0.14)' : 'rgba(255, 255, 255, 0.05)');
       var borderC = st === 'failed' ? 'rgba(239, 68, 68, 0.3)' : (st === 'scheduled' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0.1)');
       var rid = escapeHtml(String(r.id || ''));
-      var actions = actionable && rid
-        ? '<button type="button" class="ce-sched-req-retry" data-req-id="' + rid + '" title="Re-queue this failed booking" style="margin-left:4px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:var(--ink);border-radius:5px;font-size:9.5px;font-weight:700;padding:2px 7px;cursor:pointer;">Retry</button>'
-        + '<button type="button" class="ce-sched-req-remove" data-req-id="' + rid + '" title="Remove this row from the board" style="border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:800;padding:2px 6px;cursor:pointer;">×</button>'
-        : '';
+      /* P0-10 FIX (2026-09-16, lane P1_PUBLISH_SAFETY). Every attention row got the
+         same Retry + × buttons. For a `needs_verification` row BOTH were guaranteed to
+         fail: retry() accepts only failed/superseded, and remove() excluded this state
+         too. So the owner saw a Retry that could only pop a refusal, on a row he could
+         not clear, with no way forward except hand-editing the JSON.
+         The state's whole meaning is "we do not know whether this reached Meta" - so
+         Retry is deliberately absent (re-queueing an unknown-fate booking is exactly
+         the double-post this state exists to prevent). Instead the row carries the one
+         action that is actually useful: a guided check on Meta, then a clear-this-row
+         that acknowledges what happened. */
+      var isUnknownFate = st === 'needs_verification';
+      var actions = '';
+      if (actionable && rid) {
+        actions = isUnknownFate
+          ? '<button type="button" class="ce-sched-req-check" data-req-id="' + rid + '" title="Open Meta to confirm whether this post is live" style="margin-left:4px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:var(--ink);border-radius:5px;font-size:9.5px;font-weight:700;padding:2px 7px;cursor:pointer;">Check Meta</button>'
+            + '<button type="button" class="ce-sched-req-remove" data-req-id="' + rid + '" data-unknown-fate="1" title="Remove this row from the board — it does not delete anything on Meta" style="border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:800;padding:2px 6px;cursor:pointer;">×</button>'
+          : '<button type="button" class="ce-sched-req-retry" data-req-id="' + rid + '" title="Re-queue this failed booking" style="margin-left:4px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:var(--ink);border-radius:5px;font-size:9.5px;font-weight:700;padding:2px 7px;cursor:pointer;">Retry</button>'
+            + '<button type="button" class="ce-sched-req-remove" data-req-id="' + rid + '" title="Remove this row from the board" style="border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:800;padding:2px 6px;cursor:pointer;">×</button>';
+      }
       return '<span class="ce-sched-req-chip" title="' + escapeHtml(deckId + (err ? ' — ' + err : '')) + '" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;border:1px solid ' + borderC + ';background:' + badgeBg + ';color:' + color + ';backdrop-filter:blur(8px);box-shadow:0 2px 6px rgba(0,0,0,0.2);">'
         + '<span style="font-size:10px;font-weight:800;color:' + color + ';">' + icon + '</span>'
         + '<span style="font-weight:700;color:var(--ink);">' + escapeHtml(short) + '</span>'
@@ -16689,14 +16704,45 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           } catch (_e) { showAppToast('Retry failed to reach the Mac', true); }
         };
       });
+      /* P0-10 FIX (2026-09-16): a needs_verification row has no useful Retry - the
+         store refuses it on purpose, because re-queueing a booking whose fate on Meta
+         is unknown is exactly how a double post happens. The useful action is to go
+         LOOK. Check Meta opens Meta's own scheduled/feed surface so the owner can
+         settle the question himself, and the row's × then clears the board entry with
+         the acknowledgement the native store requires. Neither action touches Meta. */
+      planBox.querySelectorAll('.ce-sched-req-check').forEach(function (btn) {
+        btn.onclick = function (ev) {
+          ev.stopPropagation();
+          var rid = btn.getAttribute('data-req-id') || '';
+          try {
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge) {
+              window.webkit.messageHandlers.ceBridge.postMessage({ action: 'openURL', url: 'https://www.instagram.com/doalfaaz/' });
+            } else {
+              window.open('https://www.instagram.com/doalfaaz/', '_blank');
+            }
+            showAppToast('Check @doalfaaz for this piece, then clear the row', {
+              icon: 'info',
+              detail: 'If it is live, the row below just needs clearing. If it is not, schedule it again from the piece itself.'
+            });
+          } catch (_e) { showAppToast('Could not open Meta', true); }
+        };
+      });
       planBox.querySelectorAll('.ce-sched-req-remove').forEach(function (btn) {
         btn.onclick = function (ev) {
           ev.stopPropagation();
           var rid = btn.getAttribute('data-req-id') || '';
           if (!rid) return;
+          var unknownFate = btn.getAttribute('data-unknown-fate') === '1';
+          var msg = unknownFate
+            ? 'Clear this row from the board?\n\nThis removes the board entry only. It does NOT delete, cancel or change anything on Meta — if the piece is live, it stays live.'
+            : null;
+          if (msg && !window.confirm(msg)) return;
           try {
             if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge) {
-              window.webkit.messageHandlers.ceBridge.postMessage({ action: 'removeScheduleRequest', id: rid });
+              window.webkit.messageHandlers.ceBridge.postMessage({
+                action: 'removeScheduleRequest', id: rid,
+                acknowledgingUnknownFate: !!unknownFate
+              });
               showAppToast('Row removed from the board', { icon: 'check' });
             } else {
               showAppToast('Remove needs the Mac app running', true);
@@ -18544,6 +18590,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (Array.isArray(raw)) return raw.filter(Boolean);
     return String(raw).split(/[,\n;]+/).map(function (s) { return s.trim(); }).filter(Boolean);
   }
+  /* P0-6 FIX (2026-09-16): the Confirm sheet must state how many slides each piece
+     will actually carry, because Instagram's 10-child carousel cap is what decides
+     whether the owner gets an IG leg at all. Reads the SAME source the dispatcher
+     sends (ceQueueExportPaths -> native exportPaths), so the promise and the payload
+     can never disagree. A piece whose export has not run yet reports 0, which is
+     deliberately treated as "cannot promise an IG leg". */
+  function ceQueueSlideCount(item) {
+    if (!item) return 0;
+    if (typeof item.mediaCount === 'number' && item.mediaCount > 0) return item.mediaCount;
+    var q = item.__ceQueueRow;
+    if (!q) {
+      // callers pass the dispatch payload, not the board row - resolve the row by id
+      try {
+        q = (state.queueItems || []).filter(function (r) {
+          return r && String(r.id || '') === String(item.id || '');
+        })[0];
+      } catch (_e) { q = null; }
+    }
+    return ceQueueExportPaths(q).length;
+  }
   /* Owner order 2026-09-13: "see why it's showing that it needs to be ready and some
      sort of errors — fix it the right way." The refusal was correct (Ready IS the
      approval gate) but it was a DEAD END: it named the small ☐ without offering it, so
@@ -18709,9 +18775,23 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var first3 = items.slice(0, 3).map(function (it) {
         return '· ' + it.scheduleDate + ' ' + it.scheduleTime + ' — ' + String(it.caption).split('\n')[0].slice(0, 40);
       }).join('\n');
+      /* P0-6 FIX (2026-09-16, lane P1_PUBLISH_SAFETY). Every board item dispatched
+         platform: '' — there is NO platform picker anywhere in the app — so the native
+         else-branch dual-fired BOTH a Facebook schedule AND a local IG live-fire on this
+         Mac. The confirm sheet said only "to Meta's clock", which is what the owner
+         consents to; the local live-fire was never mentioned. That is a consent defect,
+         not just a cap defect: he was told "held on Meta" and was given "will publish
+         from my machine". The sheet now names BOTH legs, and the IG leg is only promised
+         for the pieces that will actually get one (10-slide cap). */
+      var willIg = items.filter(function (it) { return it.platform !== 'facebook' && it.mediaCount !== 0 && ceQueueSlideCount(it) <= 10; });
+      var igLine = willIg.length
+        ? '\n\nInstagram: ' + willIg.length + ' piece' + (willIg.length === 1 ? '' : 's')
+          + ' will also be armed to fire LIVE FROM THIS MAC at their minute (catch-up runs on wake).'
+        : '';
       var confirmMsg = 'Send ' + items.length + ' piece' + (items.length === 1 ? '' : 's') + " to Meta's clock?\n\n"
         + first3 + (items.length > 3 ? '\n…' : '')
-        + "\n\nFacebook holds these on Meta's clock. Instagram pieces fire from this Mac at their minute (catch-up runs on wake). Cancel keeps everything local."
+        + "\n\nFacebook holds these on Meta's clock." + igLine
+        + ' Cancel keeps everything local.'
         + (alreadyOnMeta ? '\n\n(' + alreadyOnMeta + ' already-scheduled piece' + (alreadyOnMeta === 1 ? '' : 's') + ' skipped.)' : '');
       if (!window.confirm(confirmMsg)) return 0;
     }
