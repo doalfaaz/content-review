@@ -2118,6 +2118,19 @@
         <span class="ce-ic ce-ic--sparkles ce-ic--14" aria-hidden="true"></span> Shuffle
       </button>
 
+      <!-- Owner 2026-09-15: "a filter sort of thing where I can filter and it shows me in that
+           order - most viral first, oldest first and all those kind of things - clean UI way".
+           ONE compact pill opens ONE popover holding the whole sort menu, so the shelf gains no
+           new row of chrome (his V5 law: no clutter, no duplicated controls). The label always
+           shows the ACTIVE sort so the shelf never lies about its order. -->
+      <button class="section-btn ce-poem-sort" id="poem-sort" type="button"
+              aria-haspopup="listbox" aria-expanded="false"
+              title="Choose how the shelf is ordered" aria-label="Sort poems">
+        <span class="ce-ic ce-ic--14" data-icon="sort" aria-hidden="true"></span>
+        <span id="poem-sort-label">Cadence</span>
+      </button>
+      <div class="ce-sort-popover" id="poem-sort-popover" role="listbox" aria-label="Sort poems by" hidden></div>
+
       <!-- Saved/Queue launchers live in the sidebar only — topbar duplicates were cut -->
 
       <div class="topbar-meta" id="meta" style="display:none;"></div>
@@ -2303,7 +2316,7 @@
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=5f36c1f7ad" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
-<link rel="stylesheet" href="./native-studio.css?v=acc8016ca5" />
+<link rel="stylesheet" href="./native-studio.css?v=d8daa95404" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
@@ -4173,6 +4186,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     studioPhotoIdx: 0,
     studioUseOriginal: false,
     studioCanvasRatioOverride: '',
+    // LIBRARY SORT (owner request 2026-09-15): which ordering the poem shelf renders in.
+    // 'cadence' = the existing mixViralOlder law, so the default is byte-identical to before.
+    librarySort: 'cadence',
     studioAlign: 'left',
     studioPos: 'top',
     studioType: 'photo',
@@ -7228,8 +7244,195 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   window.mixViralOlder = mixViralOlder;
 
+  /* ============================================================================
+     LIBRARY SORT + FILTER  (owner request 2026-09-15)
+     "a filter sort of thing where I can filter and it shows me in that order -
+      most viral first, oldest first and all those kind of things - clean UI way."
+
+     ARCHITECTURE. Everything needed already existed and only had to be surfaced:
+       - the poem -> Instagram join is `ceJoinIgMeta()` (shortcode / ig_id -> likes index) and it
+         is already used by mixViralOlder, so likes, repeat count and year are real numbers, not
+         estimates;
+       - the default ordering is `mixViralOlder` (the owner's cadence law: viral anchor + archive
+         gems per era), which stays the default and is untouched.
+     This adds a USER choice on top: `state.librarySort` selects a comparator, and the shelf renders
+     through it. Every comparator is total (missing data sorts LAST, never as a fake 0) so a poem
+     with no Instagram row can never be promoted as "most viral".
+     ============================================================================ */
+
+  // The sort menu, in the order the owner sees it. `key` is what we persist; `needs` documents the
+  // field each one depends on so the null policy is explicit rather than accidental.
+  var CE_LIBRARY_SORTS = [
+    { key: 'cadence', label: 'Cadence (default)', hint: 'The mix you already curate: viral anchor + archive gems per era' },
+    { key: 'viral', label: 'Most viral', hint: 'Likes + comments on the Instagram post this poem became' },
+    { key: 'likes', label: 'Most liked', hint: 'Likes on the Instagram post' },
+    { key: 'comments', label: 'Most commented', hint: 'Comments on the Instagram post' },
+    { key: 'newest', label: 'Newest first', hint: 'By the poem year, newest first' },
+    { key: 'oldest', label: 'Oldest first', hint: 'By the poem year, oldest first' },
+    { key: 'longest', label: 'Longest first', hint: 'By line count' },
+    { key: 'shortest', label: 'Shortest first', hint: 'By line count' },
+    { key: 'az', label: 'A–Z (first line)', hint: 'Alphabetical by the poem\u2019s first line' }
+  ];
+  window.__CE_LIBRARY_SORTS__ = CE_LIBRARY_SORTS;
+
+  function cePoemLinesForSort(p) {
+    var t = String((p && (p.text || p.title)) || '');
+    return t.split('\n').filter(function (x) { return x.trim(); }).length || 1;
+  }
+  // One place that reads the joined numbers, so a comparator can never invent a value.
+  function ceLibraryMetrics(p) {
+    var j = null;
+    try { j = (typeof ceJoinIgMeta === 'function') ? ceJoinIgMeta(p) : null; } catch (_e) { j = null; }
+    var likes = (j && j.li != null && isFinite(Number(j.li))) ? Number(j.li)
+              : ((typeof cePoemLikesRaw === 'function') ? Number(cePoemLikesRaw(p) || 0) : 0);
+    var comments = (j && j.cm != null && isFinite(Number(j.cm))) ? Number(j.cm) : 0;
+    var repeats = (j && j.rc != null) ? Number(j.rc) : 0;
+    var year = (j && j.y) ? Number(j.y) : ((typeof cePoemYear === 'function') ? Number(cePoemYear(p) || 0) : 0);
+    var matched = !!(j && (j.li != null || j.y));
+    return { likes: likes, comments: comments, repeats: repeats, year: year,
+             viral: likes + comments * 3, matched: matched, lines: cePoemLinesForSort(p) };
+  }
+  window.__CE_LIBRARY_METRICS__ = ceLibraryMetrics;
+
+  /* Missing data sorts LAST for every metric sort - never as a 0 masquerading as "unpopular".
+     A poem with no Instagram row is UNKNOWN, not bad, and must not be buried as if it lost. */
+  function ceApplyLibrarySort(list, key) {
+    var arr = Array.isArray(list) ? list.slice() : [];
+    key = String(key || 'cadence');
+    if (key === 'cadence') return mixViralOlder(arr);
+    var m = {};
+    for (var i = 0; i < arr.length; i++) {
+      var id = String((arr[i] && (arr[i].id || arr[i].content_id)) || i);
+      m[id] = ceLibraryMetrics(arr[i]);
+    }
+    function met(p, i) { return m[String((p && (p.id || p.content_id)) || i)] || ceLibraryMetrics(p); }
+    function byDesc(field, useMatch) {
+      return function (a, b) {
+        var A = met(a, 0), B = met(b, 0);
+        if (useMatch && A.matched !== B.matched) return A.matched ? -1 : 1;   // known ranks above unknown
+        return (Number(B[field]) || 0) - (Number(A[field]) || 0);
+      };
+    }
+    function byNum(field, dir) {
+      return function (a, b) {
+        var A = met(a, 0), B = met(b, 0);
+        if (!A[field] && B[field]) return 1;      // a zero/unknown year sinks
+        if (A[field] && !B[field]) return -1;
+        return dir * ((Number(A[field]) || 0) - (Number(B[field]) || 0));
+      };
+    }
+    var cmp;
+    switch (key) {
+      case 'viral':    cmp = byDesc('viral', true); break;
+      case 'likes':    cmp = byDesc('likes', true); break;
+      case 'comments': cmp = byDesc('comments', true); break;
+      case 'newest':   cmp = byNum('year', -1); break;
+      case 'oldest':   cmp = byNum('year', 1); break;
+      case 'longest':  cmp = byDesc('lines'); break;
+      case 'shortest': cmp = function (a, b) { return met(a, 0).lines - met(b, 0).lines; }; break;
+      case 'az':       cmp = function (a, b) {
+        var A = String((a && (a.text || a.title)) || '').trim().split('\n')[0];
+        var B = String((b && (b.text || b.title)) || '').trim().split('\n')[0];
+        return A.localeCompare(B, 'hi');
+      }; break;
+      default: cmp = byDesc('viral', true);
+    }
+    return arr.sort(cmp);
+  }
+  window.ceApplyLibrarySort = ceApplyLibrarySort;
+
+  /* --- the control -------------------------------------------------------------------------
+     One pill, one popover, one tap to reset. The label always mirrors the active sort so the
+     shelf never misrepresents its order. Selecting 'cadence' restores the default exactly.
+     Persisted in localStorage so a chosen order survives a reopen and an app restart. */
+  var CE_LIBRARY_SORT_LS = 'ce_library_sort';
+  var CE_LIBRARY_SORT_LABELS = { cadence: 'Cadence', viral: 'Most viral', likes: 'Most liked',
+    comments: 'Most commented', newest: 'Newest', oldest: 'Oldest', longest: 'Longest',
+    shortest: 'Shortest', az: 'A\u2013Z' };
+
+  function ceLibrarySortPersist(key) {
+    try { window.localStorage.setItem(CE_LIBRARY_SORT_LS, String(key || 'cadence')); } catch (_e) {}
+  }
+  function ceLibrarySortRestore() {
+    try {
+      var v = window.localStorage.getItem(CE_LIBRARY_SORT_LS);
+      if (v && CE_LIBRARY_SORT_LABELS[v]) state.librarySort = v;
+    } catch (_e) {}
+  }
+  function ceLibrarySortApplyDom() {
+    var btn = document.getElementById('poem-sort');
+    var lbl = document.getElementById('poem-sort-label');
+    var key = String(state.librarySort || 'cadence');
+    if (lbl) lbl.textContent = CE_LIBRARY_SORT_LABELS[key] || 'Cadence';
+    if (btn) btn.classList.toggle('is-active-sort', key !== 'cadence');
+  }
+  function ceLibrarySortSet(key) {
+    state.librarySort = CE_LIBRARY_SORT_LABELS[key] ? key : 'cadence';
+    ceLibrarySortPersist(state.librarySort);
+    ceLibrarySortApplyDom();
+    ceLibrarySortClose();
+    if (typeof renderMain === 'function') renderMain();
+    if (typeof showAppToast === 'function') showAppToast('Sorted: ' + (CE_LIBRARY_SORT_LABELS[state.librarySort] || 'Cadence'));
+  }
+  function ceLibrarySortClose() {
+    var pop = document.getElementById('poem-sort-popover');
+    var btn = document.getElementById('poem-sort');
+    if (pop) pop.hidden = true;
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+  function ceLibrarySortOpen() {
+    var pop = document.getElementById('poem-sort-popover');
+    var btn = document.getElementById('poem-sort');
+    if (!pop || !btn) return;
+    var cur = String(state.librarySort || 'cadence');
+    // Each option shows its label and, where the sort depends on Instagram data, the hint that
+    // says so - the owner should never have to guess what "most viral" is computed from.
+    pop.innerHTML = CE_LIBRARY_SORTS.map(function (o) {
+      var on = o.key === cur;
+      return '<button type="button" class="ce-sort-option' + (on ? ' is-on' : '') + '" role="option"'
+        + ' aria-selected="' + (on ? 'true' : 'false') + '" data-sort-key="' + o.key + '"'
+        + ' title="' + escapeHtml(o.hint) + '">'
+        + '<span class="ce-sort-check" aria-hidden="true">' + (on ? '\u2713' : '') + '</span>'
+        + '<span class="ce-sort-text"><strong>' + escapeHtml(o.label) + '</strong>'
+        + '<em>' + escapeHtml(o.hint) + '</em></span></button>';
+    }).join('');
+    pop.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+  }
+  function ceLibrarySortInit() {
+    ceLibrarySortRestore();
+    ceLibrarySortApplyDom();
+    var btn = document.getElementById('poem-sort');
+    if (!btn || btn.dataset.bound === '1') return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var pop = document.getElementById('poem-sort-popover');
+      if (pop && pop.hidden) ceLibrarySortOpen(); else ceLibrarySortClose();
+    });
+    var pop = document.getElementById('poem-sort-popover');
+    if (pop) pop.addEventListener('click', function (e) {
+      var t = e.target && e.target.closest ? e.target.closest('[data-sort-key]') : null;
+      if (t) ceLibrarySortSet(t.getAttribute('data-sort-key'));
+    });
+    // click-away and Escape close it - one escape hatch, always (the E01 law)
+    document.addEventListener('click', function (e) {
+      var wrap = document.getElementById('poem-sort-popover');
+      if (!wrap || wrap.hidden) return;
+      if (e.target && e.target.closest && (e.target.closest('#poem-sort') || e.target.closest('#poem-sort-popover'))) return;
+      ceLibrarySortClose();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') ceLibrarySortClose(); });
+  }
+  window.ceLibrarySortInit = ceLibrarySortInit;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ceLibrarySortInit);
+  else ceLibrarySortInit();
+
   function allRankedPoems() {
-    return mixViralOlder(allCleanPoems());
+    // E01/H-series law: the cadence order is the DEFAULT and is byte-identical when no sort is
+    // chosen. Any other key is a deliberate owner override applied on top of the same clean list.
+    var key = (state && state.librarySort) ? String(state.librarySort) : 'cadence';
+    return ceApplyLibrarySort(allCleanPoems(), key);
   }
   window.allRankedPoems = allRankedPoems;
 
