@@ -5924,11 +5924,29 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var t = Number(r && r.fireUnix) || 0;
         return (!a || (t && t < a)) ? t : a;
       }, 0);
+      /* P0-4 FIX, page half (2026-09-16). This used to end with "Ask the native app
+         to cancel the queue entry" - i.e. it told the owner to go find a door that DID
+         NOT EXIST (a census of all 25 bridge actions found none that could write
+         ce_ig_queue.json). The cancel action now exists natively, so the toast does the
+         thing itself instead of pointing at nothing. */
+      var igKeys = rows.map(function (r) { return String(r.key || ''); }).filter(Boolean);
       showAppToast(igOnly.length + ' piece' + (igOnly.length === 1 ? ' is' : 's are') + ' armed on the IG clock',
-        { icon: 'warn', variant: 'warn',
-          detail: 'This leg is a local queue entry, not a Meta object, so it cannot be removed the same way. '
+        { icon: 'warning', variant: 'warn',
+          detail: 'This leg is a local queue entry on this Mac, not a Meta object, so it cannot be removed the same way. '
             + (soonest ? ('It fires at ' + new Date(soonest * 1000).toLocaleString() + '. ') : '')
-            + 'Ask the native app to cancel the queue entry — nothing was removed by this action.' });
+            + 'Cancel it below to stop it firing — that changes nothing on Meta.',
+          action: {
+            label: 'Cancel the IG clock entry' + (igOnly.length === 1 ? '' : 's'),
+            primary: true,
+            onClick: function () {
+              try {
+                var b = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
+                if (!b) { showAppToast('Cancelling an IG clock entry needs the Mac app', { isError: true, variant: 'warn' }); return; }
+                b.postMessage({ action: 'cancelIgClockEntry', keys: igKeys });
+                showAppToast('Cancelling ' + igKeys.length + ' IG clock entr' + (igKeys.length === 1 ? 'y' : 'ies') + '…', { duration: 1800 });
+              } catch (_e) { showAppToast('Could not reach the Mac to cancel', { isError: true }); }
+            }
+          } });
     }
     var ids = targets.map(function (q) { return String(q.metaGraphId); });
     var n = targets.length;
