@@ -20011,7 +20011,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var availW = stage.clientWidth - 24;
     var availH = stage.clientHeight - 24;
     if (availW < 40 || availH < 40) return;
-    var z = Math.min(availW / natW, availH / natH, 2.4);
+    /* H01-3 (CE-A3, 2026-09-15): the bare 2.4 literal bound the fit on any
+       window taller than ~1122px (at 2560x1440 the natural fit is 3.1310, so the
+       canvas stuck at 1392x1044 = 39.4% of window with 832x342 dead in stage).
+       The ceiling is now expressed in the units the constraint is about — an
+       authored-pixel ceiling: the canvas never exceeds 1600 authored px wide
+       (1600/580 = 2.7586), no matter how tall the window gets. The stage keeps
+       centring it, so any leftover is even headroom, not lopsided dead space. */
+    var z = Math.min(availW / natW, availH / natH, 1600 / natW);
     /* H01-1 (CE-A1, 2026-09-15): the fitter could shrink below authored scale
        (9:16 fitted at zoom 0.797 — the canvas painted SMALLER than its 580px
        authored width, a preview-only shrink the export renderer never sees).
