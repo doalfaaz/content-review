@@ -1101,6 +1101,150 @@ html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-doc
 }
 html.ce-phone #studio-dock .ce-tools-toggle { display: flex !important; }
 
+/* F-010 (owner: "phone is not working ideally at all ... should work like Canva
+   kind of"). Measured on the merged phone bundle at 402x874: opening Tools gave a
+   62vh sheet whose four sections stacked to 391px of content in a 541px client
+   box, so the Canvas ratio pills — the control that decides the SHAPE of the piece
+   you are looking at — landed at y=1112 and y=1559, i.e. 240-680px BELOW the fold.
+   The slide was also cut off: the sheet is absolutely positioned at bottom:0 with
+   max-height:62vh, so it covered the canvas instead of sitting under it.
+
+   Two changes, both phone-only:
+   1. Canvas (design/ratio) leads the sheet. It is the highest-value control, and
+      it is the one the owner must reach without hunting. On a phone the sheet
+      scrolls, so order IS priority.
+   2. The sheet is capped by the space the stage actually leaves (58vh) and the
+      stage is pinned to the top of the column, so the artwork keeps the field
+      while the tools float beneath it. */
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-dock {
+  /* F-010: this used to be `position:absolute; bottom:0; max-height:62vh`, i.e. an
+     OVERLAY. Measured at 402x874 that made the sheet 507px tall and it covered the
+     canvas from y=367 while the stage still believed it owned all 713px — so the
+     artwork was both occluded AND fitted for space it did not have. The sheet is now
+     an in-flow flex sibling with a real height, so the stage gets the remainder and
+     the canvas fit is honest. 42vh (367px) keeps the 4:3 poem fully visible above it
+     and still scrolls the rest of the tools. */
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  top: auto !important;
+  flex: 0 0 auto !important;
+  height: 42vh !important;
+  min-height: 42vh !important;
+  max-height: 42vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  z-index: 40 !important;
+  padding: 10px 16px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+  gap: 12px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background: rgba(12, 13, 18, 0.96) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.55) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+/* The stage must hug its canvas instead of reserving the whole column: measured
+   374px of empty stage below a 283px canvas in the closed state. */
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-stage {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+/* The phone topbar measured 161px tall (3 wrapped rows) on an 874px screen — 18% of
+   the viewport spent on chrome. Back and the × button do the same job on a phone
+   (the standing law is one control per job), so × is retired there; with that and
+   the tightened spacing the actions land on two rows. */
+html.ce-phone .studio-topbar #studio-close-btn { display: none !important; }
+html.ce-phone .studio-topbar {
+  padding: 6px 10px !important;
+  gap: 4px 6px !important;
+}
+html.ce-phone .studio-title-box { max-width: 34vw !important; }
+/* Hit areas, not visual size: the icon buttons and the ••• / Typography summaries
+   measure 38x38 and 32x32 / 34px tall. Shrinking them to 38px to save topbar height
+   was the wrong trade — it broke the 44px phone floor this app enforces everywhere
+   else. Keep the compact VISUAL and expand the HIT AREA with the same ::before
+   overlay pattern the rails already use, so the target is >=44 while the chrome
+   stays small. */
+html.ce-phone .studio-topbar .studio-icon-btn,
+html.ce-phone .studio-topbar .studio-more-actions > summary,
+html.ce-phone .ce-poem-typography > summary,
+html.ce-phone .ce-launch-board-waitlist > summary {
+  position: relative !important;
+}
+html.ce-phone .studio-topbar .studio-icon-btn::after,
+html.ce-phone .studio-topbar .studio-more-actions > summary::after,
+html.ce-phone .ce-poem-typography > summary::after,
+html.ce-phone .ce-launch-board-waitlist > summary::after {
+  content: '' !important;
+  position: absolute !important;
+  /* -7px, not -5px: the smallest offender is the 32x32 ••• summary, and -5px only
+     reached 42x42 — still under the floor. -7px clears 44 on every one of them
+     (32+14=46, 34+14=48). */
+  inset: -7px !important;
+  border-radius: 12px !important;
+}
+html.ce-phone .studio-primary-actions { flex: 1 1 100% !important; justify-content: flex-start !important; }
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock #dock-canvas-section {
+  order: 1 !important;
+}
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock #dock-photo-section {
+  order: 2 !important;
+}
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock #dock-typo-section {
+  order: 3 !important;
+}
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock #ce-poem-caption-panel {
+  order: 4 !important;
+}
+/* F-010: the Style grid is a 3-column block of 4:3 swatches — 391px of the sheet for
+   a choice the owner makes once. On a phone the same swatches become a horizontal
+   swipe strip (the pattern the rails already use), which puts both the ratio pills
+   AND every style inside the first sheet viewport instead of 240-680px below it. */
+html.ce-phone #dock-canvas-section .ce-template-grid {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  gap: 8px !important;
+  padding-bottom: 6px !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-snap-type: x proximity !important;
+}
+html.ce-phone #dock-canvas-section .ce-template-swatch {
+  flex: 0 0 auto !important;
+  width: 76px !important;
+  min-width: 76px !important;
+  height: 57px !important;
+  aspect-ratio: auto !important;
+  scroll-snap-align: start !important;
+}
+html.ce-phone #dock-canvas-section .ce-template-swatch::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: -6px !important;
+}
+html.ce-phone #dock-canvas-section { padding-bottom: 4px !important; }
+html.ce-phone .ce-poem-ratio-control { margin-top: 6px !important; padding-top: 6px !important; }
+/* The caption editor is the tallest block in the sheet. The desktop rule above
+   (native-studio.css: .studio-workspace:not(.is-carousel-mode) .ce-dock-caption
+   #ce-full-caption-editor) pins it to 260px with a 240px floor, which is correct on
+   a workbench and wrong on a phone: measured at 402x874 the field took 260px of a
+   367px sheet. Phone gets a compact field; the value is still fully editable and the
+   sheet scrolls. */
+html.ce-phone #ce-poem-caption-panel #ce-full-caption-editor {
+  min-height: 74px !important;
+  height: 84px !important;
+  max-height: 110px !important;
+}
+html.ce-phone #ce-poem-caption-panel .ce-caption-chips {
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
 /* 2026-09-11 audit B1 (P1) — ROOT CAUSE: in the phone carousel editor the
    inspector's scroll container collapses to ~5px, so the sticky Tools row is
    orphaned outside its own container and paints UNDER the filmstrip

@@ -2277,6 +2277,9 @@
               </div>
             </div>
           </div>
+          <div class="dock-section" id="ce-poem-caption-panel" style="display:none; width:100%;">
+            <div id="ce-poem-caption-controls" style="width:100%;"></div>
+          </div>
         </aside>
       </div>
     </div>
@@ -2285,7 +2288,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=3d4ac4fa36"></script>
+<script src="./deck_index.js?v=35c345768e"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=b6a3a99a84" />
@@ -2296,7 +2299,7 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=947a8d13e1" />
+<link rel="stylesheet" href="./ce-mobile.css?v=95ca2da349" />
 <script src="./ce-touch-edit.js?v=5128f84265"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
@@ -8690,6 +8693,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }
   }
 
+  function renderPoemCaptionPanel() {
+    var panel = document.getElementById('ce-poem-caption-panel');
+    var controls = document.getElementById('ce-poem-caption-controls');
+    if (!panel || !controls) return;
+    var visible = state.currentType === 'poem';
+    panel.style.display = visible ? 'block' : 'none';
+    if (!visible) { controls.innerHTML = ''; return; }
+    /* F-004: this is the ONE caption editor for a poem, not a second one.
+       renderCarouselDock() assembles the dock through two mutually exclusive
+       branches — the post branch writes `captionSection + postLooksRail +
+       textInspector`, and the carousel branch writes `captionSection` into its
+       pinned column. A poem takes NEITHER (it is not a post and it is not
+       carousel mode), so for a poem this panel is the only mount point that
+       exists. Removing it as a "duplicate" left the Studio with no caption
+       control at all on any surface, desktop included. One editor, mounted here,
+       carrying the caption bank through studioEditControls(). */
+    controls.innerHTML = studioEditControls(null, []);
+    bindStudioEditControls(null, []);
+  }
+
   function studioSaveDeck(deck, slides) {
     if (state.studioSavePending) return;
     // Owner law 2026-09-04 (b2_03, twice): the collapse guard lives at this
@@ -12652,6 +12675,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
     try {
       updateStudioCanvas();
+      renderPoemCaptionPanel();
       // WKWebView can expose the Studio subtree before its first paint. Re-run
       // the selection projection on the next frame so static markup can never
       // leave Photo highlighted over an explicitly opened Paper canvas.
