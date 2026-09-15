@@ -2303,7 +2303,7 @@
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=5f36c1f7ad" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
-<link rel="stylesheet" href="./native-studio.css?v=132918bffe" />
+<link rel="stylesheet" href="./native-studio.css?v=acc8016ca5" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
@@ -20012,6 +20012,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var availH = stage.clientHeight - 24;
     if (availW < 40 || availH < 40) return;
     var z = Math.min(availW / natW, availH / natH, 2.4);
+    /* H01-1 (CE-A1, 2026-09-15): the fitter could shrink below authored scale
+       (9:16 fitted at zoom 0.797 — the canvas painted SMALLER than its 580px
+       authored width, a preview-only shrink the export renderer never sees).
+       Never render below authored scale silently: floor at 1.0 and disclose on
+       the wrap (CSS reads [data-ce-fit-below-authored] as a "shown smaller"
+       chip), so the owner always knows the preview is scaled down. */
+    var belowAuthored = z < 1 ? '1' : '';
+    if (wrap.dataset.ceFitBelowAuthored !== belowAuthored) {
+      if (belowAuthored) wrap.dataset.ceFitBelowAuthored = '1';
+      else delete wrap.dataset.ceFitBelowAuthored;
+    }
+    if (z < 1) z = 1;
     canvas.style.zoom = z >= 0.985 && z <= 1.015 ? '' : z.toFixed(4);
   }
   (function () {

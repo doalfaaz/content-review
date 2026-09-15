@@ -735,6 +735,25 @@
   max-width: 100%;
   border-radius: 16px;
 }
+/* H01-1 (CE-A1, 2026-09-15): the fit pass floors at authored scale, so a tall
+   ratio on a short stage keeps its 580px authored width and centres instead of
+   shrinking silently. The disclosure chip the fitter raises via
+   [data-ce-fit-below-authored] reads "shown smaller" — the owner always knows
+   the preview is scaled below authored size. Empty content paints nothing
+   until the attribute is present; pointer-events:none so it never steals taps. */
+.studio-canvas-wrap[data-ce-fit-below-authored]::after {
+  content: "shown smaller than authored";
+  position: absolute;
+  right: 12px; top: 12px; z-index: 30;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.85);
+  font: 600 11px/1.4 system-ui, sans-serif;
+  pointer-events: none;
+  white-space: nowrap;
+}
 
 .studio-canvas-wrap.ce-studio-canvas-wrap--post {
   height: calc(100% - 10px);
