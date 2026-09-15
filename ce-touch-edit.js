@@ -773,7 +773,24 @@
       btn.textContent = 'Schedule';
       btn.title = 'Queue this piece on Meta\u2019s clock (a week+ out)';
       btn.style.cssText = 'display:inline-flex; align-items:center; min-height:40px; padding:8px 14px; font-weight:800; border-radius:10px; color:#fff; background:#2e6f5e; border:1px solid rgba(255,255,255,0.14); cursor:pointer;';
-      btn.onclick = function () { try { window.__CE_PHONE_SCHEDULE__(); } catch (e) { if (window.showAppToast) window.showAppToast('Schedule failed: ' + e.message); } };
+      // H01-7 FIX (2026-09-15, lane H01_DEEP_PANEL_AUDIT): this control was a COMPLETELY silent
+      // no-op on the phone web bundle - measured "threw: null, and no toast, no status text, no
+      // error". The phone surface is a REVIEW surface served publicly, so a control that looks
+      // live and does nothing is the worst combination: the owner cannot tell a refusal from a
+      // success. Mirror the pattern the codebase already uses for exactly this case
+      // (studioSavePoem, index.html:8772, which DOES say "Save unavailable outside the native
+      // Studio bridge") instead of being mute. Short-circuit only on a provably absent bridge,
+      // so a real dispatch can never be falsely reported as unsent.
+      btn.onclick = function () {
+        var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
+        if (!br) {
+          if (window.showAppToast) window.showAppToast('Scheduling needs the Mac app \u2014 nothing was sent to Meta.');
+          return;
+        }
+        try { window.__CE_PHONE_SCHEDULE__(); } catch (e) {
+          if (window.showAppToast) window.showAppToast('Schedule failed: ' + ((e && e.message) || String(e)) + ' \u2014 nothing was sent to Meta.');
+        }
+      };
       justCreated = true;
     }
     if (btn.parentElement !== home) {
