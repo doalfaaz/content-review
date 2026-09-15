@@ -6114,6 +6114,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var st = window.__CE_META_INSIGHTS_STATE__;
     var payload = null;
     try { payload = typeof json === 'string' ? JSON.parse(json) : json; } catch (_e) { payload = null; }
+    // E05 P0-1 ROOT FIX (2026-09-15): remember what we already held, so an IDENTICAL payload cannot
+    // re-render the surface. Measured live before this fix: 139 getMetaInsights posts in ~15s, the
+    // .ce-launch-workbench node identity replaced on 9/10 one-second samples, every day-card ••• menu
+    // and the waitlist disclosure destroyed before they could stay open, and each board scroll
+    // position reset. Cause: a cache hit in the window between the JS 14-min freshness gate and the
+    // native 15-min TTL returns the SAME fetchedAt, which re-ran renderMain() -> mount -> request ->
+    // response -> renderMain(), forever, and during a Graph outage fired a fresh ~7-call fetchAll
+    // every cycle while the owner merely looked at the tab.
+    var prevFetchedAt = (st.data && st.data.fetchedAt) || 0;
+    var prevStatus = st.status;
     if (ok && payload) {
       st.status = 'ready';
       st.data = payload;
@@ -6131,8 +6141,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (code === 'needs_connect') { window.__CE_META_HAS_TOKEN__ = false; ceSyncMetaConnectChrome(); }
     }
     // Plan renders the Meta-clock chips, so it must re-render when Meta's
-    // authoritative scheduled_posts list lands (2026-09-10 audit A-1).
-    if (typeof renderMain === 'function' && (state.activeTab === 'grow' || state.activeTab === 'launch' || state.activeTab === 'plan')) renderMain();
+    // authoritative scheduled_posts list actually CHANGES (2026-09-10 audit A-1).
+    // E05 P0-1: only a real change may rebuild the surface — a cache echo must not.
+    var nextFetchedAt = (st.status === 'ready' && st.data && st.data.fetchedAt) || 0;
+    var changed = (st.status !== prevStatus) || (nextFetchedAt !== prevFetchedAt);
+    if (changed && typeof renderMain === 'function' && (state.activeTab === 'grow' || state.activeTab === 'launch' || state.activeTab === 'plan')) renderMain();
   };
   function ceRequestMetaInsights(force) {
     var st = window.__CE_META_INSIGHTS_STATE__;
@@ -6140,14 +6153,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (!br) { st.status = 'error'; st.error = 'Insights need the Mac app (native bridge missing).'; return; }
     if (!window.__CE_META_HAS_TOKEN__) { st.status = 'needs_connect'; return; }
     if (!force && st.status === 'loading') return;
+    // E05 P0-1: an in-flight guard on top of the status check. Without it, a mount that runs while a
+    // request is already outstanding (the loop's own mount) can stack another postMessage.
+    if (!force && st.inFlightAt && Date.now() - st.inFlightAt < 15000) return;
     // Errors don't auto-retry on every render — that would hammer Graph while
     // the owner just looks at the tab. Manual Refresh or a 60s cooldown.
     if (!force && st.status === 'error' && st.at && Date.now() - st.at < 60000) return;
-    // Freshness is judged on the payload's own fetch stamp, not page state:
-    // past the native 15-min TTL the next visit asks for a real re-sync.
+    // Freshness is judged on the payload's own fetch stamp, not page state. E05 P0-1: this window
+    // MUST stay LONGER than the native 15-min cache TTL. At 14 min the JS gate called the payload
+    // stale while the native cache still considered it valid, so native answered with the same
+    // payload and the surface rebuilt in a loop. 20 min guarantees a served payload is always
+    // treated as fresh here; a genuine past-TTL need still re-syncs on the next visit after that.
     if (!force && st.status === 'ready' && st.data && st.data.fetchedAt
-        && (Date.now() / 1000 - st.data.fetchedAt) < 14 * 60) return;
+        && (Date.now() / 1000 - st.data.fetchedAt) < 20 * 60) return;
     st.status = 'loading';
+    st.inFlightAt = Date.now();
     br.postMessage({ action: 'getMetaInsights', force: !!force });
   }
   function ceInsightsVm() {
