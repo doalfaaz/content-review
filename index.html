@@ -6458,7 +6458,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function ceLibraryPoemById(id, fallback) {
     var want = String(id || '');
     if (!want) return fallback || null;
-    if (fallback && cePoemStableId(fallback) === want) return fallback;
+    /* Saved Bank records may be intentionally lightweight stubs.  An
+       id-matching fallback is only authoritative when it actually carries
+       authored text; otherwise keep searching the live native catalog. */
+    if (fallback && cePoemStableId(fallback) === want
+        && String(fallback.text || fallback.body || '').trim()) return fallback;
     var rows = window.__NATIVE_POEMS__ || [];
     for (var i = 0; i < rows.length; i++) {
       var row = rows[i];
