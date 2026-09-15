@@ -10356,6 +10356,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     state[property] = value;
     state.studioPoemSelected = true;
     updateStudioCanvas();
+    /* The fit pass must re-run after a style/ratio change. updateStudioCanvas()
+       rebuilds #active-studio-canvas, which resets the zoom the fit had applied, so a
+       style switch silently dropped the canvas back to its natural 580x435 — measured
+       as 580x435 for photo/paper/notebook/zen/noir/banaras but 1064x798 for
+       ivory/dusk, i.e. whichever swatch happened to be measured while still zoomed.
+       Same surface, two sizes: exactly the inconsistency V12 was meant to remove. */
+    try { if (typeof ceFitPoemStudioCanvas === 'function') ceFitPoemStudioCanvas(); } catch (_fitAfter) {}
     syncPoemTypographyControls();
     if (studioCommitHistory(label, before)) {
       studioSetMessage(label + '. Saved automatically.');
