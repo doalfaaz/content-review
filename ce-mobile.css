@@ -1220,22 +1220,24 @@ html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-doc
    a choice the owner makes once. On a phone the same swatches become a horizontal
    swipe strip (the pattern the rails already use), which puts both the ratio pills
    AND every style inside the first sheet viewport instead of 240-680px below it. */
+/* H01-6 (CE-A6, 2026-09-15): the swipe strip left 4 of 8 style swatches
+   off-screen at rest (zen/noir/dusk/banaras at x336-664 on a 402px screen) —
+   half the style vocabulary invisible, the owner's V4 complaint verbatim. The
+   class fix is a 2-row x 4-col wrap: 8 x 76px + gaps fits 402px with no scroll,
+   so every style is visible at rest. Desktop keeps its 3-col grid (untouched);
+   the phone keeps the swipe-strip pattern nowhere — wrap replaces it here. */
 html.ce-phone #dock-canvas-section .ce-template-grid {
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  overflow-x: auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  overflow: visible !important;
   gap: 8px !important;
   padding-bottom: 6px !important;
-  -webkit-overflow-scrolling: touch !important;
-  scroll-snap-type: x proximity !important;
 }
 html.ce-phone #dock-canvas-section .ce-template-swatch {
-  flex: 0 0 auto !important;
-  width: 76px !important;
-  min-width: 76px !important;
-  height: 57px !important;
-  aspect-ratio: auto !important;
-  scroll-snap-align: start !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  aspect-ratio: 4 / 3 !important;
 }
 html.ce-phone #dock-canvas-section .ce-template-swatch::before {
   content: '' !important;
