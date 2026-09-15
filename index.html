@@ -1256,7 +1256,7 @@
   .main-content {
     flex: 1;
     overflow-y: auto;
-    padding: var(--topbar-h, 66px) 24px 24px; /* top bar floats above; --topbar-h is measured live (W3) */
+    padding: var(--topbar-h, 42px) 24px 24px; /* top bar floats above; --topbar-h is published by ceSyncTopbarHeight() below */
     background: var(--bg);
     color: var(--ink);
     transition: background 0.2s ease, color 0.2s ease;
@@ -2294,7 +2294,7 @@
 <script src="./deck_index.js?v=35c345768e"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
-<link rel="stylesheet" href="./native-plan.css?v=68d5fc5bc0" />
+<link rel="stylesheet" href="./native-plan.css?v=5f36c1f7ad" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
 <link rel="stylesheet" href="./native-studio.css?v=407fa7e421" />
 <style id="ce-share-trim">
@@ -16746,7 +16746,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                 <button class="ce-surface-button is-primary" data-ce-go="plan" type="button">Queue</button>
                 <button class="ce-surface-button is-on-dark" data-ce-go="write" type="button">Write</button>
               </div>
-              <div class="ce-ops-hero-number"><strong>${__growQueued}</strong><span>staged</span><small>${__growExported} exported</small></div>
+              <div class="ce-ops-hero-number"><strong>${__growExported}</strong><span>exported</span></div>
             </div>
           </div>
         </section>
@@ -17117,6 +17117,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           ${[3, 7, 14, 30].map(function (n) { return '<button type="button" aria-label="Show ' + n + '-day board" title="Show ' + n + '-day board" data-ce-plan-days="' + n + '" class="' + (n === __planLen ? 'is-on' : '') + '">' + n + 'd</button>'; }).join('')}
         </section>` : ''}
 
+        ${__designed.length ? `
         <section class="ce-launch-board-strip" aria-label=${'"'+__planLen+'-day posting board"'}>
           ${__planDays.map(function (day) {
             var piece = day.piece;
@@ -17149,7 +17150,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                 : '<div class="ce-launch-day-art" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;">Pick from Library</div>')
               + '</article>';
           }).join('')}
-        </section>
+        </section>` : ''}
 
         <section class="ce-launch-intelligence" aria-label="Launch board intelligence">
           <div class="ce-launch-intelligence-head">
@@ -19960,6 +19961,28 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       clearTimeout(peekTimer);
       peekTimer = setTimeout(function () { bar.classList.remove('ce-topbar-peek'); }, 2500);
     });
+  })();
+
+  /* D04 P1-1 (deep-audit lane D04_GROWLAUNCH, verified on HEAD 2026-09-15): the `.main-content`
+     comment claimed "--topbar-h is measured live (W3)" but NOTHING ever assigned the variable.
+     Two different fallbacks fought over an undefined value (42px at the floating-layer rule,
+     66px at .main-content), so every surface floated ~24px below the real 42px topbar - the
+     owner's "screens are not cleanly pushed on top like the Saved panel". Publish the measured
+     box height as the single source of truth, and keep it current on resize. */
+  (function ceSyncTopbarHeight() {
+    var apply = function () {
+      var bar = document.querySelector('.topbar, .app-topbar');
+      if (!bar) return;
+      var h = Math.ceil(bar.getBoundingClientRect().height);
+      if (h > 0) document.documentElement.style.setProperty('--topbar-h', h + 'px');
+    };
+    apply();
+    addEventListener('resize', apply);
+    document.addEventListener('DOMContentLoaded', apply);
+    var bar = document.querySelector('.topbar, .app-topbar');
+    if (bar && typeof ResizeObserver === 'function') {
+      try { new ResizeObserver(apply).observe(bar); } catch (_ro) {}
+    }
   })();
 
   document.addEventListener('DOMContentLoaded', init);
