@@ -4548,9 +4548,15 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 
 .studio-workspace.is-post-mode .ce-inspector-section,
 .studio-workspace.is-post-mode .ce-dock-group {
+  /* Post text tools are a direct child of the vertical dock.  Letting the
+     generic inspector rule shrink this section to zero leaves its buttons
+     below the paint box: they look present in the DOM, but the dock itself
+     intercepts their hit points.  The dock is the scroll owner, so each post
+     section must keep its intrinsic height. */
+  flex: 0 0 auto !important;
   min-height: 0 !important;
   overflow-x: hidden !important;
-  overflow-y: auto !important;
+  overflow-y: visible !important;
   scrollbar-width: thin !important;
 }
 
