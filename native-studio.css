@@ -5532,7 +5532,8 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 @media (max-width:700px) {
   .ce-poem-ratio-control { align-items:flex-start; flex-direction:column; }
   .ce-poem-ratio-pills { justify-content:flex-start; }
-  .ce-poem-ratio-pill { min-height:36px; }
+  /* F-010: the phone floor is 44x44, not "comfortably tall". 36px was under it. */
+  .ce-poem-ratio-pill { min-height:44px; min-width:44px; }
 }
 
 

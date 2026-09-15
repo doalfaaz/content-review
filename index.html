@@ -2288,9 +2288,9 @@
 <script src="./deck_index.js?v=3d4ac4fa36"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
-<link rel="stylesheet" href="./native-plan.css?v=155765bfa5" />
+<link rel="stylesheet" href="./native-plan.css?v=b6a3a99a84" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
-<link rel="stylesheet" href="./native-studio.css?v=88f9620ee3" />
+<link rel="stylesheet" href="./native-studio.css?v=b0d84d4335" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
@@ -12500,10 +12500,22 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // must win over the latest generic library style for the same poem.
       var optionStyle = options && options.style && typeof options.style === 'object' ? options.style : null;
       var optionHasStyleFields = options && (options.align || options.pos || options.photoIdx != null || options.fontSize != null || options.canvasRatio || options.canvasRatioMode || options.useOriginal != null);
+      var persistedDesign = (poemId && designs && typeof designs === 'object') ? (designs[poemId] || null) : null;
+      var persistedStyle = persistedDesign && persistedDesign.style && typeof persistedDesign.style === 'object' ? persistedDesign.style : {};
       if (optionStyle || optionHasStyleFields) {
-        savedPoemDesign = { style: optionStyle || options, text: item && item.text };
-      } else if (poemId && designs && typeof designs === 'object') {
-        savedPoemDesign = designs[poemId] || null;
+        /* F-002 parity: the preview resolves a queue/saved record as
+           {persisted Studio design <- explicit queue style} (cePoemPreviewDesign).
+           Studio used to apply the queue style ALONE, so a partial record — one
+           photoIdx, one alignment, a presetIndex that is only routing metadata —
+           silently reset every field it did not carry and the same poem opened
+           with a different backdrop, position, density and ratio than its own
+           card. One precedence, merged the same way on both sides. */
+        savedPoemDesign = {
+          style: Object.assign({}, persistedStyle, optionStyle || options),
+          text: (item && item.text) || (persistedDesign && persistedDesign.text) || ''
+        };
+      } else if (persistedDesign) {
+        savedPoemDesign = persistedDesign;
       }
       if (savedPoemDesign && typeof savedPoemDesign === 'object') {
         const st = savedPoemDesign.style && typeof savedPoemDesign.style === 'object' ? savedPoemDesign.style : {};
@@ -16631,26 +16643,28 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       growBox.innerHTML = `
         <section class="ce-ops-hero">
           <div class="ce-ops-hero-copy">
-            <h2 style="margin:0; font-size:18px; font-weight:800; color:var(--ink);">Grow</h2>
-            <div class="ce-grow-hero-rail" aria-label="Grow loop">
-              <span>Observe</span><i aria-hidden="true">→</i><span>Learn</span><i aria-hidden="true">→</i><span>Apply</span>
+            <div class="ce-grow-hero-titlerow">
+              <h2 style="margin:0; font-size:18px; font-weight:800; color:var(--ink);">Grow</h2>
+              <div class="ce-grow-hero-rail" aria-label="Grow loop">
+                <span>Observe</span><i aria-hidden="true">→</i><span>Learn</span><i aria-hidden="true">→</i><span>Apply</span>
+              </div>
             </div>
-            <div class="ce-ops-actions" style="margin-top:10px;">
-              <button class="ce-surface-button is-primary" data-ce-go="plan" type="button">Queue</button>
-              <button class="ce-surface-button is-on-dark" data-ce-go="write" type="button">Write</button>
+            <div class="ce-ops-hero-footrow">
+              <div class="ce-ops-actions" style="margin-top:10px;">
+                <button class="ce-surface-button is-primary" data-ce-go="plan" type="button">Queue</button>
+                <button class="ce-surface-button is-on-dark" data-ce-go="write" type="button">Write</button>
+              </div>
+              <div class="ce-ops-hero-number"><strong>${__growQueued}</strong><span>staged</span><small>${__growExported} exported</small></div>
             </div>
           </div>
-          <div class="ce-ops-hero-number"><strong>${__growQueued}</strong><span>staged</span><small>${__growExported} exported</small></div>
         </section>
 
-        <section class="ce-grow-column" aria-label="Observe, Learn, Apply">
-          <div class="ce-grow-colhead"><span class="ce-grow-stepnum">Observe</span></div>
-        </section>
+        <section class="ce-grow-column" aria-label="Observe"><div class="ce-grow-colhead"><span class="ce-grow-stepnum">Observe</span></div></section>
         <section class="ce-readiness-row" aria-label="Your content at a glance">
           <div><span>Ready to publish</span><strong>${__growReady.toLocaleString()}</strong><small>of ${(state.queueItems || []).length} in your Plan</small></div>
           <div><span>Designed carousels</span><strong>${__growDecks.toLocaleString()}</strong><small>ready to edit in Studio</small></div>
-          <div><span>Unedited poems</span><strong>${__growPoems.toLocaleString()}</strong><small>poems in Library</small></div>
-          <div><span>Authored posts</span><strong>${__growPosts.toLocaleString()}</strong><small>posts ready to shape</small></div>
+          <div><span>Unedited poems</span><strong>${__growPoems.toLocaleString()}</strong><small>${__growPoems === 1 ? 'poem' : 'poems'} in Library</small></div>
+          <div><span>Authored posts</span><strong>${__growPosts.toLocaleString()}</strong><small>${__growPosts === 1 ? 'post' : 'posts'} ready to shape</small></div>
         </section>
         <section class="ce-ops-panel ce-inventory-panel">
           <div class="ce-section-heading">
@@ -16664,7 +16678,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             <button type="button" class="ce-surface-button" data-ce-go="ideas">Start from Ideas</button>
           </div>` : `
           <div class="ce-mix-bar" aria-label="How your saved content breaks down">
-            ${__growMix.filter(r => r.label !== 'Ideas' && r.count > 0).map(row => `<span class="${row.className}" style="flex:${Math.max(1, row.count)}" title="${escapeHtml(row.label)}: ${row.count}"></span>`).join('')}
+            ${__growMix.filter(r => r.label !== 'Ideas' && r.count > 0).map(row => `<span class="${row.className}" style="flex:${Math.max(1, row.count)}; min-width:7px" title="${escapeHtml(row.label)}: ${row.count}"></span>`).join('')}
           </div>
           <div class="ce-mix-legend">
             ${__growMix.filter(r => r.label !== 'Ideas').map(row => `<button type="button" data-ce-go="${row.go}" ${row.lib ? `data-ce-library="${row.lib}"` : ''}><span class="ce-legend-dot ${row.className}"></span><strong>${row.count.toLocaleString()}</strong><small>${escapeHtml(row.label)}</small></button>`).join('')}

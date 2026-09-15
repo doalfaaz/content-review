@@ -1282,11 +1282,38 @@ body.bright-theme .ce-launch-board-cadence {
   .ce-ops-shell:not(.ce-launch-workbench) .ce-loop-steps button { min-height: 60px; padding-block: 10px; }
   .ce-ops-shell:not(.ce-launch-workbench) .ce-aud-gaps { background: color-mix(in srgb, var(--warn) 6%, var(--card)); }
   .ce-grow-hero-rail { display: inline-flex; align-items: center; gap: 7px; margin-top: 8px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  /* F-007 (pre-existing at cd65e1e, reproduced by qa/full-surface-audit.mjs: "Grow
+     hero stays compact" — the hero measured 155px against the 150px ceiling the
+     suite has always enforced). The loop rail was given its own line (12px + 8px
+     margin) under a 40px title, so the hero paid a whole extra line of vertical
+     rhythm for a 10px label. Title and rail now share one row and wrap only when
+     the column is genuinely too narrow; that is the dead band the owner saw, not
+     the Observe/Learn/Apply sections (those are display:none by design). */
+  .ce-grow-hero-titlerow { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .ce-grow-hero-titlerow .ce-grow-hero-rail { margin-top: 0; }
+  /* F-007 composition (vision pass on the live render): the hero was a two-column
+     grid whose copy column was 892px wide while its content stopped at ~450px, so
+     the staged/exported figure sat pinned to the far right across a ~600px void —
+     the "stretched and unbalanced" band in the owner's screenshot. The number now
+     shares the actions row, so the figure reads as the outcome of the two buttons
+     beside it and the void is gone. Scoped to the Grow shell only; Launch keeps its
+     own .ce-launch-workbench hero. */
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-ops-hero { display: flex; flex-direction: column; gap: 14px; }
+  .ce-ops-hero-footrow { display: flex; flex-direction: column; gap: 10px; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-ops-hero-footrow { flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-ops-hero-number { display: flex; align-items: baseline; gap: 9px; padding: 0; border-left: 0; border-top: 0; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-ops-hero-number span,
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-ops-hero-number small { margin-top: 0; }
   .ce-grow-hero-rail span { color: var(--accent-text); }
   .ce-grow-hero-rail i { color: var(--faint); font-style: normal; }
 }
 
 @media (max-width: 760px) {
+  /* Same single-column contract as desktop: copy, then the actions row with the
+     staged/exported figure. Without this the grid put the foot row in column two. */
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-ops-hero { display: flex; flex-direction: column; gap: 12px; }
+  .ce-grow-hero-titlerow { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .ce-grow-hero-titlerow .ce-grow-hero-rail { margin-top: 0; }
   .ce-grow-hero-rail { display: inline-flex; align-items: center; gap: 6px; margin-top: 7px; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
   .ce-grow-hero-rail span { color: var(--accent-text); }
   .ce-grow-hero-rail i { color: var(--faint); font-style: normal; }
