@@ -1460,6 +1460,14 @@ html.ce-phone .ce-plan-select-toggle {
   height: 44px !important;
   border-radius: 10px !important;
 }
+html.ce-phone .ce-plan-card-more > summary,
+html.ce-phone .queue-ready-topost {
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  border-radius: 10px !important;
+}
 html.ce-phone .kanban-col-select-btn {
   min-height: 44px !important;
 }

@@ -5521,6 +5521,20 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 .ce-dock-quicktype { padding-block: 8px; }
 .ce-dock-quicktype .ce-tool-segmented-group { justify-content: flex-start; }
 
+/* Poem canvas geometry is an authored choice, not a hidden export setting. Keep
+   the control quiet beside Style so Auto remains the default and square/story
+   choices are one deliberate tap away. */
+.ce-poem-ratio-control { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; padding-top:9px; border-top:1px solid var(--border); }
+.ce-poem-ratio-label { color:var(--muted); font-size:10px; font-weight:750; letter-spacing:.08em; text-transform:uppercase; }
+.ce-poem-ratio-pills { display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end; }
+.ce-poem-ratio-pill { min-height:26px; padding:4px 8px; border:1px solid var(--border); border-radius:7px; background:transparent; color:var(--muted); cursor:pointer; font-size:10px; font-weight:750; }
+.ce-poem-ratio-pill:hover, .ce-poem-ratio-pill.is-active { border-color:var(--accent); background:var(--accent-tint); color:var(--ink); }
+@media (max-width:700px) {
+  .ce-poem-ratio-control { align-items:flex-start; flex-direction:column; }
+  .ce-poem-ratio-pills { justify-content:flex-start; }
+  .ce-poem-ratio-pill { min-height:36px; }
+}
+
 
 /* C8 · Overflow indicator is information, not an alarm: quiet muted dot. */
 .studio-workspace.is-carousel-mode .ce-filmstrip-fit-dot:not([hidden]) {

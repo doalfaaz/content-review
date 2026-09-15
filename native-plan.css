@@ -314,7 +314,7 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
 }
 .ce-kanban-card .ce-kanban-art-block > .ce-staged-art-wrap {
   border: 0;
-  border-radius: 0;
+  border-radius: 9px 9px 0 0;
   box-shadow: none;
   /* Audit P2-4 was REJECTED after measuring the box tree. The audit read the 10px gap
      between the wrap (222) and the preview (212) as "empty padding inside the art block",
@@ -324,11 +324,18 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
         art-block 253 = wrap 222 + identity rail 29 + borders 2
         wrap 222 = its own `padding: 5px 0` (10) + preview 212  <- the preview FILLS its box
      So the 10px is the piece's deliberate frame padding and the 31px is the identity rail,
-     which carries four live controls (select, unsave, unschedule, remove). Neither is void:
+     which carries batch-select, one move-back action, and an optional Meta-clock action. Neither is void:
      "reclaiming" them means deleting frame or function. Art share stays 0.700 by design and
      the audit's >=0.80 target would require removing live controls. Two candidate rules
      (align-items: stretch, height:100%) were tried and MEASURED to change nothing, so they
      are not kept — a no-op rule with a confident comment is worse than no rule. */
+}
+/* The rail owns one intentional overflow menu; the artwork wrapper remains the
+   clipping boundary so the menu can float without adding a second visible row. */
+.ce-kanban-art-block { overflow: visible; }
+.ce-kanban-card .ce-kanban-art-block > .ce-staged-art-wrap,
+.ce-kanban-card .ce-kanban-art-block > .ce-staged-art-wrap .ce-staged-face-preview {
+  overflow: hidden;
 }
 .ce-kanban-id-rail {
   display: flex;
@@ -342,8 +349,8 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
 /* Owner law 2026-09-13 (second pass): the rail no longer repeats what the artwork
    already shows. "POEM — तुषार" under a poem whose own text carries the signature was
    clutter he asked to remove; the type and author now live in the card's aria-label
-   (announced, not painted), and the rail carries only the status chip plus the
-   piece's own two actions. An empty chip must not reserve a band. */
+   (announced, not painted), and the rail carries the batch-select affordance plus
+   one move-back action (with an optional Meta-clock action). An empty chip must not reserve a band. */
 .ce-kanban-id-rail .ce-kanban-id:empty { display: none; }
 .ce-kanban-id-rail .ce-plan-select-toggle {
   position: static;
@@ -351,6 +358,15 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
   width: 20px;
   height: 20px;
   border-radius: 6px;
+  opacity: .18;
+  background: transparent;
+  border-color: rgba(255,255,255,.24);
+  box-shadow: none;
+}
+.ce-kanban-card:hover .ce-kanban-id-rail .ce-plan-select-toggle,
+.ce-kanban-card:focus-within .ce-kanban-id-rail .ce-plan-select-toggle,
+.ce-kanban-id-rail .ce-plan-select-toggle.is-selected {
+  opacity: 1;
 }
 .ce-kanban-id {
   display: flex;
@@ -384,6 +400,73 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
   gap: 4px;
   flex: 0 0 auto;
 }
+.ce-plan-card-more { position: relative; flex: 0 0 auto; }
+.ce-plan-card-more > summary {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 1px;
+  line-height: 1;
+  list-style: none;
+}
+.ce-plan-card-more > summary::-webkit-details-marker { display: none; }
+.ce-plan-card-more > summary:hover,
+.ce-plan-card-more[open] > summary { color: var(--ink); border-color: var(--accent-border); background: var(--accent-tint); }
+.ce-plan-card-more > div {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 30;
+  min-width: 176px;
+  display: grid;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--card-border);
+  border-radius: 9px;
+  background: var(--surface, var(--card));
+  box-shadow: 0 12px 28px rgba(0,0,0,.28);
+}
+.ce-plan-card-more:not([open]) > div { display: none; }
+.ce-plan-card-more--list > div { top: calc(100% + 6px); bottom: auto; }
+.ce-plan-card-more > div button {
+  min-height: 30px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 8px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.ce-plan-card-more > div button:hover,
+.ce-plan-card-more > div button:focus-visible { background: var(--accent-tint); color: var(--ink); outline: none; }
+.queue-ready-topost {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--card-border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+}
+.queue-ready-topost:hover,
+.queue-ready-topost:focus-visible { border-color: var(--accent); color: var(--ink); outline: none; }
+.queue-ready-topost:active { transform: scale(.94); }
+.queue-ready-topost.is-ready { border-color: var(--accent); background: var(--accent); color: #fff; box-shadow: 0 2px 8px var(--accent-glow); }
 .ce-kanban-actions {
   display: flex;
   align-items: center;
@@ -1128,3 +1211,83 @@ body.bright-theme .ce-launch-board-cadence {
 .ce-launch-board-title{font-size:clamp(26px,3vw,40px)!important;letter-spacing:-.045em}.ce-launch-board-cadence{margin-top:6px}
 .ce-launch-day{box-shadow:none;transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}.ce-launch-day:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.14)}.ce-launch-day:first-child{border-color:color-mix(in srgb,var(--accent) 38%,var(--card-border));box-shadow:inset 0 2px 0 var(--accent)}
 @media(max-width:700px){.ce-ops-shell,.ce-launch-workbench{margin-top:52px;padding:0 14px 54px}.ce-ops-hero{padding:20px}.ce-readiness-row{grid-template-columns:repeat(2,1fr)}.ce-launch-board-head{padding:18px}.ce-launch-day{min-width:272px}}
+
+/* GROW COCKPIT — editorial ledger hierarchy (AB2 reference pass, 2026-09-15).
+   The old vertical stack spent a whole viewport on empty phase headings and
+   prose-heavy permission copy. Grow is a working instrument: put the live
+   count, inventory, momentum, audience signal, and next move in a compact
+   visual rhythm while keeping every existing action and data boundary. */
+@media (min-width: 761px) {
+  .ce-ops-shell:not(.ce-launch-workbench) {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+  }
+  .ce-ops-shell:not(.ce-launch-workbench) > .ce-ops-hero,
+  .ce-ops-shell:not(.ce-launch-workbench) > .ce-readiness-row,
+  .ce-ops-shell:not(.ce-launch-workbench) > .ce-audience-panel,
+  .ce-ops-shell:not(.ce-launch-workbench) > .ce-next-loop {
+    grid-column: 1 / -1;
+  }
+  .ce-ops-shell:not(.ce-launch-workbench) > .ce-inventory-panel {
+    grid-column: span 7;
+  }
+  .ce-ops-shell:not(.ce-launch-workbench) > .ce-learn-panel {
+    grid-column: span 5;
+  }
+  .ce-ops-shell:not(.ce-launch-workbench) > .ce-grow-column { display: none; }
+  .ce-ops-shell:not(.ce-launch-workbench) > .ce-ops-panel { margin-top: 0; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-readiness-row { margin-top: 0; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-aud-gaps {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px 16px;
+    padding: 12px 14px;
+  }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-aud-gaps-head,
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-aud-gaps-how { grid-column: 1 / -1; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-aud-gaps ul {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px 14px;
+    margin: 0;
+  }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-aud-gaps-acts {
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .ce-ops-shell:not(.ce-launch-workbench) > .ce-grow-column { margin-top: 12px; }
+  .ce-ops-shell:not(.ce-launch-workbench) > .ce-ops-panel { margin-top: 12px; padding: 18px; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-aud-gaps ul { gap: 5px; }
+}
+
+/* Grow cockpit finish — compact ledger rhythm, using the same editorial
+   hierarchy as the AB2 decision-room / Launch OS references.  The content
+   remains truthful and live; only the visual grouping changes. */
+@media (min-width: 761px) {
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-ops-hero {
+    min-height: 124px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--card) 88%, var(--accent) 12%), var(--card));
+  }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-readiness-row > div { padding: 14px 18px; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-readiness-row strong { font-size: 23px; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-ops-panel { padding: 18px; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-learn-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-chart-card { padding: 12px; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-loop-steps button { min-height: 60px; padding-block: 10px; }
+  .ce-ops-shell:not(.ce-launch-workbench) .ce-aud-gaps { background: color-mix(in srgb, var(--warn) 6%, var(--card)); }
+  .ce-grow-hero-rail { display: inline-flex; align-items: center; gap: 7px; margin-top: 8px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .ce-grow-hero-rail span { color: var(--accent-text); }
+  .ce-grow-hero-rail i { color: var(--faint); font-style: normal; }
+}
+
+@media (max-width: 760px) {
+  .ce-grow-hero-rail { display: inline-flex; align-items: center; gap: 6px; margin-top: 7px; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .ce-grow-hero-rail span { color: var(--accent-text); }
+  .ce-grow-hero-rail i { color: var(--faint); font-style: normal; }
+}

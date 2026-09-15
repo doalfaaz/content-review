@@ -2266,6 +2266,16 @@
               <button class="pill-btn ce-template-swatch" id="btn-type-dusk" type="button" role="option" aria-selected="false" aria-label="Dusk ember style" title="Dusk ember"></button>
               <button class="pill-btn ce-template-swatch" id="btn-type-banaras" type="button" role="option" aria-selected="false" aria-label="Banaras ghat style" title="Banaras ghat"></button>
             </div>
+            <div class="ce-poem-ratio-control" role="group" aria-label="Canvas ratio">
+              <span class="ce-poem-ratio-label">Canvas</span>
+              <div class="ce-poem-ratio-pills">
+                <button type="button" class="ce-poem-ratio-pill" data-poem-ratio="" id="btn-ratio-auto" aria-pressed="true" title="Use the automatic ratio for this poem">Auto</button>
+                <button type="button" class="ce-poem-ratio-pill" data-poem-ratio="4/3" id="btn-ratio-landscape" aria-pressed="false" title="Landscape 4:3">4:3</button>
+                <button type="button" class="ce-poem-ratio-pill" data-poem-ratio="1/1" id="btn-ratio-square" aria-pressed="false" title="Square 1:1">1:1</button>
+                <button type="button" class="ce-poem-ratio-pill" data-poem-ratio="4/5" id="btn-ratio-portrait" aria-pressed="false" title="Portrait 4:5">4:5</button>
+                <button type="button" class="ce-poem-ratio-pill" data-poem-ratio="9/16" id="btn-ratio-story" aria-pressed="false" title="Story 9:16">9:16</button>
+              </div>
+            </div>
           </div>
         </aside>
       </div>
@@ -2275,18 +2285,18 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=1cd84c6004"></script>
+<script src="./deck_index.js?v=3d4ac4fa36"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
-<link rel="stylesheet" href="./native-plan.css?v=96c13083bb" />
+<link rel="stylesheet" href="./native-plan.css?v=155765bfa5" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
-<link rel="stylesheet" href="./native-studio.css?v=357756a634" />
+<link rel="stylesheet" href="./native-studio.css?v=88f9620ee3" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=6dc8a16605" />
+<link rel="stylesheet" href="./ce-mobile.css?v=947a8d13e1" />
 <script src="./ce-touch-edit.js?v=5128f84265"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
@@ -4107,6 +4117,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     currentSlideIdx: 0,
     studioPhotoIdx: 0,
     studioUseOriginal: false,
+    studioCanvasRatioOverride: '',
     studioAlign: 'left',
     studioPos: 'top',
     studioType: 'photo',
@@ -4566,6 +4577,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return PHOTO_ASPECT_RATIO;
   }
 
+  function poemRatioToken(value) {
+    var token = String(value || '').trim();
+    return /^(?:4\/3|1\/1|4\/5|2\/3|9\/16)$/.test(token) ? token : '';
+  }
+
   function cePoemLineCount(text) {
     return String(text == null ? '' : text).split(/\n/).filter(function (line) {
       return String(line).trim().length > 0;
@@ -4576,6 +4592,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   // Couplets stay cinematic 4:3. Longer shers get a taller frame so type can
   // stay readable instead of being force-fitted over faces.
   function poemCanvasRatioFor(text, intensity, pos, preferredRatio) {
+    var explicit = poemRatioToken(preferredRatio);
+    if (explicit) return explicit;
     var lines = cePoemLineCount(text);
     // Graduated growth to 9/16 (1920 on a 1080 canvas) for very long poems so
     // the 30px floor never has to fight the box (P2-02).
@@ -4762,7 +4780,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     style.useOriginal = raw.useOriginal === true;
     var originalStillShortcode = String(raw.originalStillShortcode || '').trim();
     if (/^[A-Za-z0-9_-]+$/.test(originalStillShortcode)) style.originalStillShortcode = originalStillShortcode;
-    style.canvasRatio = PHOTO_ASPECT_RATIO;
+    var canvasRatio = poemRatioToken(raw.canvasRatio);
+    if (canvasRatio) style.canvasRatio = canvasRatio;
+    if (raw.canvasRatioMode === 'manual' || raw.canvasRatioMode === 'auto') style.canvasRatioMode = raw.canvasRatioMode;
     var photoIdx = Number(raw.photoIdx);
     if (Number.isInteger(photoIdx) && photoIdx >= 0 && photoIdx < PHOTO_BACKGROUNDS.length) style.photoIdx = photoIdx;
     var offset = raw.offset && typeof raw.offset === 'object' && !Array.isArray(raw.offset) ? raw.offset : null;
@@ -4799,8 +4819,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         ? savedStyle.photoIdx
         : (!isPaper ? (preset.photoIdx || 0) : (savedStyle.photoIdx || 0)),
       offset: savedStyle.offset || { x: 0, y: 0 },
-      canvasRatio: PHOTO_ASPECT_RATIO
+      canvasRatio: (savedStyle.canvasRatioMode === 'manual' && savedStyle.canvasRatio)
+        ? savedStyle.canvasRatio
+        : poemCanvasRatioFor((poem && (poem.text || poem.body)) || '', density, savedStyle.pos || preset.pos || 'top', '')
     });
+    style.canvasRatioMode = savedStyle.canvasRatioMode === 'manual' ? 'manual' : 'auto';
     // Original Instagram stills are opt-in only (explicit saved useOriginal).
     // Default shelf/Photo rail always paints the authored photo-design presets.
     style.useOriginal = !isPaper && savedStyle.useOriginal === true;
@@ -4815,6 +4838,32 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     const raw = item.text || item.title || item.name || item.hook || item.body || queueItem && queueItem.title || queueItem && queueItem.id || 'Untitled item';
     const firstLine = String(raw).split(/\r?\n/)[0].replace(/\s+/g, ' ').trim();
     return firstLine || 'Untitled item';
+  }
+
+  /* A queue/saved record often carries only routing metadata
+     (poemSection/presetIndex). Treating that metadata as a complete style used
+     to discard the native Studio design on the board, so the same poem opened
+     with a different backdrop, position, or density. Merge explicit authored
+     style first, then legacy direct-style fields, then the persisted Studio
+     style; metadata alone never masks the canonical design. */
+  function cePoemPreviewDesign(poem, design) {
+    var raw = design && typeof design === 'object' ? design : {};
+    var id = String(poem && (poem.id || poem.content_id) || '');
+    var persisted = window.__NATIVE_POEM_DESIGNS__ && id ? window.__NATIVE_POEM_DESIGNS__[id] : null;
+    var persistedStyle = persisted && persisted.style && typeof persisted.style === 'object' ? persisted.style : {};
+    var explicitStyle = raw.style && typeof raw.style === 'object' ? raw.style : null;
+    var directStyle = !explicitStyle && (raw.type || raw.align || raw.pos || raw.photoIdx != null || raw.fontSize != null || raw.canvasRatio || raw.canvasRatioMode || raw.useOriginal != null) ? raw : null;
+    var style = Object.assign({}, persistedStyle, directStyle || {}, explicitStyle || {});
+    var hasStyle = Object.keys(style).length > 0;
+    var section = raw.poemSection === 'paper'
+      ? 'paper'
+      : (raw.poemSection === 'photo' ? 'photo' : (style.type && style.type !== 'photo' ? 'paper' : 'photo'));
+    if (raw.poemSection) style.type = section === 'paper' ? (style.type === 'photo' ? 'white-balloon' : (style.type || 'white-balloon')) : 'photo';
+    var explicitPreset = raw.presetIndex != null ? raw.presetIndex : raw.presetIdx;
+    var presetIndex = Number.isFinite(Number(explicitPreset))
+      ? Number(explicitPreset)
+      : canonicalPoemPresetIndex(poem, section);
+    return { section: section, presetIndex: presetIndex, style: hasStyle ? style : null };
   }
 
   function queueTypeLabel(queueItem) {
@@ -4872,11 +4921,27 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   window.cePoemTone = cePoemTone;
 
+  function cePoemMood(poem) {
+    var txt = String((poem && (poem.text || poem.body || poem.t)) || '');
+    var score = function (re) { return (txt.match(re) || []).length; };
+    var grave = score(/मौत|मृत्यु|दर्द|ग़म|गम|सच|सच्चाई|क़र्ज़|कर्ज़|फ़रेब|फरेब|आँसू|आंसू|क़ब्र|कब्र|धर्म|इंसानियत/g);
+    var longing = score(/बिछड़|बिछड़|जुदाई|तन्हा|तन्हाई|ख़्वाब|ख्वाब|याद|दूर|विरह|छोड़कर|छोड़कर|रिहा/g);
+    var playful = score(/हँस|हंस|मुस्क|ख़ुश|खुश|गले लग|आजकल|गाल|चुलबुल|शरारत/g);
+    var intimate = score(/इश्क़|इश्क|मोहब्बत|मुहब्बत|प्यार|प्रेम|दिल|चाहत|जुल्फ़|ज़ुल्फ़|नज़र|नजर|चूम|साथ|तेरे|तुझे|तुझसे|जानां|जानाँ|यार|हुस्न/g);
+    if (grave > Math.max(longing, intimate, playful)) return 'grave';
+    if (longing > Math.max(intimate, playful)) return 'longing';
+    if (playful > Math.max(intimate, longing)) return 'playful';
+    if (intimate > 0) return 'intimate';
+    return 'reflective';
+  }
+  window.cePoemMood = cePoemMood;
+
   function canonicalPoemPresetIndex(poem, section) {
     if (!poem) return 0;
     var presets = (section === 'paper' ? PAPER_PRESETS : PHOTO_PRESETS);
     if (!presets.length) return 0;
     var tone = cePoemTone(poem);
+    var mood = cePoemMood(poem);
     var lines = cePoemLineCount((poem && (poem.text || poem.body || poem.t)) || '');
     var needWide = lines >= 5;
     var preferredPool = [];
@@ -4896,6 +4961,24 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       hash = ((hash << 5) - hash) + pId.charCodeAt(k);
       hash |= 0;
     }
+    /* RC-3 · mood affinity as a PERMUTATION of the tone/room pool, never as a
+       smaller filter. The pool above is the distribution law the balance gate
+       measures (it lands all seven photo treatments and all seven paper looks
+       inside a spread of 52), so it is left untouched. Mood reorders that pool
+       for the pick at `hash % pool.length`: a permutation is a bijection, so
+       per-preset counts are provably unchanged, while each mood reaches for a
+       different treatment first. The earlier shape filtered the pool by mood and
+       starved photo:1 down to 25 of 2098 poems while photo:4 / photo:6 climbed to
+       573 / 559 — spread 548 against a 100 ceiling. Preference orders are a pure
+       function of the poem text, so the pick stays stable by id across reload,
+       search, era, and phone. */
+    var MOOD_ORDER = {
+      intimate: [0, 3, 2, 5, 1, 4, 6],
+      playful: [2, 1, 0, 5, 3, 4, 6],
+      longing: [5, 3, 6, 4, 0, 2, 1],
+      reflective: [2, 4, 0, 3, 6, 1, 5],
+      grave: [4, 6, 3, 0, 2, 5, 1]
+    };
     var pool = preferredPool.length ? preferredPool : allPool;
     // Keep photo tone/room semantics strict; only paper needs this corpus-level
     // correction because all seven paper looks are editorially valid for either
@@ -4905,6 +4988,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       pool = alternatePool;
     }
     if (!pool.length) pool = allPool.length ? allPool : presets.map(function (_p, index) { return index; });
+    var moodOrder = MOOD_ORDER[mood] || null;
+    if (moodOrder && pool.length > 1) {
+      var moodRank = {};
+      for (var mo = 0; mo < moodOrder.length; mo++) moodRank[moodOrder[mo]] = mo;
+      pool = pool.slice().sort(function (a, b) {
+        var ra = moodRank[a] == null ? presets.length : moodRank[a];
+        var rb = moodRank[b] == null ? presets.length : moodRank[b];
+        return ra - rb;
+      });
+    }
     return pool[Math.abs(hash) % pool.length];
   }
   window.canonicalPoemPresetIndex = canonicalPoemPresetIndex;
@@ -5023,21 +5116,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var foundPoem = window.__NATIVE_POEMS__.find(function (p) { return p && String(p.id) === itemId; });
         if (foundPoem) poem = Object.assign({}, foundPoem, item);
       }
-      var savedDesign = (window.__NATIVE_POEM_DESIGNS__ && (poem.id || poem.title))
-        ? (window.__NATIVE_POEM_DESIGNS__[String(poem.id)] || window.__NATIVE_POEM_DESIGNS__[String(poem.title)])
-        : null;
-      var st = (queueItem && queueItem.design && (queueItem.design.style || queueItem.design)) || (savedDesign && savedDesign.style) || null;
-      var isPaper = (st && st.type && st.type !== 'photo') || (queueItem && queueItem.design && queueItem.design.poemSection === 'paper');
-      // Owner law 2026-09-03: the queue must show the SAME clean canonical face
-      // as the saved bank / Library — never a look picked by the card's queue
-      // position (that rendered random looks with clipped poem text). Passing
-      // null lets the canonical per-poem look apply.
-      var presetIdx = (queueItem && queueItem.design && queueItem.design.presetIndex != null)
-        ? queueItem.design.presetIndex
-        : null;
+      var poemDesign = cePoemPreviewDesign(poem, queueItem && queueItem.design);
+      var isPaper = poemDesign.section === 'paper';
+      var presetIdx = poemDesign.presetIndex;
       var poemInner = '';
       try {
-        var designOverride = queueItem && queueItem.design ? queueItem.design : null;
+        var designOverride = poemDesign.style ? { style: poemDesign.style } : null;
         if (isPaper && typeof renderPaperPoemHtml === 'function') poemInner = renderPaperPoemHtml(poem, presetIdx, designOverride);
         else if (typeof renderPhotoPoemHtml === 'function') poemInner = renderPhotoPoemHtml(poem, presetIdx, designOverride);
       } catch (_pe) {
@@ -6124,7 +6208,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   function ceAudienceCardHtml() {
     var vm = ceInsightsVm();
-    if (!vm) return '<div class="ce-chart-card"><div class="ce-chart-head"><strong>Audience signal</strong><span>' + (window.__CE_META_HAS_TOKEN__ ? 'syncing' : 'connect Meta') + '</span></div>' + ceInsightStateHtml() + '</div>';
+    /* When Meta is disconnected, the full-width Audience panel below owns the
+       one honest connection state. Do not duplicate the same dead-end card in
+       Momentum; connected accounts still get the unique best-post card here. */
+    if (!vm) return '';
     var best = vm.stats.bestPost;
     /* Owner law 2026-09-13 (second pass, Grow de-duplication). This card used to repeat the
        IG and FB follower counts AND the engagement trend that the "Audience" panel directly
@@ -7164,7 +7251,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var lineHeight = poemLineHeight(st && st.lineHeight);
     var customColor = poemTextColor(st && st.textColor) || '#ffffff';
     var shadowEnabled = !st || st.textShadow !== false;
-    var ratio = poemCanvasRatioFor(txt, density, pos, (st && st.canvasRatio) || photoAspectRatio());
+    var ratio = poemCanvasRatioFor(txt, density, pos, st && st.canvasRatioMode === 'manual' ? st.canvasRatio : '');
     var canvasW = POEM_TYPOGRAPHY.baseWidth;
     var gridHeight = poemRatioHeight(canvasW, ratio);
     var fontSize = poemGlyphSizeFor(txt, canvasW, gridHeight, density, 'grid', pos, st && st.lineHeight);
@@ -7233,7 +7320,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var lineHeight = poemLineHeight(st && st.lineHeight);
     var customColor = poemTextColor(st && st.textColor) || preset.color;
     var shadowEnabled = !!(st && st.textShadow === true);
-    var ratio = poemCanvasRatioFor(txt, density, pos, PHOTO_ASPECT_RATIO);
+    var ratio = poemCanvasRatioFor(txt, density, pos, st && st.canvasRatioMode === 'manual' ? st.canvasRatio : '');
     var canvasW = POEM_TYPOGRAPHY.baseWidth;
     var gridHeight = poemRatioHeight(canvasW, ratio);
     var fontSize = poemGlyphSizeFor(txt, canvasW, gridHeight, density, 'grid', pos, st && st.lineHeight);
@@ -8423,8 +8510,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         labelTitle = 'Slide ' + (selected + 1) + ' Copy & Caption';
       }
     } else {
-      contentText = String((state.currentItem && state.currentItem.text) || '').trim();
-      labelTitle = 'Poem & Caption';
+      if (state.currentType === 'poem') {
+        contentText = String(ceResolveIgCaption(state.currentItem) || '').trim();
+        labelTitle = 'Caption';
+      } else {
+        contentText = String((state.currentItem && state.currentItem.text) || '').trim();
+        labelTitle = 'Poem & Caption';
+      }
     }
 
     var status = state.studioMessage ? '<span style="font-size:11px; color:var(--muted);" id="studio-inline-status">' + escapeHtml(state.studioMessage) + '</span>' : '';
@@ -8517,6 +8609,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               }
             }
           }
+        } else if (state.currentType === 'poem') {
+          var poemCaption = String(val || '').trim();
+          state.igCaption = poemCaption;
+          var poemCaptionId = cePoemItemId(state.currentItem);
+          if (!state.igCaptionById) state.igCaptionById = {};
+          if (poemCaptionId) state.igCaptionById[poemCaptionId] = poemCaption;
+          ceSaveIgCaptions();
         }
 
         if (typeof studioSyncActiveToSurfaces === 'function') studioSyncActiveToSurfaces();
@@ -8762,6 +8861,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function studioPoemStyle() {
     var poemText = state.studioDraftText || (state.currentItem && state.currentItem.text) || '';
     var poemType = state.studioType || 'photo';
+    var manualRatio = poemRatioToken(state.studioCanvasRatioOverride);
     return {
       type: poemType,
       fontSize: poemDensityToken(state.studioFontSize, POEM_TYPOGRAPHY.schemaVersion),
@@ -8779,12 +8879,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       pos: state.studioPos || 'top',
       photoIdx: state.studioPhotoIdx || 0,
       offset: state.studioPoemOffset || { x: 0, y: 0 },
-      canvasRatio: poemCanvasRatioFor(
-        poemText,
-        state.studioFontSize,
-        state.studioPos || 'top',
-        poemPreferredRatioForType(poemType)
-      )
+      canvasRatio: poemCanvasRatioFor(poemText, state.studioFontSize, state.studioPos || 'top', manualRatio || ''),
+      canvasRatioMode: manualRatio ? 'manual' : 'auto'
     };
   }
   window.__CE_STUDIO_POEM_STYLE__ = studioPoemStyle;
@@ -10179,6 +10275,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (color) color.value = poemTextColor(state.studioPoemTextColor) || poemDefaultTextColor();
     var shadow = document.getElementById('poem-shadow-toggle');
     if (shadow) shadow.setAttribute('aria-pressed', state.studioPoemTextShadow !== false ? 'true' : 'false');
+    var activeRatio = poemRatioToken(state.studioCanvasRatioOverride);
+    document.querySelectorAll('[data-poem-ratio]').forEach(function (button) {
+      var selected = String(button.getAttribute('data-poem-ratio') || '') === activeRatio;
+      button.classList.toggle('is-active', selected);
+      button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
   }
 
   function poemSelectTextBox(selected, focusBox) {
@@ -10277,7 +10379,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       let sigColor = 'rgba(255,255,255,0.75)';
       let emoji = '';
       let hasMargin = false;
-      let ratio = '4/3';
+      let ratio = '';
       // E-013 fix 2026-09-05 (O-1 round 2): the old gradient faded to fully
       // transparent, so on bright photos the right side measured 2.64:1 against
       // white text. Floor alpha 0.56 = 4.63:1 worst-case (pure-white photo pixel)
@@ -10303,6 +10405,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
       const photoUrl = !isPaper ? PHOTO_BACKGROUNDS[state.studioPhotoIdx % PHOTO_BACKGROUNDS.length] : null;
       const rawTxt = (typeof cePoemDisplayBody === 'function' ? cePoemDisplayBody : function (t) { return t; })(String(poem.text || '').replace(/[\u2800-\u28FF\u22EE\u22EF\u2026\u22EE]*\s*Move[\s-]*/gi, ''));
+      ratio = poemCanvasRatioFor(rawTxt, state.studioFontSize, state.studioPos || 'top', poemRatioToken(state.studioCanvasRatioOverride));
       const fontFamily = poemFontStack(state.studioPoemFontFamily);
       const fontWeight = poemFontWeight(state.studioPoemFontWeight);
       const lineHeight = poemLineHeight(state.studioPoemLineHeight);
@@ -11751,7 +11854,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         + '</section>')
       : '';
 
-    var captionSection = isPost ? studioEditControls(deck, slides || []) : studioCarouselCaptionMarkup(deck);
+    var captionSection = (isPost || state.currentType === 'poem') ? studioEditControls(deck, slides || []) : studioCarouselCaptionMarkup(deck);
 
     var leftRail = document.getElementById('studio-left-rail');
     var workspaceEl = document.querySelector('.studio-workspace');
@@ -11931,8 +12034,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       }
     }, 40);
 
-    if (!isPost) bindStudioCarouselCaption(deck);
-    else bindStudioEditControls(deck, slides || []);
+    if (isPost || state.currentType === 'poem') bindStudioEditControls(deck, slides || []);
+    else bindStudioCarouselCaption(deck);
 
     var poemFontInline = document.getElementById('poem-font-family-inline');
     if (poemFontInline) {
@@ -12318,6 +12421,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     const seed = Number(String(item && (item.id || item.title) || '').replace(/\D/g, '')) || 0;
 
     if (type === 'poem') {
+      state.studioCanvasRatioOverride = '';
       const section = (options && options.section) || (options && options.poemSection) || state.poemSection || 'photo';
       const presetIdx = (options && options.presetIdx != null)
         ? options.presetIdx
@@ -12394,8 +12498,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var designs = window.__NATIVE_POEM_DESIGNS__;
       // A Saved Bank/Queue snapshot is the user's explicit chosen design. It
       // must win over the latest generic library style for the same poem.
-      if (options && (options.style || options.type)) {
-        savedPoemDesign = { style: options.style || options, text: item && item.text };
+      var optionStyle = options && options.style && typeof options.style === 'object' ? options.style : null;
+      var optionHasStyleFields = options && (options.align || options.pos || options.photoIdx != null || options.fontSize != null || options.canvasRatio || options.canvasRatioMode || options.useOriginal != null);
+      if (optionStyle || optionHasStyleFields) {
+        savedPoemDesign = { style: optionStyle || options, text: item && item.text };
       } else if (poemId && designs && typeof designs === 'object') {
         savedPoemDesign = designs[poemId] || null;
       }
@@ -12413,6 +12519,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         state.studioPoemTextColor = poemTextColor(st.textColor);
         state.studioPoemTextShadow = typeof st.textShadow === 'boolean' ? st.textShadow : st.type === 'photo';
         state.studioUseOriginal = st.useOriginal === true;
+        state.studioCanvasRatioOverride = st.canvasRatioMode === 'manual' ? poemRatioToken(st.canvasRatio) : '';
         state.studioAlign = st.align === 'center' ? 'center' : 'left';
         state.studioPos = st.pos === 'mid' ? 'mid' : 'top';
         if (Number.isFinite(Number(st.photoIdx))) {
@@ -12573,6 +12680,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (activeLook) state.currentItem.look = activeLook;
       if (activeVariant != null) state.currentItem.variant = activeVariant;
       if (currentType === 'poem' && state.studioDraftText) state.currentItem.text = state.studioDraftText;
+      if (currentType === 'poem' && caption != null) {
+        state.igCaption = String(caption).trim();
+        if (!state.igCaptionById) state.igCaptionById = {};
+        var __studioCapId = cePoemItemId(state.currentItem);
+        if (__studioCapId) state.igCaptionById[__studioCapId] = state.igCaption;
+        ceSaveIgCaptions();
+      }
       if (caption && (currentType === 'post' || currentType === 'carousel')) {
         // For posts the editor deliberately mirrors "hook + body". Persisting
         // that composite verbatim leaked the cover hook into the body and
@@ -12620,6 +12734,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           sEntry.item.look = activeLook;
           if (activeVariant != null) sEntry.item.variant = activeVariant;
           if (currentType === 'poem' && state.studioDraftText) sEntry.item.text = state.studioDraftText;
+          if (currentType === 'poem' && caption != null) sEntry.igCaption = String(caption).trim();
           if (caption && (currentType === 'post' || currentType === 'carousel')) {
             sEntry.item.body = caption;
             sEntry.item.caption = caption;
@@ -12669,6 +12784,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         qEntry.item.look = activeLook;
         if (activeVariant != null) qEntry.item.variant = activeVariant;
         if (currentType === 'poem' && state.studioDraftText) qEntry.item.text = state.studioDraftText;
+        if (currentType === 'poem' && caption != null) qEntry.igCaption = String(caption).trim();
         if (caption && (currentType === 'post' || currentType === 'carousel')) {
           qEntry.item.body = caption;
           qEntry.item.caption = caption;
@@ -13891,7 +14007,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var thumbHtml = '';
       try {
         if (cand.type === 'post') {
-          thumbHtml = renderPurePostHtml(cand.item, idx);
+          thumbHtml = renderPurePostHtml(Object.assign({}, cand.item, { look: cand.design && cand.design.look }), idx);
         } else if (cand.type === 'carousel') {
           thumbHtml = renderPureCarouselHtml(cand.item, idx);
         } else if (cand.type === 'poem') {
@@ -14181,12 +14297,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         } else if (saved.type === 'carousel') {
           previewHtml = renderPureCarouselHtml(Object.assign({}, itm, { look: dsg.look || itm.look }), idx);
         } else if (saved.type === 'poem') {
-          var savedStyle = dsg.style || dsg;
-          var savedIsPhoto = dsg.poemSection === 'photo' || savedStyle.type === 'photo' || (dsg.poemSection !== 'paper' && savedStyle.type !== 'paper');
-          var pIdx = dsg.presetIndex != null ? dsg.presetIndex : (dsg.presetIdx != null ? dsg.presetIdx : idx);
+          var savedPoemDesign = cePoemPreviewDesign(itm, dsg);
+          var savedIsPhoto = savedPoemDesign.section !== 'paper';
+          var savedStyle = savedPoemDesign.style ? { style: savedPoemDesign.style } : null;
+          var pIdx = savedPoemDesign.presetIndex;
           previewHtml = savedIsPhoto
-            ? renderPhotoPoemHtml(itm, pIdx, dsg)
-            : renderPaperPoemHtml(itm, pIdx, dsg);
+            ? renderPhotoPoemHtml(itm, pIdx, savedStyle)
+            : renderPaperPoemHtml(itm, pIdx, savedStyle);
         }
       } catch (_e) {}
 
@@ -15592,7 +15709,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var currentDay = getQueueItemDay(q);
         var currentTime = q.scheduleTime || '';
         var isUnscheduled = !!(col && col.id === 'unassigned');
-        var dotColor = q.scheduled && q.scheduleTime ? 'var(--accent)' : (q.readyToPost ? '#f59e0b' : (q.exportStatus === 'EXPORTED' ? '#34d399' : 'var(--faint)'));
         var isPlanSelected = state.planSelectedIds && state.planSelectedIds.has(q.id);
         var typeLabel = escapeHtml(queueTypeLabel(q));
         var creatorLabel = queueCreatorLabel(q);
@@ -15612,12 +15728,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               </div>
               <div class="ce-kanban-id-rail">
                 <button type="button" class="ce-plan-select-toggle${isPlanSelected ? ' is-selected' : ''}" data-idx="${idx}" aria-label="${isPlanSelected ? 'Deselect' : 'Select'} for batch action" title="${isPlanSelected ? 'Deselect' : 'Select for batch action'}">${isPlanSelected ? '<span class="ce-ic ce-ic--check ce-ic--11"></span>' : ''}</button>
-                <span class="ce-status-dot" style="width:7px; height:7px; border-radius:50%; background:${dotColor}; flex-shrink:0;"></span>
                 <span class="ce-kanban-id">${ceMetaChip(q)}</span>
                 <span class="ce-kanban-id-acts">
-                  ${q.metaGraphId ? `<button class="queue-unschedule-btn" data-idx="${idx}" type="button" aria-label="Remove from Meta's clock" title="Remove this post from Meta's clock so it can never go live" style="border:none; background:rgba(251,191,36,0.16); color:#fbbf24; width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--clock ce-ic--11"></span></button>` : ''}
-                  <button class="queue-save-bank-btn" data-idx="${idx}" type="button" aria-label="Send to Saved Bank" title="Move back to Saved Bank (Shortlist)" style="border:none; background:var(--accent-tint); color:var(--accent); width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--star ce-ic--11"></span></button>
-                  <button class="queue-del-btn" data-idx="${idx}" type="button" aria-label="Remove from queue" title="Remove from queue" style="border:none; background:color-mix(in srgb, var(--ink) 8%, transparent); color:color-mix(in srgb, var(--ink) 62%, transparent); width:22px; height:22px; border-radius:5px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; padding:0;"><span class="ce-ic ce-ic--close ce-ic--11"></span></button>
+                  <button class="queue-del-btn" data-idx="${idx}" type="button" aria-label="Remove from queue" title="Move back to Saved Bank" style="border:none; background:transparent; color:var(--muted); width:24px; height:24px; border-radius:7px; cursor:pointer; font-size:14px; font-weight:700; display:grid; place-items:center; padding:0;">↩</button>
+                  ${q.metaGraphId ? `<details class="ce-plan-card-more">
+                    <summary aria-label="More actions" title="More actions">•••</summary>
+                    <div>
+                      <button class="queue-unschedule-btn" data-idx="${idx}" type="button" aria-label="Remove from Meta's clock" title="Remove this post from Meta's clock so it can never go live">Remove from Meta clock</button>
+                    </div>
+                  </details>` : ''}
                 </span>
               </div>
             </div>
@@ -15632,19 +15751,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                 <option value=""${!currentTime ? ' selected' : ''}>Pick time…</option>
                 ${['9:00 AM','10:30 AM','11:30 AM','1:00 PM','3:00 PM','5:00 PM','6:30 PM','8:00 PM','9:00 PM'].map(function(t){ return '<option' + (t === currentTime ? ' selected' : '') + '>' + t + '</option>'; }).join('')}
               </select>
-              <label style="display:flex; align-items:center; cursor:pointer;" title="Ready to publish" aria-label="Mark ready to publish">
-                <input type="checkbox" class="queue-ready-topost" data-idx="${idx}" ${q.readyToPost ? 'checked' : ''} style="cursor:pointer; width:13px; height:13px; accent-color:var(--accent);">
-              </label>
+              <button type="button" class="queue-ready-topost${q.readyToPost ? ' is-ready' : ''}" data-idx="${idx}" aria-pressed="${q.readyToPost ? 'true' : 'false'}" aria-label="${q.readyToPost ? 'Ready to publish — turn off' : 'Mark ready to publish'}" title="${q.readyToPost ? 'Ready to publish — click to turn off' : 'Mark ready to publish'}"><span class="ce-ic ce-ic--check ce-ic--12" aria-hidden="true"></span></button>
               <!-- Owner law 2026-09-10: caption is a DROPDOWN of the saved
                    caption bank (his 8 groups, all 45 lines) — pick one and it
                    becomes this piece's caption. No more blind copy button. -->
               ${ceCaptionPickerHtml(q, idx)}
               <button class="queue-open-composer-btn" data-idx="${idx}" type="button" aria-label="${window.__CE_META_HAS_TOKEN__ ? 'Schedule to @doalfaaz' : 'Prep and open in Studio'}" style="background:rgba(120,120,150,0.08); border:1px solid rgba(120,120,150,0.14); color:var(--ink); width:26px; height:24px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; flex:0 0 auto;" title="${window.__CE_META_HAS_TOKEN__ ? 'Schedule this piece to @doalfaaz at its board date/time (confirm first)' : 'Copy caption, open slides in Finder, and open Creator Studio (manual handoff)'}">
                 <span class="ce-ic ce-ic--share ce-ic--12"></span>
-              </button>
-              <!-- Owner law 2026-09-10: graphical, no text button. -->
-              <button class="queue-open-studio-btn" data-idx="${idx}" type="button" aria-label="Edit in Studio" title="Edit in Studio" style="background:rgba(120,120,150,0.08); border:1px solid rgba(120,120,150,0.14); color:var(--ink); width:26px; height:24px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; flex:0 0 auto;">
-                <span class="ce-ic ce-ic--arrow-up-right ce-ic--12"></span>
               </button>
             </div>
           </div>
@@ -15875,8 +15988,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                         </div>
                       </button>
                       <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-                        <button class="queue-open-studio-btn" data-idx="${idx}" type="button" style="border:1px solid rgba(120,120,150,0.25); background:rgba(120,120,150,0.08); color:var(--ink); padding:6px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Edit in Studio</button>
-                        <button class="queue-del-btn" data-idx="${idx}" type="button" aria-label="Remove from queue" title="Remove from queue" style="border:none; background:color-mix(in srgb, var(--ink) 8%, transparent); color:color-mix(in srgb, var(--ink) 62%, transparent); width:28px; height:28px; border-radius:6px; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center;">×</button>
+                        <button class="queue-del-btn" data-idx="${idx}" type="button" aria-label="Remove from queue" title="Move back to Saved Bank" style="border:none; background:transparent; color:var(--muted); width:28px; height:28px; border-radius:7px; cursor:pointer; font-size:16px; font-weight:700; display:grid; place-items:center; padding:0;">↩</button>
+                        ${q.metaGraphId ? `<details class="ce-plan-card-more ce-plan-card-more--list">
+                        <summary aria-label="More actions" title="More actions">•••</summary>
+                        <div>
+                          <button class="queue-unschedule-btn" data-idx="${idx}" type="button" aria-label="Remove from Meta's clock" title="Remove this post from Meta's clock so it can never go live">Remove from Meta clock</button>
+                        </div>
+                        </details>` : ''}
                       </div>
                     </div>
 
@@ -15897,9 +16015,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                         <select class="kanban-day-select" data-idx="${idx}" style="background:var(--card); color:var(--ink); border:1px solid rgba(120,120,150,0.25); padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
                           ${kanbanDays.map(d => `<option value="${d.id}" ${getQueueItemDay(q) === d.id ? 'selected' : ''}>${escapeHtml(d.label)}</option>`).join('')}
                         </select>
-                        <label style="display:flex; align-items:center; cursor:pointer;" title="${q.readyToPost ? 'Ready to schedule' : 'Mark ready to schedule'}">
-                          <input type="checkbox" class="queue-ready-topost" data-idx="${idx}" ${q.readyToPost ? 'checked' : ''} style="cursor:pointer; width:15px; height:15px; accent-color:var(--accent);">
-                        </label>
+                        <button type="button" class="queue-ready-topost${q.readyToPost ? ' is-ready' : ''}" data-idx="${idx}" aria-pressed="${q.readyToPost ? 'true' : 'false'}" aria-label="${q.readyToPost ? 'Ready to publish — turn off' : 'Mark ready to publish'}" title="${q.readyToPost ? 'Ready to publish — click to turn off' : 'Mark ready to publish'}"><span class="ce-ic ce-ic--check ce-ic--12" aria-hidden="true"></span></button>
                       </div>
                     </div>
                   </div>
@@ -16384,12 +16500,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         };
       });
 
-      planBox.querySelectorAll('.queue-ready-topost').forEach(function (checkbox) {
-        checkbox.onchange = function () {
-          var idx = Number(checkbox.getAttribute('data-idx'));
+      planBox.querySelectorAll('.queue-ready-topost').forEach(function (toggle) {
+        toggle.onclick = function (e) {
+          e.stopPropagation();
+          var idx = Number(toggle.getAttribute('data-idx'));
           var queued = state.queueItems[idx];
           if (queued) {
-            queued.readyToPost = checkbox.checked;
+            var next = toggle.tagName === 'INPUT'
+              ? !!toggle.checked
+              : toggle.getAttribute('aria-pressed') !== 'true';
+            queued.readyToPost = next;
             localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
             renderMain();
           }
@@ -16512,6 +16632,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         <section class="ce-ops-hero">
           <div class="ce-ops-hero-copy">
             <h2 style="margin:0; font-size:18px; font-weight:800; color:var(--ink);">Grow</h2>
+            <div class="ce-grow-hero-rail" aria-label="Grow loop">
+              <span>Observe</span><i aria-hidden="true">→</i><span>Learn</span><i aria-hidden="true">→</i><span>Apply</span>
+            </div>
             <div class="ce-ops-actions" style="margin-top:10px;">
               <button class="ce-surface-button is-primary" data-ce-go="plan" type="button">Queue</button>
               <button class="ce-surface-button is-on-dark" data-ce-go="write" type="button">Write</button>
@@ -19194,6 +19317,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     typeBtnMap.forEach(item => {
       const btn = document.getElementById(item.id);
       if (btn) btn.onclick = () => selectCanvasType(item.type);
+    });
+    document.querySelectorAll('[data-poem-ratio]').forEach(function (button) {
+      button.onclick = function () {
+        var ratio = poemRatioToken(button.getAttribute('data-poem-ratio'));
+        poemApplyTypography('studioCanvasRatioOverride', ratio, ratio ? 'Canvas ratio set to ' + ratio : 'Canvas ratio set to Auto');
+        syncPoemTypographyControls();
+      };
     });
 
       function bindPhonePackButton() {
