@@ -2157,14 +2157,21 @@
             <div class="studio-more-menu">
               <button class="pill-btn" id="studio-download-pack-btn" title="Download all slides as PNGs + copy the caption — ready to post on your phone">Download for phone</button>
               <button class="pill-btn" id="studio-save-bank-btn" title="Save a reusable copy in Saved Bank">Save to Bank</button>
-              <button class="pill-btn" id="studio-queue-btn" title="Stage directly into publishing plan">Queue</button>
-              <button class="pill-btn" id="studio-view-plan-btn" title="Open the publishing plan">Plan (<span id="studio-plan-badge">0</span>)</button>
+              <button class="pill-btn" id="studio-schedule-btn" title="Stage this piece Ready and place it on the earliest open calendar slot">Place in next open slot</button>
               <button class="pill-btn" id="studio-export-btn" title="Export full-resolution PNG files">Export PNG</button>
-              <button class="pill-btn" id="studio-copy-btn">Copy</button>
+              <button class="pill-btn" id="studio-copy-btn" title="Copy the poem text and caption">Copy</button>
             </div>
           </details>
-          <button class="pill-btn" id="studio-schedule-btn" title="Place on the calendar via the Plan queue">Schedule</button>
-          <button class="pill-btn" id="studio-post-btn" title="Stage Ready & open Plan to publish now">Post</button>
+          <!-- E01 STUDIO SHIP GRAMMAR (deep-audit lane E01_STUDIO_SHIP_GRAMMAR, 2026-09-15): FOUR
+               controls all terminated at the same Plan destination - Queue, Schedule, Post and
+               "Plan (n)" (Queue/Schedule/Post all funnel through studioStageCurrent ->
+               addToQueue -> the same ce_queue_items that "Plan (n)" merely opened). Owner law:
+               ONE primary ship control with one job. Post is promoted to the primary (its handler
+               is already the union: stage + Ready + preselect + land on Plan) and renamed
+               "Send to Plan"; Schedule moves into this menu as "Place in next open slot" (it is
+               the only route to ceStageIntoNextSlot); Queue and the "Plan (n)" item are gone,
+               with the queue count moving onto the primary so it can no longer vanish at 0. -->
+          <button class="pill-btn is-primary" id="studio-post-btn" title="Stage this piece Ready and open your Plan">Send to Plan (<span id="studio-plan-badge">0</span>)</button>
         </div>
       </div>
 
@@ -2291,12 +2298,12 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=35c345768e"></script>
+<script src="./deck_index.js?v=7d14c25206"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=5f36c1f7ad" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
-<link rel="stylesheet" href="./native-studio.css?v=407fa7e421" />
+<link rel="stylesheet" href="./native-studio.css?v=86d053d5de" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
@@ -18544,7 +18551,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       };
     }
     var contentId = getContentKey(state.currentType, itemToQueue);
-    var queued = addToQueue(state.currentType, itemToQueue, designMeta);
+    /* E01 STUDIO SHIP GRAMMAR: ONE announcement per ship click. addToQueue toasts on its own
+       ("Added to Plan & Queue") and this function then toasts again ("... (n staged)"), so every
+       Queue/Schedule/Post click fired TWO stacked toasts. The staging call is now quiet and this
+       function owns the single message. */
+    var queued = addToQueue(state.currentType, itemToQueue, designMeta, undefined, { quiet: true });
     if (!queued) { showNotification('Could not save to queue'); return null; }
     var row = state.queueItems.find(function (x) {
       return x.type === state.currentType && x.item && getContentKey(x.type, x.item) === contentId;
@@ -18693,7 +18704,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var count = Array.isArray(state.queueItems) ? state.queueItems.length : 0;
     if (countEl) countEl.textContent = count;
     if (navEl) { navEl.textContent = count; navEl.style.display = count > 0 ? '' : 'none'; }
-    if (studioBadge) { studioBadge.textContent = count; studioBadge.parentElement.style.display = count > 0 ? '' : 'none'; }
+    /* E01 STUDIO SHIP GRAMMAR: the count rides the "Send to Plan" primary now. The old code hid the
+       badge's whole parent at count 0, so an empty queue left no route from Studio to Plan and the
+       primary would have disappeared with it. The primary must always be visible. */
+    if (studioBadge) studioBadge.textContent = count;
   }
   window.__CE_UPDATE_TOPBAR_QUEUE__ = updateTopbarQueueBadge;
 
@@ -18913,13 +18927,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       };
     }
 
-    const studioViewPlanBtn = document.getElementById('studio-view-plan-btn');
-    if (studioViewPlanBtn) {
-      studioViewPlanBtn.onclick = () => {
-        closeStudio(true);
-        navigateTo('plan');
-      };
-    }
+    /* E01 STUDIO SHIP GRAMMAR: the "Plan (n)" menu item is gone. Its only job was to OPEN the Plan
+       surface (Back + the sidebar Plan button already do that), and its count now rides the
+       "Send to Plan" primary, so it can no longer vanish when the queue is empty. */
     updateTopbarSavedBadge();
     updateTopbarQueueBadge();
 
@@ -19468,8 +19478,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       };
     }
 
-    var studioQueueBtn = document.getElementById('studio-queue-btn');
-    if (studioQueueBtn) studioQueueBtn.onclick = () => { studioStageCurrent('Saved to Plan & Queue'); };
+    /* E01 STUDIO SHIP GRAMMAR: "Queue" is gone - staging the piece Ready IS the first half of the
+       "Send to Plan" primary, and studioStageCurrent (which Queue called) still serves the menu's
+       "Place in next open slot" variant. */
 
     /* Studio ship buttons (owner 2026-09-07): Post = stage Ready + jump to Plan
        (publish now sits one click away on the selection); Schedule = stage Ready
