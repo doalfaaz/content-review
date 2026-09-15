@@ -10518,7 +10518,28 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
       const photoUrl = !isPaper ? PHOTO_BACKGROUNDS[state.studioPhotoIdx % PHOTO_BACKGROUNDS.length] : null;
       const rawTxt = (typeof cePoemDisplayBody === 'function' ? cePoemDisplayBody : function (t) { return t; })(String(poem.text || '').replace(/[\u2800-\u28FF\u22EE\u22EF\u2026\u22EE]*\s*Move[\s-]*/gi, ''));
-      ratio = poemCanvasRatioFor(rawTxt, state.studioFontSize, state.studioPos || 'top', poemRatioToken(state.studioCanvasRatioOverride));
+      // H01-5 (CE-A5, 2026-09-15): the auto rung is form-factor aware at the STUDIO
+      // surface only. A portrait stage (phone 402x663) that inherits the desktop
+      // 4:3 auto rung can only fill 283 of 663px of height (30.5% of screen, 380px
+      // dead). Auto on a portrait stage promotes to the portrait rungs 2/3 -> 4/5
+      // -> 9/16 instead, so the canvas fills the field it is painted into. Explicit
+      // manual pills, the lane contract (4:3), shelf/export callers, and landscape
+      // Mac stages are untouched — this only lifts the AUTO floor on portrait.
+      var __ceStagePortrait = (function () {
+        try {
+          var st = document.querySelector('.studio-stage');
+          if (!st) return false;
+          var r = st.getBoundingClientRect();
+          return r.width > 0 && r.height > 0 && r.height > r.width && (r.height / r.width) > 1.2;
+        } catch (_sp) { return false; }
+      })();
+      var __ceAutoRatio = poemRatioToken(state.studioCanvasRatioOverride);
+      if (!__ceAutoRatio && __ceStagePortrait) {
+        var __ceAutoBase = poemRatioToken(ratio) || poemCanvasRatioFor(rawTxt, state.studioFontSize, state.studioPos || 'top', '');
+        if (__ceAutoBase === '4/3') __ceAutoRatio = '4/5';
+        else if (__ceAutoBase === '1/1') __ceAutoRatio = '2/3';
+      }
+      ratio = poemCanvasRatioFor(rawTxt, state.studioFontSize, state.studioPos || 'top', __ceAutoRatio || poemRatioToken(state.studioCanvasRatioOverride));
       const fontFamily = poemFontStack(state.studioPoemFontFamily);
       const fontWeight = poemFontWeight(state.studioPoemFontWeight);
       const lineHeight = poemLineHeight(state.studioPoemLineHeight);
