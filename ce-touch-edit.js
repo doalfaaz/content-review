@@ -1305,9 +1305,23 @@
     t.style.setProperty('height', '44px', 'important');
     t.style.setProperty('pointer-events', 'auto', 'important');
   }
+  var dockEnsureTimer = 0;
+  var scheduleDockEnsure = function () {
+    if (dockEnsureTimer) return;
+    dockEnsureTimer = setTimeout(function () {
+      dockEnsureTimer = 0;
+      ensureDockTools();
+    }, 80);
+  };
   function arm() {
+    if (window.__CE_DOCK_TOOLS_OBSERVER__) {
+      ensureDockTools();
+      return;
+    }
+    window.__CE_DOCK_TOOLS_OBSERVER__ = true;
     ensureDockTools();
-    new MutationObserver(ensureDockTools).observe(document.body, { childList: true, subtree: true });
+    var target = document.body || document.documentElement;
+    if (target) new MutationObserver(scheduleDockEnsure).observe(target, { childList: true, subtree: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm); else arm();
 })();
