@@ -4206,12 +4206,29 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 
 /* Devanagari Matra Clearance and Shirorekha Protection */
 .ce-render-block-content .poem,
-.ce-poem-text-block,
 .slide--poem .mid,
 .ce-deva-text {
   line-height: var(--deva-lh-loose, 1.6) !important;
   padding-block: var(--deva-matra-padding, 0.15em) !important;
   -webkit-font-smoothing: subpixel-antialiased !important;
+}
+
+/* P0-2 (deep-audit D00_ANCHOR_PARITY, verified on HEAD): `.ce-poem-text-block` was in
+   the selector list above. That selector is GLOBAL (native-studio.css is loaded on every
+   surface), so `line-height:1.6!important` + `padding-block:0.15em!important` beat the
+   authored inline `line-height` that renderPhotoPoemHtml/renderPaperPoemHtml set from
+   POEM_TYPOGRAPHY — on EVERY card (Library shelf, Saved bank, Plan queue) — while
+   Studio's `#studio-editable-text` carries no such class and kept the authored value.
+   Measured on a 2-line 21px poem: card block 2x21x1.6 = 67px vs Studio 2x21x1.78 = 75px,
+   an 11% looser block, plus ~3px of padding pushing card text below its anchor. That is
+   a permanent preview-vs-Studio parity breaker that fires even when pos matches.
+   The Devanagari clearance this rule exists for is already carried by the authored
+   inline line-height (POEM_TYPOGRAPHY.lineHeight = 1.78, looser than 1.6) and by the
+   `--deva-matra-padding` fallback below, so dropping the class from this list keeps the
+   shirorekha protection while letting authored values win. */
+.ce-poem-text-block {
+  padding-block: var(--deva-matra-padding, 0.15em);
+  -webkit-font-smoothing: subpixel-antialiased;
 }
 
 /* Emil Kowalski Tactile Button Spring */

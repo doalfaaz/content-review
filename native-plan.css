@@ -121,7 +121,16 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
    4:3 photo stage paint its background across only half the card ("weirdly
    cut"). The stage keeps its authored inline size; fitQueuePreviews scales it. */
 .ce-staged-face-preview .ce-poem-stage{transform-origin:top left;position:absolute;top:0;left:0}
-.ce-staged-face-preview .ce-poem-stage>div{width:100%!important;height:100%!important;aspect-ratio:auto!important;border-radius:10px!important}
+/* P0-1 (deep-audit D00_ANCHOR_PARITY, verified on HEAD): the bare `>div` reset also hit
+   the TEXT layer. Arithmetic on the authored 580x435 stage: a `pos:'mid'` text block is
+   `top:42%` (182.7px) + `translateY(-50%)`; with `height:100%!important` the box becomes
+   435px tall, so -50% = -217.5px and the box top lands at -34.8px — the first ~35px of
+   text sits ABOVE the stage and is clipped by `overflow:hidden`. A 2-line poem loses its
+   whole first line, which is why the owner saw "thumbnail shows nothing, open shows a
+   poem" (V2). `pos:'top'` blocks have no -50% shift, which is why only SOME cards looked
+   empty. Scope the reset to the non-text layers so the background/shade layers keep the
+   A3 cut fix while the text layer keeps its own height. */
+.ce-staged-face-preview .ce-poem-stage > :not(.ce-poem-text-block):not(.ce-draggable-box):not(.ce-poem-signature){width:100%!important;height:100%!important;aspect-ratio:auto!important;border-radius:10px!important}
 
 /* ==========================================================
    KANBAN BOARD FOR DAYS (Weekly Publishing Board)

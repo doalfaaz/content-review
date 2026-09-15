@@ -1128,7 +1128,11 @@
     top: 0;
     left: 0;
   }
-  .ce-staged-face-preview .ce-poem-stage>div {
+  /* P0-1: same scoping as native-plan.css — see the comment there. The bare `>div` reset
+     also matched the text layer and, for a pos:'mid' block (top:42% + translateY(-50%)),
+     made the box full-height so the -50% shift pushed the first ~35px of text above the
+     stage and clipped it. Non-text layers keep the A3 cut fix. */
+  .ce-staged-face-preview .ce-poem-stage > :not(.ce-poem-text-block):not(.ce-draggable-box):not(.ce-poem-signature) {
     width: 100%!important;
     height: 100%!important;
     aspect-ratio: auto!important;
@@ -2291,9 +2295,9 @@
 <script src="./deck_index.js?v=35c345768e"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
-<link rel="stylesheet" href="./native-plan.css?v=b6a3a99a84" />
+<link rel="stylesheet" href="./native-plan.css?v=68d5fc5bc0" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
-<link rel="stylesheet" href="./native-studio.css?v=b0d84d4335" />
+<link rel="stylesheet" href="./native-studio.css?v=407fa7e421" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
@@ -10530,6 +10534,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           <div id="active-studio-canvas" style="position:relative; width:580px; aspect-ratio:${ratio}; overflow:hidden; background:${bg}; border-radius:14px; box-shadow:0 0 0 1px rgba(255,255,255,0.08), 0 24px 64px -12px rgba(0,0,0,0.85), 0 12px 28px -8px rgba(0,0,0,0.6);">
             <div class="ce-poem-photo-layer" style="position:absolute; inset:0; display:${!isPaper ? 'block' : 'none'}; background-color:#1c1a24; background-image:${!isPaper ? `url('${photoUrl}')` : 'none'}; background-size:cover; background-position:center; filter:grayscale(1) sepia(0.08) contrast(1.08) brightness(0.82);"></div>
             <div class="ce-poem-shade-layer" style="position:absolute; inset:0; display:${!isPaper ? 'block' : 'none'}; background:${shade}; z-index:1;"></div>
+            <!-- P1-3 / V1 (deep-audit D00_ANCHOR_PARITY, verified on HEAD): the card
+                 renderer paints a THIRD overlay after the photo and the horizontal
+                 shade — a top-down readability gradient
+                 (linear-gradient(180deg, rgba(5,5,6,.78) 0%, rgba(5,5,6,.30) 30%,
+                 rgba(5,5,6,0) 52%), index.html renderPhotoPoemHtml). The Studio canvas
+                 painted only photo + shade, so opening a poem dropped that upper
+                 gradient and the white Devanagari looked wrong against the artwork —
+                 exactly the owner's V1 ("the upper gradient vanishes"). Same values as
+                 the card, one source of truth for the readability layer. -->
+            <div class="ce-poem-topvignette-layer" style="position:absolute; inset:0; display:${!isPaper ? 'block' : 'none'}; background:linear-gradient(180deg, rgba(5,5,6,0.78) 0%, rgba(5,5,6,0.30) 30%, rgba(5,5,6,0) 52%); z-index:1;"></div>
             <div class="ce-poem-margin-line" style="position:absolute; left:32px; top:0; bottom:0; width:2px; display:${hasMargin ? 'block' : 'none'}; background:#d4a58c; opacity:0.8; z-index:1;"></div>
             <div id="studio-draggable-container" class="ce-draggable-box${state.studioPoemSelected ? ' is-selected' : ''}${state.studioPoemEditing ? ' is-editing' : ''}" tabindex="0" role="group" aria-label="Poem text box. Drag to move; double-click or press Enter to edit." style="position:absolute; z-index:2; left:${leftPad}; ${textBoxWidthStyle} ${topStyle}">
               <div class="ce-drag-handle-bar" title="Drag to reposition text with magnetic snapping" aria-hidden="true" contenteditable="false" style="user-select:none; -webkit-user-select:none;">⋮⋮ Move</div>
@@ -12762,8 +12776,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         } else if (currentType === 'poem') {
           sEntry.design.type = poemStyle.type;
           sEntry.design.poemSection = poemStyle.type === 'photo' ? 'photo' : 'paper';
-          sEntry.design.presetIndex = poemStyle.photoIdx;
-          sEntry.design.presetIdx = poemStyle.photoIdx;
+          /* P1-1 (deep-audit D00_ANCHOR_PARITY, verified on HEAD): presetIndex/presetIdx
+             mean "which PHOTO_PRESETS/PAPER_PRESETS slot", while photoIdx means "which
+             backdrop asset". They coincide numerically for photo presets today, so the
+             stamping looked harmless — but for a PAPER design photoIdx is meaningless, so
+             a paper poem saved from Studio got presetIndex=0 and lost its real preset slot
+             on the next open (the resolvers prefer presetIndex). Only the explicit
+             photoIdx belongs in the design; the style carries the rest. */
+          if (Number.isFinite(Number(poemStyle.photoIdx))) sEntry.design.photoIdx = Number(poemStyle.photoIdx);
           sEntry.design.style = poemStyle;
         }
         if (sEntry.item) {
@@ -12812,8 +12832,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (activeVariant != null) qEntry.design.variant = activeVariant;
       } else if (currentType === 'poem') {
         qEntry.design.type = poemStyle.type;
-        qEntry.design.presetIndex = poemStyle.photoIdx;
-        qEntry.design.presetIdx = poemStyle.photoIdx;
+        /* P1-1: same correction as the saved-bank path — presetIndex/presetIdx name a
+           PRESET slot while photoIdx names a backdrop asset; stamping one from the other
+           is semantically wrong and loses a paper poem's preset on reopen. */
+        if (Number.isFinite(Number(poemStyle.photoIdx))) qEntry.design.photoIdx = Number(poemStyle.photoIdx);
         qEntry.design.style = poemStyle;
       }
       if (qEntry.item) {
