@@ -2298,7 +2298,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=7d14c25206"></script>
+<script src="./deck_index.js?v=902bd2ae3f"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=5f36c1f7ad" />
@@ -4615,7 +4615,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (lines >= 8) return '2/3';
     if (lines >= 5) return '4/5';
     if (lines >= 3) return '1/1';
-    return PHOTO_ASPECT_RATIO;
+    // OWNER REVIEW 2026-09-15 (V15): the couplet tier used to fall through to PHOTO_ASPECT_RATIO,
+    // which is 4/3 LANDSCAPE - so the SHORTEST poems opened on the WIDEST canvas, and the V12
+    // fill then stretched that landscape across ~96% of the stage. The owner: "as soon as I open a
+    // poem it opens weirdly in this full screen mode which is wrong totally". Every other tier is
+    // portrait or square, so the couplet now continues the same ladder at 4/5 - Instagram's native
+    // feed ratio - meaning a poem opens at the exact shape it will post at. The per-poem override
+    // in the canvas control (Auto / 4:3 / 1:1 / 4:5 / 9:16) still wins when the owner sets one.
+    return '4/5';
   }
 
   // One proportional typography law for gallery, Studio and export. The
@@ -5186,7 +5193,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
        only the hook line does. Pointer-fine only, like carousel hover-play. */
     let hookTimer = 0, hookEl = null, hookPost = null, hookDeck = null, hookIdx = 0, hookList = null;
     let hookOrigHTML = '', hookOrigClass = '';
-    const renderHookFace = (el, deck, post, hook) => {
+    const renderHookFace = (el, deck, post, hook, lookOverride) => {
       if (!el || !window.CarouselCore || !window.postFaceSlide) return;
       const stage = el.firstElementChild;
       if (!stage) return;
@@ -5195,7 +5202,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // hook-only face contract identical across every variation.
       const slide0 = window.postFaceSlide(Object.assign({}, post || {}, { title: hook, text: hook }), null);
       if (!slide0) return;
-      const look = (typeof validLook === 'function') ? validLook((post && post.look) || (deck && deck.look) || 'midnight') : ((post && post.look) || (deck && deck.look) || 'midnight');
+      // OWNER REVIEW 2026-09-15 (V16): lookOverride lets the hover cycle walk the RANKED BEST-FIT
+      // DESIGNS, not just the hook text. Without it every hover showed one frozen theme.
+      const look = (typeof validLook === 'function')
+        ? validLook(lookOverride || (post && post.look) || (deck && deck.look) || 'midnight')
+        : (lookOverride || (post && post.look) || (deck && deck.look) || 'midnight');
       const slide = (typeof normSlide === 'function') ? normSlide(slide0, 0, 1) : slide0;
       stage.className = 'look-' + look;
       window.cePaintSlide(stage, slide, 0, 1, look);
@@ -5237,20 +5248,47 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         ? window.__CE_STRIP_HOOK_PLAIN__(faceHookEl ? faceHookEl.innerHTML : '')
         : '';
       hookList = (typeof generateAlternativeHooks === 'function') ? generateAlternativeHooks(post, facePlain || null) : [];
-      if (!hookList || hookList.length < 2) return;
+      // OWNER REVIEW 2026-09-15 (V16): the cycle below used to advance ONLY hookList, so a post's
+      // DESIGN never changed no matter how long the owner hovered - he reported it as "showing
+      // single theme for next Post designs that come with hovering ... it should be with its best
+      // fit design ... it shows me other multiple variations that I can use in place of it". The
+      // walk is now driven by studioRankedLooks - the SAME ranked order the Studio's design picker
+      // presents - so hover shows the post's real best-fit designs.
+      const curLook = (typeof validLook === 'function')
+        ? validLook((post && (post.look || post.look_id)) || (deck && deck.look) || '')
+        : ((post && (post.look || post.look_id)) || (deck && deck.look) || '');
+      let lookList = [];
+      try {
+        if (typeof studioRankedLooks === 'function' && deck) {
+          lookList = (studioRankedLooks(deck) || []).filter(function (l) { return l && l !== curLook; });
+        }
+      } catch (_e) { lookList = []; }
+      if ((!hookList || hookList.length < 2) && lookList.length < 2) return;
       if (!deck && window.__CE_DECK_WANT__ && deckId) window.__CE_DECK_WANT__(deckId);
       // Snapshot BEFORE the first cycle replaces the stage — the mouse-out
       // restore puts this exact markup back (byte-exact restore contract).
       hookOrigHTML = stageEl ? stageEl.innerHTML : '';
       hookOrigClass = stageEl ? stageEl.className : '';
+      const seedHook = facePlain
+        || (hookList && hookList.length ? hookList[0].text : '')
+        || String((post && (post.text || post.title)) || '');
       hookEl = el; hookPost = post; hookDeck = deck; hookIdx = 0;
       hookTimer = setInterval(() => {
         if (!document.contains(hookEl)) { stopHookPlay(); return; }
         const live = (deckId && window.__CE_DECKS_FULL__ && window.__CE_DECKS_FULL__[deckId]) || hookDeck;
         if (live && live !== hookDeck) hookDeck = live;
-        hookIdx = (hookIdx + 1) % hookList.length;
-        renderHookFace(hookEl, hookDeck, hookPost, hookList[hookIdx].text);
-      }, 900);
+        if (lookList.length >= 2) {
+          // Walk the ranked designs, holding the post's OWN text steady so the owner is judging the
+          // design rather than the wording. (A beat longer than the old hook sweep - a design needs
+          // more than 900ms to read.)
+          const look = lookList[hookIdx % lookList.length];
+          hookIdx = (hookIdx + 1) % lookList.length;
+          renderHookFace(hookEl, hookDeck, hookPost, seedHook, look);
+        } else {
+          hookIdx = (hookIdx + 1) % hookList.length;
+          renderHookFace(hookEl, hookDeck, hookPost, hookList[hookIdx].text);
+        }
+      }, 1200);
     }, { passive: true });
     document.addEventListener('mouseover', (e) => {
       const el = (e.target && e.target.closest) ? e.target.closest('.ce-cc.ce-real-face[data-ce-deck]') : null;
