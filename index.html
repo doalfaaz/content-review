@@ -2275,7 +2275,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=b2eafdcc78"></script>
+<script src="./deck_index.js?v=1cd84c6004"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=96c13083bb" />
@@ -4932,10 +4932,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
 
   function queuePreviewHtml(queueItem, queueIndex) {
-    const item = queueItem && queueItem.item && typeof queueItem.item === 'object'
+    let item = queueItem && queueItem.item && typeof queueItem.item === 'object'
       ? queueItem.item
       : {};
     const type = String(queueItem && queueItem.type || item.kind || item.type || '').toLowerCase();
+    if (type === 'poem' && typeof ceLibraryPoemById === 'function') {
+      const poemId = String(item.id || item.content_id || queueItem.contentId || '');
+      item = ceLibraryPoemById(poemId, item) || item;
+    }
     const itemId = String(item.id || item.content_id || item.title || '');
 
     if (type === 'carousel') {
@@ -13160,6 +13164,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function installAppBackGesture() {
     if (window.__CE_APP_BACK_GESTURE__) return;
     var lastBack = 0;
+    var backGestureConsumed = false;
     var gestureX = 0;
     var gestureY = 0;
     var gestureReset = 0;
@@ -13196,14 +13201,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         gestureX = 0;
         gestureY = 0;
         gestureReset = 0;
+        /* A long physical sweep can emit wheel packets for >650ms. Once one
+           packet navigates, ignore the rest of that same sweep; a quiet
+           interval arms the next deliberate gesture. */
+        backGestureConsumed = false;
       }, 240);
       /* Threshold raised -76 → -160 with a stricter direction ratio: a casual
          trackpad flick (~80px) must never change screens; a deliberate pull does. */
-      if (gestureX > -160 || Math.abs(gestureX) <= Math.abs(gestureY) * 1.6) return;
+      if (gestureX > -160 || Math.abs(gestureX) <= Math.abs(gestureY) * 1.6 || backGestureConsumed) return;
       var now = Date.now();
       if (now - lastBack < 650) return;
       if (appNavigateBack()) {
         lastBack = now;
+        backGestureConsumed = true;
         gestureX = 0;
         gestureY = 0;
         event.preventDefault();
@@ -14144,15 +14154,22 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var card = document.createElement('div');
       card.className = 'pure-card deck-card ce-saved-card';
       card.setAttribute('data-saved-id', saved.id || '');
-      if (saved.type === 'poem' && saved.item) {
-        card.setAttribute('data-poem-id', String(saved.item.id || saved.item.content_id || ''));
+      /* Saved rows are intentionally lightweight persistence records. A poem
+         saved before a catalog refresh may contain only id/title, while Studio
+         resolves the full live row on open; using the stub here painted an
+         empty card that changed shape as soon as Studio opened it. Resolve
+         the same canonical poem row before BOTH preview and click paths. */
+      var itm = saved.item || {};
+      if (saved.type === 'poem') {
+        var savedPoemId = String(itm.id || itm.content_id || saved.contentId || '');
+        if (typeof ceLibraryPoemById === 'function') itm = ceLibraryPoemById(savedPoemId, itm) || itm;
+        card.setAttribute('data-poem-id', String(itm.id || itm.content_id || savedPoemId));
       }
 
       var isSelected = state.savedSelectedIds && state.savedSelectedIds.has(saved.id);
       if (isSelected) card.classList.add('is-selected');
 
       var previewHtml = '';
-      var itm = saved.item || {};
       var dsg = saved.design || {};
       try {
         if (saved.type === 'post') {
