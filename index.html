@@ -2386,6 +2386,36 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 (function () {
   'use strict';
 
+  /* N123/CE-B8 (2026-09-15): the session-lifetime keyed stores below accepted a
+     write per entity/asset and never evicted — memory grew monotonically with use
+     (960 hydrated decks, ~3.7MB JSON -> ~8-20MB heap, pinned forever; rasters latent
+     at the same shape). One bounded-store helper kills the class: set() touches +
+     evicts LRU past max, delete() evicts on entity removal. Plain objects (not Maps)
+     so every existing `store[id]`, `Object.keys`, `hasOwnProperty` read site keeps
+     working; eviction deletes the OLDEST-TOUCHED key first. */
+  window.__CE_BOUNDED_MAX__ = window.__CE_BOUNDED_MAX__ || { __CE_DECKS_FULL__: 120, __CE_RASTERS__: 60, __CE_AUTHORED_COVER__: 120, __NATIVE_POEM_DESIGNS__: 400 };
+  window.__ceBoundedTouch = window.__ceBoundedTouch || {};
+  window.ceBoundedSet = window.ceBoundedSet || function (storeName, key, value) {
+    try {
+      var max = (window.__CE_BOUNDED_MAX__ && window.__CE_BOUNDED_MAX__[storeName]) || 100;
+      var store = window[storeName];
+      if (!store || typeof store !== 'object') { store = {}; window[storeName] = store; }
+      var touch = window.__ceBoundedTouch[storeName] || (window.__ceBoundedTouch[storeName] = {});
+      store[key] = value;
+      touch[key] = Date.now();
+      var keys = Object.keys(store);
+      if (keys.length > max) {
+        keys.sort(function (a, b) { return (touch[a] || 0) - (touch[b] || 0); });
+        for (var i = 0; i < keys.length - max; i++) { delete store[keys[i]]; delete touch[keys[i]]; }
+      }
+    } catch (_bs) { try { window[storeName][key] = value; } catch (_bs2) {} }
+  };
+  window.ceBoundedDelete = window.ceBoundedDelete || function (storeName, key) {
+    try {
+      if (window[storeName]) delete window[storeName][key];
+      if (window.__ceBoundedTouch[storeName]) delete window.__ceBoundedTouch[storeName][key];
+    } catch (_bd) {}
+  };
   if (!window.__CE_DECKS_FULL__) window.__CE_DECKS_FULL__ = {};
   if (!window.__NATIVE_DECKS__) window.__NATIVE_DECKS__ = [];
   if (!window.__NATIVE_DECK_INDEX__) window.__NATIVE_DECK_INDEX__ = [];
@@ -2931,7 +2961,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     deck.id = deck.id || id;
     var sourceSlides = deck.slides || [];
     deck.slides = sourceSlides.map(function (slide, index) { return normSlide(slide, index, sourceSlides.length); });
-    window.__CE_DECKS_FULL__[id] = deck;
+    if (window.ceBoundedSet) window.ceBoundedSet('__CE_DECKS_FULL__', id, deck);
+    else window.__CE_DECKS_FULL__[id] = deck;
     try {
       window.__CE_AUTHORED_COVER__ = window.__CE_AUTHORED_COVER__ || {};
       var cover0 = deck.slides && deck.slides[0];
@@ -2940,7 +2971,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var coverText = coverHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
         if (coverHtml) {
           var rec = { html: coverHtml, text: coverText, sub: String(cover0.sub || ''), kickline: String(cover0.kickline || ''), fromDeck: true };
-          window.__CE_AUTHORED_COVER__[id] = rec;
+          if (window.ceBoundedSet) window.ceBoundedSet('__CE_AUTHORED_COVER__', id, rec);
+          else window.__CE_AUTHORED_COVER__[id] = rec;
           try { sessionStorage.setItem('ce_authored_cover_v2_' + id, JSON.stringify(rec)); } catch (_se) {}
         }
       }
@@ -3141,7 +3173,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
   window.__CE_RASTER_RECEIVED__ = function (cacheKey, b64) {
     delete rasterPending[cacheKey];
-    window.__CE_RASTERS__[cacheKey] = b64 || null;
+    /* N123/CE-B8: a failed raster used to pin `null` forever behind the hasOwnProperty
+       guard — never retried in-session. Null is now a miss: not stored, so the next
+       WANT re-fires the bridge request instead of hitting a permanent tombstone. */
+    if (!b64) {
+      if (window.ceBoundedDelete) window.ceBoundedDelete('__CE_RASTERS__', cacheKey);
+      else delete window.__CE_RASTERS__[cacheKey];
+      return;
+    }
+    if (window.ceBoundedSet) window.ceBoundedSet('__CE_RASTERS__', cacheKey, b64);
+    else window.__CE_RASTERS__[cacheKey] = b64;
     document.querySelectorAll('[data-ce-queue-raster]').forEach(function (shell) {
       if (shell.dataset.ceQueueRaster !== cacheKey) return;
       if (!b64) {
@@ -3948,7 +3989,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               var cur = window.__NATIVE_POEM_DESIGNS__[rid];
               var curT = cur && Date.parse(cur.updatedAt || ''); var rowT = Date.parse(row.updatedAt || '');
               if (!cur || (isFinite(rowT) && (!isFinite(curT) || rowT >= curT))) {
-                window.__NATIVE_POEM_DESIGNS__[rid] = { text: row.body || (cur && cur.text) || '', style: row.poemStyle, title: row.title || (cur && cur.title) || '', updatedAt: row.updatedAt || '' };
+                (function (__rid, __val) { if (window.ceBoundedSet) window.ceBoundedSet('__NATIVE_POEM_DESIGNS__', __rid, __val); else window.__NATIVE_POEM_DESIGNS__[__rid] = __val; })(rid, { text: row.body || (cur && cur.text) || '', style: row.poemStyle, title: row.title || (cur && cur.title) || '', updatedAt: row.updatedAt || '' });
               }
             });
           }
@@ -4005,7 +4046,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         window.__NATIVE_DECKS__.forEach(function (deck) {
           if (!deck || !deck.id) return;
           deck.slides = (deck.slides || []).map(normSlide);
-          window.__CE_DECKS_FULL__[deck.id] = deck;
+          if (window.ceBoundedSet) window.ceBoundedSet('__CE_DECKS_FULL__', deck.id, deck);
+          else window.__CE_DECKS_FULL__[deck.id] = deck;
         });
       } else if (!Array.isArray(window.__NATIVE_DECKS__)) {
         window.__NATIVE_DECKS__ = [];
@@ -4257,7 +4299,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var settled = false;
       var done = function (r) { if (!settled) { settled = true; resolve(r || { ok: false }); } };
       __ceBankPending[reqId] = done;
-      setTimeout(function () { done({ ok: false, timeout: true }); }, 9000);
+      /* N123/CE-B8: the 9s timeout resolved the promise but left the dead closure
+         pinned in the map forever. Delete on the timeout edge too. */
+      setTimeout(function () { delete __ceBankPending[reqId]; done({ ok: false, timeout: true }); }, 9000);
       try {
         window.webkit.messageHandlers.ceBridge.postMessage({
           action: action, req: reqId,
@@ -4415,6 +4459,30 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var tomb = ceBankTombstones();
     var now = Date.now();
     (Array.isArray(keys) ? keys : [keys]).forEach(function (k) { if (k) tomb[String(k)] = now; });
+    /* N123/CE-B8 discipline (b): entity deletion evicts every entity-keyed store,
+       so a deleted deck/poem cannot pin its hydrated objects for the session. */
+    try {
+      (Array.isArray(keys) ? keys : [keys]).forEach(function (k) {
+        if (!k) return;
+        var id = String(k);
+        if (window.ceBoundedDelete) {
+          window.ceBoundedDelete('__CE_DECKS_FULL__', id);
+          window.ceBoundedDelete('__CE_AUTHORED_COVER__', id);
+          window.ceBoundedDelete('__CE_RASTERS__', id);
+          window.ceBoundedDelete('__NATIVE_POEM_DESIGNS__', id);
+        } else {
+          delete window.__CE_DECKS_FULL__[id];
+          delete window.__CE_AUTHORED_COVER__[id];
+          delete window.__CE_RASTERS__[id];
+          delete window.__NATIVE_POEM_DESIGNS__[id];
+        }
+        if (Array.isArray(window.__NATIVE_DECKS__)) {
+          var ix = window.__NATIVE_DECKS__.findIndex(function (d) { return d && String(d.id) === id; });
+          if (ix >= 0) window.__NATIVE_DECKS__.splice(ix, 1);
+        }
+        try { sessionStorage.removeItem('ce_authored_cover_v2_' + id); } catch (_rmc) {}
+      });
+    } catch (_evict) {}
     cePersistTombstones(tomb);
     ceSavedBankPush();
   }
@@ -10199,7 +10267,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }
     var id = studioDeckId(state.currentItem, state.currentType);
     if (id && window.__CE_DECKS_FULL__) {
-      window.__CE_DECKS_FULL__[id] = deck;
+      if (window.ceBoundedSet) window.ceBoundedSet('__CE_DECKS_FULL__', id, deck);
+      else window.__CE_DECKS_FULL__[id] = deck;
     }
   }
 
@@ -11203,7 +11272,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (!id) return null;
     var rec = authoredCoverRecord(window.__CE_AUTHORED_COVER__[id]);
     if (rec) {
-      window.__CE_AUTHORED_COVER__[id] = rec;
+      if (window.ceBoundedSet) window.ceBoundedSet('__CE_AUTHORED_COVER__', id, rec);
+      else window.__CE_AUTHORED_COVER__[id] = rec;
       return rec;
     }
     try {
@@ -11211,7 +11281,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (raw) {
         rec = authoredCoverRecord(JSON.parse(raw));
         if (rec) {
-          window.__CE_AUTHORED_COVER__[id] = rec;
+          if (window.ceBoundedSet) window.ceBoundedSet('__CE_AUTHORED_COVER__', id, rec);
+          else window.__CE_AUTHORED_COVER__[id] = rec;
           return rec;
         }
       }
@@ -11238,7 +11309,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var cardTitle = stripHookPlain((window.__CE_STATE__ && window.__CE_STATE__.currentItem && window.__CE_STATE__.currentItem.title) || '');
     if (cardTitle && text.toLowerCase() === cardTitle.toLowerCase()) return;
     var rec = { html: html, text: text, sub: sub, kickline: kickline, fromDeck: !!trusted };
-    window.__CE_AUTHORED_COVER__[id] = rec;
+    if (window.ceBoundedSet) window.ceBoundedSet('__CE_AUTHORED_COVER__', id, rec);
+    else window.__CE_AUTHORED_COVER__[id] = rec;
     try { sessionStorage.setItem('ce_authored_cover_v2_' + id, JSON.stringify(rec)); } catch (_e) {}
   }
 
@@ -11528,6 +11600,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var authored = !!(options && options.authored);
       if (!authored && (banned.test(low) || command.test(value))) {
         window.__CE_HOOK_VOICE_REJECTIONS__.push({ angle: angle, reason: banned.test(low) ? 'blacklist' : 'guru-command' });
+        /* N123/CE-B8: write-only diagnostic sink, no readers — cap so it cannot grow forever. */
+        if (window.__CE_HOOK_VOICE_REJECTIONS__.length > 500) window.__CE_HOOK_VOICE_REJECTIONS__.splice(0, window.__CE_HOOK_VOICE_REJECTIONS__.length - 500);
         return;
       }
       seen[key] = true;
@@ -15493,6 +15567,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           if (!writeApplyingHistory && writeHistory[writeHistoryIndex] !== state.writeDraft) {
             writeHistory = writeHistory.slice(0, writeHistoryIndex + 1);
             writeHistory.push(state.writeDraft);
+            /* N123/CE-B8: per-keystroke full-draft copies — cap like the studio undo stack (80). */
+            if (writeHistory.length > 80) writeHistory.shift();
             writeHistoryIndex = writeHistory.length - 1;
           }
           updatePreview();
