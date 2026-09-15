@@ -101,6 +101,24 @@
   transition-duration: 70ms !important;
 }
 
+/* E01 STUDIO SHIP GRAMMAR (2026-09-15): the ONE primary ship control. The Studio topbar used to
+   carry three equal-weight ship pills (Queue / Schedule / Post, all terminating at the same Plan
+   destination) so none of them read as THE action. "Send to Plan" is now the single accent
+   control - the same treatment the Plan board gives its own primary (.ce-plan-bulk-btn.is-primary). */
+.pill-btn.is-primary {
+  background: var(--accent) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+.pill-btn.is-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 86%, #fff) !important;
+}
+.pill-btn.is-primary #studio-plan-badge {
+  opacity: 0.88;
+  font-variant-numeric: tabular-nums;
+}
+
 .ce-look-choice {
   transition: transform 200ms var(--ease-spring), border-color 150ms ease, box-shadow 200ms var(--ease-spring) !important;
 }
@@ -291,6 +309,44 @@
 .studio-more-actions:not([open]) > .studio-more-menu { display: none; }
 .studio-more-menu .pill-btn { width: 100%; justify-content: flex-start; white-space: nowrap; }
 
+/* H01-2 (CE-A2, 2026-09-15): the Studio dock/topbar carried 28 of 45 visible
+   interactives under the 44px touch floor (ratio pills 32x26, undo/redo 32x32,
+   8 icon tools 34x32, caption chips h25-27, Back/Send-to-Plan h28). One rule,
+   not 28 patches: the lane's own prescription — a 44px floor on Studio chrome
+   (.studio-dock button, .studio-topbar button, .ce-poem-ratio-pill) — applied
+   as a class census so every sibling rides along. The pills row already wraps,
+   so it folds to two rows instead of shrinking its targets. Carousel-mode
+   compact strips keep their authored 25px visuals (higher-specificity
+   !important rules there win) but still get the tap-slop pseudo below, so no
+   Studio control anywhere keeps a sub-44px tap box. */
+.studio-topbar button,
+.studio-dock button,
+.studio-left-rail button,
+.studio-topbar summary {
+  min-width: 44px;
+  min-height: 44px;
+}
+/* Tap-slop expander for anything the floor above cannot reach (carousel-mode
+   compact strips, icon glyphs): an empty ::before stretched to a centred
+   44x44 box. ::after is taken (studio icon glyph layer), so ::before carries
+   it; buttons become positioned so the pseudo anchors to the control. Empty
+   content paints nothing — hit area only, never layout. */
+.studio-topbar button,
+.studio-dock button,
+.studio-left-rail button {
+  position: relative;
+}
+.studio-topbar button::before,
+.studio-dock button::before,
+.studio-left-rail button::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc(50% - 22px));
+  min-width: 44px;
+  min-height: 44px;
+}
+.ce-poem-ratio-pills { align-items: stretch; }
+
 .studio-icon-btn {
   width: 32px;
   height: 32px;
@@ -396,9 +452,10 @@
 
 .ce-icon-tool,
 .ce-compact-tool {
-  width: 34px;
-  height: 32px;
-  min-width: 34px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   display: inline-grid;
   place-items: center;
   padding: 0;
@@ -1253,7 +1310,12 @@
      Bank / Queue / Plan / Copy / Close studio), so the summary stayed visible
      and opened an empty menu — the owner's "no button works" on the phone.
      The menu's own children now keep their display. */
-  .studio-primary-actions > .pill-btn:not(#studio-export-btn) {
+  /* E01 STUDIO SHIP GRAMMAR (2026-09-15): the primary ship control ("Send to Plan",
+     #studio-post-btn) is a direct child of .studio-primary-actions, so the old
+     `:not(#studio-export-btn)` trim would have hidden the ONE control that must survive on the
+     phone. Exclude the primary from the trim - it is now the single ship affordance at every
+     width, alongside the phone's own pack/download primary. */
+  .studio-primary-actions > .pill-btn:not(#studio-export-btn):not(#studio-post-btn) {
     display: none;
   }
 
@@ -1726,12 +1788,13 @@
 .studio-workspace:not(.is-carousel-mode) .ce-dock-group button.ce-compact-tool,
 .studio-workspace.is-carousel-mode .ce-typography-toolbar button.ce-compact-tool,
 .studio-workspace.is-carousel-mode .ce-dock-group button.ce-compact-tool {
-  width: 34px !important;
-  height: 32px !important;
-  min-width: 34px !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
   display: inline-grid !important;
   place-items: center !important;
-  flex: 0 0 34px !important;
+  flex: 0 0 44px !important;
   padding: 0 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: 8px!important;
