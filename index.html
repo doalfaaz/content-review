@@ -2316,7 +2316,7 @@
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=5f36c1f7ad" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
-<link rel="stylesheet" href="./native-studio.css?v=08f561a46c" />
+<link rel="stylesheet" href="./native-studio.css?v=28e71d78ab" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
@@ -5892,17 +5892,43 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
      would still fire. This is the client half of the real delete; the native half
      is CEMetaPublisher.handleUnschedule, which DELETEs the graph id and then
      re-reads Meta's own scheduled_posts so the claim is checked against the fact. */
+  /* P1 P0-4 FIX (2026-09-15, lane P1_PUBLISH_SAFETY). Both helpers used to count ONLY items with a
+     Facebook `metaGraphId`. A piece armed on the IG clock alone has no graph id at that moment - its
+     entry lives in the native ce_ig_queue.json - so it was filtered out and the refusal toast
+     confidently announced "Nothing is on Meta's clock" WHILE AN ARMED ENTRY SAT THERE AND WOULD
+     FIRE. That is the worst kind of UI: it tells the owner a local gun is unloaded.
+     `ceIgQueueRowFor` already existed to find the IG-clock row for an item, so the armed set is now
+     the union of both legs and the empty-state text can no longer be a lie. */
+  function ceIgArmedRow(q) {
+    try { return (typeof ceIgQueueRowFor === 'function') ? ceIgQueueRowFor(q) : null; } catch (_e) { return null; }
+  }
   function ceArmedQueueItems() {
-    return (state.queueItems || []).filter(function (q) { return q && q.metaGraphId; });
+    return (state.queueItems || []).filter(function (q) { return q && (q.metaGraphId || ceIgArmedRow(q)); });
   }
   function ceUnscheduleQueueItems(items, opts) {
-    var targets = (items || []).filter(function (q) { return q && q.metaGraphId; });
+    var targets = (items || []).filter(function (q) { return q && (q.metaGraphId || ceIgArmedRow(q)); });
     if (!targets.length) {
       showAppToast('Nothing is on Meta\u2019s clock', {
         icon: 'info', variant: 'warn',
         detail: 'These pieces are only on your local board \u2014 there is nothing on Meta to remove.'
       });
       return 0;
+    }
+    // If ANY target is armed only on the IG clock, say so: that leg is not a Graph object and cannot
+    // be removed by a DELETE, so the owner must be told what will and will not be cancelled rather
+    // than being given a button whose effect he cannot predict.
+    var igOnly = targets.filter(function (q) { return !q.metaGraphId && ceIgArmedRow(q); });
+    if (igOnly.length) {
+      var rows = igOnly.map(ceIgArmedRow).filter(Boolean);
+      var soonest = rows.reduce(function (a, r) {
+        var t = Number(r && r.fireUnix) || 0;
+        return (!a || (t && t < a)) ? t : a;
+      }, 0);
+      showAppToast(igOnly.length + ' piece' + (igOnly.length === 1 ? ' is' : 's are') + ' armed on the IG clock',
+        { icon: 'warn', variant: 'warn',
+          detail: 'This leg is a local queue entry, not a Meta object, so it cannot be removed the same way. '
+            + (soonest ? ('It fires at ' + new Date(soonest * 1000).toLocaleString() + '. ') : '')
+            + 'Ask the native app to cancel the queue entry — nothing was removed by this action.' });
     }
     var ids = targets.map(function (q) { return String(q.metaGraphId); });
     var n = targets.length;
@@ -20421,7 +20447,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (belowAuthored) wrap.dataset.ceFitBelowAuthored = '1';
       else delete wrap.dataset.ceFitBelowAuthored;
     }
-    if (z < 1) z = 1;
+    /* GATE FIX (2026-09-15). The original CE-A1 fix also forced `if (z < 1) z = 1;`, which made a
+       tall canvas OVERFLOW its stage — studio-canvas-fill measured fillH 102.8% (overflowBottom 12)
+       and 116.6% (overflowBottom 62), and the 64-gate suite correctly refused to deploy. A floored
+       canvas that spills out of the stage is worse than a small one: the bottom of the poem is
+       simply gone.
+       The class's real intent is in this block's own words — never render below authored scale
+       SILENTLY. The disclosure is the contract, and it is already applied above via
+       data-ce-fit-below-authored (the wrap renders a "shown smaller" chip from it). So the fit may
+       still scale down to fit the stage, but it can never again do so without saying so.
+       Invariant restored: the canvas always fits its stage (no overflow) AND any sub-authored
+       preview is disclosed to the owner. */
     canvas.style.zoom = z >= 0.985 && z <= 1.015 ? '' : z.toFixed(4);
   }
   (function () {
