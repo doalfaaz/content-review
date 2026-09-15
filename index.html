@@ -2316,7 +2316,7 @@
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=5f36c1f7ad" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
-<link rel="stylesheet" href="./native-studio.css?v=d8daa95404" />
+<link rel="stylesheet" href="./native-studio.css?v=08f561a46c" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
@@ -4189,6 +4189,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     // LIBRARY SORT (owner request 2026-09-15): which ordering the poem shelf renders in.
     // 'cadence' = the existing mixViralOlder law, so the default is byte-identical to before.
     librarySort: 'cadence',
+    // LIBRARY FILTER (same request): {posted, len, q}. All 'all'/empty = no filtering at all.
+    libraryFilter: { posted: 'all', len: 'all', q: '' },
     studioAlign: 'left',
     studioPos: 'top',
     studioType: 'photo',
@@ -7341,11 +7343,66 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   window.ceApplyLibrarySort = ceApplyLibrarySort;
 
+  /* --- THE FILTER HALF (owner asked for "filter sort of thing" - sort alone is half the ask) -----
+     Same discipline as the sort: every filter predicates on a field that EXISTS, and a filter that
+     cannot be evaluated never silently hides poems. Empty result is stated, never a blank shelf. */
+  var CE_LIBRARY_FILTERS = [
+    { key: 'posted', label: 'Shown', options: [
+      { v: 'all', label: 'Everything' },
+      { v: 'posted', label: 'Posted to Instagram' },
+      { v: 'unposted', label: 'Never posted' } ] },
+    { key: 'len', label: 'Length', options: [
+      { v: 'all', label: 'Any length' },
+      { v: 'couplet', label: 'Couplets (1\u20132 lines)' },
+      { v: 'short', label: 'Short (3\u20134)' },
+      { v: 'mid', label: 'Medium (5\u20137)' },
+      { v: 'long', label: 'Long (8+)' } ] }
+  ];
+  window.__CE_LIBRARY_FILTERS__ = CE_LIBRARY_FILTERS;
+
+  function ceLibraryFilterMatches(p, f) {
+    f = f || {};
+    var m = ceLibraryMetrics(p);
+    var lines = m.lines;
+    // posted / never posted - uses the SAME join as the sort, so the two can never disagree
+    if (f.posted === 'posted' && !m.matched) return false;
+    if (f.posted === 'unposted' && m.matched) return false;
+    switch (f.len) {
+      case 'couplet': if (lines > 2) return false; break;
+      case 'short':   if (lines < 3 || lines > 4) return false; break;
+      case 'mid':     if (lines < 5 || lines > 7) return false; break;
+      case 'long':    if (lines < 8) return false; break;
+    }
+    if (f.q) {
+      var needle = String(f.q).toLowerCase();
+      var hay = String((p && (p.text || p.title)) || '').toLowerCase();
+      if (hay.indexOf(needle) === -1) return false;
+    }
+    return true;
+  }
+  function ceApplyLibraryFilter(list, f) {
+    var arr = Array.isArray(list) ? list : [];
+    if (!f) return arr;
+    if ((!f.posted || f.posted === 'all') && (!f.len || f.len === 'all') && !f.q) return arr;
+    return arr.filter(function (p) { return ceLibraryFilterMatches(p, f); });
+  }
+  window.ceApplyLibraryFilter = ceApplyLibraryFilter;
+  function ceLibraryFilterCount() {
+    var f = (state && state.libraryFilter) || {};
+    var n = 0;
+    if (f.posted && f.posted !== 'all') n++;
+    if (f.len && f.len !== 'all') n++;
+    if (f.q) n++;
+    return n;
+  }
+  window.ceLibraryFilterCount = ceLibraryFilterCount;
+
   /* --- the control -------------------------------------------------------------------------
      One pill, one popover, one tap to reset. The label always mirrors the active sort so the
      shelf never misrepresents its order. Selecting 'cadence' restores the default exactly.
      Persisted in localStorage so a chosen order survives a reopen and an app restart. */
   var CE_LIBRARY_SORT_LS = 'ce_library_sort';
+  var CE_LIBRARY_FILTER_LS = 'ce_library_filter';
   var CE_LIBRARY_SORT_LABELS = { cadence: 'Cadence', viral: 'Most viral', likes: 'Most liked',
     comments: 'Most commented', newest: 'Newest', oldest: 'Oldest', longest: 'Longest',
     shortest: 'Shortest', az: 'A\u2013Z' };
@@ -7357,6 +7414,20 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     try {
       var v = window.localStorage.getItem(CE_LIBRARY_SORT_LS);
       if (v && CE_LIBRARY_SORT_LABELS[v]) state.librarySort = v;
+    } catch (_e) {}
+    // the filter restores with the same discipline: an unreadable/absent value leaves it inert
+    try {
+      var f = window.localStorage.getItem(CE_LIBRARY_FILTER_LS);
+      if (f) {
+        var o = JSON.parse(f);
+        if (o && typeof o === 'object') {
+          state.libraryFilter = {
+            posted: (o.posted === 'posted' || o.posted === 'unposted') ? o.posted : 'all',
+            len: (['couplet', 'short', 'mid', 'long'].indexOf(o.len) >= 0) ? o.len : 'all',
+            q: typeof o.q === 'string' ? o.q.slice(0, 80) : ''
+          };
+        }
+      }
     } catch (_e) {}
   }
   function ceLibrarySortApplyDom() {
@@ -7373,6 +7444,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     ceLibrarySortClose();
     if (typeof renderMain === 'function') renderMain();
     if (typeof showAppToast === 'function') showAppToast('Sorted: ' + (CE_LIBRARY_SORT_LABELS[state.librarySort] || 'Cadence'));
+  }
+  function ceLibraryFilterSet(key, val) {
+    if (!state.libraryFilter) state.libraryFilter = { posted: 'all', len: 'all', q: '' };
+    if (key === '__reset') state.libraryFilter = { posted: 'all', len: 'all', q: '' };
+    else state.libraryFilter[key] = val;
+    try { window.localStorage.setItem(CE_LIBRARY_FILTER_LS, JSON.stringify(state.libraryFilter)); } catch (_e) {}
+    ceLibrarySortOpen();          // re-render the menu so the chips show their new state
+    if (typeof renderMain === 'function') renderMain();
+    var n = ceLibraryFilterCount();
+    if (typeof showAppToast === 'function') {
+      showAppToast(n ? ('Filtered (' + n + ') - ' + (typeof allRankedPoems === 'function' ? allRankedPoems().length : '?') + ' poems shown')
+                     : 'Filters cleared');
+    }
   }
   function ceLibrarySortClose() {
     var pop = document.getElementById('poem-sort-popover');
@@ -7395,7 +7479,22 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         + '<span class="ce-sort-check" aria-hidden="true">' + (on ? '\u2713' : '') + '</span>'
         + '<span class="ce-sort-text"><strong>' + escapeHtml(o.label) + '</strong>'
         + '<em>' + escapeHtml(o.hint) + '</em></span></button>';
-    }).join('');
+    }).join('')
+    + '<div class="ce-sort-sep" role="separator"></div>'
+      + '<div class="ce-sort-heading">Filter</div>'
+      + CE_LIBRARY_FILTERS.map(function (grp) {
+          var fcur = (state.libraryFilter || {})[grp.key] || 'all';
+          return '<div class="ce-filter-group"><span class="ce-filter-label">' + escapeHtml(grp.label) + '</span>'
+            + '<div class="ce-filter-chips">' + grp.options.map(function (o) {
+                var on = o.v === fcur;
+                return '<button type="button" class="ce-filter-chip' + (on ? ' is-on' : '') + '"'
+                  + ' aria-pressed="' + (on ? 'true' : 'false') + '" data-filter-key="' + grp.key + '"'
+                  + ' data-filter-val="' + o.v + '">' + escapeHtml(o.label) + '</button>';
+              }).join('') + '</div></div>';
+        }).join('')
+      + (ceLibraryFilterCount()
+          ? '<button type="button" class="ce-filter-reset" data-filter-reset="1">Clear filters (' + ceLibraryFilterCount() + ')</button>'
+          : '');
     pop.hidden = false;
     btn.setAttribute('aria-expanded', 'true');
   }
@@ -7413,7 +7512,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var pop = document.getElementById('poem-sort-popover');
     if (pop) pop.addEventListener('click', function (e) {
       var t = e.target && e.target.closest ? e.target.closest('[data-sort-key]') : null;
-      if (t) ceLibrarySortSet(t.getAttribute('data-sort-key'));
+      if (t) { ceLibrarySortSet(t.getAttribute('data-sort-key')); return; }
+      var rst = e.target && e.target.closest ? e.target.closest('[data-filter-reset]') : null;
+      if (rst) { ceLibraryFilterSet('__reset', ''); return; }
+      var fc = e.target && e.target.closest ? e.target.closest('[data-filter-key]') : null;
+      if (fc) {
+        // toggling the ACTIVE value returns that group to 'all' - one tap to undo, always
+        var gk = fc.getAttribute('data-filter-key');
+        var gv = fc.getAttribute('data-filter-val');
+        var cur = (state.libraryFilter || {})[gk] || 'all';
+        ceLibraryFilterSet(gk, (gv === cur && gv !== 'all') ? 'all' : gv);
+      }
     });
     // click-away and Escape close it - one escape hatch, always (the E01 law)
     document.addEventListener('click', function (e) {
@@ -7431,8 +7540,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function allRankedPoems() {
     // E01/H-series law: the cadence order is the DEFAULT and is byte-identical when no sort is
     // chosen. Any other key is a deliberate owner override applied on top of the same clean list.
+    // FILTER runs first (narrow the set), then SORT (order it) - filtering after sorting would mean
+    // ordering poems that are about to be thrown away.
     var key = (state && state.librarySort) ? String(state.librarySort) : 'cadence';
-    return ceApplyLibrarySort(allCleanPoems(), key);
+    var filtered = ceApplyLibraryFilter(allCleanPoems(), (state && state.libraryFilter) || null);
+    return ceApplyLibrarySort(filtered, key);
   }
   window.allRankedPoems = allRankedPoems;
 
