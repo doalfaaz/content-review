@@ -2161,7 +2161,6 @@
               <button class="pill-btn" id="studio-view-plan-btn" title="Open the publishing plan">Plan (<span id="studio-plan-badge">0</span>)</button>
               <button class="pill-btn" id="studio-export-btn" title="Export full-resolution PNG files">Export PNG</button>
               <button class="pill-btn" id="studio-copy-btn">Copy</button>
-              <button class="pill-btn" id="studio-close-menu-btn">Close studio</button>
             </div>
           </details>
           <button class="pill-btn" id="studio-schedule-btn" title="Place on the calendar via the Plan queue">Schedule</button>
@@ -9617,6 +9616,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     // handler is uniform across the whole Studio element, but its back branch
     // was removed — the earlier swipe-to-back behavior violated this law and
     // wave52 G3.)
+    /* D07 P1-1 (deep-audit lane D07_GESTURE_ROUTING, verified on HEAD): three separate
+       accumulators tracked the same physical sweep — this studio-scoped one and the
+       app-level `gestureX` — with NO shared latch. Whichever crossed its threshold first
+       called appNavigateBack(); closeStudio() then removed .open synchronously, so the
+       REMAINING inertia packets of the same pull reached the app-level handler, which no
+       longer early-returns, crossed -160 and popped a SECOND level (sim:
+       ["closeStudio","pop->[]"]). One sweep = two steps, which is exactly the V3
+       overshoot. This single timestamped latch is consulted by both handlers: once any
+       handler consumes a sweep, the other ignores the rest of that same sweep. A quiet
+       interval (400ms) arms the next deliberate gesture. */
+    window.__CE_SWEEP_CONSUMED_AT__ = 0;
+    function ceSweepConsume() { window.__CE_SWEEP_CONSUMED_AT__ = Date.now(); }
+    function ceSweepAlreadyConsumed() { return (Date.now() - (window.__CE_SWEEP_CONSUMED_AT__ || 0)) < 400; }
     var studioBackGesture = 0;
     var studioBackGestureReset = 0;
     var workspaceEl = document.getElementById('studio') || document.querySelector('.studio-workspace');
@@ -9647,7 +9659,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             if (studioBackGesture < -140) {
               studioBackGesture = 0;
               e.preventDefault();
-              try { appNavigateBack(); } catch (_b) {}
+              if (!ceSweepAlreadyConsumed()) { ceSweepConsume(); try { appNavigateBack(); } catch (_b) {} }
             }
           } else {
             studioBackGesture = 0;
@@ -9670,7 +9682,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             if (studioBackGesture < -140) {
               studioBackGesture = 0;
               e.preventDefault();
-              try { appNavigateBack(); } catch (_b) {}
+              if (!ceSweepAlreadyConsumed()) { ceSweepConsume(); try { appNavigateBack(); } catch (_b) {} }
               return;
             }
           } else {
@@ -9689,7 +9701,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           if (studioBackGesture < -140) {
             studioBackGesture = 0;
             e.preventDefault();
-            try { appNavigateBack(); } catch (_b) {}
+            if (!ceSweepAlreadyConsumed()) { ceSweepConsume(); try { appNavigateBack(); } catch (_b) {} }
             return;
           }
         } else {
@@ -13394,11 +13406,39 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       /* Threshold raised -76 → -160 with a stricter direction ratio: a casual
          trackpad flick (~80px) must never change screens; a deliberate pull does. */
       if (gestureX > -160 || Math.abs(gestureX) <= Math.abs(gestureY) * 1.6 || backGestureConsumed) return;
+      /* D07 P1-1b (2026-09-15): the studio-scoped handler in this file may have already
+         consumed this SAME physical sweep and navigated. Its latch lives on window so
+         both handlers can see one sweep once; without this check the studio-exit sweep's
+         remaining inertia packets still reached here, crossed -160 and popped a second
+         level — the V3 overshoot the owner screenshotted. */
+      if (window.__CE_SWEEP_CONSUMED_AT__ && (Date.now() - window.__CE_SWEEP_CONSUMED_AT__) < 400) {
+        gestureX = 0;
+        gestureY = 0;
+        return;
+      }
       var now = Date.now();
       if (now - lastBack < 650) return;
       if (appNavigateBack()) {
+        window.__CE_SWEEP_CONSUMED_AT__ = now;
         lastBack = now;
         backGestureConsumed = true;
+        gestureX = 0;
+        gestureY = 0;
+        event.preventDefault();
+        event.stopPropagation();
+      } else {
+        /* D07 P1-2 (deep-audit lane D07_GESTURE_ROUTING, verified on HEAD): on a
+           DECLINED back the old code left `backGestureConsumed`, `gestureX` and
+           `lastBack` untouched, so every remaining inertia packet of the same physical
+           sweep re-entered this handler, re-called appNavigateBack() and re-fired the
+           "Nothing further back" toast — measured 10-11 toasts per sweep, and it fired
+           immediately after a successful Studio close, i.e. the app scolded the owner
+           right after doing what he asked (his S0958_1 screenshot). A declined back is
+           still a CONSUMED gesture: latch it and clear the accumulator so one sweep
+           produces exactly one cue. */
+        backGestureConsumed = true;
+        window.__CE_SWEEP_CONSUMED_AT__ = now;
+        lastBack = now;
         gestureX = 0;
         gestureY = 0;
         event.preventDefault();
@@ -15962,7 +16002,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               <h3 class="ce-plan-heading" style="margin:0; font-size:17px; font-weight:700; color:var(--ink);">Plan & Queue</h3>
               <button id="plan-schedule-all-ready-btn" type="button" title="Place all Ready pieces a week+ out (owner law — Meta refuses sooner) with human-ish times between 9am and 9pm." style="background:var(--accent); color:#fff; border:1px solid transparent; padding:5px 14px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer;">Schedule all ready</button>
               ${planFailedMeta > 0 ? `<button id="ce-plan-batch-meta-btn" type="button" title="Re-send the ${planFailedMeta} failed Ready piece${planFailedMeta === 1 ? '' : 's'} to Meta's clock (same confirm as Schedule)." style="background:rgba(196,59,78,0.16); color:#ff8fa0; border:1px solid rgba(196,59,78,0.4); padding:5px 12px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer;">Retry failed (${planFailedMeta})</button>` : ''}
-              <button id="plan-select-all-ready-btn" type="button" title="Tick every staged piece as Ready" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer;">Select all</button>
+              <button id="plan-select-all-ready-btn" type="button" title="Tick every staged piece as Ready" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer;">Mark all Ready</button>
               <button id="plan-auto-schedule-btn" type="button" title="Pull from Saved Bank / library into empty day slots." style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer;">Fill week</button>
               <button id="plan-open-meta-btn" type="button" aria-label="Open Meta Creator Studio" title="Open Meta Creator Studio / Business Suite in your browser" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); width:28px; height:26px; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
                 <span class="ce-ic ce-ic--arrow-up-right ce-ic--12"></span>
@@ -15975,7 +16015,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                 <summary aria-label="More plan actions" title="More plan actions">•••</summary>
                 <div>
                   <button id="plan-move-to-saved-btn" type="button">Move all to Saved Bank</button>
-                  <button id="plan-clear-all-btn" type="button">Clear plan</button>
                 </div>
               </details>
               ` : ''}
@@ -16191,7 +16230,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var __readyN = (state.queueItems || []).filter(function (q) { return q && q.readyToPost; }).length;
       var __eligibleN = (state.queueItems || []).filter(ceQueueShipEligible).length;
       [['plan-schedule-all-ready-btn', __readyN, 'Schedule all ready'],
-       ['plan-select-all-ready-btn', __eligibleN, 'Select all']
+       ['plan-select-all-ready-btn', __eligibleN, 'Mark all Ready']
       ].forEach(function (pair) {
         var el = document.getElementById(pair[0]);
         if (!el) return;
@@ -16342,7 +16381,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         renderMain();
       };
 
-      var planClearAll = document.getElementById('plan-clear-all-btn');
+      var planClearAll = null;
       if (planClearAll) planClearAll.onclick = function () {
         if (state.queueItems.length === 0) return;
         // Clearing the posting board must never destroy creative work. Keep
@@ -19285,7 +19324,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     document.getElementById('studio-back').onclick = function () { closeStudio(false); };
     var studioCloseBtn = document.getElementById('studio-close');
     if (studioCloseBtn) studioCloseBtn.onclick = function () { closeStudio(false); };
-    var studioCloseMenuBtn = document.getElementById('studio-close-menu-btn');
+    var studioCloseMenuBtn = null;
     if (studioCloseMenuBtn) studioCloseMenuBtn.onclick = function () { closeStudio(false); };
     document.getElementById('studio-undo-btn').onclick = studioUndo;
     document.getElementById('studio-redo-btn').onclick = studioRedo;
