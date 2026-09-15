@@ -19832,8 +19832,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var canvas = document.getElementById('active-studio-canvas');
     if (!stage || !wrap) return;
     if (!canvas || state.currentType !== 'poem') { if (canvas) canvas.style.zoom = ''; return; }
-    var isPhone = document.documentElement.classList.contains('ce-phone') || window.innerWidth <= 700;
-    if (!isPhone) { canvas.style.zoom = ''; return; }
+    /* V12 (owner-verified: "the poem canvas occupies roughly 21% of the window while
+       ~55% is empty dark workspace ... he wants the working surface to fill the screen
+       honestly"). The fit pass used to return early on desktop and pin the canvas to
+       its natural 580px, so on a 1440x900 window the measured canvas area was 19.5% of
+       the viewport while the stage offered 1104x846. The fit now runs on BOTH form
+       factors: the poem scales up into the space the stage actually has, capped so a
+       very large window cannot produce an absurd canvas, and never shrunk below fit.
+       zoom() (not transform:scale) because a transform on this subtree becomes a
+       composited layer that escapes every ancestor radius/clip (the corner law). */
     var arParts = String(canvas.style.aspectRatio || '').split('/');
     var natW = 580;
     var curZoom = parseFloat(canvas.style.zoom) || 1;
@@ -19843,8 +19850,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var availW = stage.clientWidth - 24;
     var availH = stage.clientHeight - 24;
     if (availW < 40 || availH < 40) return;
-    var z = Math.min(availW / natW, availH / natH, 1);
-    canvas.style.zoom = z >= 0.985 ? '' : z.toFixed(4);
+    var z = Math.min(availW / natW, availH / natH, 2.4);
+    canvas.style.zoom = z >= 0.985 && z <= 1.015 ? '' : z.toFixed(4);
   }
   (function () {
     var hudTarget = null, hudTimer = null;
