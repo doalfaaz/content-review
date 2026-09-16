@@ -1779,7 +1779,13 @@ html.ce-phone.ce-poem-library .topbar #poem-sections .section-btn,
 html.ce-phone.ce-poem-library .topbar #poem-shuffle {
   min-height: 44px !important;
 }
-html.ce-phone.ce-poem-library .main-content { padding-top: calc(108px + env(safe-area-inset-top, 0px)) !important; }
+/* The pad must equal the REAL bar height, never a hardcoded guess. The poem
+   library uses a two-row phone topbar (Photo/Paper + Shuffle + Search); the bar
+   measured 111px while the old calc() reserved only 108px, so the first ~3px of
+   content slid under it (phone17 gate W3). --topbar-h is published live by
+   ceSyncTopbarHeight() from the measured bar box — drive the pad off it so the
+   reserve can never drift from the bar. env() covers the no-measure first frame. */
+html.ce-phone.ce-poem-library .main-content { padding-top: var(--topbar-h, calc(108px + env(safe-area-inset-top, 0px))) !important; }
 
 /* PHONE CONTROL FLOOR (recursive re-audit 2026-09-14). The earlier pass grew
    only selected toolbars to 36–40px and relied on pseudo-element hit extenders;
