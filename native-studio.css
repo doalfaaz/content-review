@@ -5703,3 +5703,120 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* ── LIBRARY SORT control (owner request 2026-09-15) ────────────────────────────────────────────
+   One compact pill beside Shuffle; the menu lives in a popover so the shelf gains no extra
+   chrome (his V5 law). Every row is 44px minimum, matching the floor the Studio now enforces. */
+.ce-poem-sort { position: relative; }
+.ce-poem-sort.is-active-sort {
+  color: var(--ink) !important;
+  border-color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 14%, transparent) !important;
+}
+.ce-sort-popover {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 274px;
+  max-width: min(340px, 92vw);
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border, rgba(255,255,255,.14));
+  background: var(--card, #15161a);
+  box-shadow: 0 18px 44px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.05) inset;
+}
+.ce-sort-popover[hidden] { display: none !important; }
+.ce-sort-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;               /* the house floor - this menu is not exempt */
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.ce-sort-option:hover { background: rgba(255,255,255,.06); }
+.ce-sort-option.is-on { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.ce-sort-check { width: 14px; flex: 0 0 14px; font-size: 12px; line-height: 1.5; opacity: .9; }
+.ce-sort-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ce-sort-text strong { font-size: 12.5px; font-weight: 700; letter-spacing: .1px; }
+.ce-sort-text em { font-size: 10.5px; font-style: normal; color: var(--muted); line-height: 1.35; }
+
+/* ── LIBRARY FILTER (inside the same sort popover - one control, not two) ────────────────────── */
+.ce-sort-sep { height: 1px; margin: 6px 4px; background: var(--card-border, rgba(255,255,255,.12)); }
+.ce-sort-heading { padding: 4px 10px 2px; font-size: 10px; font-weight: 800; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--muted); }
+.ce-filter-group { padding: 4px 10px 6px; }
+.ce-filter-label { display: block; margin-bottom: 5px; font-size: 10.5px; font-weight: 700; color: var(--muted); }
+.ce-filter-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.ce-filter-chip {
+  min-height: 30px; padding: 5px 10px; border-radius: 999px;
+  border: 1px solid var(--card-border, rgba(255,255,255,.16));
+  background: transparent; color: var(--ink);
+  font-size: 11px; font-weight: 600; cursor: pointer;
+}
+.ce-filter-chip:hover { background: rgba(255,255,255,.06); }
+.ce-filter-chip.is-on {
+  border-color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 20%, transparent) !important;
+  color: var(--ink) !important;
+}
+.ce-filter-reset {
+  display: block; width: calc(100% - 20px); margin: 2px 10px 6px; min-height: 34px;
+  border-radius: 8px; border: 1px dashed var(--card-border, rgba(255,255,255,.2));
+  background: transparent; color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer;
+}
+.ce-filter-reset:hover { color: var(--ink); background: rgba(255,255,255,.05); }
+
+/* ── GATE FIXES (2026-09-15) - the 44px floor must not push controls out of their box ──────────
+   studio-design-system: "Carousel controls escape their section" - the Bold / Align-right
+   controls are now 44px each and the text-dock section's content box is 239px, so the strip's
+   last control ran 1.5px past the section's right edge. The floor stays; the strip learns to
+   wrap so a control can never leave the box it belongs to. */
+.ce-inspector-section .ce-tool-strip { flex-wrap: wrap !important; max-width: 100%; }
+.ce-inspector-section .ce-tool-strip > * { flex: 0 1 auto; }
+
+/* phone-product-floor: the header search input measured 42x44 on saved / write / plan / grow /
+   launch - 2px under the 44px floor in one axis. The real element is
+   `<input type="text" class="search-input" id="search">` (index.html:2139) - an earlier attempt
+   selected input[type="search"] and matched nothing. The floor is a 44px MINIMUM IN BOTH AXES. */
+html.ce-phone .search-input,
+html.ce-phone input#search { min-width: 44px !important; min-height: 44px !important; }
+
+/* studio-design-system: "Carousel controls escape their section". MEASURED CHAIN (not guessed):
+   section 464..735 (271px) > .ce-tool-strip 480..719 (239px, already correct and inside the
+   section) > an inner wrapper holding 9 controls, which did NOT wrap, so "Align right" sat at
+   right=757 - 38px past its own strip and 22px past the section.
+   Constraining the strip was necessary but not sufficient: the WRAPPER between the strip and the
+   controls is the box that actually overflows, so the wrap + shrink has to land there. */
+.ce-inspector-section .ce-tool-strip,
+.ce-inspector-section.ce-dock-text .ce-tool-strip,
+.ce-inspector-section .ce-tool-strip > div,
+.ce-inspector-section .ce-tool-strip > * {
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+.ce-inspector-section .ce-tool-strip,
+.ce-inspector-section .ce-tool-strip > div {
+  flex-wrap: wrap !important;
+}
+.ce-inspector-section .ce-tool-strip > div > * { flex: 0 1 auto; }
+
+/* studio-design-system ROOT FIX (2026-09-15): "Carousel controls escape their section".
+   `.is-carousel-mode .ce-inspector-pinned` was `flex: 0 0 280px` with `min-width: 240px` — a panel
+   that CANNOT shrink, sitting in a text-dock section whose content box is 239px (271px section less
+   6px/16px padding). So the panel overran its own section and took the 44px controls inside it out
+   of the box with it (measured: Align-right right-edge past the section's right edge).
+   The intended width is preserved whenever there is room; the panel simply may no longer be WIDER
+   than the container it lives in. flex-shrink 0 -> 1 is the whole fix. */
+.studio-workspace.is-carousel-mode .ce-inspector-pinned {
+  flex: 0 1 280px !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
