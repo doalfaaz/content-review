@@ -1228,10 +1228,13 @@ html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-doc
    the phone keeps the swipe-strip pattern nowhere — wrap replaces it here. */
 html.ce-phone #dock-canvas-section .ce-template-grid {
   display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  /* Nine style choices (Photo + seven Paper presets + the explicit Editorial
+     frame) need two compact rows on a 402px phone. Four columns created a
+     third row and put the Canvas ratio rail below the first sheet viewport. */
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
   overflow: visible !important;
-  gap: 8px !important;
-  padding-bottom: 6px !important;
+  gap: 6px !important;
+  padding-bottom: 2px !important;
 }
 html.ce-phone #dock-canvas-section .ce-template-swatch {
   width: 100% !important;

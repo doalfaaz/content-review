@@ -2288,6 +2288,7 @@
               <button class="pill-btn ce-template-swatch" id="btn-type-noir" type="button" role="option" aria-selected="false" aria-label="Pure noir style" title="Pure noir"></button>
               <button class="pill-btn ce-template-swatch" id="btn-type-dusk" type="button" role="option" aria-selected="false" aria-label="Dusk ember style" title="Dusk ember"></button>
               <button class="pill-btn ce-template-swatch" id="btn-type-banaras" type="button" role="option" aria-selected="false" aria-label="Banaras ghat style" title="Banaras ghat"></button>
+              <button class="pill-btn ce-template-swatch" id="btn-type-editorial" type="button" role="option" aria-selected="false" aria-label="Editorial ink style" title="Editorial ink"></button>
             </div>
             <div class="ce-poem-ratio-control" role="group" aria-label="Canvas ratio">
               <span class="ce-poem-ratio-label">Canvas</span>
@@ -2311,10 +2312,10 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=902bd2ae3f"></script>
+<script src="./deck_index.js?v=e20d9bd607"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
-<link rel="stylesheet" href="./native-plan.css?v=5f36c1f7ad" />
+<link rel="stylesheet" href="./native-plan.css?v=c53ee89878" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
 <link rel="stylesheet" href="./native-studio.css?v=28e71d78ab" />
 <style id="ce-share-trim">
@@ -2322,8 +2323,8 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=3e71590531" />
-<script src="./ce-touch-edit.js?v=48f7b64608"></script>
+<link rel="stylesheet" href="./ce-mobile.css?v=f5954673d9" />
+<script src="./ce-touch-edit.js?v=d5b7d014e8"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -4161,8 +4162,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   const state = {
     activeTab: 'library',
     libraryType: 'poems',
-    poemSection: 'photo', // 'photo' or 'paper'
-    shelfDensity: 'comfy',
+    poemSection: (function () {
+      try { return localStorage.getItem('ce_poem_section') === 'paper' ? 'paper' : 'photo'; } catch (_e) { return 'photo'; }
+    })(), // 'photo' or 'paper'
+    shelfDensity: (function () {
+      try { return localStorage.getItem('ce_shelf_density') === 'dense' ? 'dense' : 'comfy'; } catch (_e) { return 'comfy'; }
+    })(),
     scheduleTarget: null,
     poemEra: (function () {
       if (window.__CE_NATIVE_APP__) return 'all';
@@ -4193,6 +4198,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     libraryFilter: { posted: 'all', len: 'all', q: '' },
     studioAlign: 'left',
     studioPos: 'top',
+    // Photo and Paper are separate rails. New poems open in the Photo family;
+    // authored designs restore their explicit family/style below when one exists.
     studioType: 'photo',
     studioFontSize: 21,
     studioPoemFontFamily: 'kohinoor',
@@ -4602,13 +4609,22 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     minDensity: 14,
     maxDensity: 36,
     defaultDensity: 21,
-    fitFloorDensity: 10,
+    // 30px at 1080px authored width, expressed on the 580px source canvas.
+    // The old 10px token let enforcePoemNoWrap shrink long Devanagari lines
+    // below the readability contract (about 18.6px at export width).
+    fitFloorDensity: 16,
     lineHeight: 1.78,
     topInset: 36,
     bottomReserve: 60,
     horizontalInset: 72,
     midAnchor: 0.42
   });
+
+  function poemNoWrapFloorPx(width) {
+    var w = Number(width) || POEM_TYPOGRAPHY.baseWidth;
+    return Math.max(Math.round(30 * w / 1080), Math.round(POEM_TYPOGRAPHY.fitFloorDensity * (w / POEM_TYPOGRAPHY.baseWidth)));
+  }
+  window.__CE_POEM_NO_WRAP_FLOOR__ = poemNoWrapFloorPx;
 
   const POEM_FONT_FAMILIES = Object.freeze({
     'kohinoor': "'Kohinoor Devanagari', 'Noto Sans Devanagari', 'Devanagari Sangam MN', sans-serif",
@@ -4757,8 +4773,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     // canvas, so previews/covers and the 1080 export obey one visual law.
     var minFloor = Math.max(Math.round(30 * w / 1080), Math.round(POEM_TYPOGRAPHY.fitFloorDensity * scaleFactor));
     var px = Math.max(minFloor, boundedFit);
-    if (noWrapLines >= 8) px = Math.min(px, Math.round(16 * scaleFactor));
-    else if (noWrapLines >= 5) px = Math.min(px, Math.round(18 * scaleFactor));
+    // Dense poems may use a smaller optical cap, but never below the
+    // proportional 30px@1080 floor.
+    if (noWrapLines >= 8) px = Math.max(minFloor, Math.min(px, Math.round(30 * scaleFactor)));
+    else if (noWrapLines >= 5) px = Math.max(minFloor, Math.min(px, Math.round(32 * scaleFactor)));
     else if (noWrapLines <= 2) px = Math.max(px, Math.round(20 * scaleFactor));
     return px;
   }
@@ -4869,7 +4887,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function normalizePoemStyle(raw) {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
     var style = {};
-    var types = ['photo', 'paper', 'ivory', 'notebook', 'zen', 'noir', 'dusk', 'banaras',
+    var types = ['photo', 'paper', 'ivory', 'notebook', 'zen', 'noir', 'dusk', 'banaras', 'editorial-ink',
       'white-balloon', 'gallery-ivory', 'notebook-margin', 'minimal-zen',
       'midnight-noir', 'dusk-ember', 'banaras-ghat'];
     if (types.indexOf(raw.type) !== -1) style.type = raw.type;
@@ -4904,6 +4922,22 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return style;
   }
 
+  const CE_POEM_DEFAULT_STYLE_KEY = 'ce_poem_default_style';
+  function poemDefaultStyleType() {
+    var allowed = ['editorial-ink', 'photo', 'white-balloon', 'gallery-ivory', 'notebook-margin', 'minimal-zen', 'midnight-noir', 'dusk-ember', 'banaras-ghat'];
+    var value = '';
+    try { value = String(localStorage.getItem(CE_POEM_DEFAULT_STYLE_KEY) || ''); } catch (_e) {}
+    return allowed.indexOf(value) >= 0 ? value : 'photo';
+  }
+  function setPoemDefaultStyleType(value) {
+    var allowed = ['editorial-ink', 'photo', 'white-balloon', 'gallery-ivory', 'notebook-margin', 'minimal-zen', 'midnight-noir', 'dusk-ember', 'banaras-ghat'];
+    var next = allowed.indexOf(String(value || '')) >= 0 ? String(value) : 'photo';
+    try { localStorage.setItem(CE_POEM_DEFAULT_STYLE_KEY, next); } catch (_e) {}
+    return next;
+  }
+  window.__CE_POEM_DEFAULT_STYLE__ = poemDefaultStyleType;
+  window.__CE_SET_POEM_DEFAULT_STYLE__ = setPoemDefaultStyleType;
+
   // The shelf choice is explicit authored context. A poem may have one saved
   // typography state, but opening a Paper card must never silently restore a
   // saved Photo background (or vice versa). Build the exact style painted on
@@ -4917,20 +4951,38 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var safeIndex = Math.max(0, Number(presetIndex) || 0) % Math.max(1, presets.length);
     var preset = presets[safeIndex] || presets[0] || {};
     var density = poemDensityToken(savedStyle.fontSize, savedStyle.densityVersion);
+    var resolvedType;
+    var hasAuthoredType = !!savedStyle.type;
+    if (savedStyle.type) {
+      // An explicitly authored photo stays photo on the Photo rail; a saved
+      // editorial/paper design remains contained when opened from either rail.
+      resolvedType = isPaper
+        ? (savedStyle.type === 'photo' ? (preset.id || 'white-balloon') : savedStyle.type)
+        : (savedStyle.type === 'photo' || savedStyle.type === 'editorial-ink' ? savedStyle.type : 'photo');
+    } else {
+      // The shelf keeps its deterministic tone/preset artwork. The marker is
+      // carried into Studio, where an unsaved poem opens in the new contained
+      // default without destroying the shelf's balanced preset draw.
+      resolvedType = isPaper ? (preset.id || 'white-balloon') : 'photo';
+    }
     var style = Object.assign({}, savedStyle, {
-      type: isPaper ? (preset.id || 'white-balloon') : 'photo',
+      type: resolvedType,
       fontSize: density,
       densityVersion: POEM_TYPOGRAPHY.schemaVersion,
       align: savedStyle.align || preset.align || 'left',
       pos: savedStyle.pos || preset.pos || (isPaper ? 'mid' : 'top'),
-      photoIdx: !isPaper && savedStyle.type === 'photo' && savedStyle.photoIdx != null
+      photoIdx: resolvedType === 'photo' && savedStyle.photoIdx != null
         ? savedStyle.photoIdx
-        : (!isPaper ? (preset.photoIdx || 0) : (savedStyle.photoIdx || 0)),
+        : (resolvedType === 'photo' ? (preset.photoIdx || 0) : (savedStyle.photoIdx || 0)),
       offset: savedStyle.offset || { x: 0, y: 0 },
       canvasRatio: (savedStyle.canvasRatioMode === 'manual' && savedStyle.canvasRatio)
         ? savedStyle.canvasRatio
         : poemCanvasRatioFor((poem && (poem.text || poem.body)) || '', density, savedStyle.pos || preset.pos || 'top', '')
     });
+    // Paper is a separate family. A global Photo default is only a Studio
+    // opening hint for the Photo rail; stamping it onto a Paper card makes the
+    // next openStudio call reinterpret the authored paper preset as Photo.
+    if (!hasAuthoredType && !isPaper) style.defaultTemplate = poemDefaultStyleType();
     style.canvasRatioMode = savedStyle.canvasRatioMode === 'manual' ? 'manual' : 'auto';
     // Original Instagram stills are opt-in only (explicit saved useOriginal).
     // Default shelf/Photo rail always paints the authored photo-design presets.
@@ -4963,6 +5015,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var directStyle = !explicitStyle && (raw.type || raw.align || raw.pos || raw.photoIdx != null || raw.fontSize != null || raw.canvasRatio || raw.canvasRatioMode || raw.useOriginal != null) ? raw : null;
     var style = Object.assign({}, persistedStyle, directStyle || {}, explicitStyle || {});
     var hasStyle = Object.keys(style).length > 0;
+    if (!hasStyle) {
+      // Preview the same contained default that Studio will open. Keep the
+      // type/photo routing marker so older callers still choose this renderer.
+      style = {
+        type: 'photo',
+        defaultTemplate: poemDefaultStyleType(),
+        align: 'left',
+        pos: 'top',
+        fontSize: POEM_TYPOGRAPHY.defaultDensity,
+        densityVersion: POEM_TYPOGRAPHY.schemaVersion
+      };
+      hasStyle = true;
+    }
     var section = raw.poemSection === 'paper'
       ? 'paper'
       : (raw.poemSection === 'photo' ? 'photo' : (style.type && style.type !== 'photo' ? 'paper' : 'photo'));
@@ -5885,6 +5950,25 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       showQueueToast(err + ' Composer is a last resort — use Open Meta Composer only if you must.', true);
     }
   };
+  // Native IG-clock cancellation calls this seam after the local queue file is
+  // atomically rewritten. Keep the page optimistic state-free until this
+  // receipt arrives; a refusal must remain visible instead of looking cancelled.
+  window.__CE_IG_CANCEL_RESULT__ = function (ok, mode, detail) {
+    var info = detail;
+    if (typeof detail === 'string') { try { info = JSON.parse(detail); } catch (_e) { info = { raw: detail }; } }
+    if (!info || typeof info !== 'object') info = {};
+    if (ok) {
+      var rows = Array.isArray(info.cancelled) ? info.cancelled.length : Number(info.count || 0);
+      showAppToast('Cancelled ' + rows + ' IG clock entr' + (rows === 1 ? 'y' : 'ies'), {
+        icon: 'check', detail: String(info.note || 'Local queue only — nothing on Meta was changed.')
+      });
+      try { var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge; if (br) br.postMessage({ action: 'getIgQueue' }); } catch (_refresh) {}
+    } else {
+      showAppToast('IG clock cancellation refused', {
+        isError: true, variant: 'warn', detail: String(info.error || 'The entry was not changed. Refresh the queue and review its state.')
+      });
+    }
+  };
   /* ── Unschedule from Meta's clock (owner order 2026-09-13) ────────────────────
      He asked for this twice without knowing it did not exist: "then you have to
      delete it also". Until now the ONLY thing the app could do to a scheduled
@@ -6029,6 +6113,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }
   })();
   window.__CE_COPY_RESULT__ = function (ok) { window.__CE_LAST_COPY_OK__ = !!ok; };
+  window.__CE_EXPORT_GC_RESULT__ = function (removed) {
+    var n = Math.max(0, Number(removed) || 0);
+    showAppToast(n ? ('Cleaned ' + n + ' old export' + (n === 1 ? '' : 's')) : 'Exports are already clean', { icon: 'check' });
+  };
   window.__CE_IG_QUEUE__ = function (json) {
     var rows;
     try { rows = typeof json === 'string' ? JSON.parse(json) : json; } catch (_e) { rows = []; }
@@ -6069,7 +6157,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       } else {
         showAppToast(kind === 'retry'
           ? 'Retry refused — this row already started or is not a failed booking.'
-          : 'Remove refused — this booking may already be in flight.', true);
+          : kind === 'cancel'
+            ? 'Cancel refused — this request may already be in flight.'
+            : 'Remove refused — this booking may already be in flight.', true);
       }
     } catch (_e) {}
   };
@@ -6152,7 +6242,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var isUnknownFate = st === 'needs_verification';
       var actions = '';
       if (actionable && rid) {
-        actions = isUnknownFate
+        actions = (st === 'pending' || st === 'queued')
+          ? '<button type="button" class="ce-sched-req-cancel" data-req-id="' + rid + '" title="Cancel before the Mac relay starts" style="margin-left:4px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:var(--ink);border-radius:5px;font-size:9.5px;font-weight:700;padding:2px 7px;cursor:pointer;">Cancel</button>'
+          : isUnknownFate
           ? '<button type="button" class="ce-sched-req-check" data-req-id="' + rid + '" title="Open Meta to confirm whether this post is live" style="margin-left:4px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:var(--ink);border-radius:5px;font-size:9.5px;font-weight:700;padding:2px 7px;cursor:pointer;">Check Meta</button>'
             + '<button type="button" class="ce-sched-req-remove" data-req-id="' + rid + '" data-unknown-fate="1" title="Remove this row from the board — it does not delete anything on Meta" style="border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:800;padding:2px 6px;cursor:pointer;">×</button>'
           : '<button type="button" class="ce-sched-req-retry" data-req-id="' + rid + '" title="Re-queue this failed booking" style="margin-left:4px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:var(--ink);border-radius:5px;font-size:9.5px;font-weight:700;padding:2px 7px;cursor:pointer;">Retry</button>'
@@ -6168,7 +6260,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         + actions
         + '</span>';
     };
-    var items = live.map(function (r) { return chipHtml(r, false); }).join('');
+    var items = live.map(function (r) { return chipHtml(r, r.state === 'pending' || r.state === 'queued'); }).join('');
     var attentionHtml = attention.length
       ? '<details class="ce-sched-req-attention" style="width:100%;margin-top:4px;">'
         + '<summary style="list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:#f87171;padding:3px 0;">'
@@ -6796,7 +6888,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     for (var r = 0; r < list.length; r++) ceResetPoemRailMeta(list[r]);
     for (var i = 0; i < list.length; i++) {
       var poem = list[i];
-      var key = window.__CE_POEM_TEXT_KEY__(poem.text);
+      var key = window.__CE_POEM_TEXT_KEY__(poem && (poem.text || poem.body || poem.t));
       if (!key) { out.push(poem); continue; }
       
       var src = (poem && poem.source) || poem || {};
@@ -7719,6 +7811,49 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return defaultSig != null ? defaultSig : '- तुषार';
   }
 
+  // Optional contained editorial frame. Photo and Paper remain distinct
+  // families; this named style is only used when explicitly selected.
+  function renderEditorialPoemHtml(poem, st, savedDesign) {
+    var txtRaw = (savedDesign && savedDesign.text) ? savedDesign.text : (poem && (poem.text || poem.body || poem.t) || '');
+    var txt = (typeof cePoemDisplayBody === 'function') ? cePoemDisplayBody(txtRaw) : txtRaw;
+    var formattedLines = String(txt).split('\n').map(function (line) {
+      return '<span style="white-space:pre-wrap;">' + escapeHtml(line) + '</span>';
+    }).join('<br>');
+    var density = poemStyleDensity(st);
+    var lineCount = cePoemLineCount(txt);
+    if (!(st && st.fontSize)) {
+      if (lineCount >= 8) density = Math.min(density, 18);
+      else if (lineCount >= 5) density = Math.min(density, 20);
+      else if (lineCount >= 3) density = Math.min(density, 22);
+    }
+    var pos = (st && st.pos) === 'top' ? 'top' : 'mid';
+    var align = (st && st.align) === 'center' ? 'center' : 'left';
+    var ratio = poemCanvasRatioFor(txt, density, pos, st && st.canvasRatioMode === 'manual' ? st.canvasRatio : '');
+    var canvasW = POEM_TYPOGRAPHY.baseWidth;
+    var canvasH = poemRatioHeight(canvasW, ratio);
+    var fontSize = Math.max(poemNoWrapFloorPx(canvasW), poemGlyphSizeFor(txt, canvasW, canvasH, density, 'grid', pos, st && st.lineHeight));
+    var lineHeight = poemLineHeight(st && st.lineHeight);
+    var fontFamily = poemFontStack(st && st.fontFamily);
+    var fontWeight = poemFontWeight(st && st.fontWeight);
+    var customColor = poemTextColor(st && st.textColor) || '#221f1b';
+    var offset = (st && st.offset) ? st.offset : { x: 0, y: 0 };
+    var offsetX = Math.round(offset.x || 0);
+    var offsetY = Math.round(offset.y || 0);
+    var topStyle = pos === 'top'
+      ? 'top:58px; transform:translate(' + offsetX + 'px,' + offsetY + 'px);'
+      : 'top:45%; transform:translate(' + offsetX + 'px,calc(-50% + ' + offsetY + 'px));';
+    var sigText = typeof cePoemAuthorSignature === 'function' ? cePoemAuthorSignature(poem, '- तुषार') : '- तुषार';
+    var title = typeof cePoemDisplayTitle === 'function' ? cePoemDisplayTitle(poem) : 'Poem';
+    return '<div class="ce-poem-face ce-poem-face--editorial" data-ce-poem-template="editorial-ink" data-ce-poem-family="paper" style="position:relative;width:100%;aspect-ratio:' + ratio + ';overflow:hidden;background:#ece7df;border-radius:14px;border:1px solid rgba(81,67,54,.22);box-shadow:0 14px 30px rgba(11,10,9,.14);">'
+      + '<div class="ce-poem-stage ce-poem-editorial-frame" style="position:absolute;top:0;left:0;width:' + canvasW + 'px;aspect-ratio:' + ratio + ';transform-origin:top left;background:linear-gradient(145deg,#f3eee6 0%,#e6dfd4 100%);">'
+      + '<div class="ce-editorial-grid" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(73,57,41,.05) 1px,transparent 1px),linear-gradient(rgba(73,57,41,.04) 1px,transparent 1px);background-size:29px 29px;mask-image:linear-gradient(180deg,rgba(0,0,0,.42),transparent 72%);"></div>'
+      + '<div class="ce-editorial-topline" style="position:absolute;left:64px;right:64px;top:38px;display:flex;align-items:center;gap:12px;color:#8a7665;font:600 10px/1.2 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;"><span>Doalfaaz</span><span style="height:1px;flex:1;background:#b9a795;"></span><span>Poem / ' + escapeHtml(String(title || 'Untitled').slice(0, 22)) + '</span></div>'
+      + '<div class="ce-editorial-accent" aria-hidden="true" style="position:absolute;left:64px;top:84px;width:34px;height:4px;background:#c23d50;border-radius:99px;"></div>'
+      + '<div class="ce-poem-text-block" data-ce-font-start="' + fontSize + '" data-ce-font-floor="' + poemNoWrapFloorPx(canvasW) + '" style="position:absolute;z-index:2;left:64px;right:64px;' + topStyle + 'font-family:' + fontFamily + ';font-size:' + fontSize + 'px;line-height:' + lineHeight + ';font-weight:' + fontWeight + ';color:' + customColor + ';text-align:' + align + ';max-width:100%;max-height:calc(100% - 150px);overflow:hidden;">' + formattedLines + '</div>'
+      + '<div class="ce-editorial-footer" style="position:absolute;z-index:2;left:64px;right:64px;bottom:38px;display:flex;justify-content:space-between;gap:16px;align-items:center;color:#766b60;font:500 13px/1.4 system-ui,"Noto Sans Devanagari",sans-serif;letter-spacing:.03em;"><span>एक ठहरा हुआ सच</span><span>' + escapeHtml(sigText) + '</span></div>'
+      + '</div></div>';
+  }
+
   // Render Pure Photo Poem Card (Section 1)
   window.renderPhotoPoemHtml = renderPhotoPoemHtml;
 
@@ -7728,6 +7863,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       ? { style: designOverride.style || designOverride, text: designOverride.text || (poem && (poem.text || poem.body)) }
       : ((window.__NATIVE_POEM_DESIGNS__ && poemId) ? window.__NATIVE_POEM_DESIGNS__[poemId] : null);
     var st = normalizePoemStyle(savedDesign && savedDesign.style);
+
+    if (st && st.type && st.type !== 'photo') {
+      return renderPaperPoemHtml(poem, presetIdx, { style: st, text: savedDesign && savedDesign.text });
+    }
 
     var useOriginal = st && st.useOriginal === true
       && typeof cePoemHasOriginalStill === 'function'
@@ -7782,7 +7921,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var sigText = typeof cePoemAuthorSignature === 'function' ? cePoemAuthorSignature(poem, '- तुषार') : '- तुषार';
 
     return `
-      <div class="ce-poem-face" style="position:relative; width:100%; aspect-ratio:${ratio}; overflow:hidden; background:#111; border-radius:12px;">
+      <div class="ce-poem-face" data-ce-poem-family="photo" style="position:relative; width:100%; aspect-ratio:${ratio}; overflow:hidden; background:#111; border-radius:12px;">
         <div class="ce-poem-stage" style="position:absolute; top:0; left:0; width:${canvasW}px; aspect-ratio:${ratio}; transform-origin:top left;">
         <div style="position:absolute; inset:0; background-color:#1c1a24; background-image:url('${photoUrl}'); background-size:cover; background-position:center; filter:grayscale(1) contrast(1.06) brightness(0.85);"></div>
         <div style="position:absolute; inset:0; background:${shade}; z-index:1;"></div>
@@ -7807,6 +7946,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       ? { style: designOverride.style || designOverride, text: designOverride.text || (poem && (poem.text || poem.body)) }
       : ((window.__NATIVE_POEM_DESIGNS__ && poemId) ? window.__NATIVE_POEM_DESIGNS__[poemId] : null);
     var st = normalizePoemStyle(savedDesign && savedDesign.style);
+
+    if (st && st.type === 'editorial-ink') {
+      return renderEditorialPoemHtml(poem, st, savedDesign);
+    }
 
     var canonicalIdx = presetIdx != null ? presetIdx : canonicalPoemPresetIndex(poem, 'paper');
     let preset = PAPER_PRESETS[canonicalIdx % PAPER_PRESETS.length];
@@ -7852,7 +7995,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var sigText = typeof cePoemAuthorSignature === 'function' ? cePoemAuthorSignature(poem, '- तुषार' + emoji) : ('- तुषार' + emoji);
 
     return `
-      <div class="ce-poem-face" style="position:relative; width:100%; aspect-ratio:${ratio}; overflow:hidden; background:${preset.bg}; border-radius:12px;">
+      <div class="ce-poem-face" data-ce-poem-family="paper" style="position:relative; width:100%; aspect-ratio:${ratio}; overflow:hidden; background:${preset.bg}; border-radius:12px;">
         <div class="ce-poem-stage" style="position:absolute; top:0; left:0; width:${canvasW}px; aspect-ratio:${ratio}; transform-origin:top left;">
         ${preset.hasMarginLine ? `
           <div style="position:absolute; left:32px; top:0; bottom:0; width:2px; background:#d4a58c; opacity:0.8; z-index:1;"></div>
@@ -7883,7 +8026,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     dusk: 'btn-type-dusk',
     'dusk-ember': 'btn-type-dusk',
     banaras: 'btn-type-banaras',
-    'banaras-ghat': 'btn-type-banaras'
+    'banaras-ghat': 'btn-type-banaras',
+    'editorial-ink': 'btn-type-editorial'
   });
 
   function syncPoemTemplateSelection(type) {
@@ -7963,7 +8107,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       { id: 'btn-type-zen', kind: 'paper', preset: 3, type: 'minimal-zen', pos: 'mid' },
       { id: 'btn-type-noir', kind: 'paper', preset: 4, type: 'midnight-noir', pos: 'mid' },
       { id: 'btn-type-dusk', kind: 'paper', preset: 5, type: 'dusk-ember', pos: 'mid' },
-      { id: 'btn-type-banaras', kind: 'paper', preset: 6, type: 'banaras-ghat', pos: 'top' }
+      { id: 'btn-type-banaras', kind: 'paper', preset: 6, type: 'banaras-ghat', pos: 'top' },
+      { id: 'btn-type-editorial', kind: 'paper', preset: 7, type: 'editorial-ink', pos: 'mid' }
     ];
     previews.forEach(function (preview) {
       var button = document.getElementById(preview.id);
@@ -10876,6 +11021,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (state.studioPoemEditing) poemFinishTextEdit();
     var before = studioSnapshot();
     state[property] = value;
+    if (property === 'studioType' && state.currentType === 'poem') {
+      setPoemDefaultStyleType(value);
+    }
     state.studioPoemSelected = true;
     updateStudioCanvas();
     /* The fit pass must re-run after a style/ratio change. updateStudioCanvas()
@@ -10920,6 +11068,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       studioCapturePoemDraft();
       const poem = state.currentItem;
       const isPaper = state.studioType !== 'photo';
+      const isEditorial = state.studioType === 'editorial-ink';
       if (!isPaper && state.studioUseOriginal === true && typeof cePoemHasOriginalStill === 'function' && cePoemHasOriginalStill(poem)) {
         const stillUrl = cePoemStillUrl(poem);
         const stillAlt = (typeof cePoemDisplayTitle === 'function') ? cePoemDisplayTitle(poem) : 'Original Instagram poem';
@@ -10943,6 +11092,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       let shade = 'linear-gradient(90deg, rgba(8,8,8,0.78) 0%, rgba(8,8,8,0.2) 60%, rgba(8,8,8,0.56) 100%)';
 
       const paperPreset = PAPER_PRESETS.find(p => p.id === state.studioType || (state.studioType === 'paper' && p.id === 'white-balloon') || (state.studioType === 'ivory' && p.id === 'gallery-ivory') || (state.studioType === 'notebook' && p.id === 'notebook-margin') || (state.studioType === 'zen' && p.id === 'minimal-zen') || (state.studioType === 'noir' && p.id === 'midnight-noir') || (state.studioType === 'dusk' && p.id === 'dusk-ember') || (state.studioType === 'banaras' && p.id === 'banaras-ghat'));
+
+      if (isEditorial) {
+        bg = '#ece7df';
+        textColor = '#221f1b';
+        sigColor = '#766b60';
+        ratio = PHOTO_ASPECT_RATIO;
+      }
 
       if (paperPreset) {
         bg = paperPreset.bg;
@@ -11004,20 +11160,24 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var ox = (state.studioPoemOffset && Number(state.studioPoemOffset.x)) || 0;
       var oy = (state.studioPoemOffset && Number(state.studioPoemOffset.y)) || 0;
       let topStyle = state.studioPos === 'top'
-        ? ('top: 36px; transform: ' + poemOffsetTransform(ox, oy, 'top') + ';')
+        ? ('top: ' + (isEditorial ? '58px' : '36px') + '; transform: ' + poemOffsetTransform(ox, oy, 'top') + ';')
         : ('top: 42%; transform: ' + poemOffsetTransform(ox, oy, 'mid') + ';');
       let leftPadValue = hasMargin ? 48 : 36;
       let leftPad = leftPadValue + 'px';
       let textBoxWidthStyle = state.studioAlign === 'center'
         ? 'right:36px; width:auto; max-width:calc(100% - ' + (leftPadValue + 36) + 'px);'
-        : 'right:auto; width:max-content; max-width:calc(100% - ' + (leftPadValue + 36) + 'px);';
+        // A left-aligned selection frame should follow the readable text
+        // column, not stretch across the entire authored canvas. Keep enough
+        // width for long Devanagari lines while leaving a calm breathing rail
+        // on both sides (the text and export coordinates remain authored).
+        : 'right:36px; width:auto; max-width:calc(100% - 104px);';
 
       const existingActiveCanvas = document.getElementById('active-studio-canvas');
       const existingEditableText = document.getElementById('studio-editable-text');
       const existingDragBox = document.getElementById('studio-draggable-container');
       const isCurrentlyEditing = existingEditableText && (document.activeElement === existingEditableText || existingEditableText.contains(document.activeElement));
 
-      if (existingActiveCanvas && existingEditableText && existingDragBox && isCurrentlyEditing) {
+      if (existingActiveCanvas && existingEditableText && existingDragBox && isCurrentlyEditing && !isEditorial) {
         // IN-PLACE LIVE UPDATE: User is actively typing or editing text.
         // DO NOT blow away the DOM innerHTML! Preserve focus, caret, composition and live typing!
         existingActiveCanvas.style.background = bg;
@@ -11043,9 +11203,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         }
 
         existingDragBox.style.left = leftPad;
-        existingDragBox.style.right = state.studioAlign === 'center' ? '36px' : 'auto';
-        existingDragBox.style.width = state.studioAlign === 'center' ? 'auto' : 'max-content';
-        existingDragBox.style.maxWidth = 'calc(100% - ' + (leftPadValue + 36) + 'px)';
+        existingDragBox.style.right = '36px';
+        existingDragBox.style.width = 'auto';
+        existingDragBox.style.maxWidth = 'calc(100% - 104px)';
         if (state.studioPos === 'top') {
           existingDragBox.style.top = '36px';
           existingDragBox.style.transform = poemOffsetTransform(ox, oy, 'top');
@@ -11065,7 +11225,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         existingEditableText.style.fontSize = glyphPx + 'px';
         existingEditableText.style.fontWeight = String(fontWeight);
         existingEditableText.style.lineHeight = String(lineHeight);
-        enforcePoemNoWrap(existingEditableText, glyphPx, Math.max(8, Math.round(POEM_TYPOGRAPHY.fitFloorDensity * (studioCanvasW / POEM_TYPOGRAPHY.baseWidth))));
+        enforcePoemNoWrap(existingEditableText, glyphPx, poemNoWrapFloorPx(studioCanvasW));
         existingEditableText.style.color = textColor;
         existingEditableText.style.textAlign = state.studioAlign;
         existingEditableText.style.textShadow = textShadow;
@@ -11080,8 +11240,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         }
       } else {
         const formattedLines = rawTxt.split('\n').map(l => `<span style="white-space:pre-wrap;">${escapeHtml(l)}</span>`).join('<br>');
+        if (isEditorial) {
+          canvasWrap.innerHTML = `
+            <div id="active-studio-canvas" class="ce-poem-editorial-stage ce-poem-editorial-frame" data-ce-poem-template="editorial-ink" style="position:relative; width:580px; aspect-ratio:${ratio}; overflow:hidden; background:linear-gradient(145deg,#f3eee6 0%,#e6dfd4 100%); border-radius:14px; box-shadow:0 0 0 1px rgba(81,67,54,.22), 0 24px 54px -16px rgba(11,10,9,.42);">
+              <div class="ce-editorial-grid" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(73,57,41,.05) 1px,transparent 1px),linear-gradient(rgba(73,57,41,.04) 1px,transparent 1px);background-size:29px 29px;mask-image:linear-gradient(180deg,rgba(0,0,0,.42),transparent 72%);"></div>
+              <div class="ce-editorial-topline" style="position:absolute;left:64px;right:64px;top:38px;display:flex;align-items:center;gap:12px;color:#8a7665;font:600 10px/1.2 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;"><span>Doalfaaz</span><span style="height:1px;flex:1;background:#b9a795;"></span><span>Poem</span></div>
+              <div class="ce-editorial-accent" aria-hidden="true" style="position:absolute;left:64px;top:84px;width:34px;height:4px;background:#c23d50;border-radius:99px;"></div>
+              <div id="studio-draggable-container" class="ce-draggable-box${state.studioPoemSelected ? ' is-selected' : ''}${state.studioPoemEditing ? ' is-editing' : ''}" tabindex="0" role="group" aria-label="Poem text box. Drag to move; double-click or press Enter to edit." style="position:absolute; z-index:2; left:64px; right:64px; ${topStyle}">
+                <div class="ce-drag-handle-bar" title="Drag to reposition text with magnetic snapping" aria-hidden="true" contenteditable="false" style="user-select:none; -webkit-user-select:none;">⋮⋮ Move</div>
+                <div id="studio-editable-text" data-ce-poem-id="${escapeHtml(cePoemStableId(poem))}" contenteditable="${state.studioPoemEditing ? 'true' : 'false'}" spellcheck="false" style="font-family:${fontFamily}; font-size:${glyphPx}px; line-height:${lineHeight}; font-weight:${fontWeight}; color:${textColor}; text-align:${state.studioAlign}; text-shadow:none; outline:none; cursor:${state.studioPoemEditing ? 'text' : 'grab'}; user-select:${state.studioPoemEditing ? 'text' : 'none'}; -webkit-user-select:${state.studioPoemEditing ? 'text' : 'none'};">${formattedLines}</div>
+              </div>
+              <div class="ce-editorial-footer" style="position:absolute;z-index:2;left:64px;right:64px;bottom:38px;display:flex;justify-content:space-between;gap:16px;align-items:center;color:#766b60;font:500 13px/1.4 system-ui,'Noto Sans Devanagari',sans-serif;letter-spacing:.03em;"><span>एक ठहरा हुआ सच</span><span class="ce-poem-signature">- तुषार</span></div>
+            </div>`;
+          enforcePoemNoWrap(document.getElementById('studio-editable-text'), glyphPx, poemNoWrapFloorPx(studioCanvasW));
+          renderPhotoStrip();
+          syncPoemTemplateSelection(state.studioType);
+          syncPoemTypographyControls();
+          studioUpdateHistoryControls();
+        } else {
         canvasWrap.innerHTML = `
-          <div id="active-studio-canvas" style="position:relative; width:580px; aspect-ratio:${ratio}; overflow:hidden; background:${bg}; border-radius:14px; box-shadow:0 0 0 1px rgba(255,255,255,0.08), 0 24px 64px -12px rgba(0,0,0,0.85), 0 12px 28px -8px rgba(0,0,0,0.6);">
+          <div id="active-studio-canvas" data-ce-poem-family="${isPaper ? 'paper' : 'photo'}" style="position:relative; width:580px; aspect-ratio:${ratio}; overflow:hidden; background:${bg}; border-radius:14px; box-shadow:0 0 0 1px rgba(255,255,255,0.08), 0 24px 64px -12px rgba(0,0,0,0.85), 0 12px 28px -8px rgba(0,0,0,0.6);">
             <div class="ce-poem-photo-layer" style="position:absolute; inset:0; display:${!isPaper ? 'block' : 'none'}; background-color:#1c1a24; background-image:${!isPaper ? `url('${photoUrl}')` : 'none'}; background-size:cover; background-position:center; filter:grayscale(1) sepia(0.08) contrast(1.08) brightness(0.82);"></div>
             <div class="ce-poem-shade-layer" style="position:absolute; inset:0; display:${!isPaper ? 'block' : 'none'}; background:${shade}; z-index:1;"></div>
             <!-- P1-3 / V1 (deep-audit D00_ANCHOR_PARITY, verified on HEAD): the card
@@ -11106,7 +11284,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             </div>
           </div>
         `;
-        enforcePoemNoWrap(document.getElementById('studio-editable-text'), glyphPx, Math.max(8, Math.round(POEM_TYPOGRAPHY.fitFloorDensity * (studioCanvasW / POEM_TYPOGRAPHY.baseWidth))));
+        enforcePoemNoWrap(document.getElementById('studio-editable-text'), glyphPx, poemNoWrapFloorPx(studioCanvasW));
+        }
       }
 
       const strip = document.getElementById('studio-photo-strip');
@@ -13040,12 +13219,24 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         state.studioPhotoIdx = 0;
       } else {
         const photoPreset = PHOTO_PRESETS[presetIdx % PHOTO_PRESETS.length];
-        state.studioType = 'photo';
-        state.studioPhotoIdx = photoPreset.photoIdx % PHOTO_BACKGROUNDS.length;
-        state.studioUseOriginal = options && options.useOriginal === true;
-        state.studioAlign = photoPreset.align || 'left';
-        state.studioPos = photoPreset.pos || 'top';
+        state.studioType = poemDefaultStyleType();
+        state.studioUseOriginal = state.studioType === 'photo' && options && options.useOriginal === true;
+        if (state.studioType === 'photo') {
+          state.studioPhotoIdx = photoPreset.photoIdx % PHOTO_BACKGROUNDS.length;
+          state.studioAlign = photoPreset.align || 'left';
+          state.studioPos = photoPreset.pos || 'top';
+        } else {
+          var defaultPreset = PAPER_PRESETS.find(function (p) { return p.id === state.studioType; }) || PAPER_PRESETS[PAPER_PRESETS.length - 1];
+          state.studioPhotoIdx = 0;
+          state.studioAlign = state.studioType === 'editorial-ink' ? 'left' : (defaultPreset.align || 'left');
+          state.studioPos = state.studioType === 'editorial-ink' ? 'top' : (defaultPreset.pos || 'mid');
+        }
         state.studioFontSize = (function () {
+          // Fresh Photo cards and Studio must share the same authored density.
+          // The shelf carries the 21px default token; reducing a long Photo only
+          // here made the open canvas visibly smaller than its card. Explicit
+          // saved styles are applied by the persisted-design branch below.
+          if (state.studioType === 'photo' || state.studioType === 'editorial-ink') return POEM_TYPOGRAPHY.defaultDensity;
           var n = cePoemLineCount((item && (item.text || item.body)) || '');
           if (n >= 8) return 13;
           if (n >= 5) return 15;
@@ -13111,7 +13302,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       }
       if (savedPoemDesign && typeof savedPoemDesign === 'object') {
         const st = savedPoemDesign.style && typeof savedPoemDesign.style === 'object' ? savedPoemDesign.style : {};
-        const validTypes = ['photo', 'paper', 'ivory', 'notebook', 'zen', 'noir', 'dusk', 'banaras', 'white-balloon', 'gallery-ivory', 'notebook-margin', 'minimal-zen', 'midnight-noir', 'dusk-ember', 'banaras-ghat'];
+        // A shelf card without an authored Studio design carries a private
+        // defaultTemplate marker. Resolve it only here, so the shelf keeps its
+        // balanced photo/paper draw while opening in the new editorial frame.
+        if (!persistedDesign && st.defaultTemplate) st.type = poemDefaultStyleType();
+        const validTypes = ['photo', 'paper', 'ivory', 'notebook', 'zen', 'noir', 'dusk', 'banaras', 'editorial-ink', 'white-balloon', 'gallery-ivory', 'notebook-margin', 'minimal-zen', 'midnight-noir', 'dusk-ember', 'banaras-ghat'];
         state.studioType = validTypes.indexOf(st.type) >= 0 ? st.type : (st.type ? st.type : 'photo');
         // A saved density token is authored state. Restore it exactly; the
         // shelf derives the proportional pixel size from the same token, so
@@ -16712,6 +16907,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           ev.stopPropagation();
           var rid = btn.getAttribute('data-req-id') || '';
           if (!rid) return;
+          if (!window.confirm('Retry this failed schedule request?\n\nThe Mac will send it through the scheduling engine again. Confirm only if this row is known to have failed before Meta accepted it.')) return;
           try {
             if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge) {
               window.webkit.messageHandlers.ceBridge.postMessage({ action: 'retryScheduleRequest', id: rid });
@@ -16720,6 +16916,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               showAppToast('Retry needs the Mac app running', true);
             }
           } catch (_e) { showAppToast('Retry failed to reach the Mac', true); }
+        };
+      });
+      planBox.querySelectorAll('.ce-sched-req-cancel').forEach(function (btn) {
+        btn.onclick = function (ev) {
+          ev.stopPropagation();
+          var rid = btn.getAttribute('data-req-id') || '';
+          if (!rid || !window.confirm('Cancel this phone schedule request?\n\nIt has not reached Meta yet. The Mac relay will leave it cancelled.')) return;
+          try {
+            var bridge = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
+            if (!bridge) { showAppToast('Cancel needs the Mac app running', true); return; }
+            bridge.postMessage({ action: 'cancelScheduleRequest', id: rid });
+          } catch (_e) { showAppToast('Cancel failed to reach the Mac', true); }
         };
       });
       /* P0-10 FIX (2026-09-16): a needs_verification row has no useful Retry - the
@@ -17263,6 +17471,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var __growReady = state.queueItems.filter(function (q) {
         return q && q.readyToPost === true && q.auditStatus !== 'DRAFT';
       }).length;
+      var __growReadyIndex = state.queueItems.findIndex(function (q) {
+        return q && q.readyToPost === true && q.auditStatus !== 'DRAFT' && q.item;
+      });
+      var __growReadyQueue = __growReadyIndex >= 0 ? state.queueItems[__growReadyIndex] : null;
+      var __growReadyTitle = __growReadyQueue && __growReadyQueue.item
+        ? String(__growReadyQueue.item.title || __growReadyQueue.item.text || __growReadyQueue.item.body || 'Your next ready piece')
+        : '';
+      var __growReadyPreview = __growReadyQueue ? queuePreviewHtml(__growReadyQueue, __growReadyIndex) : '';
       var __growMix = [
         { label: 'Posts', count: __growPosts, className: 'is-posts', go: 'library', lib: 'posts' },
         { label: 'Poems', count: __growPoems, className: 'is-poems', go: 'library', lib: 'poems' },
@@ -17300,107 +17516,88 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var __queueTotal14 = __queueByDay.reduce(function (a, b) { return a + b.count; }, 0);
 
       const growBox = document.createElement('div');
-      growBox.className = 'ce-ops-shell';
+      growBox.className = 'ce-ops-shell ce-grow-shell';
       growBox.innerHTML = `
-        <section class="ce-ops-hero">
-          <div class="ce-ops-hero-copy">
-            <div class="ce-grow-hero-titlerow">
-              <h2 style="margin:0; font-size:18px; font-weight:800; color:var(--ink);">Grow</h2>
-              <div class="ce-grow-hero-rail" aria-label="Grow loop">
-                <span>Observe</span><i aria-hidden="true">→</i><span>Learn</span><i aria-hidden="true">→</i><span>Apply</span>
-              </div>
-            </div>
-            <div class="ce-ops-hero-footrow">
-              <div class="ce-ops-actions" style="margin-top:10px;">
-                <button class="ce-surface-button is-primary" data-ce-go="plan" type="button">Queue</button>
-                <button class="ce-surface-button is-on-dark" data-ce-go="write" type="button">Write</button>
-              </div>
-              <div class="ce-ops-hero-number"><strong>${__growExported}</strong><span>exported</span></div>
-            </div>
+        <section class="ce-grow-instrument" aria-label="Grow readiness">
+          <div class="ce-grow-instrument-main">
+            <h2>Grow</h2>
+            <div class="ce-grow-instrument-number"><strong>${__growReady}</strong><span>of ${(state.queueItems || []).length} ready</span></div>
+            <span class="ce-grow-instrument-hint">${__growReady ? (__growReady === 1 ? 'One piece is ready for your next move.' : __growReady + ' pieces are ready for your next move.') : 'Design one piece to create your next move.'}</span>
+          </div>
+          <div class="ce-grow-instrument-meta">
+            <span>Local inventory · saved on this Mac · ${__growQueued} staged · ${__growExported} exported</span>
+            <time>${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</time>
           </div>
         </section>
 
-        <section class="ce-grow-column" aria-label="Observe"><div class="ce-grow-colhead"><span class="ce-grow-stepnum">Observe</span></div></section>
-        <section class="ce-readiness-row" aria-label="Your content at a glance">
+        <section class="ce-grow-next-move" aria-label="Next move">
+          <div class="ce-grow-next-art${__growReadyPreview ? '' : ' is-empty'}">${__growReadyPreview || '<span class="ce-grow-empty-mark">+</span>'}</div>
+          <div class="ce-grow-next-copy">
+            <span class="ce-grow-eyebrow">Next move</span>
+            <h2>${escapeHtml(__growReadyTitle || 'Design your first piece')}</h2>
+            <p>${__growReady ? 'This piece is ready in your Plan. Open it once, then decide.' : 'Nothing is ready yet. Start from your Library and keep the next decision small.'}</p>
+            ${__growReady
+              ? '<button type="button" class="ce-surface-button is-primary" data-ce-grow-open-ready>Open in Studio</button>'
+              : '<button type="button" class="ce-surface-button is-primary" data-ce-go="library" data-ce-library="carousels">Pick from Library</button>'}
+          </div>
+        </section>
+
+        <section class="ce-readiness-row ce-grow-readiness" aria-label="Your content at a glance">
           <div><span>Ready to publish</span><strong>${__growReady.toLocaleString()}</strong><small>of ${(state.queueItems || []).length} in your Plan</small></div>
           <div><span>Designed carousels</span><strong>${__growDecks.toLocaleString()}</strong><small>ready to edit in Studio</small></div>
           <div><span>Unedited poems</span><strong>${__growPoems.toLocaleString()}</strong><small>${__growPoems === 1 ? 'poem' : 'poems'} in Library</small></div>
           <div><span>Authored posts</span><strong>${__growPosts.toLocaleString()}</strong><small>${__growPosts === 1 ? 'post' : 'posts'} ready to shape</small></div>
         </section>
-        <section class="ce-ops-panel ce-inventory-panel">
-          <div class="ce-section-heading">
-            <div><h3>Content mix</h3></div>
-            <span class="ce-data-note">Local inventory only · saved on this Mac</span>
-          </div>
-          ${__growTotal === 0 ? `
-          <div class="ce-native-empty" role="status">
-            <span class="ce-empty-title">Not enough data yet</span>
-            <span class="ce-empty-sub">Add content to your Library to see the publishing mix.</span>
-            <button type="button" class="ce-surface-button" data-ce-go="ideas">Start from Ideas</button>
-          </div>` : `
-          <div class="ce-mix-bar" aria-label="How your saved content breaks down">
-            ${__growMix.filter(r => r.label !== 'Ideas' && r.count > 0).map(row => `<span class="${row.className}" style="flex:${Math.max(1, row.count)}; min-width:7px" title="${escapeHtml(row.label)}: ${row.count}"></span>`).join('')}
-          </div>
-          <div class="ce-mix-legend">
-            ${__growMix.filter(r => r.label !== 'Ideas').map(row => `<button type="button" data-ce-go="${row.go}" ${row.lib ? `data-ce-library="${row.lib}"` : ''}><span class="ce-legend-dot ${row.className}"></span><strong>${row.count.toLocaleString()}</strong><small>${escapeHtml(row.label)}</small></button>`).join('')}
-            <button type="button" data-ce-go="ideas"><span class="ce-legend-dot is-ideas"></span><strong>${__growIdeas.toLocaleString()}</strong><small>Ideas (not postable yet)</small></button>
-          </div>`}
-        </section>
-
-        <section class="ce-grow-column" aria-label="Learn boundary"><div class="ce-grow-colhead"><span class="ce-grow-stepnum">Learn</span></div></section>
-        <section class="ce-ops-panel ce-learn-panel">
-          <div class="ce-section-heading">
-            <div><h3>Momentum</h3></div>
-            <span class="ce-data-note">Last 14 days · local activity on this Mac${window.__CE_META_HAS_TOKEN__ ? ' · audience below is live Meta' : ' · no analytics connected'}</span>
-          </div>
-          <div class="ce-learn-grid">
-            <div class="ce-chart-card">
-              <div class="ce-chart-head"><strong>Saved pieces</strong><span>${__savedTotal14} in 14 days</span></div>
-              ${__savedTotal14 === 0 ? `
-              <div class="ce-chart-empty">Save a piece from Library or Studio to start the streak.</div>` : `
-              <div class="ce-chart-bars" role="img" aria-label="Pieces saved per day over the last 14 days">
-                ${__savedByDay.map(d => `
-                <div class="ce-chart-col" title="${d.label}: ${d.count} saved">
-                  <span class="ce-chart-val">${d.count || ''}</span>
-                  <span class="ce-chart-bar" style="height:${d.count ? Math.round(d.count / __savedPeak * 60) + 4 : 2}px"></span>
-                  <span class="ce-chart-day">${d.label}</span>
-                </div>`).join('')}
+        <section class="ce-grow-momentum ce-ops-panel" aria-label="Momentum and content mix">
+          <div class="ce-section-heading"><div><h3>Momentum + mix</h3></div><span class="ce-data-note">Last 14 days · local activity${window.__CE_META_HAS_TOKEN__ ? ' · Meta below is live' : ' · no analytics connected'}</span></div>
+          <div class="ce-grow-momentum-grid">
+            <div class="ce-grow-mix">
+              <span class="ce-grow-eyebrow">Content mix</span>
+              ${__growTotal === 0 ? `
+              <div class="ce-native-empty" role="status"><span class="ce-empty-title">Not enough data yet</span><span class="ce-empty-sub">Add content to your Library to see the mix.</span><button type="button" class="ce-surface-button" data-ce-go="ideas">Start from Ideas</button></div>` : `
+              <div class="ce-mix-bar" aria-label="How your saved content breaks down">
+                ${__growMix.filter(r => r.label !== 'Ideas' && r.count > 0).map(row => `<span class="${row.className}" style="flex:${Math.max(1, row.count)}; min-width:7px" title="${escapeHtml(row.label)}: ${row.count}"></span>`).join('')}
+              </div>
+              <div class="ce-mix-legend">
+                ${__growMix.filter(r => r.label !== 'Ideas').map(row => `<button type="button" data-ce-go="${row.go}" ${row.lib ? `data-ce-library="${row.lib}"` : ''}><span class="ce-legend-dot ${row.className}"></span><strong>${row.count.toLocaleString()}</strong><small>${escapeHtml(row.label)}</small></button>`).join('')}
+                <button type="button" data-ce-go="ideas"><span class="ce-legend-dot is-ideas"></span><strong>${__growIdeas.toLocaleString()}</strong><small>Ideas · not postable yet</small></button>
               </div>`}
             </div>
-            <div class="ce-chart-card">
-              <div class="ce-chart-head"><strong>Queue flow</strong><span>${__queueTotal14} staged in 14 days</span></div>
-              ${__queueTotal14 === 0 ? `
-              <div class="ce-chart-empty">Stage a piece to the posting board and the rhythm shows up here.</div>` : `
-              <div class="ce-chart-bars" role="img" aria-label="Pieces staged per day over the last 14 days">
-                ${__queueByDay.map(d => `
-                <div class="ce-chart-col" title="${d.label}: ${d.count} staged">
-                  <span class="ce-chart-val">${d.count || ''}</span>
-                  <span class="ce-chart-bar" style="height:${d.count ? Math.round(d.count / __queuePeak * 60) + 4 : 2}px"></span>
-                  <span class="ce-chart-day">${d.label}</span>
-                </div>`).join('')}
-              </div>`}
+            <div class="ce-grow-charts">
+              <div class="ce-chart-card"><div class="ce-chart-head"><strong>Saved pieces</strong><span>${__savedTotal14} in 14 days</span></div>
+                ${__savedTotal14 === 0 ? `<div class="ce-chart-empty">Save a piece from Library or Studio to start the streak.</div>` : `<div class="ce-chart-bars" role="img" aria-label="Pieces saved per day over the last 14 days">${__savedByDay.map(d => `<div class="ce-chart-col" title="${d.label}: ${d.count} saved"><span class="ce-chart-val">${d.count || ''}</span><span class="ce-chart-bar" style="height:${d.count ? Math.round(d.count / __savedPeak * 60) + 4 : 2}px"></span><span class="ce-chart-day">${d.label}</span></div>`).join('')}</div>`}
+              </div>
+              <div class="ce-chart-card"><div class="ce-chart-head"><strong>Queue flow</strong><span>${__queueTotal14} staged in 14 days</span></div>
+                ${__queueTotal14 === 0 ? `<div class="ce-chart-empty">Stage a piece to see the rhythm here.</div>` : `<div class="ce-chart-bars" role="img" aria-label="Pieces staged per day over the last 14 days">${__queueByDay.map(d => `<div class="ce-chart-col" title="${d.label}: ${d.count} staged"><span class="ce-chart-val">${d.count || ''}</span><span class="ce-chart-bar" style="height:${d.count ? Math.round(d.count / __queuePeak * 60) + 4 : 2}px"></span><span class="ce-chart-day">${d.label}</span></div>`).join('')}</div>`}
+              </div>
             </div>
-            ${ceAudienceCardHtml()}
           </div>
         </section>
 
-        <section class="ce-ops-panel ce-audience-panel" aria-label="Live audience insights">
-          ${ceAudiencePanelHtml()}
+        <section class="ce-grow-audience-strip" aria-label="Audience">
+          ${window.__CE_META_HAS_TOKEN__ ? ceLaunchPulseHtml() : `<div class="ce-grow-audience-copy"><span class="ce-grow-eyebrow">Audience</span>${ceInsightStateHtml('grow')}</div>`}
         </section>
 
-        <section class="ce-grow-column" aria-label="Apply actions"><div class="ce-grow-colhead"><span class="ce-grow-stepnum">Apply</span></div></section>
-        <section class="ce-ops-panel ce-next-loop">
-          <div class="ce-section-heading"><div><h3>Next moves</h3></div></div>
+        <details class="ce-grow-more-moves">
+          <summary>More moves <span>Open only when you need another path</span></summary>
           <div class="ce-loop-steps">
-            <button type="button" data-ce-go="library" data-ce-library="carousels"><span>01</span><strong>Choose a designed piece</strong><small>Open the real carousel or post in Studio.</small><em class="ce-apply-tag">Apply → Studio</em></button>
-            <button type="button" data-ce-go="plan"><span>02</span><strong>Curate the posting board</strong><small>Keep only work you would genuinely post.</small><em class="ce-apply-tag">Apply → Plan &amp; Queue</em></button>
-            <button type="button" data-ce-go="launch"><span>03</span><strong>Place it in the launch arc</strong><small>Review awareness, authority, and invitation.</small><em class="ce-apply-tag">Apply → Launch</em></button>
+            <button type="button" data-ce-go="library" data-ce-library="carousels"><span>01</span><strong>Choose a designed piece</strong><small>Open the real carousel or post in Studio.</small></button>
+            <button type="button" data-ce-go="plan"><span>02</span><strong>Curate the posting board</strong><small>Keep only work you would genuinely post.</small></button>
+            <button type="button" data-ce-go="launch"><span>03</span><strong>Place it in the launch arc</strong><small>Review awareness, authority, and invitation.</small></button>
+            <button type="button" data-ce-go="write"><span>04</span><strong>Write a new piece</strong><small>Start a fresh post or poem when the queue is not the next move.</small></button>
           </div>
-        </section>
+        </details>
       `;
       view.appendChild(growBox);
       bindCreatorSurfaceActions(growBox);
       ceBindInsightsActions(growBox);
+      hydrateRasterPreviews(growBox);
+      if (__growReadyQueue) {
+        var __growOpenReady = growBox.querySelector('[data-ce-grow-open-ready]');
+        if (__growOpenReady) __growOpenReady.onclick = function () {
+          if (__growReadyQueue.item) openStudio(__growReadyQueue.type || 'carousel', __growReadyQueue.item, Object.assign({}, __growReadyQueue.design || {}, { queueIndex: __growReadyIndex }));
+        };
+      }
 
     } else if (state.activeTab === 'launch') {
       // Launch = daily posting board, not a cockpit. One recommended piece for tomorrow,
@@ -17672,22 +17869,20 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         <section class="ce-launch-board-head">
           ${__todayPiece ? `
             <div class="ce-launch-board-cand ce-launch-board-cand--slim">
-              <span class="ce-launch-board-eyebrow">Next to post</span>
+              <span class="ce-launch-board-eyebrow">Today</span>
               <button type="button" class="ce-launch-board-open" data-ce-launch-open-art="${escapeHtml(__todayPiece.id)}" title="Open in Studio">${escapeHtml(__todayPiece.title || 'Open in Studio')}</button>
               <button class="ce-surface-button is-primary" data-ce-launch-tomorrow-stage="${escapeHtml(__todayPiece.id)}" title="Stage in Plan & Queue" type="button">Stage</button>
             </div>
-          ` : `<div class="ce-launch-board-cand"><span class="ce-launch-board-eyebrow">Next to post</span><button type="button" class="ce-surface-button" data-ce-launch-goto-library>Pick from Library</button></div>`}
+          ` : `<div class="ce-launch-board-cand ce-launch-board-cand--empty"><span class="ce-launch-board-eyebrow">Today</span><strong>Nothing ready yet</strong><button type="button" class="ce-surface-button is-primary" data-ce-launch-goto-library>Pick from Library</button></div>`}
+          <div class="ce-launch-board-cadence" aria-label="Board length">
+            ${[3, 7, 14, 30].map(function (n) { return '<button type="button" aria-label="Show ' + n + '-day board" title="Show ' + n + '-day board" data-ce-plan-days="' + n + '" class="' + (n === __planLen ? 'is-on' : '') + (!__designed.length ? ' is-disabled' : '') + '"' + (!__designed.length ? ' disabled aria-disabled="true"' : '') + '>' + n + 'd</button>'; }).join('')}
+          </div>
         </section>
 
         ${ceLaunchPulseHtml()}
 
-        ${__designed.length ? `
-        <section class="ce-launch-board-cadence" aria-label="Board length">
-          ${[3, 7, 14, 30].map(function (n) { return '<button type="button" aria-label="Show ' + n + '-day board" title="Show ' + n + '-day board" data-ce-plan-days="' + n + '" class="' + (n === __planLen ? 'is-on' : '') + '">' + n + 'd</button>'; }).join('')}
-        </section>` : ''}
-
-        ${__designed.length ? `
-        <section class="ce-launch-board-strip" aria-label=${'"'+__planLen+'-day posting board"'}>
+        <section class="ce-launch-board-strip${__designed.length ? '' : ' is-empty'}" aria-label=${'"'+__planLen+'-day posting board"'}>
+          ${__designed.length ? `
           ${__planDays.map(function (day) {
             var piece = day.piece;
             var face = piece ? __renderTilePiece(piece) : '';
@@ -17708,10 +17903,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               + (piece
                 ? '<button type="button" class="ce-launch-day-art" data-ce-launch-open-art="' + escapeHtml(piece.id) + '" aria-label="Open ' + escapeHtml(piece.title || 'this piece') + ' in Studio" title="' + escapeHtml(piece.title || '') + '">' + face + '</button>'
                     + (pillarName ? '<div class="ce-launch-day-meta"><span class="ce-launch-pillar-chip" title="' + escapeHtml(pillarName) + '">' + escapeHtml(pillarChip) + '</span>' + (whyLine ? '<span class="ce-launch-day-why">' + escapeHtml(whyLine) + '</span>' : '') + '</div>' : '')
-                    + '<div class="ce-launch-day-title">' + escapeHtml(piece.title || '') + '</div>'
+                    + '<span class="ce-launch-day-sr-title">' + escapeHtml(piece.title || '') + '</span>'
                     + '<div class="ce-launch-day-actions">'
-                    +   '<button type="button" class="is-primary" data-ce-launch-stage-day="' + day.idx + '" title="Stage in Plan &amp; Queue">Stage</button>'
-                    +   '<details class="ce-launch-day-more"><summary aria-label="More options" title="More options">•••</summary><div>'
+                    +   '<button type="button" class="' + (day.idx === 0 ? 'is-primary' : '') + '" data-ce-launch-stage-day="' + day.idx + '" title="' + (day.idx === 0 ? 'Stage today in Plan &amp; Queue' : 'Set this day in Plan &amp; Queue') + '">' + (day.idx === 0 ? 'Stage' : 'Set') + '</button>'
+                    +   '<details class="ce-launch-day-more"><summary aria-label="More options" title="More options">More</summary><div>'
                     +     '<button type="button" data-ce-launch-shuffle-day="' + day.idx + '" title="Next-best designed piece for this day">Change piece</button>'
                     +     '<button type="button" data-ce-launch-retire-day="' + day.idx + '" title="Remove this suggestion">Remove</button>'
                     +   '</div></details>'
@@ -17719,7 +17914,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                 : '<div class="ce-launch-day-art" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;">Pick from Library</div>')
               + '</article>';
           }).join('')}
-        </section>` : ''}
+          ` : `<article class="ce-launch-empty-card"><span class="ce-launch-board-eyebrow">Your first post</span><strong>Start with one piece you would genuinely share.</strong><small>The board stays quiet until a designed piece exists.</small><button type="button" class="ce-surface-button is-primary" data-ce-launch-goto-library>Pick from Library</button></article>`}
+        </section>
 
         <section class="ce-launch-intelligence" aria-label="Launch board intelligence">
           <div class="ce-launch-intelligence-head">
@@ -19876,11 +20072,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         document.querySelectorAll('#poem-sections button[data-sec]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         state.poemSection = btn.getAttribute('data-sec');
+        try { localStorage.setItem('ce_poem_section', state.poemSection); } catch (_e) {}
         renderMain();
         hideCollapsedSidebar();
       };
     });
     window.__CE_SET_POEM_SECTION__ = function(sec) {
+      try { localStorage.setItem('ce_poem_section', sec === 'paper' ? 'paper' : 'photo'); } catch (_e) {}
       var btn = document.querySelector('#poem-sections button[data-sec="' + sec + '"]');
       if (btn) btn.click();
     };
@@ -20025,7 +20223,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       { id: 'btn-type-zen', type: 'minimal-zen' },
       { id: 'btn-type-noir', type: 'midnight-noir' },
       { id: 'btn-type-dusk', type: 'dusk-ember' },
-      { id: 'btn-type-banaras', type: 'banaras-ghat' }
+      { id: 'btn-type-banaras', type: 'banaras-ghat' },
+      { id: 'btn-type-editorial', type: 'editorial-ink' }
     ];
     typeBtnMap.forEach(item => {
       const btn = document.getElementById(item.id);
@@ -20271,6 +20470,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     window.__CE_SET_LIBRARY__ = setLibraryType;
     window.__CE_SET_POEM_SECTION__ = function(sec) {
       state.poemSection = sec;
+      try { localStorage.setItem('ce_poem_section', state.poemSection); } catch (_e) {}
       document.querySelectorAll('#poem-sections button[data-sec]').forEach(function(b) { b.classList.remove('active'); });
       var btn = document.querySelector('#poem-sections button[data-sec="' + sec + '"]');
       if (btn) btn.classList.add('active');
@@ -20383,7 +20583,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           var view = document.getElementById('view');
           if (view) {
             view.classList.toggle('is-dense');
-            if (window.__CE_STATE__) window.__CE_STATE__.shelfDensity = view.classList.contains('is-dense') ? 'dense' : 'comfy';
+            if (window.__CE_STATE__) {
+              window.__CE_STATE__.shelfDensity = view.classList.contains('is-dense') ? 'dense' : 'comfy';
+              try { localStorage.setItem('ce_shelf_density', window.__CE_STATE__.shelfDensity); } catch (_e) {}
+            }
           }
       } }
     ];
@@ -20462,6 +20665,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (document.querySelector('.ce-palette-overlay.open')) return;
     view.classList.toggle('is-dense');
     window.__CE_STATE__.shelfDensity = view.classList.contains('is-dense') ? 'dense' : 'comfy';
+    try { localStorage.setItem('ce_shelf_density', window.__CE_STATE__.shelfDensity); } catch (_e) {}
   });
   // Owner 2026-09-11: the canvas px readout ("580×435 · 54%") is designer chrome
   // on a creator surface — it was always-on and read as debug furniture. It is
@@ -20526,14 +20730,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var availW = stage.clientWidth - 24;
     var availH = stage.clientHeight - 24;
     if (availW < 40 || availH < 40) return;
-    /* H01-3 (CE-A3, 2026-09-15): the bare 2.4 literal bound the fit on any
-       window taller than ~1122px (at 2560x1440 the natural fit is 3.1310, so the
-       canvas stuck at 1392x1044 = 39.4% of window with 832x342 dead in stage).
-       The ceiling is now expressed in the units the constraint is about — an
-       authored-pixel ceiling: the canvas never exceeds 1600 authored px wide
-       (1600/580 = 2.7586), no matter how tall the window gets. The stage keeps
-       centring it, so any leftover is even headroom, not lopsided dead space. */
-    var z = Math.min(availW / natW, availH / natH, 1600 / natW);
+    /* Owner correction (2026-09-16): a poem opening should feel like an authoring
+       surface, not a full-window poster. The preview may use the stage, but on
+       desktop it is deliberately bounded to 720 CSS px high so long 9:16 poems
+       do not dominate the entire window and short 4:3 poems do not become a
+       wall-sized card. Phone stages stay limited by their own available height.
+       This is display-only: the authored ratio, 580px coordinate space, and
+       full-resolution export are unchanged. */
+    var previewMaxH = Math.min(availH, 720);
+    var z = Math.min(availW / natW, previewMaxH / natH, 1600 / natW);
     /* H01-1 (CE-A1, 2026-09-15): the fitter could shrink below authored scale
        (9:16 fitted at zoom 0.797 — the canvas painted SMALLER than its 580px
        authored width, a preview-only shrink the export renderer never sees).

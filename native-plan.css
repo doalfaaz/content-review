@@ -1332,3 +1332,172 @@ body.bright-theme .ce-launch-board-cadence {
   .ce-grow-hero-rail span { color: var(--accent-text); }
   .ce-grow-hero-rail i { color: var(--faint); font-style: normal; }
 }
+
+/* --------------------------------------------------------------------------
+   CURRENT GROW / LAUNCH FLOOR (D04, 2026-09-16)
+   The previous composition was technically complete but visually wrong: a
+   title hero, repeated Observe/Learn/Apply bands, split Content mix/Momentum
+   panels and a 155px Launch intelligence card. These final rules give the
+   surfaces one decision grammar while retaining every underlying action.
+   -------------------------------------------------------------------------- */
+
+/* Grow: instrument bar → one next move → readiness → merged momentum → audience → more. */
+.ce-grow-shell {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 12px !important;
+  padding: 0 28px 48px !important;
+  max-width: 1440px !important;
+  margin: 0 auto !important;
+}
+.ce-grow-shell > .ce-ops-panel,
+.ce-grow-shell > .ce-readiness-row,
+.ce-grow-shell > .ce-grow-audience-strip,
+.ce-grow-shell > .ce-grow-more-moves { margin-top: 0 !important; }
+.ce-grow-instrument {
+  display: flex; align-items: center; justify-content: space-between; gap: 18px;
+  min-height: 68px; padding: 12px 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--card-border));
+  border-radius: 14px;
+  background: linear-gradient(110deg, color-mix(in srgb, var(--card) 94%, var(--accent) 6%), var(--card));
+}
+.ce-grow-instrument-main { display: flex; align-items: baseline; gap: 16px; min-width: 0; flex-wrap: wrap; }
+.ce-grow-instrument h2 { margin: 0; color: var(--ink); font-size: 22px; font-weight: 780; letter-spacing: -.04em; }
+.ce-grow-instrument-number { display: inline-flex; align-items: baseline; gap: 6px; }
+.ce-grow-instrument-number strong { color: var(--accent-text); font-size: 32px; font-weight: 760; line-height: 1; font-variant-numeric: tabular-nums; }
+.ce-grow-instrument-number span { color: var(--ink); font-size: 12px; font-weight: 720; }
+.ce-grow-instrument-hint { color: var(--muted); font-size: 11px; }
+.ce-grow-instrument-meta { display: flex; align-items: flex-end; flex-direction: column; gap: 3px; color: var(--faint); font-size: 10px; text-align: right; white-space: nowrap; }
+.ce-grow-instrument-meta time { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.ce-grow-next-move {
+  display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: center; gap: 18px;
+  min-height: 148px; padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: 14px; background: var(--card);
+}
+.ce-grow-next-art { width: 104px; aspect-ratio: 4 / 5; overflow: hidden; border: 1px solid var(--card-border); border-radius: 10px; background: var(--bg); }
+.ce-grow-next-art > .ce-real-face,
+.ce-grow-next-art > .ce-queue-raster-shell,
+.ce-grow-next-art > .ce-queue-preview { display: block; width: 100%; height: 100%; }
+.ce-grow-next-art > .ce-real-face > * { width: 100% !important; height: 100% !important; }
+.ce-grow-next-art.is-empty { display: grid; place-items: center; border-style: dashed; }
+.ce-grow-empty-mark { color: var(--accent-text); font-size: 32px; font-weight: 300; }
+.ce-grow-next-copy { min-width: 0; }
+.ce-grow-eyebrow { display: block; margin-bottom: 6px; color: var(--accent-text); font-size: 10px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
+.ce-grow-next-copy h2 { max-width: 720px; margin: 0; color: var(--ink); font-size: clamp(20px, 2.2vw, 30px); font-weight: 760; line-height: 1.08; letter-spacing: -.04em; }
+.ce-grow-next-copy p { max-width: 640px; margin: 8px 0 12px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.ce-grow-next-copy .ce-surface-button { min-height: 40px; }
+
+.ce-grow-readiness { margin: 0 !important; }
+.ce-grow-readiness > div { padding: 12px 16px !important; }
+.ce-grow-readiness strong { font-size: 22px !important; }
+
+.ce-grow-momentum { padding: 16px !important; }
+.ce-grow-momentum .ce-section-heading { margin-bottom: 12px; }
+.ce-grow-momentum-grid { display: grid; grid-template-columns: minmax(220px, .72fr) minmax(0, 1.28fr); gap: 16px; align-items: stretch; }
+.ce-grow-mix { min-width: 0; padding-right: 16px; border-right: 1px solid var(--card-border); }
+.ce-grow-mix .ce-mix-bar { margin-top: 12px; }
+.ce-grow-mix .ce-mix-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin-top: 8px; }
+.ce-grow-mix .ce-mix-legend button { padding: 6px 2px; }
+.ce-grow-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-width: 0; }
+.ce-grow-charts .ce-chart-card { min-width: 0; padding: 12px; }
+.ce-grow-charts .ce-chart-head { gap: 6px; }
+.ce-grow-charts .ce-chart-head span { white-space: nowrap; }
+.ce-grow-charts .ce-chart-bars { gap: 3px; }
+.ce-grow-charts .ce-chart-day { font-size: 8px; }
+
+.ce-grow-audience-strip { min-height: 56px; max-height: none; padding: 0; border: 1px solid var(--card-border); border-radius: 14px; overflow: visible; background: var(--card); }
+.ce-grow-audience-strip .ce-launch-pulse { min-height: 54px; border: 0; border-radius: 0; box-shadow: none; }
+.ce-grow-audience-copy { display: flex; align-items: center; gap: 14px; min-height: 56px; padding: 8px 16px; }
+.ce-grow-audience-copy .ce-grow-eyebrow { margin: 0; }
+.ce-grow-audience-copy .ce-aud-state { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.ce-grow-audience-strip .ce-aud-state { min-height: 0; margin: 0; padding: 0; }
+.ce-grow-audience-copy .ce-aud-state em { color: var(--muted); font-size: 11px; font-style: normal; }
+.ce-grow-audience-copy .ce-surface-button { min-height: 36px; white-space: nowrap; }
+
+.ce-grow-more-moves { border: 1px solid var(--card-border); border-radius: 14px; background: var(--card); }
+.ce-grow-more-moves > summary { display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding: 0 16px; color: var(--ink); cursor: pointer; font-size: 12px; font-weight: 750; list-style: none; }
+.ce-grow-more-moves > summary::-webkit-details-marker { display: none; }
+.ce-grow-more-moves > summary span { color: var(--faint); font-size: 10px; font-weight: 500; }
+.ce-grow-more-moves[open] > summary { border-bottom: 1px solid var(--card-border); }
+.ce-grow-more-moves .ce-loop-steps { margin: 0; padding: 0 16px 10px; }
+
+/* Launch: one today row, one snap rail, one thin intelligence strip, one disclosure. */
+.ce-launch-workbench { gap: 12px !important; padding: 0 28px 48px !important; max-width: 1440px !important; }
+.ce-launch-board-head { display: flex !important; align-items: center; justify-content: space-between; gap: 14px; padding: 8px 14px !important; border-radius: 14px !important; }
+.ce-launch-board-cand--slim { min-width: 0; flex: 1 1 auto; gap: 12px; padding: 0 !important; }
+.ce-launch-board-cand--slim .ce-launch-board-open { flex: 1 1 auto; min-width: 0; }
+.ce-launch-board-cand--empty { display: flex; align-items: center; gap: 12px; padding: 0 !important; }
+.ce-launch-board-cand--empty strong { color: var(--muted); font-size: 12px; }
+.ce-launch-board-cadence { flex: 0 0 auto; margin: 0 !important; }
+.ce-launch-board-cadence button { min-height: 36px; padding: 4px 9px; }
+.ce-launch-board-cadence button.is-disabled { cursor: not-allowed; opacity: .45; }
+.ce-launch-board-strip { gap: 10px; padding: 2px 2px 8px; }
+.ce-launch-day { flex-basis: 188px; grid-template-rows: auto 1fr auto; gap: 6px; padding: 8px; }
+.ce-launch-day-art { aspect-ratio: 4 / 5; }
+.ce-launch-day-meta { min-height: 15px; }
+.ce-launch-day-sr-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ce-launch-day-title { display: none !important; }
+.ce-launch-day-actions { align-items: center; }
+.ce-launch-day-actions button { min-height: 34px; }
+.ce-launch-day-more { opacity: .35; transition: opacity .14s ease; }
+.ce-launch-day:hover .ce-launch-day-more, .ce-launch-day-more:focus-within { opacity: 1; }
+.ce-launch-day-more summary { width: 48px; height: 34px; font-size: 10px; letter-spacing: 0; }
+.ce-launch-intelligence { padding: 2px 12px 2px !important; border-radius: 14px !important; }
+.ce-launch-intelligence-head { align-items: center; padding-bottom: 3px; }
+.ce-launch-intelligence-head strong { font-size: 13px; }
+.ce-launch-insight { padding: 5px 12px 4px; }
+.ce-launch-insight strong { font-size: 19px; }
+.ce-launch-insight span { margin-top: 3px; font-size: 9px; }
+.ce-launch-rhythm { margin-top: 1px; height: 6px; }
+.ce-launch-board-waitlist { max-width: 100%; padding: 0 !important; }
+.ce-launch-board-waitlist[open] { max-height: 170px; overflow: auto; padding: 10px 12px !important; }
+.ce-launch-empty-card { display: grid; align-content: center; justify-items: start; gap: 8px; min-height: 210px; width: min(100%, 360px); padding: 20px; border: 1px dashed var(--accent-border); border-radius: 14px; background: color-mix(in srgb, var(--card) 92%, var(--accent) 8%); }
+.ce-launch-empty-card strong { max-width: 260px; color: var(--ink); font-size: 18px; line-height: 1.2; }
+.ce-launch-empty-card small { max-width: 300px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+
+@media (max-width: 760px) {
+  .ce-grow-shell, .ce-launch-workbench { gap: 10px !important; padding: 0 14px 48px !important; }
+  .ce-grow-instrument { align-items: flex-start; flex-direction: column; gap: 8px; min-height: 62px; padding: 12px 14px; }
+  .ce-grow-instrument-main { gap: 10px; }
+  .ce-grow-instrument h2 { font-size: 20px; }
+  .ce-grow-instrument-number strong { font-size: 28px; }
+  .ce-grow-instrument-meta { align-items: flex-start; flex-direction: row; gap: 10px; text-align: left; }
+  .ce-grow-next-move { grid-template-columns: 92px minmax(0, 1fr); gap: 12px; min-height: 118px; padding: 10px; }
+  .ce-grow-next-art { width: 92px; }
+  .ce-grow-next-copy h2 { font-size: 20px; }
+  .ce-grow-next-copy p { margin: 6px 0 8px; font-size: 10px; }
+  .ce-grow-next-copy .ce-surface-button { min-height: 40px; }
+  .ce-grow-readiness > div { padding: 12px 14px !important; }
+  .ce-grow-momentum { padding: 14px !important; }
+  .ce-grow-momentum-grid { grid-template-columns: 1fr; gap: 12px; }
+  .ce-grow-mix { padding: 0 0 10px; border-right: 0; border-bottom: 1px solid var(--card-border); }
+  .ce-grow-charts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ce-grow-charts .ce-chart-card { padding: 9px; }
+  .ce-grow-charts .ce-chart-head { display: block; }
+  .ce-grow-charts .ce-chart-head span { display: block; margin-top: 4px; }
+  .ce-grow-audience-strip { max-height: none; }
+  .ce-grow-audience-copy { align-items: flex-start; flex-direction: column; gap: 8px; padding: 10px 14px; }
+  .ce-grow-audience-copy .ce-aud-state { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .ce-grow-more-moves > summary { min-height: 44px; padding-inline: 14px; }
+  .ce-launch-board-head { align-items: stretch; flex-direction: column; gap: 8px; padding: 10px !important; }
+  .ce-launch-board-cand--slim { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+  .ce-launch-board-cand--slim .ce-launch-board-open { max-height: 44px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .ce-launch-board-cand--empty { flex-wrap: wrap; }
+  .ce-launch-board-cadence { width: 100%; justify-content: space-between; }
+  .ce-launch-board-cadence button { flex: 1 1 0; min-height: 44px; }
+  .ce-launch-day { flex-basis: 236px; }
+  .ce-launch-day-meta { min-height: 15px; }
+  .ce-launch-day-actions button { min-height: 40px; }
+  .ce-launch-day-more summary { width: 48px; height: 40px; }
+  .ce-launch-intelligence { padding: 10px !important; }
+  .ce-launch-intelligence-head { display: block; }
+  .ce-launch-intelligence-head small { display: block; margin-top: 4px; }
+  .ce-launch-insights { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ce-launch-insight { padding: 8px 6px 6px; border-right: 1px solid var(--card-border); border-bottom: 0 !important; text-align: center; }
+  .ce-launch-insight:first-child { padding-left: 0; }
+  .ce-launch-insight:last-child { padding-right: 0; border-right: 0; }
+  .ce-launch-insight strong { font-size: 17px; }
+  .ce-launch-insight span { font-size: 8px; letter-spacing: 0; }
+  .ce-launch-empty-card { width: 100%; min-height: 170px; }
+}

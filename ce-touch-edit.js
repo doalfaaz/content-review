@@ -306,15 +306,14 @@
     if (window.__CE_SYNC_ENDPOINT__) { cb(window.__CE_SYNC_ENDPOINT__); return; }
     discover();
   }
-  // OWNER LAW / AUDIT FIX (2026-09-11): do NOT probe the sync endpoint at page load.
-  // The endpoint lives on the owner's private tailnet. Probing it from a public
-  // visitor's browser (a) discloses the hostname in every visitor's network log and
-  // (b) produces an unavoidable console error (TLS/network failure from anywhere that
-  // cannot reach the tailnet), which tripped the pack-webkit-oracle gates x3.
-  // Discover LAZILY instead: on the first real pointer/key interaction, which is also
-  // the only time sync can actually be used. Nothing is lost — every sync action
-  // requires an interaction first, and `window.__CE_SYNC_ENDPOINT__` short-circuits the
-  // discovery once resolved (see the guard inside findSyncEndpoint).
+  // OWNER LAW / AUDIT FIX (2026-09-11): public visitors must not probe the
+  // private sync endpoint at page load. A device that already holds the owner's
+  // sync key is different: its cached endpoint is revalidated by the owner-boot
+  // arm below, then one remote pull runs without waiting for a gesture. No key
+  // means no private-network request; the static bundle remains the visitor path.
+  // Discover lazily for public visitors: every sync action still requires an
+  // interaction first, and `window.__CE_SYNC_ENDPOINT__` short-circuits once
+  // resolved (see the guard inside findSyncEndpoint).
   var __ceSyncDiscoveryArmed = false;
   function armSyncDiscovery() {
     if (__ceSyncDiscoveryArmed) return;
@@ -325,6 +324,23 @@
   document.addEventListener('pointerdown', armSyncDiscovery, { once: true, passive: true });
   document.addEventListener('keydown', armSyncDiscovery, { once: true, passive: true });
   // A stale cached endpoint is still revalidated lazily, on the same trigger.
+  // Owner sync is different from public-visitor discovery: when this device
+  // already holds the write key and an endpoint cache, pull once on boot so
+  // Mac-authored edits are visible without requiring a sacrificial tap.
+  function armOwnerSyncOnBoot() {
+    if (!getWriteKey()) return;
+    findSyncEndpoint(function (base) {
+      if (!base) return;
+      window.__CE_SYNC_ENDPOINT__ = base;
+      pullOwnerSyncOnce();
+    });
+  }
+  function pullOwnerSyncOnce() {
+    if (window.__CE_SYNC_BOOT_PULL_STARTED__) return;
+    window.__CE_SYNC_BOOT_PULL_STARTED__ = true;
+    if (typeof pullRemoteEdits === 'function') pullRemoteEdits();
+  }
+  setTimeout(armOwnerSyncOnBoot, 350);
 
   /* ---- Write key (P0-2) ---------------------------------------------------
      Writes on the sync server require the shared write key (X-CE-Sync-Key
@@ -481,7 +497,7 @@
   }
   // test/probe hook (final refinement): deterministic pull for E2E checks
   window.__CE_PULL_REMOTE_EDITS__ = pullRemoteEdits;
-  setTimeout(pullRemoteEdits, 1200);
+  setTimeout(pullOwnerSyncOnce, 1200);
   setInterval(pullRemoteEdits, 60000);
 
 
