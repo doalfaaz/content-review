@@ -2050,7 +2050,7 @@
       <ol style="margin:0; padding-left:18px; font-size:11.5px; color:var(--muted); line-height:1.55;">
         <li>Meta Business Suite → Settings → Users → <strong>System users</strong> → Add.</li>
         <li>Assign your Facebook Page + Instagram account (@doalfaaz).</li>
-        <li>Generate token with: pages_manage_posts, pages_read_engagement, instagram_basic, instagram_content_publish. For live Grow/Launch insights also add: read_insights, instagram_manage_insights, pages_read_user_content.</li>
+        <li>Generate token with: pages_manage_posts, pages_read_engagement, instagram_basic, instagram_content_publish. For live Grow/Launch insights also add: read_insights, instagram_manage_insights, pages_read_user_content. If Publishing handoff still looks disconnected, close and reopen the gear — CE re-probes the token on disk.</li>
         <li>Paste it here → Save &amp; test. The token stays on this Mac (0600 file); only yes/no ever comes back to the app UI.</li>
       </ol>
     </div>
@@ -2312,7 +2312,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=e20d9bd607"></script>
+<script src="./deck_index.js?v=fe83e7a554"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=c53ee89878" />
@@ -5740,7 +5740,20 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (!modal) return;
     modal.hidden = false;
     ceSetModalBackground(true);
-    if (status) status.textContent = 'Manual handoff is active · no automatic publishing';
+    // Do NOT force Manual handoff here — that lied whenever ce_meta_token
+    // already existed. Respect boot hydrate, then re-ask native + probe.
+    if (status) {
+      status.textContent = window.__CE_META_HAS_TOKEN__
+        ? 'Meta connected · Graph scheduling active'
+        : 'Checking Meta connection…';
+    }
+    var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
+    if (br) {
+      try { br.postMessage({ action: 'getMetaToken' }); } catch (_e) {}
+      try { br.postMessage({ action: 'probeMeta' }); } catch (_e2) {}
+    } else if (status && !window.__CE_META_HAS_TOKEN__) {
+      status.textContent = 'Manual handoff is active · no automatic publishing';
+    }
     // E-004 fix 2026-09-05: the sheet was keyboard-inert — focus never entered it
     // and Escape did nothing. Move focus to Close and allow Esc/Enter dismissal.
     var closeBtn = document.getElementById('ce-settings-close');
@@ -16108,10 +16121,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           // 2026-08-26: the Write design rail used to cap at a fixed 6 faces while the
           // full authored template library sat unwired — now every PostCore template
           // is offered here, same source of truth as Post Studio.
+          // An empty draft is a valid starting state, but blank Paper thumbnails
+          // make the chooser look broken. Use a disposable sample only inside
+          // the rail; the editor value and the large Preview remain untouched.
+          var writeRailText = txt || (state.writeType === 'poem'
+            ? 'एक ठहरा हुआ सच\nजो दिल में रह गया।'
+            : 'A thought worth keeping\nwritten in your own words.');
           writeDesignRail.innerHTML = Array.from({ length: postTemplateCount() || 6 }, function (_, idx) {
             var face = state.writeType === 'poem'
-              ? (idx % 2 === 0 ? renderPhotoPoemHtml({ id: 'live_1', text: txt, theme: 'Custom' }, idx % PHOTO_PRESETS.length) : renderPaperPoemHtml({ id: 'live_1', text: txt, theme: 'Custom' }, idx % PAPER_PRESETS.length))
-              : renderPostCoreFallbackHtml(writeDraftItem(txt), idx % (postTemplateCount() || 6), '');
+              ? (idx % 2 === 0 ? renderPhotoPoemHtml({ id: 'live_1', text: writeRailText, theme: 'Custom' }, idx % PHOTO_PRESETS.length) : renderPaperPoemHtml({ id: 'live_1', text: writeRailText, theme: 'Custom' }, idx % PAPER_PRESETS.length))
+              : renderPostCoreFallbackHtml(writeDraftItem(writeRailText), idx % (postTemplateCount() || 6), '');
             return `<button type="button" data-ce-write-design="${idx}" class="${idx === state.writeDesignIdx ? 'is-active' : ''}" aria-label="Try design ${idx + 1}">${face}</button>`;
           }).join('');
           writeDesignRail.querySelectorAll('[data-ce-write-design]').forEach(function (button) {
