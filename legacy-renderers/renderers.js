@@ -22,6 +22,39 @@
 
    module.exports = { render(kind, d) -> HTML string, css: '<all block CSS as one string>' }
    Class prefix .ib-*  (infographic block) so it never collides with core's .bk-*.               */
+
+/* Single source of truth for the current honest offer (Aham Brahmasmi 2.0).
+   Every offer-context literal below must read OFFER.x — DEADLINE:'none' means no countdown copy, ever. */
+const OFFER = {
+  PRICE: '₹1,999',
+  PRICE_EARLY: '₹999',
+  HOURS: '15+ hr',
+  HOURS_NOTE: '10+ on day one',
+  LESSONS: '50+',
+  ACCESS: 'lifetime',
+  REFUND: '14 days',
+  DEADLINE: 'none',
+  STUDENTS: '1,000+'
+};
+
+/* B1 (2026-09-17): pillar closers, substituted at the paint boundary only.
+   ~954 decks store the identical stale bio card as their last face
+   ('650+ lives transformed · Link in bio' — dead end, banned register).
+   slideHTML swaps that last-face profile html for a pillar-family closer at
+   paint time; stored rows are never touched, so shelf, Studio, export and
+   thumbnails all recover through the one seam. Brand law: a sher never
+   carries commerce — poetry closes on the handle alone. An unresolved
+   pillar falls back to the teaching closer, never commerce. */
+const CLOSERS = {
+  funnel:   'Comment "Interested" - the link comes to your DM.',
+  teaching: 'Save this. It reads different the second time.',
+  pain:     'If this named you - comment "Interested". The course is the way through.',
+  proof:    'Comment "Interested".',
+  poetry:   '@doalfaaz'
+};
+// Safe default: an unknown or unmatched pillar paints the teaching closer.
+CLOSERS.default = CLOSERS.teaching;
+
 (function (root) {
 
   // ---------- tiny defensive helpers ----------
@@ -862,6 +895,156 @@
     return elements.map((element, index) => `<div class="ce-extra-element ce-render-block" data-ce-block="element" data-ce-element-index="${index}" style="${layoutStyle(s, 'element', index)}">${renderStudioElement(element)}</div>`).join('');
   }
 
+  // ---- B1 pillar closers: resolve the deck's pillar family at the paint seam ----
+  // slideHTML's contract (s, i, n, lookId) carries no deck/pillar argument and
+  // stored slides carry no ids. Resolution order, strongest signal first:
+  //   1. a pillar field the slide itself carries (future schema)
+  //   2. the hydrated deck this face belongs to — identified by the
+  //      fingerprints of faces painted earlier in the same run (first-face
+  //      role+html is unique per stored deck: 960/960 verified), its id read
+  //      against the deck index / content rows for the real pillar label
+  //   3. the content-id prefix fold (coarse — the id alone rarely names a
+  //      pillar, so it only fires on explicit signal words)
+  //   4. the authored look inverted through PILLAR_LOOKS, only when every
+  //      pillar list containing it folds to ONE family
+  //   5. default = teaching closer — never commerce on an unknown pillar.
+  const CLOSER_TRAIL = { key: '', ids: null, sawNonLast: false };
+  function closerGlobal() { return typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : {}); }
+  function closerDecks() {
+    const r = closerGlobal(), out = [];
+    const full = r.__CE_DECKS_FULL__;
+    if (full && typeof full === 'object') for (const k in full) { const d = full[k]; if (d && Array.isArray(d.slides)) out.push(d); }
+    if (Array.isArray(r.__NATIVE_DECKS__)) r.__NATIVE_DECKS__.forEach(d => { if (d && Array.isArray(d.slides)) out.push(d); });
+    return out;
+  }
+  function closerFP(s) {
+    if (!s || typeof s !== 'object') return '';
+    const html = s.html != null ? s.html : (s.text != null ? s.text : (s.hook != null ? s.hook : (s.title || '')));
+    return String(s.role || s.kind || '') + '|' + String(html).replace(/\s+/g, ' ').trim();
+  }
+  // Record one painted face. Candidates = hydrated decks whose i-th slide has
+  // the same fingerprint, same length and same look (look check relaxed only
+  // when it would zero the set — Studio look previews repaint in other looks).
+  function closerObserve(s, i, n, lookId) {
+    if (!(n > 1) || i < 0 || i >= n) return;
+    const key = String(lookId || '') + '|' + n;
+    if (i === 0 || CLOSER_TRAIL.key !== key) {
+      CLOSER_TRAIL.key = key;
+      CLOSER_TRAIL.ids = null;
+      CLOSER_TRAIL.sawNonLast = false;
+    }
+    const fp = closerFP(s), withLook = [], anyLook = [];
+    closerDecks().forEach(d => {
+      if (d.slides.length !== n || i >= d.slides.length || closerFP(d.slides[i]) !== fp) return;
+      const id = String(d.id || d.deck_id || d.content_id || '');
+      const bucket = String(d.look || '') === String(lookId || '') ? withLook : anyLook;
+      if (bucket.indexOf(id) < 0) bucket.push(id);
+    });
+    const ids = withLook.length ? withLook : anyLook;
+    CLOSER_TRAIL.ids = (CLOSER_TRAIL.ids === null) ? ids : CLOSER_TRAIL.ids.filter(x => ids.indexOf(x) >= 0);
+    if (i < n - 1) CLOSER_TRAIL.sawNonLast = true;
+  }
+  // Fold the messy stored pillar vocabulary (~120 labels) to a closer family.
+  // Order matters: poetry first (a sher never carries commerce), then commerce
+  // intent, then proof, then recognition, then teaching.
+  function closerFold(pillar) {
+    const p = String(pillar || '').toLowerCase();
+    if (!p) return '';
+    if (/poetr|poem|sher|shayari|ghazal|apple notes/.test(p)) return 'poetry';
+    if (/sales|marketing|launch|promo|offer|waitlist|enroll|conversion|\bcta\b|ad angle|lead magnet|email|broadcast|\bdm\b|faq|objection|doubt|engagement|interaction|warmup|poll|desire/.test(p)) return 'funnel';
+    if (/proof|trust|case|evidence|testimonial|bridge|positioning|students|receipt|result|ledger|transformation|benefit|social proof|contrast|comparison/.test(p)) return 'proof';
+    if (/pain|problem|recognition|mirror|truth|reframe|stor|narrative|founder|personal|comeback|journey|connection|hot ?take|myth|shadow|warning|wake|observation|insight|spiritual bypassing|relatable|aware|engage/.test(p)) return 'pain';
+    if (/teach|practice|solution|educat|framework|decode|lesson|learn|mental|strateg|habit|deep|philosoph|scripture|spiritual|explain|liner|highlight|reel|carousel|content|longform|youtube|calendar|script|post|identity/.test(p)) return 'teaching';
+    return '';
+  }
+  // Coarse content-id fold — only explicit family words, never guesses.
+  function closerIdFold(id) {
+    const i = String(id || '').toLowerCase();
+    if (!i) return '';
+    if (/^poem[:_.-]/.test(i)) return 'poetry';
+    if (/sales|marketing|launch|promo|funnel|waitlist|\bobj\b|\bdm\b/.test(i)) return 'funnel';
+    if (/proof|case|receipt|result|ledger/.test(i)) return 'proof';
+    if (/pain|problem|recognition|mirror/.test(i)) return 'pain';
+    if (/teach|stor|hottake|oneliner|truth|deep|explain|decode|practice|learn/.test(i)) return 'teaching';
+    return '';
+  }
+  // The authored look as a last-resort pillar proxy: invert PILLAR_LOOKS and
+  // accept only when every pillar list containing this look folds to ONE
+  // family. Multi-family looks ('grid', 'midnight', 'loud') resolve nothing.
+  function closerLookFold(lookId) {
+    const fams = {};
+    Object.keys(PILLAR_LOOKS).forEach(p => {
+      if (PILLAR_LOOKS[p].indexOf(lookId) >= 0) { const f = closerFold(p); if (f) fams[f] = true; }
+    });
+    const keys = Object.keys(fams);
+    return keys.length === 1 ? keys[0] : '';
+  }
+  // Deck id → real pillar label, via the injected indexes / content pools.
+  function closerDeckMeta(deckId) {
+    const r = closerGlobal();
+    const pools = [r.__NATIVE_DECK_INDEX__, r.__STATIC_DECK_INDEX__, r.__NATIVE_POSTS__, r.__NATIVE_POEMS__];
+    for (const pool of pools) {
+      if (!Array.isArray(pool)) continue;
+      for (const x of pool) {
+        if (x && String(x.id || x.content_id || '') === String(deckId)) return { pillar: x.pillar || x.theme || '', kind: x.kind || '' };
+      }
+    }
+    const decks = closerDecks();
+    for (const d of decks) {
+      if (String(d.id || d.deck_id || d.content_id || '') === String(deckId) && (d.pillar || d.kind)) return { pillar: d.pillar || '', kind: d.kind || '' };
+    }
+    return null;
+  }
+  // Offer-flavored decks get the OFFER line under the funnel ask — price,
+  // sales, launch, objection and enrollment pillars only; nurture/engagement
+  // prompts keep the bare ask.
+  function closerOfferish(pillar, deckId) {
+    const b = (String(pillar || '') + ' ' + String(deckId || '')).toLowerCase();
+    return /sales|launch|offer|price|waitlist|enroll|objection|faq|doubt|promo|course|conversion|\bcta\b|ad angle|lead magnet|email|desire/.test(b);
+  }
+  // A stored profile that is NOT the stale bio and already carries its own ask
+  // is an authored closer — leave it on the face.
+  function closerAuthored(html) {
+    const t = String(html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!t || /tushar mehrotra|link in bio|lives transformed/i.test(t)) return false;
+    return /comment|\bdm\b|save|share|follow|sikha|likh|bata|pooch|bolo|kaho|reply|join/i.test(t);
+  }
+  // The substitutable set is the bio card itself, not "any last face": authored
+  // cta slides reach this seam as role 'profile' (normSlide folds cta→profile)
+  // and must never be swapped. A profile only qualifies when its text carries
+  // the bio fingerprint — handle plus a bio marker (name, credential, claim,
+  // or the dead-end link).
+  function closerIsBio(html) {
+    const t = String(html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    return /@doalfaaz/i.test(t) && /tushar mehrotra|lives transformed|link in bio|\bnit\b|deloitte|students|lives/i.test(t);
+  }
+  // Proof closers may keep a real metric the stored profile carries — never
+  // the bio boilerplate itself (stripped before the metric scan).
+  function closerMetric(html) {
+    const t = String(html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const stripped = t.replace(/tushar mehrotra|@doalfaaz|\bnit\b|ex[- ]?deloitte|[\d,+]+\s*lives transformed|link in bio/gi, ' ');
+    const m = stripped.match(/₹\s*[\d,]+|[\d,]+\+?\s*(?:students|lives|hours|hrs|days|%|clients|lessons|cases|results|kg)/i);
+    return m ? m[0].trim() : '';
+  }
+  function closerResolve(s, lookId) {
+    let family = closerFold(s.pillar);
+    let deckId = String(s.cid || s.content_id || s.deckId || (typeof s.deck === 'string' ? s.deck : '') || '');
+    // A trail match is trusted only when this session observed a non-last face
+    // of the same deck — a lone last face can never self-identify (the stored
+    // bio is byte-identical across decks), so without one it falls through to
+    // the look fold / default rather than risking a stale-trail wrong family.
+    if (!deckId && CLOSER_TRAIL.ids && CLOSER_TRAIL.ids.length === 1 && CLOSER_TRAIL.sawNonLast) deckId = CLOSER_TRAIL.ids[0];
+    let pillar = String(s.pillar || ''), kind = '';
+    if (deckId && !family) {
+      const meta = closerDeckMeta(deckId);
+      if (meta) { pillar = meta.pillar || pillar; kind = meta.kind || ''; }
+      family = closerFold(pillar) || (kind === 'poem' ? 'poetry' : '') || closerIdFold(deckId);
+    }
+    if (!family) family = closerLookFold(lookId);
+    if (!family) family = 'teaching';
+    return { family: family, offerish: closerOfferish(pillar, deckId) };
+  }
+
   // Build one slide's HTML (the .slide element). look = look id (for graphic + arrow).
   /* Back-compat slide schema (owner 2026-09-10, found by reaudit).
      Three stored decks (post:arsenal_0933, post:clbal:12:4, post:clseed:9:27) carry the
@@ -887,6 +1070,19 @@
 
   function slideHTML(s, i, n, lookId) {
     s = normalizeSlideSchema(s);
+    // B1 (2026-09-17): a last face stored as the stale bio card paints the
+    // deck's pillar closer instead — the painted copy swaps, the stored row
+    // never does. .profile styling, brand and footer are untouched; only the
+    // content html changes. Authored closers (an ask of their own, not the
+    // bio boilerplate) stay on the face.
+    closerObserve(s, i, n, lookId);
+    if (s && i === n - 1 && s.role === 'profile' && closerIsBio(s.html) && !closerAuthored(s.html)) {
+      const cl = closerResolve(s, lookId);
+      let closerHtml = CLOSERS[cl.family] || CLOSERS.default;
+      if (cl.family === 'funnel' && cl.offerish) closerHtml += '<br>' + OFFER.PRICE + ' · ' + OFFER.ACCESS + ' · ' + OFFER.REFUND;
+      if (cl.family === 'proof') { const metric = closerMetric(s.html); if (metric) closerHtml += '<br>' + metric; }
+      s = Object.assign({}, s, { html: closerHtml });
+    }
     const L = LOOKS[lookId] || {};
     // A5: machinery stamps (CONFIRMED / CASE NOTE / cryptic codes) only on slide 1 + one interior.
     const stampHeavy = L.graphic && /CONFIRMED|CASE NOTE|NOTE\s*\d+|A\d+\s*·\s*B\d+|YOU ARE HERE/i.test(L.graphic);
@@ -4878,7 +5074,7 @@ niwala: { name: 'Pehla Niwala', chip: '#c9973f', bg: '#243b28', arrow: '#c9973f'
       html: card.cta ? emph(card.cta) : ( (window.__dzCtaOverlay && window.__dzCtaOverlay[card.id]) ? emph(window.__dzCtaOverlay[card.id]) : 'Agar yeh laga —<br><b>save kar lo. Tumhe yaad rahega.</b>' ),
       kicker: 'save · @doalfaaz' });
     if (opts.profile !== false) slides.push({ role: 'profile',
-      html: '<b>Tushar Mehrotra</b> · @doalfaaz<br>NIT · ex-Deloitte · 650+ lives transformed<br><b>Link in bio.</b>' });
+      html: 'Tushar Mehrotra · @doalfaaz<br><b>Link in bio.</b>' });
     return { look: lookId, title: card.title, cardId: card.id, slides };
   }
 
@@ -7297,14 +7493,14 @@ window.__DOALFAAZ_V357_TYPESET__ = { version: 'v357-ptype', law: 'break_where_th
   </div>
   <div class="card">
     <div class="pricerow">
-      <div class="price">${esc(v.offer_price_now || '&#8377;999')}</div>
-      <div class="tier"><span>${esc(v.offer_deadline || 'Ye price <b>Sunday raat tak</b> hai.')}</span><br>
-      <span>${esc(v.offer_price_later || 'Uske baad page band nahi hoga &mdash; price &#8377;1,999 ho jaayegi.')}</span></div>
+      <div class="price">${esc(v.offer_price_now || OFFER.PRICE_EARLY)}</div>
+      <div class="tier"><span>${esc(v.offer_deadline || 'Ye price <b>early-bird</b> hai &mdash; ' + OFFER.ACCESS + ' access, koi deadline nahi.')}</span><br>
+      <span>${esc(v.offer_price_later || 'Early-bird ke baad page band nahi hoga &mdash; price ' + OFFER.PRICE + ' ho jaayegi.')}</span></div>
     </div>
     <div class="incl">${(Array.isArray(v.offer_inclusions) && v.offer_inclusions.length ? v.offer_inclusions
-        : ['Recorded lectures', 'Per-lecture notes', 'Lifetime access', 'Community'])
+        : ['Recorded lectures', 'Per-lecture notes', OFFER.ACCESS + ' access', 'Community'])
         .map(it => `<div class="it">${esc(typeof it === 'string' ? it : (it && it.what) || '')}</div>`)
-        .join('')}<div class="it guarantee">${esc(v.offer_guarantee || '100% refund guarantee')}</div></div>
+        .join('')}<div class="it guarantee">${esc(v.offer_guarantee || '100% refund guarantee &mdash; ' + OFFER.REFUND)}</div></div>
   </div>
   <div class="cta">
     <div class="main">${esc(v.offer_cta || 'Page <span class="ul">link bio mein</span> hai. Aaram se padh lijiye.')}</div>
@@ -7316,27 +7512,27 @@ window.__DOALFAAZ_V357_TYPESET__ = { version: 'v357-ptype', law: 'break_where_th
   </div>` };
   TPL["offer-calendar-truth"] = { cls: "pc-offercal", fn: v => `
   <div class="wm">@DOALFAAZ</div>
-  <div class="eyebrow"><div class="rule"></div><div class="txt">${esc(v.dl_eyebrow || 'Ek hi deadline hai')}</div></div>
+  <div class="eyebrow"><div class="rule"></div><div class="txt">${esc(v.dl_eyebrow || 'Koi deadline nahi')}</div></div>
   <div class="head">
-    <div class="h1">${esc(v.dl_headline || 'Enrollment <b>Sunday raat</b> band ho jaayega.')}</div>
+    <div class="h1">${esc(v.dl_headline || 'Enrollment <b>open</b> &mdash; ' + OFFER.PRICE + ' &middot; ' + OFFER.ACCESS + ' access &middot; no deadline')}</div>
   </div>
   <div class="cal">${(Array.isArray(v.dl_week) && v.dl_week.length ? v.dl_week
       : [{ dow: 'THU', dt: '09', state: 'past' },
          { dow: 'FRI', dt: '10', state: 'today', tag: (v.dl_today || 'AAJ') },
          { dow: 'SAT', dt: '11' },
-         { dow: 'SUN', dt: (v.dl_date || '12'), state: 'last', tag: 'RAAT TAK' }])
+         { dow: 'SUN', dt: (v.dl_date || '12') }])
       .map(d => (typeof d === 'string' ? { dow: d.split(/\s+/)[0] || '', dt: d.split(/\s+/)[1] || '' } : (d || {})))
       .map(d => `<div class="day${d.state ? ' ' + esc(d.state) : ''}"><div class="dow">${esc(d.dow || '')}</div><div class="dt">${esc(d.dt || '')}</div>${d.tag ? `<div class="tag">${esc(d.tag)}</div>` : ''}</div>`)
       .join('')}</div>
   <div class="reason">
-    <div class="rt">${esc(v.dl_reason || 'Reason simple hai: main is launch ko khinchna nahi chahta. <b>Iske baad mujhe onboarding aur course delivery par dhyaan dena hai.</b>')}</div>
+    <div class="rt">${esc(v.dl_reason || 'Reason simple hai: early-bird sirf shuruaati batch ke liye. <b>Uske baad ' + OFFER.PRICE + ' &mdash; koi deadline nahi.</b>')}</div>
   </div>
   <div class="fact">
-    <div class="price">${esc(v.dl_price || 'Is tier par price <b>&#8377;999</b> &mdash; uske baad &#8377;1,999.')}</div>
+    <div class="price">${esc(v.dl_price || 'Is tier par price <b>' + OFFER.PRICE_EARLY + '</b> &mdash; uske baad ' + OFFER.PRICE + '.')}</div>
     <div class="calm">${esc(v.dl_cta || 'Faisla shaant dimaag se lena.')}</div>
   </div>
   <div class="foot">
-    <span>${esc(v.dl_counter || 'Launch &middot; Deadline')}</span>
+    <span>${esc(v.dl_counter || 'Launch &middot; Cart open')}</span>
     <span>${esc(v.foot_brand || 'Aham Brahmasmi 2.0')}</span>
   </div>` };
   TPL["pattika-offer"] = { cls: "pc-pattika", fn: v => `
@@ -7347,11 +7543,11 @@ window.__DOALFAAZ_V357_TYPESET__ = { version: 'v357-ptype', law: 'break_where_th
     <div class="hr"></div>
     <div class="title">${esc(v.title || 'अहम् ब्रह्मास्मि')}</div>
     <div class="subtitle">${esc(v.subtitle || 'Aham Brahmasmi &mdash; 2.0')}</div>
-    <div class="medium">${esc(v.medium || 'Vedanta &amp; modern psychology &middot; 50 recorded lessons &middot; 10&ndash;15 hrs<br>lifetime access &middot; notes with every lecture &middot; 650+ students so far')}</div>
+    <div class="medium">${esc(v.medium || 'Vedanta &amp; modern psychology &middot; ' + OFFER.LESSONS + ' recorded lessons &middot; ' + OFFER.HOURS + '<br>' + OFFER.ACCESS + ' access &middot; notes with every lecture &middot; ' + OFFER.STUDENTS + ' students')}</div>
     <div class="desc">${esc(v.epigraph || '&ldquo;Psychology gives you the map.<br>Vedanta gives you the one who reads the map.&rdquo;')}</div>
     <div class="prow">
-      <div class="edition">${esc(v.terms || 'Self-paced &mdash; begins the day you do.<br>100% refund guarantee, no questions.')}</div>
-      <div class="price">${esc(v.price || '₹999')}<span class="dot"></span></div>
+      <div class="edition">${esc(v.terms || 'Self-paced &mdash; begins the day you do.<br>100% refund guarantee &mdash; ' + OFFER.REFUND + ', no questions.')}</div>
+      <div class="price">${esc(v.price || OFFER.PRICE)}<span class="dot"></span></div>
     </div>
   </div>
   <div class="wallnote">${esc(v.wallnote || 'DOALFAAZ.COM&nbsp;&nbsp;&mdash;&nbsp;&nbsp;LINK IN BIO')}</div>` };

@@ -372,7 +372,14 @@
     var meta = document.getElementById('meta');
     if (meta) {
       var suffix = context.query || filter !== 'all' || language !== 'english' || structuredOnly ? ' · filtered' : '';
-      meta.textContent = all.length + ' ideas across spiritual & psychological topics' + suffix;
+      /* Corpus-count truth (2026-09-17): the honest number is the browsable
+         corpus — the deduped list this surface renders (dedup strips
+         title-placeholder junk rows, not real ideas). The summary line below
+         still carries the shown count. */
+      var corpusIdeas = all.length || ((typeof window.ceCorpusCounts === 'function')
+        ? window.ceCorpusCounts().ideas
+        : (Array.isArray(window.__HTML_IDEAS__) && window.__HTML_IDEAS__.length ? window.__HTML_IDEAS__.length : 0));
+      meta.textContent = corpusIdeas + ' ideas across spiritual & psychological topics' + suffix;
     }
     view.className = 'view ce-ideas-parity';
     view.innerHTML = controlsHtml() +

@@ -1,6 +1,6 @@
 {
-  "updated": "2026-08-30 21:06 IST",
-  "source": "Tushar paste 2026-08-30",
+  "updated": "2026-09-17",
+  "source": "Tushar paste 2026-08-30; funnel-20260917: added funnel group (one-ask meta) + pillar hashtag sets",
   "groups": [
     {
       "id": "truth_simple",
@@ -102,6 +102,27 @@
         "बताओ अब इससे ख़ूबसूरत क्या होगा!?",
         "ज़रा सोचना एक बार, फिर बताना?"
       ]
+    },
+    {
+      "id": "funnel",
+      "label": "Funnel / Interested",
+      "fit": "evergreen Aham Brahmasmi 2.0 offer — calm, no emoji, no urgency devices; meta[i].ask pairs with captions[i] (one-ask rule: never two asks, funnel never zero)",
+      "captions": [
+        "The course is called Aham Brahmasmi 2.0. Comment \"Interested\" — the details come to your DM. ₹1,999, no deadline, whenever you're ready.",
+        "Fifteen hours. Fifty lessons. The book. Comment \"Interested\" and it reaches you first.",
+        "This one is not for everyone. If it named you — comment \"Interested\".",
+        "The kind of post you come back to. Save this. It reads different the second time.",
+        "Receipts over promises. Comment \"Interested\" and the details come to your DM.",
+        "If this named you — comment \"Interested\". The course is the way through."
+      ],
+      "meta": [
+        { "ask": "interested" },
+        { "ask": "interested" },
+        { "ask": "interested" },
+        { "ask": "save" },
+        { "ask": "interested" },
+        { "ask": "interested" }
+      ]
     }
   ],
   "all": [
@@ -149,6 +170,84 @@
     "अगर समझ सको तो बताना? 🍂🌼",
     "थोड़ी गहरी बात है, जो अगर समझ सको तो बताना! 🔥🥀",
     "बताओ अब इससे ख़ूबसूरत क्या होगा!?",
-    "ज़रा सोचना एक बार, फिर बताना?"
-  ]
+    "ज़रा सोचना एक बार, फिर बताना?",
+    "The course is called Aham Brahmasmi 2.0. Comment \"Interested\" — the details come to your DM. ₹1,999, no deadline, whenever you're ready.",
+    "Fifteen hours. Fifty lessons. The book. Comment \"Interested\" and it reaches you first.",
+    "This one is not for everyone. If it named you — comment \"Interested\".",
+    "The kind of post you come back to. Save this. It reads different the second time.",
+    "Receipts over promises. Comment \"Interested\" and the details come to your DM.",
+    "If this named you — comment \"Interested\". The course is the way through."
+  ],
+  "hashtags": {
+    "funnel": [
+      "#AhamBrahmasmi",
+      "#InnerWork",
+      "#SelfMastery",
+      "#MindsetWork",
+      "#PersonalGrowth"
+    ],
+    "launch": [
+      "#CourseLaunch",
+      "#AhamBrahmasmi",
+      "#OnlineCourse",
+      "#SelfPaced",
+      "#NewCourse"
+    ],
+    "teach": [
+      "#MentalHealth",
+      "#EmotionalIntelligence",
+      "#SelfAwareness",
+      "#HealingJourney",
+      "#Psychology"
+    ],
+    "story": [
+      "#Storytelling",
+      "#WritingCommunity",
+      "#WritersOfInstagram",
+      "#LifeLessons",
+      "#RealStories"
+    ],
+    "oneliners": [
+      "#OneLiners",
+      "#DoAlfaaz",
+      "#HindiQuotes",
+      "#DeepQuotes",
+      "#WordsThatHeal"
+    ],
+    "hottakes": [
+      "#HotTake",
+      "#UnpopularOpinion",
+      "#RealTalk",
+      "#HardTruths",
+      "#MentalHealthMatters"
+    ],
+    "masterpost": [
+      "#DeepPosts",
+      "#InnerWork",
+      "#SelfReflection",
+      "#ThoughtProvoking",
+      "#ReadThis"
+    ],
+    "sales": [
+      "#AhamBrahmasmi",
+      "#OnlineCourse",
+      "#InvestInYourself",
+      "#SelfPacedCourse",
+      "#GrowthWork"
+    ],
+    "marketing": [
+      "#ContentMarketing",
+      "#CreatorEconomy",
+      "#DigitalMarketing",
+      "#ContentCreator",
+      "#WritingCommunity"
+    ],
+    "poem": [
+      "#HindiPoetry",
+      "#DoAlfaaz",
+      "#Shayari",
+      "#HindiShayari",
+      "#PoetryOfInstagram"
+    ]
+  }
 }

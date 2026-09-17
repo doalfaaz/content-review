@@ -69,26 +69,30 @@
     --hairline: #625e6d;
     /* Small accent LABELS (<=12px) need 4.5:1; --accent itself is 3.49:1 on --surface and stays
        reserved for fills/borders/brand marks. */
-    --accent-text: #e0576b;
-    /* Owner-locked 2026-09-01: crimson/garnet accent family stays. Not yellow. */
-    --accent: #c43b4e;
-    --accent-hover: #d4576b;
-    --accent-press: #a83242;
-    --accent-tint: rgba(196, 59, 78, 0.16);
-    --accent-border: rgba(196, 59, 78, 0.42);
-    --accent-glow: rgba(196, 59, 78, 0.32);
-    /* Owner-locked 2026-09-01 evening: Tangerine→Crimson gradient family
-       (PoolDeck-aligned). One warm accent flow; crimson stays the anchor. */
-    --tangerine: #e8863a;
-    --tangerine-light: #f0a05a;
-    --grad-accent: linear-gradient(135deg, #e8863a, #c43b4e);
-    --grad-accent-h: linear-gradient(90deg, #e8863a, #c43b4e);
-    --grad-bar: linear-gradient(180deg, #f0a05a, #e8863a 45%, #c43b4e);
-    --grad-accent-text: linear-gradient(135deg, #e8863a, #c43b4e);
-    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(232, 134, 58, 0.07), transparent 45%);
-    /* Status (semantic, not decorative). */
-    --danger: #f0655e;
-    --warn: #d9b04a;
+    --accent-text: #d96a7c;
+    /* Owner-locked 2026-09-01: crimson/garnet accent family stays. Not yellow.
+       2026-09-17 unified to Tracky crimson (#bf4b5d family) app-wide — same tokens
+       the .ce-grow-shell/.ce-launch-workbench rebind below already asserts. */
+    --accent: #bf4b5d;
+    --accent-hover: #d96a7c;
+    --accent-press: #8e2f3d;
+    --accent-tint: rgba(217, 106, 124, 0.12);
+    --accent-border: rgba(217, 106, 124, 0.38);
+    --accent-glow: rgba(217, 106, 124, 0.22);
+    /* 2026-09-17: the old Tangerine→Crimson flow collapsed to one crimson family —
+       var names kept so existing consumers rebind at definition. */
+    --tangerine: #bf4b5d;
+    --tangerine-light: #d96a7c;
+    --grad-accent: linear-gradient(135deg, #bf4b5d, #8e2f3d);
+    --grad-accent-h: linear-gradient(90deg, #bf4b5d, #8e2f3d);
+    --grad-bar: linear-gradient(180deg, #e0879a, #d96a7c 45%, #bf4b5d);
+    --grad-accent-text: linear-gradient(135deg, #bf4b5d, #d96a7c);
+    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(217, 106, 124, 0.06), transparent 45%);
+    /* Status (semantic, not decorative). --danger stays a restrained garnet for
+       true destructive affordances; --warn flattens to muted — a fact with a fix
+       path is never red (grow/launch precedent). */
+    --danger: #c43b4e;
+    --warn: var(--muted);
     --info: #6fa8dc;
     --success: #57b98a;
     /* Radius family: 18px cards / 12px controls / 8px chips / 999 pills.
@@ -141,24 +145,24 @@
     --muted: #5c5766;
     --faint: #6b6577;
     --hairline: #8e889b;
-    --accent-text: #b83245;
-    /* Same garnet hue family; deeper on cream for contrast. */
-    --accent: #c43b4e;
-    --accent-hover: #b03a4c;
-    --accent-press: #962c3d;
-    --accent-tint: rgba(196, 59, 78, 0.12);
-    --accent-border: rgba(196, 59, 78, 0.38);
-    --accent-glow: rgba(196, 59, 78, 0.25);
-    /* Same gradient family on cream; the tangerine stop deepens for contrast. */
-    --tangerine: #e8863a;
-    --tangerine-light: #f0a05a;
-    --grad-accent: linear-gradient(135deg, #dd7a28, #c43b4e);
-    --grad-accent-h: linear-gradient(90deg, #dd7a28, #c43b4e);
-    --grad-bar: linear-gradient(180deg, #f0a05a, #dd7a28 45%, #c43b4e);
-    --grad-accent-text: linear-gradient(135deg, #c05f14, #c43b4e);
-    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(232, 134, 58, 0.09), transparent 45%);
-    --danger: #c33d3d;
-    --warn: #8a6400;
+    --accent-text: #8e2f3d;
+    /* Same crimson family on cream; hover/press/text deepen for contrast. */
+    --accent: #bf4b5d;
+    --accent-hover: #a83242;
+    --accent-press: #8e2f3d;
+    --accent-tint: rgba(217, 106, 124, 0.12);
+    --accent-border: rgba(217, 106, 124, 0.38);
+    --accent-glow: rgba(217, 106, 124, 0.22);
+    /* Same crimson gradient family on cream; text/bar gradients run deep-first. */
+    --tangerine: #bf4b5d;
+    --tangerine-light: #d96a7c;
+    --grad-accent: linear-gradient(135deg, #bf4b5d, #8e2f3d);
+    --grad-accent-h: linear-gradient(90deg, #bf4b5d, #8e2f3d);
+    --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
+    --grad-accent-text: linear-gradient(135deg, #8e2f3d, #bf4b5d);
+    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(217, 106, 124, 0.09), transparent 45%);
+    --danger: #962c3d;
+    --warn: var(--muted);
     --info: #0055d4;
     --success: #0f8a52;
     --shadow-1: 0 1px 2px rgba(74, 62, 40, 0.10);
@@ -1016,11 +1020,11 @@
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
-    box-shadow: 0 2px 10px rgba(196, 59, 78, 0.4);
+    box-shadow: 0 2px 10px rgba(217, 106, 124, 0.4);
   }
   .ce-plan-bulk-btn.is-primary:hover {
     background: color-mix(in srgb, var(--accent) 90%, white);
-    box-shadow: 0 4px 14px rgba(196, 59, 78, 0.6);
+    box-shadow: 0 4px 14px rgba(217, 106, 124, 0.6);
   }
   .ce-plan-select-toggle {
     position: absolute;
@@ -1055,7 +1059,7 @@
     background: var(--accent);
     border-color: #ffffff;
     color: #ffffff;
-    box-shadow: 0 0 12px rgba(196, 59, 78, 0.65);
+    box-shadow: 0 0 12px rgba(217, 106, 124, 0.65);
     transform: scale(1.03);
   }
   .ce-plan-select-toggle--list {
@@ -1931,7 +1935,7 @@
   .ce-aud-cadence { font-size:11px; color:var(--muted); padding:6px 2px 0; }
   .ce-aud-state { display:flex; flex-direction:column; gap:8px; padding:18px; border:1px dashed var(--border); border-radius:var(--radius-sm); }
   .ce-aud-state em { font-style:normal; font-size:12px; color:var(--muted); line-height:1.5; }
-  .ce-aud-state.is-error em { color:var(--danger); }
+  .ce-aud-state.is-error em { color:var(--muted); }
   .ce-aud-state .ce-surface-button { align-self:flex-start; }
   .ce-aud-skel { display:block; height:12px; border-radius:6px; background:linear-gradient(90deg, var(--card) 25%, var(--card-hover) 50%, var(--card) 75%); background-size:200% 100%; animation:ce-aud-shimmer 1.3s linear infinite; }
   .ce-aud-skel.is-short { width:55%; }
@@ -2092,31 +2096,57 @@
   .ce-launch-workbench .ce-receipt-quiet-note { margin-left: auto; color: var(--faint); font-size: 10px; }
 
   /* ── P2 (merged plan 24 §0, 2026-09-17): the redesign surfaces ──────────────
-     Palette: Grow + Launch run the teal instrument accent. No warm accent
-     (tangerine/crimson) and no amber/red status hue may compute on this
-     chrome, so every var a warm consumer could read is rebound on the two
-     shells; --warn/--danger flatten to muted (a refusal is a fact with a fix
-     path, never red). Rules stay scoped under the shells so they outrank the
-     later-loading native-plan.css on specificity alone. */
-  .ce-grow-shell, .ce-launch-workbench {
-    --accent: #3ECFAE;
-    --accent-text: #3ECFAE;
-    --accent-border: rgba(62,207,174,.35);
-    --accent-tint: rgba(62,207,174,.14);
-    --accent-glow: rgba(62,207,174,.28);
-    --accent-hover: #5bdcc0;
-    --accent-press: #2fae8e;
-    --tangerine: #3ECFAE;
-    --tangerine-light: #6fe0c5;
-    --grad-accent: linear-gradient(135deg, #2ea98b, #1f7d65);
-    --grad-accent-h: linear-gradient(90deg, #3ECFAE, #2ea98b);
-    --grad-accent-text: linear-gradient(135deg, #3ECFAE, #6fe0c5);
-    --grad-bar: linear-gradient(180deg, #6fe0c5, #3ECFAE 45%, #2ea98b);
-    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(62,207,174,.06), transparent 45%);
+     Palette: Grow + Launch + Write run Tracky's muted crimson instrument
+     accent — matte, never neon. No foreign warm accent (tangerine/orange)
+     and no amber/red status hue may compute on this chrome, so every var a
+     warm consumer could read is rebound on the three shells; --warn/--danger
+     flatten to muted (a refusal is a fact with a fix path, never red).
+     Rules stay scoped under the shells so they outrank the later-loading
+     native-plan.css on specificity alone. */
+  .ce-grow-shell, .ce-launch-workbench, .ce-write-shell {
+    --accent: #bf4b5d;
+    --accent-text: #d96a7c;
+    --accent-border: rgba(217,106,124,.38);
+    --accent-tint: rgba(217,106,124,.12);
+    --accent-glow: rgba(217,106,124,.22);
+    --accent-hover: #d96a7c;
+    --accent-press: #8e2f3d;
+    --tangerine: #bf4b5d;
+    --tangerine-light: #d96a7c;
+    --grad-accent: linear-gradient(135deg, #bf4b5d, #8e2f3d);
+    --grad-accent-h: linear-gradient(90deg, #bf4b5d, #8e2f3d);
+    --grad-accent-text: linear-gradient(135deg, #bf4b5d, #d96a7c);
+    --grad-bar: linear-gradient(180deg, #e0879a, #d96a7c 45%, #bf4b5d);
+    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(217,106,124,.06), transparent 45%);
     --warn: var(--muted);
     --danger: var(--muted);
     font-variant-numeric: tabular-nums;
   }
+
+  /* Write surface sizing (2026-09-17): the compose field sizes to its draft —
+     no fixed-height void. native-plan.css still pins .ce-write-field textarea
+     at 360px; the scoped rules below outrank it on specificity. The
+     #live-write-input input handler grows the box to scrollHeight; CSS owns
+     the floor (~240px desktop) and the html.ce-phone cap (38vh) so the
+     Undo/Redo/Copy/Add-to-Plan row stays reachable above the preview. */
+  .ce-write-shell .ce-write-field textarea { height: auto; min-height: 240px; }
+  html.ce-phone .ce-write-shell .ce-write-field textarea { min-height: 180px !important; max-height: 38vh; }
+
+  /* A disabled write control is a fact, not an alarm — flatten to muted. */
+  .ce-write-shell .ce-write-actions button:disabled,
+  .ce-write-shell .ce-surface-button:disabled {
+    background: var(--card);
+    background-image: none;
+    border-color: var(--card-border);
+    box-shadow: none;
+    color: var(--faint);
+    cursor: not-allowed;
+    opacity: .7;
+  }
+
+  /* 2026-09-17: a positive delta on these shells is a counted fact — crimson,
+     not the app-wide success green (one accent family on the day-won surfaces). */
+  .ce-grow-shell .ce-aud-delta.is-up, .ce-launch-workbench .ce-aud-delta.is-up { color: var(--accent-text); background: color-mix(in srgb, var(--accent) 14%, transparent); }
 
   /* The fortnight: one field panel, 14 day columns on a shared baseline —
      solid accent = landed, bone hatch = local work, dashed tick = neither,
@@ -2168,6 +2198,13 @@
   .ce-grow-shell .ce-tide-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; color: var(--faint); font-size: 9px; }
   .ce-grow-shell .ce-tide-void { margin-top: 8px; padding: 12px 14px; border: 1px dashed var(--hairline); border-radius: 10px; color: var(--muted); font-size: 10.5px; line-height: 1.5; }
   .ce-grow-shell .ce-tide-lane .ce-unmeasured-acts { margin-top: 8px; }
+  .ce-grow-shell .ce-tide-plot { position: relative; }
+  .ce-grow-shell .ce-tide-tick { stroke: var(--muted); stroke-width: 1.4px; }
+  .ce-grow-shell .ce-tide-tick.is-up { stroke: var(--accent); }
+  .ce-grow-shell .ce-tide-return { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+  .ce-grow-shell .ce-tide-return-label { position: absolute; top: 10px; transform: translateX(-50%); color: var(--faint); font-size: 8px; letter-spacing: .06em; white-space: nowrap; pointer-events: none; font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-ans-velocity { align-self: center; color: var(--accent); font-size: 10px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ce-grow-shell .ce-ans-velocity.is-flat { color: var(--faint); }
 
   /* Their answers: last posts on one true scale against the year median —
      44px rows, 40px thumb, 4px bone bar (accent past the median), the median
@@ -2287,6 +2324,22 @@
     html.ce-phone .ce-launch-workbench .ce-launch-move { flex-wrap: wrap; gap: 10px; }
     html.ce-phone .ce-launch-workbench .ce-launch-move-art { flex-basis: 72px; width: 72px; }
     html.ce-phone .ce-launch-workbench .ce-launch-move-title { font-size: 14px; }
+    /* Phone leftovers (390px): the tide's empty lane drew a second dashed
+       box inside its own dashed card — box-in-box noise. The lane stays the
+       one dashed container; the inner void line flattens to plain copy (the
+       label, the connect note, and the unlock verb all stay). */
+    html.ce-phone .ce-grow-shell .ce-tide-lane.is-empty .ce-tide-void { padding: 0; border: 0; }
+    /* The cadence picker mirrors the desktop thin-row shape on phone — an
+       inline chip group, not a full-width bar of stretched cells. Height
+       stays at the 44px tap floor — thin means narrow, not short. */
+    html.ce-phone .ce-launch-workbench .ce-launch-board-cadence { width: max-content; justify-self: start; justify-content: flex-start; }
+    html.ce-phone .ce-launch-workbench .ce-launch-board-cadence button { flex: 0 0 auto; min-height: 44px !important; }
+    /* Same nested-border class: the waitlist card carried fully bordered
+       rows inside its own border — flatten to hairline-separated rows like
+       the rail ledger. */
+    html.ce-phone .ce-launch-workbench .ce-launch-wl-rows { gap: 0; }
+    html.ce-phone .ce-launch-workbench .ce-launch-wl-row { padding: 7px 2px; border: 0; border-bottom: 1px solid var(--card-border); border-radius: 0; }
+    html.ce-phone .ce-launch-workbench .ce-launch-wl-row:last-child { border-bottom: 0; }
   }
 
   /* ── Premium polish layer (owner 2026-09-03) — restraint over confetti:
@@ -2602,11 +2655,11 @@
 </div>
 
 <!-- Embedded Data Scripts -->
-<script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=73d607cf13"></script>
+<script src="./content_data.js?v=efe91af179"></script>
+<script src="./deck_index.js?v=c3195c790b"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
-<link rel="stylesheet" href="./native-plan.css?v=57931c8eb1" />
+<link rel="stylesheet" href="./native-plan.css?v=b6e5ff7170" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
 <link rel="stylesheet" href="./native-studio.css?v=28e71d78ab" />
 <style id="ce-share-trim">
@@ -2614,7 +2667,7 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=f5954673d9" />
+<link rel="stylesheet" href="./ce-mobile.css?v=882102d528" />
 <script src="./ce-touch-edit.js?v=d5b7d014e8"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
@@ -2682,7 +2735,263 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 </script>
 
 <script src="./share-decks.js?v=5e7d79ee88"></script>
-<script src="./native-ideas.js?v=0a8c403e75"></script>
+<!-- Ideas surface density + crimson rebind (2026-09-17). The parity renderer
+     ships tall outline cards and the catalog is ~600 ideas, so the tab read
+     as pink-tinted text walls. Cards now render as compact rows that expand
+     inline (the companion script below toggles .is-open); group heads slim to
+     hairline dividers; every pink/plum tint rebinds to the crimson tokens.
+     This block sits after the native-*.css links and scopes under
+     .ce-ideas-parity / html.ce-phone so it wins without !important wars. -->
+<style>
+  .ce-ideas-parity {
+    --ideas-surface: var(--card);
+    --ideas-panel: var(--bg);
+    --ideas-ink: var(--ink);
+    --ideas-muted: var(--muted);
+    --ideas-line: var(--border);
+    --ideas-accent: #bf4b5d;
+    --ideas-accent-text: #8e2f3d;
+    --ideas-row: rgba(217,106,124,.07);
+    --ideas-row-line: rgba(217,106,124,.22);
+  }
+  body:not(.bright-theme) .ce-ideas-parity {
+    --ideas-accent: #d96a7c;
+    --ideas-accent-text: #d96a7c;
+    --ideas-row: rgba(217,106,124,.09);
+    --ideas-row-line: rgba(217,106,124,.26);
+  }
+  .ce-ideas-parity .ce-ideas-section:nth-of-type(n) { --ideas-accent: #bf4b5d; }
+  body:not(.bright-theme) .ce-ideas-parity .ce-ideas-section:nth-of-type(n) { --ideas-accent: #d96a7c; }
+
+  /* Controls + summary: quiet one-line meta, unchanged wiring. */
+  .ce-ideas-parity .ce-ideas-controls { margin-bottom: 10px; padding-bottom: 10px; }
+  .ce-ideas-parity .ce-ideas-summary { margin-bottom: 8px; }
+
+  /* Group heads: hairline dividers, not bordered panels. */
+  .ce-ideas-parity .ce-ideas-section {
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--ideas-line);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .ce-ideas-parity .ce-ideas-section-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    min-height: 40px;
+    padding: 9px 4px;
+    background: transparent;
+  }
+  .ce-ideas-parity .ce-ideas-section.is-open .ce-ideas-section-head { border-bottom-color: transparent; }
+  .ce-ideas-parity .ce-ideas-section-number { display: none; }
+  .ce-ideas-parity .ce-ideas-section-title {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--ideas-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ce-ideas-parity .ce-ideas-section-meta { gap: 8px; font-size: 11px; font-weight: 650; }
+  .ce-ideas-parity .ce-ideas-count {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--ideas-muted);
+  }
+  .ce-ideas-parity .ce-ideas-chevron { font-size: 12px; }
+
+  /* Lead cluster hero (light): the priority-first group reads as the lead
+     lane — a thin accent rail and faint tint, not a panel. */
+  .ce-ideas-parity .ce-ideas-section:first-of-type {
+    border-left: 3px solid var(--ideas-accent);
+    padding-left: 10px;
+    background: linear-gradient(90deg, var(--ideas-row), transparent 55%);
+  }
+  .ce-ideas-parity .ce-ideas-section:first-of-type .ce-ideas-count { color: var(--ideas-accent-text); }
+
+  /* Card rows: one scannable line — title left, actions right. Outline,
+     intro and the pending note stay one click away via .is-open. */
+  .ce-ideas-parity .ce-ideas-card-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 2px 0 12px;
+    background: transparent;
+  }
+  .ce-ideas-parity .ce-ideas-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 7px 12px;
+    border-color: var(--ideas-line);
+    border-radius: 10px;
+    box-shadow: none;
+    cursor: pointer;
+    transition: border-color .16s ease, background .16s ease;
+  }
+  .ce-ideas-parity .ce-ideas-card:hover {
+    border-color: var(--ideas-row-line);
+    background: var(--ideas-row);
+  }
+  .ce-ideas-parity .ce-ideas-card h3 {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.35;
+    letter-spacing: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ce-ideas-parity .ce-ideas-card:has(.ce-ideas-points, .ce-ideas-card-intro) > h3::before {
+    content: '›';
+    display: inline-block;
+    margin-right: 8px;
+    color: var(--ideas-accent-text);
+    font-weight: 400;
+    transition: transform .16s ease;
+  }
+  .ce-ideas-parity .ce-ideas-card.is-open > h3::before { transform: rotate(90deg); }
+  .ce-ideas-parity .ce-ideas-card:has(.ce-ideas-card-pending) > h3 { color: var(--ideas-muted); font-weight: 600; }
+  .ce-ideas-parity .ce-ideas-card-intro,
+  .ce-ideas-parity .ce-ideas-points,
+  .ce-ideas-parity .ce-ideas-card-pending { display: none; }
+  .ce-ideas-parity .ce-ideas-card-actions {
+    flex: 0 0 auto;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .ce-ideas-parity .ce-ideas-card-actions .ce-ideas-action {
+    min-height: 28px;
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+  .ce-ideas-parity .ce-ideas-card:not(.is-open):not(:hover):not(:focus-within) .ce-ideas-action:not(.is-primary) { opacity: .45; }
+  .ce-ideas-parity .ce-ideas-action-status { font-size: 10.5px; color: var(--ideas-muted); }
+
+  /* Expanded row: the full card returns, still tightened. */
+  .ce-ideas-parity .ce-ideas-card.is-open {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px 14px;
+    border-color: var(--ideas-row-line);
+    background: var(--ideas-surface);
+    cursor: default;
+  }
+  .ce-ideas-parity .ce-ideas-card.is-open h3 {
+    font-size: 15px;
+    font-weight: 750;
+    white-space: normal;
+  }
+  .ce-ideas-parity .ce-ideas-card.is-open .ce-ideas-card-intro,
+  .ce-ideas-parity .ce-ideas-card.is-open .ce-ideas-points,
+  .ce-ideas-parity .ce-ideas-card.is-open .ce-ideas-card-pending { display: block; }
+  .ce-ideas-parity .ce-ideas-card.is-open .ce-ideas-points { display: grid; gap: 6px; }
+  .ce-ideas-parity .ce-ideas-card.is-open .ce-ideas-card-actions {
+    padding-top: 8px;
+    border-top: 1px solid var(--ideas-line);
+  }
+  .ce-ideas-parity .ce-ideas-card-intro,
+  .ce-ideas-parity .ce-ideas-card-pending {
+    padding: 9px 11px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--ideas-ink) 4%, var(--ideas-surface));
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+  .ce-ideas-parity .ce-ideas-point {
+    padding: 9px 11px;
+    border-radius: 10px;
+    border-color: var(--ideas-row-line);
+    background: var(--ideas-row);
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+  .ce-ideas-parity .ce-ideas-point:nth-child(4n+2),
+  .ce-ideas-parity .ce-ideas-point:nth-child(4n+3),
+  .ce-ideas-parity .ce-ideas-point:nth-child(4n+4) {
+    border-color: var(--ideas-row-line);
+    background: var(--ideas-row);
+  }
+  body:not(.bright-theme) .ce-ideas-parity .ce-ideas-point,
+  body:not(.bright-theme) .ce-ideas-parity .ce-ideas-point:nth-child(4n+2),
+  body:not(.bright-theme) .ce-ideas-parity .ce-ideas-point:nth-child(4n+3),
+  body:not(.bright-theme) .ce-ideas-parity .ce-ideas-point:nth-child(4n+4) {
+    border-color: rgba(217,106,124,.26);
+    background: rgba(217,106,124,.09);
+    color: var(--ideas-ink);
+  }
+  body:not(.bright-theme) .ce-ideas-parity .ce-ideas-point strong { color: #e8a3af; }
+  .ce-ideas-parity .ce-ideas-subpoints { margin-top: 5px; }
+  .ce-ideas-parity .ce-ideas-empty { padding: 28px 16px; }
+
+  /* Phone: same density pass. Rows wrap — title on line one, the 44px
+     action contract (ce-mobile.css, !important) keeps its floor on line
+     two — and the divider-heads stay slim. */
+  html.ce-phone .ce-ideas-parity .ce-ideas-card { flex-wrap: wrap; row-gap: 6px; }
+  html.ce-phone .ce-ideas-parity .ce-ideas-card h3 { flex: 1 1 100%; font-size: 13.5px; white-space: normal; }
+  html.ce-phone .ce-ideas-parity .ce-ideas-card-actions { flex: 1 1 100%; }
+  html.ce-phone .ce-ideas-parity .ce-ideas-card-actions .ce-ideas-action { flex: 1 1 auto; }
+  html.ce-phone .ce-ideas-parity .ce-ideas-section-head { min-height: 38px; padding: 8px 2px; }
+  html.ce-phone .ce-ideas-parity .ce-ideas-card.is-open { padding: 10px 12px; }
+
+  /* Fallback renderer (used only when native-ideas.js is absent): the same
+     ideas also render .canon-card walls inside .standard-grid — compact them
+     to short cards with a clamped preview. */
+  .standard-grid:has(> .canon-card) { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .standard-grid > .canon-card { padding: 12px 14px; gap: 5px; }
+  .standard-grid > .canon-card > div:last-child {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+<script src="./native-ideas.js?v=14526cabff"></script>
+<script>
+/* Ideas rows expand/collapse companion: the parity renderer rebuilds
+   #view innerHTML on every filter/group change, so row state lives in a
+   keyed map here and is re-applied after each render. Delegation sits on
+   document (bubbling reaches it after the renderer's own handler); action
+   buttons are skipped so Take forward / Schedule / Copy behave identically. */
+(function () {
+  'use strict';
+  var openRows = Object.create(null);
+  document.addEventListener('click', function (event) {
+    var card = event.target && event.target.closest
+      ? event.target.closest('#view.ce-ideas-parity .ce-ideas-card')
+      : null;
+    if (!card) return;
+    if (event.target.closest('button, a, input, textarea, select, .ce-ideas-card-actions')) return;
+    var title = event.target.closest ? event.target.closest('h3') : null;
+    if (event.target !== card && !(title && title.parentElement === card)) return;
+    var id = card.getAttribute('data-ce-idea-id') || '';
+    openRows[id] = !openRows[id];
+    card.classList.toggle('is-open', !!openRows[id]);
+  }, false);
+  var ideasView = document.getElementById('view');
+  if (ideasView && typeof MutationObserver === 'function') {
+    new MutationObserver(function () {
+      if (!ideasView.classList.contains('ce-ideas-parity')) return;
+      var cards = ideasView.querySelectorAll('.ce-ideas-card');
+      for (var i = 0; i < cards.length; i++) {
+        var id = cards[i].getAttribute('data-ce-idea-id') || '';
+        if (openRows[id]) cards[i].classList.add('is-open');
+      }
+    }).observe(ideasView, { childList: true });
+  }
+})();
+</script>
 <script src="./ce-insights.js?v=e30373b449"></script>
 <script src="./legacy-renderers/renderers.js"></script>
 
@@ -6492,9 +6801,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       needs_verification: 'Verify on Meta'
     };
     var STATE_COLOR = {
-      pending: 'var(--muted)', queued: 'var(--muted)', scheduling: '#fbbf24',
-      scheduled: '#60a5fa', published: '#34d399', failed: '#f87171',
-      superseded: 'var(--muted)', needs_verification: '#fbbf24'
+      pending: 'var(--muted)', queued: 'var(--muted)', scheduling: 'var(--accent-text)',
+      scheduled: '#60a5fa', published: '#34d399', failed: 'var(--muted)',
+      superseded: 'var(--muted)', needs_verification: 'var(--muted)'
     };
     // Newest first; terminal rows older than a day don't need board real estate.
     var dayMs = 24 * 3600 * 1000;
@@ -6541,8 +6850,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var platform = String(r.platform || 'facebook');
       var err = (r.result && r.result.error) ? String(r.result.error) : '';
       var icon = st === 'failed' ? '✕' : (st === 'scheduled' || st === 'published' ? '✓' : '•');
-      var badgeBg = st === 'failed' ? 'rgba(239, 68, 68, 0.14)' : (st === 'scheduled' ? 'rgba(59, 130, 246, 0.14)' : 'rgba(255, 255, 255, 0.05)');
-      var borderC = st === 'failed' ? 'rgba(239, 68, 68, 0.3)' : (st === 'scheduled' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0.1)');
+      var badgeBg = st === 'failed' ? 'rgba(120, 120, 150, 0.08)' : (st === 'scheduled' ? 'rgba(59, 130, 246, 0.14)' : 'rgba(255, 255, 255, 0.05)');
+      var borderC = st === 'failed' ? 'rgba(120, 120, 150, 0.3)' : (st === 'scheduled' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0.1)');
       var rid = escapeHtml(String(r.id || ''));
       /* P0-10 FIX (2026-09-16, lane P1_PUBLISH_SAFETY). Every attention row got the
          same Retry + × buttons. For a `needs_verification` row BOTH were guaranteed to
@@ -6578,7 +6887,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var items = live.map(function (r) { return chipHtml(r, r.state === 'pending' || r.state === 'queued'); }).join('');
     var attentionHtml = attention.length
       ? '<details class="ce-sched-req-attention" style="width:100%;margin-top:4px;">'
-        + '<summary style="list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:#f87171;padding:3px 0;">'
+        + '<summary style="list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:3px 0;">'
         + '<span style="font-size:11px;">!</span>Needs attention (' + attention.length + ')</summary>'
         + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:4px;">'
         + attention.slice(0, 6).map(function (r) { return chipHtml(r, true); }).join('')
@@ -6622,7 +6931,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (!fmsg) fmsg = 'export failed';
       if (fmsg.length > 26) fmsg = fmsg.slice(0, 25).replace(/\s+\S*$/, '') + '…';
       var flead = fshort ? (fshort + ' · ') : '';
-      return '<span class="ce-meta-chip" title="' + escapeHtml(q.metaError || 'failed') + '" style="' + chip + 'color:#f87171;border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.1);">✗ ' + escapeHtml(flead + fmsg) + '</span>';
+      return '<span class="ce-meta-chip" title="' + escapeHtml(q.metaError || 'failed') + '" style="' + chip + 'color:var(--muted);border-color:rgba(120,120,150,.3);background:rgba(120,120,150,.08);">✗ ' + escapeHtml(flead + fmsg) + '</span>';
     }
     if (q.metaState === 'skipped') {
       var smsg = String(q.metaError || 'Skipped').replace(/^Skipped\s*[—-]\s*/i, '').trim() || 'skipped';
@@ -6649,7 +6958,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var dispatchedAt = Number(q.metaAt) || 0;
       var canJudge = sched.known && sched.at > dispatchedAt && (Date.now() - dispatchedAt > 4 * 60 * 1000);
       if (canJudge && sched.ids[gid] !== true) {
-        return '<span class="ce-meta-chip" title="Not present in this Page\'s scheduled_posts. Facebook has nothing queued for this piece — reschedule it." style="' + chip + 'color:#fbbf24;border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.1);">⚠ Not on Meta\'s clock' + escapeHtml(ig) + '</span>';
+        return '<span class="ce-meta-chip" title="Not present in this Page\'s scheduled_posts. Facebook has nothing queued for this piece — reschedule it." style="' + chip + 'color:var(--muted);border-color:rgba(120,120,150,.3);background:rgba(120,120,150,.08);">⚠ Not on Meta\'s clock' + escapeHtml(ig) + '</span>';
       }
       var clockLabel = q.metaIgOnly ? 'On app clock' : 'On Meta clock';
       var verified = (sched.known && sched.ids[gid] === true) ? ' ✓' : '';
@@ -7364,6 +7673,49 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   window.allCleanPoems = allCleanPoems;
 
+  /* Corpus-count truth (2026-09-17): every printed corpus number reads ONE
+     source — the arrays the app actually boots from. The native store wins;
+     the static boot catalogs (ALL_CONTENT_DATA / __STATIC_DECK_INDEX__ /
+     content_data idea rows) answer only when no live array exists (file:// /
+     phone bundle) and are flagged so printers can label provenance. Filtered
+     shelf subsets (allCleanPoems, __CE_PURE_POSTS__, the ideas dedupe) are
+     display counts and must never print as corpus numbers — they are what the
+     defect looked like: 2,098 clean poems printed while the store held 2,496. */
+  function ceCorpusCounts() {
+    var cat = { poem: 0, post: 0, idea: 0 };
+    if (Array.isArray(window.ALL_CONTENT_DATA)) {
+      window.ALL_CONTENT_DATA.forEach(function (x) {
+        if (!x || typeof x !== 'object') return;
+        if (x.kind === 'poem') cat.poem++;
+        else if (x.kind === 'post') cat.post++;
+        else if (x.kind === 'idea' || (x.id && String(x.id).indexOf('idea:') === 0)) cat.idea++;
+      });
+    }
+    function pick(liveArr, catalogN) {
+      return (Array.isArray(liveArr) && liveArr.length)
+        ? { n: liveArr.length, src: 'live' }
+        : { n: catalogN, src: 'catalog' };
+    }
+    var poems = pick(window.__NATIVE_POEMS__, cat.poem);
+    var decks = pick(window.__NATIVE_DECK_INDEX__, Array.isArray(window.__STATIC_DECK_INDEX__) ? window.__STATIC_DECK_INDEX__.length : 0);
+    var posts = pick(window.__NATIVE_POSTS__, cat.post);
+    /* __HTML_IDEAS__ (ideas_catalog.js) IS the store the app boots for ideas —
+       there is no native ideas injection; only the content_data fallback is
+       'catalog' provenance. */
+    var ideas = (Array.isArray(window.__HTML_IDEAS__) && window.__HTML_IDEAS__.length)
+      ? { n: window.__HTML_IDEAS__.length, src: 'live' }
+      : { n: cat.idea, src: 'catalog' };
+    var byKind = { poems: poems.src, decks: decks.src, posts: posts.src, ideas: ideas.src };
+    var catalogKinds = Object.keys(byKind).filter(function (k) { return byKind[k] === 'catalog'; });
+    return {
+      poems: poems.n, decks: decks.n, posts: posts.n, ideas: ideas.n,
+      byKind: byKind,
+      catalogKinds: catalogKinds,
+      anyCatalog: catalogKinds.length > 0
+    };
+  }
+  window.ceCorpusCounts = ceCorpusCounts;
+
   /* ── Poem mix (display order only). Looks stay hashed by content_id. ── */
   var CE_YEAR_LIKE_MEDIANS = { 2017: 752, 2018: 4342, 2019: 9634, 2020: 7866, 2021: 12003, 2022: 8696, 2023: 8626, 2024: 8626, 2025: 1259, 2026: 1259 };
 
@@ -8033,7 +8385,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       : CE_CAPTION_BANK_FALLBACK;
   }
 
-  function ceAutopickCaptionGroup(text) {
+  /* Funnel routing (2026-09-17): posts whose pillar/id marks the funnel
+     family always resolve to the 'funnel' caption group — the poem
+     register autopick only applies to actual poems. */
+  function ceAutopickCaptionGroup(text, item) {
+    var src = item || {};
+    var pid = String(src.pillar || src.family || '').toLowerCase();
+    var iid = String(src.id || src.content_id || '').toLowerCase();
+    if (/^(funnel|sales|marketing|launch|promo)$/.test(pid) || /masterpost:(sales|marketing)|funnel|launch/.test(iid)) return 'funnel';
     var t = String(text || '');
     if (/मोहब्बत|mohabbat|ishq|प्यार|\blove\b/i.test(t)) return 'soft_love';
     if (/कटु|गहरी|gahri|katu/i.test(t)) return 'deep_bitter';
@@ -8053,13 +8412,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       return state.igCaption;
     }
     var bank = ceCaptionBank();
-    var gid = state.igCaptionGroupId || ceAutopickCaptionGroup((poem && (poem.text || poem.body)) || '');
+    var gid = state.igCaptionGroupId || ceAutopickCaptionGroup((poem && (poem.text || poem.body)) || '', poem);
     state.igCaptionGroupId = gid;
     var group = null;
     (bank.groups || []).forEach(function (g) { if (g.id === gid) group = g; });
     if (!group) group = (bank.groups || [])[0];
     var cap = (group && group.captions && group.captions[0]) || '';
     state.igCaption = cap;
+    state.igCaptionAsk = (group && group.meta && group.meta[0] && group.meta[0].ask) || '';
     if (id) state.igCaptionById[id] = cap;
     ceSaveIgCaptions();
     return cap;
@@ -8068,22 +8428,40 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function ceSaveIgCaptions() {
     try { localStorage.setItem('ce_ig_captions', JSON.stringify(state.igCaptionById || {})); } catch (_e) {}
   }
+  /* One-ask rule (2026-09-17): a funnel post can never ship a caption with
+     zero asks — the resolve seam appends the canonical ask when the routed
+     group is 'funnel' and no ask token is present. Two-ask authored text is
+     left alone (authored intent outranks the lint). */
   function ceResolveIgCaption(qOrItem) {
     var q = (qOrItem && qOrItem.item) ? qOrItem : null;
     var item = q ? q.item : qOrItem;
+    var cap = '';
     var fromQ = q && q.igCaption ? String(q.igCaption).trim() : '';
-    if (fromQ) return fromQ;
-    var id = '';
-    try { id = (typeof cePoemItemId === 'function') ? cePoemItemId(item) : String((item && (item.id || item.content_id)) || ''); } catch (_e) {}
-    var map = state.igCaptionById || {};
-    var hit = (id && map[id]) || (item && (map[item.id] || map[item.content_id])) || '';
-    if (hit) return String(hit).trim();
-    try { return String((typeof ceEnsureIgCaption === 'function' && ceEnsureIgCaption(item)) || '').trim(); } catch (_e2) { return ''; }
+    if (fromQ) cap = fromQ;
+    if (!cap) {
+      var id = '';
+      try { id = (typeof cePoemItemId === 'function') ? cePoemItemId(item) : String((item && (item.id || item.content_id)) || ''); } catch (_e) {}
+      var map = state.igCaptionById || {};
+      var hit = (id && map[id]) || (item && (map[item.id] || map[item.content_id])) || '';
+      if (hit) cap = String(hit).trim();
+    }
+    if (!cap) {
+      try { cap = String((typeof ceEnsureIgCaption === 'function' && ceEnsureIgCaption(item)) || '').trim(); } catch (_e2) { cap = ''; }
+    }
+    try {
+      if (cap && typeof ceAutopickCaptionGroup === 'function'
+          && ceAutopickCaptionGroup((item && (item.text || item.body || item.title)) || '', item) === 'funnel'
+          && !/comment\s*["“]?interested|save this/i.test(cap)) {
+        cap = cap.replace(/\s+$/, '') + ' Comment "Interested".';
+      }
+    } catch (_e3) {}
+    return cap;
   }
 
   function captionChipsHtml() {
-    if (state.currentType !== 'poem') return '';
     var poem = state.currentItem || {};
+    if (state.currentType !== 'poem'
+        && ceAutopickCaptionGroup((poem.text || poem.body || poem.title) || '', poem) !== 'funnel') return '';
     ceEnsureIgCaption(poem);
     var bank = ceCaptionBank();
     var groups = bank.groups || [];
@@ -10837,6 +11215,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         renderCarouselDock(slides.length, deck, slides);
 
         if (event.target.closest('.ce-block-drag-grip')) return;
+
+        // The footer block is rendered chrome, not authored text: slideHTML
+        // paints the "NN / NN" page counter and arrow into it at render time.
+        // Arming contenteditable there snapshots that counter's innerText back
+        // into slide.html/text on blur, and autosave persists it as content —
+        // exactly how "01 / 14" was once stored as a deck's cover. The footer
+        // stays selectable and draggable for layout; it is never an edit target.
+        if (descriptor.key === 'footer') return;
 
         var targetEl = event.target.closest('[data-ce-edit], .hook, .body, .quote, .bk-t, .bk-h, .bk-title, .bk-annot-t, .bk-annot-n, .bk-scr-v, .bk-scr-m, .sub, .kicker, .kt, .poem')
           || block.querySelector('[data-ce-edit], .hook, .body, .quote, .bk-annot-t, .bk-t, .poem, .bk-title')
@@ -16027,8 +16413,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               var isGrid = track.classList.toggle('is-grid-view');
               var currentLen = track.__ceItems ? track.__ceItems.length : gm.items.length;
               toggleBtn.textContent = isGrid ? 'Rail' : 'All';
-              toggleBtn.style.background = isGrid ? 'rgba(196,59,78,0.15)' : 'rgba(120,120,150,0.08)';
-              toggleBtn.style.borderColor = isGrid ? 'rgba(196,59,78,0.4)' : 'rgba(120,120,150,0.2)';
+              toggleBtn.style.background = isGrid ? 'rgba(217,106,124,0.15)' : 'rgba(120,120,150,0.08)';
+              toggleBtn.style.borderColor = isGrid ? 'rgba(217,106,124,0.38)' : 'rgba(120,120,150,0.2)';
               if (prevBtn) prevBtn.style.display = isGrid ? 'none' : '';
               if (nextBtn) nextBtn.style.display = isGrid ? 'none' : '';
               if (isGrid) {
@@ -16234,8 +16620,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               var isGrid = track.classList.toggle('is-grid-view');
               var currentLen = track.__ceItems ? track.__ceItems.length : gm.items.length;
               toggleBtn.textContent = isGrid ? 'Rail' : 'All';
-              toggleBtn.style.background = isGrid ? 'rgba(196,59,78,0.15)' : 'rgba(120,120,150,0.08)';
-              toggleBtn.style.borderColor = isGrid ? 'rgba(196,59,78,0.4)' : 'rgba(120,120,150,0.2)';
+              toggleBtn.style.background = isGrid ? 'rgba(217,106,124,0.15)' : 'rgba(120,120,150,0.08)';
+              toggleBtn.style.borderColor = isGrid ? 'rgba(217,106,124,0.38)' : 'rgba(120,120,150,0.2)';
               if (prevBtn) prevBtn.style.display = isGrid ? 'none' : '';
               if (nextBtn) nextBtn.style.display = isGrid ? 'none' : '';
               if (isGrid) {
@@ -16451,11 +16837,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (window.__CE_FIT_ALL__) window.__CE_FIT_ALL__();
       };
       if (writeInput) {
+        /* Size-to-content: the CSS floor/phone-cap lives on .ce-write-field
+           textarea; here the box grows with the draft. The 38vh phone cap is
+           re-read per call so rotation stays correct; CSS max-height is the
+           backstop either way. */
+        var autosizeWriteInput = function () {
+          var cap = document.documentElement.classList.contains('ce-phone')
+            ? Math.round((window.innerHeight || 800) * 0.38)
+            : 0;
+          writeInput.style.height = 'auto';
+          var next = writeInput.scrollHeight;
+          if (cap > 0 && next > cap) next = cap;
+          writeInput.style.height = next + 'px';
+        };
         writeInput.value = state.writeDraft || defaultWriteText;
+        autosizeWriteInput();
         var writeComposing = false;
         writeInput.addEventListener('compositionstart', function () { writeComposing = true; });
         writeInput.addEventListener('compositionend', function () { writeComposing = false; });
         writeInput.oninput = function () {
+          autosizeWriteInput();
           if (writeComposing) return;
           state.writeDraft = writeInput.value;
           localStorage.setItem('ce_write_draft', state.writeDraft);
@@ -16479,6 +16880,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         state.writeDraft = writeInput.value;
         localStorage.setItem('ce_write_draft', state.writeDraft);
         writeApplyingHistory = false;
+        autosizeWriteInput();
         updatePreview();
       };
       document.getElementById('write-undo-btn').onclick = function () { applyWriteHistory(writeHistoryIndex - 1); };
@@ -17060,7 +17462,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
               <h3 class="ce-plan-heading" style="margin:0; font-size:17px; font-weight:700; color:var(--ink);">Plan & Queue</h3>
               <button id="plan-schedule-all-ready-btn" type="button" title="Place all Ready pieces a week+ out (owner law — Meta refuses sooner) with human-ish times between 9am and 9pm." style="background:var(--accent); color:#fff; border:1px solid transparent; padding:5px 14px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer;">Schedule all ready</button>
-              ${planFailedMeta > 0 ? `<button id="ce-plan-batch-meta-btn" type="button" title="Re-send the ${planFailedMeta} failed Ready piece${planFailedMeta === 1 ? '' : 's'} to Meta's clock (same confirm as Schedule)." style="background:rgba(196,59,78,0.16); color:#ff8fa0; border:1px solid rgba(196,59,78,0.4); padding:5px 12px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer;">Retry failed (${planFailedMeta})</button>` : ''}
+              ${planFailedMeta > 0 ? `<button id="ce-plan-batch-meta-btn" type="button" title="Re-send the ${planFailedMeta} failed Ready piece${planFailedMeta === 1 ? '' : 's'} to Meta's clock (same confirm as Schedule)." style="background:rgba(217,106,124,0.16); color:#d96a7c; border:1px solid rgba(217,106,124,0.38); padding:5px 12px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer;">Retry failed (${planFailedMeta})</button>` : ''}
               <button id="plan-select-all-ready-btn" type="button" title="Tick every staged piece as Ready" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer;">Mark all Ready</button>
               <button id="plan-auto-schedule-btn" type="button" title="Pull from Saved Bank / library into empty day slots." style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer;">Fill week</button>
               <button id="plan-open-meta-btn" type="button" aria-label="Open Meta Creator Studio" title="Open Meta Creator Studio / Business Suite in your browser" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); width:28px; height:26px; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
@@ -17772,25 +18174,23 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // Live Meta audience: cache-TTL'd native fetch; safe to ask on every render.
       if (window.__CE_META_HAS_TOKEN__) ceRequestMetaInsights(false);
 
-      var __growPoems = allCleanPoems().length;
-      // 2026-09-06 deep live audit (Muse vision found the contradiction): in browser mode
-      // __NATIVE_DECK_INDEX__ / __NATIVE_POSTS__ are empty, so Grow reported "Designed
-      // carousels 0 / Authored posts 0" right under a sidebar reading 957 / 3299 — the same
-      // class of bug as the posts badge (198afb4). Use the same stable-collection contract:
-      // native index first, static boot corpus as the browser fallback.
-      var __growStableDecks = (window.__NATIVE_DECK_INDEX__ && window.__NATIVE_DECK_INDEX__.length)
-        ? window.__NATIVE_DECK_INDEX__
-        : (window.__STATIC_DECK_INDEX__ || []);
-      var __growDecks = __growStableDecks.length;
-      var __growStablePosts = (window.__NATIVE_POSTS__ && window.__NATIVE_POSTS__.length)
-        ? window.__NATIVE_POSTS__
-        : (window.ALL_CONTENT_DATA
-            ? window.ALL_CONTENT_DATA.filter(function (x) { return x && x.kind === 'post'; })
-            : []);
-      var __growPosts = __growStablePosts.length;
-      var __growIdeas = (Array.isArray(window.__HTML_IDEAS__) && window.__HTML_IDEAS__.length > 0)
-        ? window.__HTML_IDEAS__.length
-        : (Array.isArray(window.ALL_CONTENT_DATA) ? window.ALL_CONTENT_DATA.filter(function (x) { return x && (x.kind === 'idea' || (x.id && String(x.id).startsWith('idea:'))); }).length : 0);
+      // Corpus counts read ceCorpusCounts() — the single live-source reader
+      // (native store first, static boot catalog flagged when it has to answer).
+      // The pre-fix versions mixed three contracts: clean-subset poems (2,098
+      // printed vs 2,496 in the store), native-or-static decks/posts, and
+      // catalog ideas — the same contradiction class as the 2026-09-06 audit.
+      var __corpus = (typeof ceCorpusCounts === 'function')
+        ? ceCorpusCounts()
+        : { poems: 0, decks: 0, posts: 0, ideas: 0, byKind: {}, catalogKinds: [], anyCatalog: false };
+      var __growPoems = __corpus.poems;
+      var __growDecks = __corpus.decks;
+      var __growPosts = __corpus.posts;
+      var __growIdeas = __corpus.ideas;
+      var __corpusSrcNote = __corpus.anyCatalog
+        ? (__corpus.catalogKinds.length === 4
+            ? ' · static catalog'
+            : ' · ' + __corpus.catalogKinds.join(' + ') + ' from static catalog')
+        : '';
       var __growTotal = __growPoems + __growDecks + __growPosts + __growIdeas;
       var __growQueued = state.queueItems.length;
       var __growExported = state.queueItems.filter(q => q.exportStatus === 'EXPORTED').length;
@@ -17890,10 +18290,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         __gapLabel = __gapLen + ' quiet days · ' + __fortSlots[__gapStart].date.toLocaleDateString('en-IN', __gf) + ' → ' + __fortSlots[__gapStart + __gapLen - 1].date.toLocaleDateString('en-IN', __gf);
       }
       var __ledgerYoung = !!(__workMap.firstDay && __workMap.firstDay > __fortSlots[0].key);
+      /* The return reframe: when a landed post ended the longest recent
+         silence, the sentence names the comeback day and scores the window
+         since it — never the whole fortnight's flat average. */
+      var __returnInfo = (__gMeta.live && typeof ceReturnInfo === 'function') ? ceReturnInfo() : null;
       var __heroLine;
       if (__gMeta.live) {
         __heroLine = __landedN + ' landed → <b class="ce-fort-num">' + ceGrowFmtN(__engSum) + '</b> came back';
-        if (__landedN && __median && __median.value > 0) {
+        if (__returnInfo) {
+          __heroLine += ' · since you came back on ' + escapeHtml(__returnInfo.label);
+          if (__returnInfo.n && __returnInfo.median && __returnInfo.median.value > 0) {
+            var __rrBase = __returnInfo.matureN > 0 ? __returnInfo.matureEng / __returnInfo.matureN : __returnInfo.eng / __returnInfo.n;
+            var __rr = __rrBase / __returnInfo.median.value;
+            __heroLine += ' the audience answered ' + (__rr >= 10 ? String(Math.round(__rr)) : (Math.round(__rr * 10) / 10).toFixed(1)) + '× your usual';
+          }
+        } else if (__landedN && __median && __median.value > 0) {
           var __ratio = (__engSum / __landedN) / __median.value;
           __heroLine += ' · the audience answered ' + (__ratio >= 10 ? String(Math.round(__ratio)) : (Math.round(__ratio * 10) / 10).toFixed(1)) + '× your usual' + (__landedN === 1 ? ' · n=1' : '');
         }
@@ -17954,6 +18365,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           + (__median ? '<i class="ce-ans-med" style="left:' + Math.min(100, __median.value / __ansScale * 100).toFixed(1) + '%" title="' + escapeHtml('your ' + __median.year + ' usual · ' + ceGrowFmtN(__median.value)) + '"></i>' : '')
           + '</span></span></button>';
       };
+      var __ansVelocity = (__gMeta.live && typeof ceEngagementVelocityHtml === 'function') ? ceEngagementVelocityHtml() : '';
       var __ansInner;
       if (!__gMeta.live) {
         __ansInner = '<div class="ce-ans-empty">' + (window.__CE_META_HAS_TOKEN__ ? 'syncing Meta…' : 'unmeasured — connect Meta and the last posts line up against your usual') + '</div>';
@@ -17974,7 +18386,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           : 'IG week unmeasured — connect Meta')
         + ' · <b>' + __growMetaClock + '</b> on Meta\u2019s clock'
         + ' · <b>' + __growExported + '</b> exported'
-        + ' · library: <b>' + ceGrowFmtN(__growDecks) + '</b> designed carousels · <b>' + ceGrowFmtN(__growPoems) + '</b> poems · <b>' + ceGrowFmtN(__growPosts) + '</b> authored posts · <b>' + ceGrowFmtN(__growIdeas) + '</b> ideas';
+        + ' · library: <b>' + ceGrowFmtN(__growDecks) + '</b> designed carousels · <b>' + ceGrowFmtN(__growPoems) + '</b> poems · <b>' + ceGrowFmtN(__growPosts) + '</b> authored posts · <b>' + ceGrowFmtN(__growIdeas) + '</b> ideas'
+        + (__corpusSrcNote ? '<span class="ce-ledger-src">' + escapeHtml(__corpusSrcNote) + '</span>' : '');
 
       const growBox = document.createElement('div');
       growBox.className = 'ce-ops-shell ce-grow-shell';
@@ -17996,7 +18409,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         </section>
 
         <section class="ce-grow-answers" aria-label="The answers">
-          <div class="ce-section-heading"><div><h3>Their answers</h3></div><span class="ce-data-note">${__gMeta.live ? 'likes+comments · newest first' + (__gMeta.stale && __gMeta.fetchedAtIst ? ' · as of ' + escapeHtml(__gMeta.fetchedAtIst) : '') : 'needs Meta'}</span></div>
+          <div class="ce-section-heading"><div><h3>Their answers</h3></div>${__ansVelocity}<span class="ce-data-note">${__gMeta.live ? 'likes+comments · newest first' + (__gMeta.stale && __gMeta.fetchedAtIst ? ' · as of ' + escapeHtml(__gMeta.fetchedAtIst) : '') : 'needs Meta'}</span></div>
           ${__ansInner}
           ${__median && __ansShown.length ? '<div class="ce-ans-legend">your ' + escapeHtml(__median.year) + ' usual · ' + ceGrowFmtN(__median.value) + '</div>' : ''}
         </section>
@@ -18024,10 +18437,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         <details class="ce-grow-more-moves">
           <summary>More moves <span>Open only when you need another path</span></summary>
           <section class="ce-readiness-row ce-grow-readiness" aria-label="Local inventory">
-            <div><span>Designed carousels</span><strong>${__growDecks.toLocaleString()}</strong><small>in Library · local only</small></div>
-            <div><span>Poems</span><strong>${__growPoems.toLocaleString()}</strong><small>${__growPoems === 1 ? 'poem' : 'poems'} in Library · local only</small></div>
-            <div><span>Authored posts</span><strong>${__growPosts.toLocaleString()}</strong><small>${__growPosts === 1 ? 'post' : 'posts'} · local only</small></div>
-            <div><span>Ideas</span><strong>${__growIdeas.toLocaleString()}</strong><small>not postable yet</small></div>
+            <div><span>Designed carousels</span><strong>${__growDecks.toLocaleString()}</strong><small>in Library · ${__corpus.byKind.decks === 'catalog' ? 'static catalog' : 'local only'}</small></div>
+            <div><span>Poems</span><strong>${__growPoems.toLocaleString()}</strong><small>${__growPoems === 1 ? 'poem' : 'poems'} in Library · ${__corpus.byKind.poems === 'catalog' ? 'static catalog' : 'local only'}</small></div>
+            <div><span>Authored posts</span><strong>${__growPosts.toLocaleString()}</strong><small>${__growPosts === 1 ? 'post' : 'posts'} · ${__corpus.byKind.posts === 'catalog' ? 'static catalog' : 'local only'}</small></div>
+            <div><span>Ideas</span><strong>${__growIdeas.toLocaleString()}</strong><small>${__corpus.byKind.ideas === 'catalog' ? 'static catalog · ' : ''}not postable yet</small></div>
           </section>
           <div class="ce-loop-steps">
             <button type="button" data-ce-go="library" data-ce-library="carousels"><span>01</span><strong>Choose a designed piece</strong><small>Open the real carousel or post in Studio.</small></button>
@@ -18505,11 +18918,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
         <section class="ce-launch-continuum ce-launch-week" aria-label="Two-week day continuum">${__contCells.join('')}</section>
 
-        <section class="ce-launch-board-head">
-          <div class="ce-launch-board-cadence" aria-label="Board length">
-            ${[3, 7, 14, 30].map(function (n) { return '<button type="button" aria-label="Show ' + n + '-day board" title="Show ' + n + '-day board" data-ce-plan-days="' + n + '" class="' + (n === __planLen ? 'is-on' : '') + (!__designed.length ? ' is-disabled' : '') + '"' + (!__designed.length ? ' disabled aria-disabled="true"' : '') + '>' + n + 'd</button>'; }).join('')}
-          </div>
-        </section>
+        <div class="ce-launch-board-cadence" aria-label="Board length">
+          ${[3, 7, 14, 30].map(function (n) { return '<button type="button" aria-label="Show ' + n + '-day board" title="Show ' + n + '-day board" data-ce-plan-days="' + n + '" class="' + (n === __planLen ? 'is-on' : '') + (!__designed.length ? ' is-disabled' : '') + '"' + (!__designed.length ? ' disabled aria-disabled="true"' : '') + '>' + n + 'd</button>'; }).join('')}
+        </div>
 
         ${ceLaunchPulseHtml()}
 
@@ -18837,7 +19248,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var title = opts.title != null ? String(opts.title) : parts.title;
     var detail = opts.detail != null ? String(opts.detail) : parts.detail;
 
-    var accent = variant === 'error' ? '#f87171' : (variant === 'warn' ? '#fbbf24' : '#34d399');
+    var accent = (variant === 'error' || variant === 'warn') ? 'var(--muted)' : '#34d399';
     toast.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:99999;'
       + 'width:min(392px, calc(100vw - 40px)); box-sizing:border-box;'
       + 'padding:13px 14px 13px 13px; border-radius:14px;'
@@ -19378,6 +19789,95 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return null;
   }
 
+  /* The return: the first landed day that ends the longest posting silence —
+     claimed only when that landing is itself recent (inside the fortnight)
+     and the silence was real (>=3 empty days, the same bar the quiet-days
+     label uses). Ancient gaps stay ancient; a still-running silence has no
+     landing after it, so it never counts. Returns null when none exists. */
+  function ceReturnInfo() {
+    var rows = ceIgMediaRows();
+    if (rows.length < 2) return null;
+    var dayNum = function (k) {
+      var p = String(k || '').split('-');
+      return p.length === 3 ? Math.round(Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2])) / 86400000) : NaN;
+    };
+    var seen = {}, days = [];
+    rows.forEach(function (m) {
+      var n = dayNum(m.day);
+      if (isFinite(n) && !seen[m.day]) { seen[m.day] = true; days.push({ k: m.day, n: n }); }
+    });
+    days.sort(function (a, b) { return a.n - b.n; });
+    if (days.length < 2) return null;
+    var minDay = dayNum(ceIstDateKey(new Date())) - 13;
+    var best = null;
+    for (var i = 1; i < days.length; i++) {
+      var silent = days[i].n - days[i - 1].n - 1;
+      if (!isFinite(days[i].n) || days[i].n < minDay || silent < 3) continue;
+      if (!best || silent > best.silent || (silent === best.silent && days[i].n > best.n)) {
+        best = { day: days[i].k, n: days[i].n, silent: silent };
+      }
+    }
+    if (!best) return null;
+    var eng = 0, n = 0, firstTs = 0, mEng = 0, mN = 0;
+    var __nowS = Date.now() / 1000;
+    rows.forEach(function (m) {
+      var d = dayNum(m.day);
+      if (!isFinite(d) || d < best.n) return;
+      eng += m.eng; n++;
+      /* Still-counting posts (<24h) can't score against the year median —
+         the answers rail already labels them 'still counting · early'. */
+      if (m.ts && (__nowS - m.ts) >= 86400) { mEng += m.eng; mN++; }
+      if (d === best.n && (!firstTs || m.ts < firstTs)) firstTs = m.ts;
+    });
+    return {
+      day: best.day,
+      ts: firstTs || best.n * 86400,
+      label: new Date(best.n * 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' }),
+      silent: best.silent,
+      n: n,
+      eng: eng,
+      matureEng: mEng,
+      matureN: mN,
+      median: ceYearMedian()
+    };
+  }
+
+  /* Engagement velocity: per-media likes+comments snapshotted to
+     localStorage (max one write per 20 min, cap 60). Velocity = the newest
+     snap's total minus the closest snap >=1h older, counted per mediaId so a
+     fresh post's early count lands whole. Text only — never a bar. */
+  function ceEngagementVelocityHtml() {
+    var rows = ceIgMediaRows();
+    if (!rows.length) return '';
+    var map = {};
+    rows.forEach(function (m) { if (m.id) map[m.id] = m.eng; });
+    if (!Object.keys(map).length) return '';
+    var now = Date.now();
+    var snaps = [];
+    try { snaps = JSON.parse(localStorage.getItem('ce_engagement_snaps') || '[]'); } catch (_e) { snaps = []; }
+    if (!Array.isArray(snaps)) snaps = [];
+    snaps = snaps.filter(function (s) { return s && Number(s.ts) > 0 && s.map && typeof s.map === 'object'; });
+    var latest = snaps.length ? snaps[snaps.length - 1] : null;
+    if (!latest || now - Number(latest.ts) >= 20 * 60 * 1000) {
+      latest = { ts: now, map: map };
+      snaps.push(latest);
+      while (snaps.length > 60) snaps.shift();
+      try { localStorage.setItem('ce_engagement_snaps', JSON.stringify(snaps)); } catch (_w) {}
+    }
+    var base = null;
+    for (var i = snaps.length - 2; i >= 0; i--) {
+      if (Number(latest.ts) - Number(snaps[i].ts) >= 3600000) { base = snaps[i]; break; }
+    }
+    if (!base) return '';
+    var delta = 0;
+    Object.keys(latest.map).forEach(function (k) {
+      delta += (Number(latest.map[k]) || 0) - (Number(base.map[k]) || 0);
+    });
+    if (delta <= 0) return '<span class="ce-ans-velocity is-flat">flat this hour</span>';
+    var hrs = Math.max(1, Math.round((Number(latest.ts) - Number(base.ts)) / 3600000));
+    return '<span class="ce-ans-velocity">+' + ceGrowFmtN(delta) + ' in the last ' + hrs + 'h</span>';
+  }
+
   /* The fortnight substrate: ce_day_events bucketed by the day the work HAPPENED
      (event ts), plus owner-marked quiet days (dayKey) and the first ledger day —
      the pre-ledger era draws as a hatched "before the ledger" zone and is never
@@ -19435,6 +19935,29 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var cx = xFor(Number(r.ts)), cy = yFor(Number(r[key]) || 0);
       return '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + (i === vis.length - 1 ? '2.6' : '1.5') + '" class="ce-tide-dot' + (i === vis.length - 1 ? ' is-last' : '') + '"></circle>';
     }).join('');
+    /* Per-snapshot delta ticks at the baseline: accent when the stored count
+       rose since the previous snapshot, muted when it fell or held — real
+       upticks draw even inside a declining window. A point with no earlier
+       stored row gets no tick; nothing is invented. */
+    var visStart = rows.length - vis.length;
+    var ticks = vis.map(function (r, i) {
+      var prev = (visStart + i - 1 >= 0) ? rows[visStart + i - 1] : null;
+      if (!prev) return '';
+      var d = (Number(r[key]) || 0) - (Number(prev[key]) || 0);
+      var cx = xFor(Number(r.ts));
+      return '<line x1="' + cx.toFixed(1) + '" y1="' + (H - pad).toFixed(1) + '" x2="' + cx.toFixed(1) + '" y2="' + (H - pad + 2.5).toFixed(1) + '" class="ce-tide-tick' + (d > 0 ? ' is-up' : '') + '" vector-effect="non-scaling-stroke"></line>';
+    }).join('');
+    /* The return hairline: the first landed post after the longest recent
+       silence, drawn only when that day sits inside this chart's window. */
+    var __retInfo = (typeof ceReturnInfo === 'function') ? ceReturnInfo() : null;
+    var __retX = __retInfo ? (Number(__retInfo.ts) - t0) / (tEnd - t0) * W : -1;
+    var __retIn = !!(__retInfo && isFinite(__retX) && __retX >= 0 && __retX <= W);
+    var __retMark = __retIn
+      ? '<line x1="' + __retX.toFixed(1) + '" y1="0" x2="' + __retX.toFixed(1) + '" y2="' + (H - pad).toFixed(1) + '" class="ce-tide-return" vector-effect="non-scaling-stroke"></line>'
+      : '';
+    var __retTag = __retIn
+      ? '<span class="ce-tide-return-label" style="left:' + Math.min(90, Math.max(10, __retX / W * 100)).toFixed(1) + '%">the return · ' + escapeHtml(__retInfo.label) + '</span>'
+      : '';
     var latest = Number(rows[rows.length - 1][key]) || 0;
     var first = vis.length ? (Number(vis[0][key]) || 0) : latest;
     var spanDays = Math.max(1, Math.round((tEnd - Number(vis.length ? vis[0].ts : tEnd)) / 86400));
@@ -19448,12 +19971,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return '<div class="ce-tide-lane' + (meta.stale ? ' is-stale' : '') + '">'
       + label
       + '<strong class="ce-tide-end">' + ceGrowFmtN(latest) + '</strong>' + deltaHtml + '</div>'
+      + '<div class="ce-tide-plot">'
       + '<svg class="ce-tide-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="' + escapeHtml(name) + ' follower snapshots, unsmoothed">'
       + (hatchW > 2 ? '<defs><pattern id="ce-tide-hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="rgba(237,232,223,.04)"></rect><line x1="0" y1="0" x2="0" y2="7" stroke="rgba(237,232,223,.16)" stroke-width="1"></line></pattern></defs><rect x="0" y="0" width="' + hatchW.toFixed(1) + '" height="' + H + '" class="ce-tide-void-fill" fill="url(#ce-tide-hatch)"></rect>' : '')
       + '<line x1="0" y1="' + (H - pad) + '" x2="' + W + '" y2="' + (H - pad) + '" class="ce-tide-base"></line>'
+      + ticks
       + (pts.length > 1 ? '<polyline points="' + pts.join(' ') + '" class="ce-tide-line"></polyline>' : '')
       + dots
+      + __retMark
       + '</svg>'
+      + __retTag
+      + '</div>'
       + '<div class="ce-tide-foot">'
       + (hatchW > 2 ? '<span class="ce-tide-void-label">no snapshots before ' + escapeHtml(firstLabel) + '</span>' : '<span></span>')
       + '<span>' + vis.length + ' snapshots · unsmoothed · axis ' + ceGrowFmtN(vMin) + '–' + ceGrowFmtN(vMax) + '</span>'
@@ -20588,23 +21116,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     try { rows = (typeof allNativePoemRows === 'function') ? allNativePoemRows() : []; } catch (_r) { rows = []; }
     // 2026-09-06 external audit (A-3): `last.decks`/`last.posts` are PER-SURFACE
     // state — whichever library surface rendered last overwrites them, so the
-    // carousel/post badges blanked everywhere except their own surface. The two
-    // badges now read the STABLE collection globals (native index first, static
-    // boot index as the browser fallback), exactly like the poem badge reads the
-    // stable clean collection. Same contract as O-4: collection total, everywhere.
-    var stableDecks = (window.__NATIVE_DECK_INDEX__ && window.__NATIVE_DECK_INDEX__.length)
-      ? window.__NATIVE_DECK_INDEX__
-      : (window.__STATIC_DECK_INDEX__ || []);
-    var stablePosts;
-    try { stablePosts = (window.__NATIVE_POSTS__ && window.__NATIVE_POSTS__.length)
-      ? window.__NATIVE_POSTS__
-      : ((typeof ceSafePurePosts === 'function') ? ceSafePurePosts() : []); }
-    catch (_p2) { stablePosts = window.__NATIVE_POSTS__ || []; }
-    // Browser-mode fallback: the native globals are absent there, so read the
-    // same boot corpus the posts surface itself renders from.
-    if (!(stablePosts && stablePosts.length) && Array.isArray(window.ALL_CONTENT_DATA)) {
-      try { stablePosts = window.ALL_CONTENT_DATA.filter(function (x) { return x && x.kind === 'post'; }); } catch (_p3) { stablePosts = []; }
-    }
+    // carousel/post badges blanked everywhere except their own surface.
+    // 2026-09-17 corpus-count truth: all three parent badges now read
+    // ceCorpusCounts() — the same single live-source reader the Grow ledger
+    // prints — so badge and ledger can never disagree again. (Pre-fix the poem
+    // badge read the clean shelf subset, 2,098 vs the store's 2,496.)
+    var __badgeCorpus = (typeof ceCorpusCounts === 'function')
+      ? ceCorpusCounts()
+      : { poems: 0, decks: 0, posts: 0 };
 
     // E-002 fix 2026-09-05: the parent Poems badge changed meaning with navigation
     // (rail subset 1385 while browsing poems vs full collection 2099 elsewhere, and
@@ -20619,13 +21138,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     // deleted the `var poemBadgeN` declaration — every call then died on a
     // ReferenceError swallowed by this try/catch and all six library badges froze
     // at their HTML defaults. Declaration restored; keep it adjacent to setters.)
-    var poemBadgeN = (clean && clean.length) ? clean.length : (Array.isArray(rail) ? rail.length : 0);
+    var poemBadgeN = __badgeCorpus.poems || (Array.isArray(rail) ? rail.length : 0);
     // If masonry already painted cards, never leave the HTML default 0.
     var mounted = Number(window.__CE_POEM_MOUNTED_COUNT__ || 0);
     if (poemBadgeN === 0 && mounted > 0) poemBadgeN = mounted;
     setCount('nav-poem-count', poemBadgeN);
-    setCount('nav-carousel-count', Array.isArray(stableDecks) ? stableDecks.length : 0);
-    setCount('nav-post-count', Array.isArray(stablePosts) ? stablePosts.length : 0);
+    setCount('nav-carousel-count', __badgeCorpus.decks);
+    setCount('nav-post-count', __badgeCorpus.posts);
 
     function eraCount(era) {
       // The All rail renders clean minus long poems (long poems live on their

@@ -1883,3 +1883,355 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip-track {
   align-items: flex-start !important;
   padding-top: 12px !important;
 }
+
+/* ==========================================================================
+   PHONE SURFACE REPAIR (owner screenshot audit, live-measured 390x844 on the
+   served bundle, 2026-09-17).
+   Measured before this block: the Write editor held the desktop 360px fixed
+   textarea inside a 665px mostly-empty card; the shared topbar ran ~406px of
+   controls on a 390px row so Search crushed to a 44px "Se" and the last icon
+   clipped; the "shown smaller than authored" chip painted over the poem's own
+   lines; the resting poem dock leaked a clipped "BACKDROP" label under the
+   56px Tools row; and phone chrome still ran the warm tangerine gradient
+   (Add to Plan) and teal (Schedule, Grow/Launch CTAs) on forward actions.
+   Every rule is html.ce-phone scoped or inside @media (max-width:700px) —
+   zero desktop leakage.
+   ========================================================================== */
+
+/* ---- Palette: crimson tokens replace warm/teal on phone chrome ----
+   The desktop keeps the owner-locked 2026-09-01 tangerine->crimson family.
+   On the phone the whole family rebinds to the crimson tokens
+   (accent #bf4b5d / accent-2 #d96a7c / deep #8e2f3d). Decline/refusal
+   controls never read --accent (they are dim bone by their own rules), so
+   they stay dim — nothing here can turn a refusal red. */
+html.ce-phone {
+  --accent: #bf4b5d;
+  --accent-hover: #d96a7c;
+  --accent-press: #8e2f3d;
+  --accent-text: #d96a7c;
+  --accent-tint: rgba(191, 75, 93, 0.16);
+  --accent-border: rgba(191, 75, 93, 0.42);
+  --accent-glow: rgba(191, 75, 93, 0.32);
+  --tangerine: #bf4b5d;
+  --tangerine-light: #d96a7c;
+  --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+  --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
+  --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
+  --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
+  --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.07), transparent 45%);
+}
+/* body.bright-theme re-declares the family one element closer to the
+   controls, so the phone rebind must be restated at body depth or cream
+   mode keeps the warm literals. */
+html.ce-phone body.bright-theme {
+  --accent: #b13a4c;
+  --accent-hover: #bf4b5d;
+  --accent-press: #8e2f3d;
+  --accent-text: #b13a4c;
+  --accent-tint: rgba(191, 75, 93, 0.12);
+  --accent-border: rgba(191, 75, 93, 0.38);
+  --accent-glow: rgba(191, 75, 93, 0.25);
+  --tangerine: #bf4b5d;
+  --tangerine-light: #d96a7c;
+  --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+  --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
+  --grad-accent-text: linear-gradient(135deg, #bf4b5d, #8e2f3d);
+  --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
+  --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.09), transparent 45%);
+}
+/* Grow/Launch shells rebind the family to teal AT SHELL LEVEL, so the
+   html-level rebind above never reaches inside them; restate at the same
+   depth on phone. */
+html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
+  --accent: #bf4b5d;
+  --accent-text: #d96a7c;
+  --accent-border: rgba(191, 75, 93, 0.35);
+  --accent-tint: rgba(191, 75, 93, 0.14);
+  --accent-glow: rgba(191, 75, 93, 0.28);
+  --accent-hover: #d96a7c;
+  --accent-press: #8e2f3d;
+  --tangerine: #bf4b5d;
+  --tangerine-light: #d96a7c;
+  --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+  --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
+  --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
+  --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
+  --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.06), transparent 45%);
+}
+@media (max-width: 700px) {
+  :root {
+    --accent: #bf4b5d;
+    --accent-hover: #d96a7c;
+    --accent-press: #8e2f3d;
+    --accent-text: #d96a7c;
+    --accent-tint: rgba(191, 75, 93, 0.16);
+    --accent-border: rgba(191, 75, 93, 0.42);
+    --accent-glow: rgba(191, 75, 93, 0.32);
+    --tangerine: #bf4b5d;
+    --tangerine-light: #d96a7c;
+    --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+    --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
+    --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
+    --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
+    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.07), transparent 45%);
+  }
+  body.bright-theme {
+    --accent: #b13a4c;
+    --accent-hover: #bf4b5d;
+    --accent-press: #8e2f3d;
+    --accent-text: #b13a4c;
+    --accent-tint: rgba(191, 75, 93, 0.12);
+    --accent-border: rgba(191, 75, 93, 0.38);
+    --accent-glow: rgba(191, 75, 93, 0.25);
+    --tangerine: #bf4b5d;
+    --tangerine-light: #d96a7c;
+    --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+    --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
+    --grad-accent-text: linear-gradient(135deg, #bf4b5d, #8e2f3d);
+    --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
+    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.09), transparent 45%);
+  }
+  .ce-grow-shell, .ce-launch-workbench {
+    --accent: #bf4b5d;
+    --accent-text: #d96a7c;
+    --accent-border: rgba(191, 75, 93, 0.35);
+    --accent-tint: rgba(191, 75, 93, 0.14);
+    --accent-glow: rgba(191, 75, 93, 0.28);
+    --accent-hover: #d96a7c;
+    --accent-press: #8e2f3d;
+    --tangerine: #bf4b5d;
+    --tangerine-light: #d96a7c;
+    --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+    --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
+    --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
+    --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
+    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.06), transparent 45%);
+  }
+}
+/* The injected web Schedule button hardcodes teal inline (ce-touch-edit.js
+   writes style.cssText with a NON-important #2e6f5e), so a stylesheet
+   !important rebinds it to the crimson family. */
+html.ce-phone #ce-web-schedule-btn {
+  background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #fff !important;
+}
+@media (max-width: 700px) {
+  #ce-web-schedule-btn {
+    background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    color: #fff !important;
+  }
+}
+/* The Plan mix-bar "poems" legend chip was a leftover orange literal
+   (#e8863a). accent-2 keeps it distinct from the carousels chip. */
+html.ce-phone .is-poems { background: #d96a7c !important; }
+@media (max-width: 700px) {
+  .is-poems { background: #d96a7c !important; }
+}
+/* The download-pack gradient predates the token set — same crimson family. */
+html.ce-phone .studio-topbar #studio-download-pack-btn {
+  background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
+}
+@media (max-width: 700px) {
+  .studio-workspace .studio-topbar #studio-download-pack-btn {
+    background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
+  }
+}
+
+/* ---- Write: the desktop fixed-360px textarea was the "giant mostly-empty
+   card" (the .ce-write-editor section measured 665px for an empty draft).
+   Content-sized now: field-sizing where supported, a 150px floor so an
+   empty draft still reads as a writing surface, and a 34vh cap so it never
+   eats the screen again. The fieldbar gets real padding so "Saved on this
+   Mac / N characters" stops hugging the card's bottom border. */
+html.ce-phone .ce-write-field textarea {
+  height: auto !important;
+  min-height: 150px !important;
+  max-height: 34vh !important;
+  field-sizing: content;
+}
+html.ce-phone .ce-write-fieldbar { padding: 10px 22px 12px !important; }
+@media (max-width: 700px) {
+  .ce-write-field textarea {
+    height: auto !important;
+    min-height: 150px !important;
+    max-height: 34vh !important;
+    field-sizing: content;
+  }
+  .ce-write-fieldbar { padding: 10px 22px 12px !important; }
+}
+
+/* ---- Shared topbar: measured ~406px of controls on a 390px row — Search
+   crushed to a 44px "Se" stub and the theme toggle clipped at the right
+   edge on every non-Library tab. The one-row law predates the Cadence
+   control, and --topbar-h is published live by ceSyncTopbarHeight() (the
+   old reason wrapping was banned: content slid under a mis-measured bar).
+   Wrap to two rows exactly like the poem-library bar already does; on
+   wider phones everything still fits one row. */
+@media (max-width: 700px) {
+  .topbar, .app-topbar {
+    flex-wrap: wrap !important;
+    row-gap: 6px !important;
+    padding-bottom: 6px !important;
+  }
+  .topbar > div[style*="margin-left:auto"],
+  .app-topbar > div[style*="margin-left:auto"] {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+}
+html.ce-phone .topbar, html.ce-phone .app-topbar {
+  flex-wrap: wrap !important;
+  row-gap: 6px !important;
+  padding-bottom: 6px !important;
+}
+html.ce-phone .topbar > div[style*="margin-left:auto"],
+html.ce-phone .app-topbar > div[style*="margin-left:auto"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+/* ---- Wrapped-topbar content clearance (surface-floor occlusion 2026-09-17).
+   --topbar-h was never stale: it measures 105-111px live once the bar wraps.
+   The broken link is the RESERVATION — .main-content owns it (index.html:1279)
+   but native-ideas.js swaps #view's class to `view ce-ideas-parity` and nothing
+   restores main-content, so after one Ideas visit every later surface keeps a
+   hardcoded 52px self-pad (native-ideas.css <=760px block) under a ~105px bar.
+   Bind the clearance to #view itself — the scroll container every surface
+   renders into — so the pad is always the measured bar height, same contract
+   as the poem-library rule at 1791. Fallback 108 covers the no-measure first
+   frame; when the bar fits one row the var reads ~54 and the pad follows it. */
+@media (max-width: 700px) {
+  #view { padding-top: var(--topbar-h, calc(108px + env(safe-area-inset-top, 0px))) !important; }
+}
+html.ce-phone #view {
+  padding-top: var(--topbar-h, calc(108px + env(safe-area-inset-top, 0px))) !important;
+}
+
+/* ---- Poem/post dock resting state: the 56px clip showed the 44px Tools
+   row plus a 12px peek of the first section, so "BACKDROP" ghosted under
+   the row on every closed workbench. Closed dock shows the toggle only;
+   the sections return when the sheet opens. */
+html.ce-phone .studio-workspace:not(.is-carousel-mode):not(.ce-tools-open) #studio-dock > :not(.ce-tools-toggle) {
+  display: none !important;
+}
+@media (max-width: 700px) {
+  .studio-workspace:not(.is-carousel-mode):not(.ce-tools-open) #studio-dock > :not(.ce-tools-toggle) {
+    display: none !important;
+  }
+}
+
+/* ---- "shown smaller than authored" chip: it floated at the wrap's
+   top-right over the poem's own lines (and over the slide card's top edge
+   on carousel). The wrap is overflow:hidden, so anything docked outside
+   its box is clipped — the chip goes position:fixed (no transformed
+   ancestors on this surface, verified live) and docks per state, always
+   clear of the artwork:
+     closed      — bottom-right of the stage, just above the TOOLS row
+                   (the stage's dead space under the canvas);
+     tools open  — a vertical tab in the stage's right gutter, anchored
+                   above the sheet (the canvas narrows to ~249px, so the
+                   gutter is free top to bottom);
+     carousel    — inside the wrap at the gallery header band above the
+                   slide card (the "1/15" row; the card starts ~195px). */
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-canvas-wrap[data-ce-fit-below-authored]::after {
+  position: fixed !important;
+  top: auto !important;
+  right: 12px !important;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+  left: auto !important;
+}
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-canvas-wrap[data-ce-fit-below-authored]::after {
+  position: fixed !important;
+  top: auto !important;
+  right: 12px !important;
+  bottom: calc(42vh + 8px) !important;
+  left: auto !important;
+  writing-mode: vertical-rl !important;
+  padding: 10px 4px !important;
+}
+html.ce-phone .studio-workspace.is-carousel-mode .studio-canvas-wrap[data-ce-fit-below-authored]::after {
+  top: 6px !important;
+  right: 12px !important;
+}
+@media (max-width: 700px) {
+  .studio-workspace:not(.is-carousel-mode) .studio-canvas-wrap[data-ce-fit-below-authored]::after {
+    position: fixed !important;
+    top: auto !important;
+    right: 12px !important;
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    left: auto !important;
+  }
+  .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-canvas-wrap[data-ce-fit-below-authored]::after {
+    position: fixed !important;
+    top: auto !important;
+    right: 12px !important;
+    bottom: calc(42vh + 8px) !important;
+    left: auto !important;
+    writing-mode: vertical-rl !important;
+    padding: 10px 4px !important;
+  }
+  .studio-workspace.is-carousel-mode .studio-canvas-wrap[data-ce-fit-below-authored]::after {
+    top: 6px !important;
+    right: 12px !important;
+  }
+}
+
+/* ---- Carousel tools-open: ce-touch-edit.js portals the inspector to
+   <body> and pins it position:fixed !important INLINE (50vh sheet) — no
+   stylesheet can move it, and the filmstrip fitter does not refit on
+   resize, so the sheet covered the slide's bottom half. Until the fitter
+   reserves the sheet space in JS, scale the slides into the window the
+   sheet leaves (the whole slide stays visible; nothing is crowded).
+   Cards carry no inline transform (verified live), so this is safe. */
+html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-filmstrip-card {
+  transform: scale(0.46) !important;
+  transform-origin: top center !important;
+}
+@media (max-width: 700px) {
+  .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-filmstrip-card {
+    transform: scale(0.46) !important;
+    transform-origin: top center !important;
+  }
+}
+
+/* ---- Caption chips: the old rule set nowrap + overflow-x on the COLUMN
+   container (dead CSS — a column flex wraps vertically, so the chips
+   never actually got the scroll strip). The brief is wrap-with-gap: keep
+   the container a column and make the two chip rows wrap explicitly with
+   a real gap, and drop the horizontal clip. */
+html.ce-phone #ce-poem-caption-panel .ce-caption-chips {
+  flex-wrap: nowrap !important;
+  overflow-x: visible !important;
+}
+html.ce-phone #ce-poem-caption-panel .ce-caption-group-row,
+html.ce-phone #ce-poem-caption-panel .ce-caption-pick-row {
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+@media (max-width: 700px) {
+  #ce-poem-caption-panel .ce-caption-group-row,
+  #ce-poem-caption-panel .ce-caption-pick-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+}
+
+/* ---- Launch intelligence head: the strong ("7-day p…") clipped mid-word
+   with no ellipsis because only the sibling <small> had the ellipsis
+   rules. Give the strong the same honest truncation. */
+html.ce-phone .ce-launch-intelligence-head > div > strong {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  min-width: 0 !important;
+}
+@media (max-width: 700px) {
+  .ce-launch-intelligence-head > div > strong {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+  }
+}
