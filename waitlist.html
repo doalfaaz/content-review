@@ -3,8 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Aham Brahmasmi 2.0 — VIP Waitlist</title>
-<meta name="description" content="Join the VIP Waitlist for Aham Brahmasmi 2.0. Be the first when doors open.">
+<title>Aham Brahmasmi 2.0 · recorded course</title>
+<meta name="description" content="A recorded course on the gap between knowing and doing. ₹1,999 once, lifetime access, 14-day refund, no deadline.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Aham Brahmasmi 2.0 · recorded course">
+<meta property="og:description" content="A recorded course on the gap between knowing and doing. ₹1,999 once, lifetime access, 14-day refund, no deadline.">
+<meta property="og:image" content="https://doalfaaz.github.io/content-review/apple-touch-icon.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://doalfaaz.github.io/content-review/apple-touch-icon.png">
+<meta name="theme-color" content="#09090c">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
@@ -15,7 +24,7 @@
   --gold: #c8a96e; --gold-dim: #a08550; --gold-pale: #e8d5a8;
   --gold-glow: rgba(200,169,110,0.10); --gold-glow2: rgba(200,169,110,0.18);
   --green: #4ade80; --green-bg: rgba(74,222,128,0.08);
-  --text: #ede9e2; --text2: #a8a098; --text3: #666058;
+  --text: #ede9e2; --text2: #a8a098; --text3: #918a82;
   --border: rgba(255,255,255,0.06); --border-gold: rgba(200,169,110,0.22);
   --radius: 8px; --radius-lg: 12px;
   --sans: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -64,42 +73,26 @@ a { color: var(--gold); text-decoration: none; }
   font-style: italic; line-height: 1.7;
 }
 
-/* COUNTDOWN */
-.countdown-section { padding: 40px 0; }
-.countdown-card {
+/* OFFER */
+.offer-section { padding: 40px 0; }
+.offer-card {
   background: var(--surface); border: 1px solid var(--border-gold);
   border-radius: var(--radius-lg); padding: 36px 32px; text-align: center;
   position: relative; overflow: hidden;
 }
-.countdown-card::before {
+.offer-card::before {
   content: ''; position: absolute; inset: 0;
   background: radial-gradient(ellipse at 50% 0%, var(--gold-glow2) 0%, transparent 60%);
   pointer-events: none;
 }
-.countdown-label {
+.offer-label {
   font-size: 0.62rem; font-weight: 600; letter-spacing: 0.22em;
   text-transform: uppercase; color: var(--gold-dim); margin-bottom: 20px;
 }
-.countdown-grid {
-  display: flex; justify-content: center; gap: 16px; margin-bottom: 20px;
-  position: relative;
-}
-.cd-unit {
-  background: var(--bg3); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px 20px; min-width: 72px;
-}
-.cd-num {
-  font-size: 2.4rem; font-weight: 700; color: var(--gold);
-  letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums;
-}
-.cd-lbl {
-  font-size: 0.58rem; font-weight: 500; letter-spacing: 0.15em;
-  text-transform: uppercase; color: var(--text3); margin-top: 6px;
-}
-.countdown-target {
-  font-size: 0.85rem; color: var(--text2); margin-top: 4px;
-}
-.countdown-target strong { color: var(--gold); font-weight: 500; }
+.offer-facts { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 18px; position:relative; }
+.offer-facts span { color:var(--text2); font-size:.82rem; }
+.offer-price { position:relative; margin:6px 0 14px; font-size:clamp(2.2rem,8vw,3.4rem); line-height:1; color:var(--gold); font-weight:600; font-variant-numeric:tabular-nums; }
+.offer-note { position:relative; color:var(--text2); font-size:.84rem; margin-top:18px; }
 
 /* WAITLIST CTA */
 .cta-section { padding: 48px 0; text-align: center; }
@@ -131,6 +124,7 @@ a { color: var(--gold); text-decoration: none; }
 .capture-form input:focus { border-color: var(--gold-dim); }
 .capture-form input::placeholder { color: var(--text3); }
 .capture-form .cta-main { width: 100%; margin-top: 4px; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 .capture-or {
   margin-top: 26px; font-size: 0.78rem; color: var(--text3);
 }
@@ -228,31 +222,27 @@ footer {
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-brand">Aham Brahmasmi 2.0</div>
-  <div class="nav-status pulse">Waitlist Open</div>
+  <div class="nav-status">Doors open</div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
   <div class="container">
-    <div class="hero-eyebrow">After 3 years of silence</div>
+    <div class="hero-eyebrow">One recorded course · no deadline</div>
     <h1>You are not broken.<br><em>You are entangled.</em></h1>
     <p class="hero-sub">Advaita Vedanta + modern psychology. For the mind that argues with itself all night.</p>
-    <p class="hero-voice">"Main 3 saal ke liye gayab ho gaya tha. Apne peak par. Ab wapas aa raha hoon — aur jo seekha hai, wo ek structured path mein samet diya hai."</p>
+  <p class="hero-voice">"Main 3 saal ke liye gayab ho gaya tha. Apne peak par. Ab wapas aa raha hoon. Jo seekha hai, wo ek structured path mein samet diya hai."</p>
   </div>
 </section>
 
-<!-- COUNTDOWN -->
-<section class="countdown-section">
+<!-- OFFER -->
+<section class="offer-section">
   <div class="container">
-    <div class="countdown-card">
-      <div class="countdown-label">Doors Open In</div>
-      <div class="countdown-grid">
-        <div class="cd-unit"><div class="cd-num" id="cdDays">00</div><div class="cd-lbl">Days</div></div>
-        <div class="cd-unit"><div class="cd-num" id="cdHours">00</div><div class="cd-lbl">Hours</div></div>
-        <div class="cd-unit"><div class="cd-num" id="cdMins">00</div><div class="cd-lbl">Mins</div></div>
-        <div class="cd-unit"><div class="cd-num" id="cdSecs">00</div><div class="cd-lbl">Secs</div></div>
-      </div>
-      <div class="countdown-target">Saturday · 8:00 PM IST</div>
+    <div class="offer-card">
+      <div class="offer-label">The offer, stated once</div>
+      <div class="offer-price">₹1,999</div>
+      <div class="offer-facts"><span>15+ hours</span><span>50+ lessons</span><span>Lifetime access</span><span>14-day refund</span></div>
+      <p class="offer-note">Recorded, self-paced, and evergreen. No clock, no tiers, no pressure.</p>
     </div>
   </div>
 </section>
@@ -261,13 +251,15 @@ footer {
 <section class="cta-section" id="join">
   <div class="container">
     <form class="capture-form" id="wlForm" autocomplete="on">
-      <input type="text" id="wlName" name="name" placeholder="Your name" required maxlength="60">
-      <input type="tel" id="wlNum" name="whatsapp" placeholder="Your WhatsApp number" required maxlength="15">
-      <button type="submit" class="cta-main">Join VIP Waitlist on WhatsApp →</button>
+      <label class="sr-only" for="wlName">Your name</label>
+      <input type="text" id="wlName" name="name" placeholder="Your name" autocomplete="name" required maxlength="60">
+      <label class="sr-only" for="wlNum">Your WhatsApp number</label>
+      <input type="tel" id="wlNum" name="whatsapp" placeholder="Your WhatsApp number" autocomplete="tel" inputmode="tel" required maxlength="15">
+      <button type="submit" class="cta-main">Ask for course details on WhatsApp →</button>
     </form>
-    <p class="cta-sub">Tapping the button opens your own WhatsApp with the message ready —<br>hit send and your seat on the list is locked.</p>
-    <div class="cta-promise">✓ You'll be the first to get the link when doors open</div>
-    <p class="capture-or">or <a href="https://www.instagram.com/doalfaaz/" target="_blank" rel="noopener">comment "SHURU" on the latest post</a> and we'll DM you.</p>
+    <p class="cta-sub">Your WhatsApp opens with the message ready.<br>Nothing is sent until you press Send.</p>
+    <div class="cta-promise">₹1,999 · lifetime access · 14-day refund</div>
+    <p class="capture-or">Prefer Instagram? <a href="https://www.instagram.com/doalfaaz/" target="_blank" rel="noopener">message @doalfaaz directly</a>.</p>
   </div>
 </section>
 
@@ -289,23 +281,23 @@ footer {
     </div>
     <div class="teaser-grid">
       <div class="teaser-card">
-        <div class="icon">🧠</div>
-        <h3>10+ Hours Structured Course</h3>
-        <p>Vedanta + modern psychology. 6 modules, from pattern recognition to lived integration. Recorded, self-paced.</p>
+        <div class="icon" aria-hidden="true">01</div>
+        <h3>15+ Hours · 50+ Lessons</h3>
+        <p>Vedanta + modern psychology. Recorded, self-paced, and built for the move from pattern recognition to lived integration.</p>
       </div>
       <div class="teaser-card">
-        <div class="icon">🎙</div>
+        <div class="icon" aria-hidden="true">02</div>
         <h3>Live "Talk To Tushar" Sessions</h3>
-        <p>Early birds get 2 live interactive sessions with Tushar. Recorded and added to the course for future buyers.</p>
+        <p>Two live interactive sessions are recorded and added later. The course remains self-paced.</p>
       </div>
       <div class="teaser-card">
-        <div class="icon">📖</div>
+        <div class="icon" aria-hidden="true">03</div>
         <h3>Per-Lecture Notes + Workbook</h3>
-        <p>Every lecture comes with structured notes and reflection prompts. Not just watching — sitting with it.</p>
+        <p>Every lesson comes with structured notes and reflection prompts. Not just watching. Sitting with it.</p>
       </div>
       <div class="teaser-card">
-        <div class="icon">♾️</div>
-        <h3>18 Months Access</h3>
+        <div class="icon" aria-hidden="true">04</div>
+        <h3>Lifetime Access</h3>
         <p>No rush. No cohort pace. Come back whenever you want. The course waits for you.</p>
       </div>
     </div>
@@ -328,7 +320,7 @@ Shayad tum bhi yahi karte ho.
 <span class="hl">Main tumhe fix karne nahi aaya.
 Main tumhare upar nahi khada.
 Main tumhare saath khada hoon.</span></div>
-      <div class="letter-sig"><strong>— Tushar</strong> · Do Alfaaz · Banaras</div>
+      <div class="letter-sig"><strong>· Tushar</strong> · Do Alfaaz · Banaras</div>
     </div>
   </div>
 </section>
@@ -343,7 +335,7 @@ Main tumhare saath khada hoon.</span></div>
           <li><span class="ic">◆</span> Advaita Vedanta as inquiry, not belief</li>
           <li><span class="ic">◆</span> Modern psychology as observation</li>
           <li><span class="ic">◆</span> Practices for ordinary life</li>
-          <li><span class="ic">◆</span> 18 months of access</li>
+          <li><span class="ic">◆</span> Lifetime access</li>
         </ul>
       </div>
       <div class="what-card">
@@ -362,19 +354,19 @@ Main tumhare saath khada hoon.</span></div>
 <!-- NO PRESSURE -->
 <div class="no-pressure">
   <div class="container">
-    <strong>Jaldi mein decision mat lena.</strong><br>
-    Faisla shaant dimaag se lena. Waitlist par hone ka matlab commitment nahi hai —<br>
-    sirf itna ki jab doors open ho, aapko pehle pata chalega.
+    <strong>Take your time.</strong><br>
+    Faisla shaant dimaag se lena. There is no deadline and no commitment here.<br>
+    Read the terms and decide when you are ready.
   </div>
 </div>
 
 <!-- FINAL CTA -->
 <section class="cta-section" style="padding-bottom:80px">
   <div class="container">
-    <h2 style="font-size:1.2rem;font-weight:300;margin-bottom:6px">Join the VIP Waitlist</h2>
-    <p style="color:var(--text2);margin-bottom:24px;font-size:0.9rem">Be the first when Saturday 8 PM arrives.</p>
-    <a href="#join" class="cta-main">Join VIP Waitlist →</a>
-    <p class="cta-sub">Name + WhatsApp number above — the message opens ready to send.</p>
+    <h2 style="font-size:1.2rem;font-weight:300;margin-bottom:6px">Ready when you are</h2>
+    <p style="color:var(--text2);margin-bottom:24px;font-size:0.9rem">One price. Lifetime access. No deadline.</p>
+    <a href="#join" class="cta-main">Ask for course details →</a>
+    <p class="cta-sub">The message opens ready to send.</p>
   </div>
 </section>
 
@@ -390,50 +382,11 @@ Main tumhare saath khada hoon.</span></div>
   "use strict";
 
 
-  // Countdown to the next Saturday, 8:00 PM IST. No baked calendar date.
-  // IST = UTC+5:30, so 8:00 PM IST = 14:30 UTC.
-  function nextSaturday8pmIST() {
-    var now = new Date();
-    var istNow = new Date(now.getTime() + 5.5 * 3600000);
-    var add = (6 - istNow.getUTCDay() + 7) % 7;
-    var sat = new Date(Date.UTC(istNow.getUTCFullYear(), istNow.getUTCMonth(), istNow.getUTCDate() + add, 14, 30, 0));
-    if (sat.getTime() <= now.getTime()) sat = new Date(sat.getTime() + 7 * 86400000);
-    return sat;
-  }
-  var TARGET = nextSaturday8pmIST();
-
-  function pad(n) { return n < 10 ? '0' + n : String(n); }
-
-  function tick() {
-    var now = new Date();
-    var diff = TARGET - now;
-
-    if (diff <= 0) {
-      TARGET = nextSaturday8pmIST();
-      diff = TARGET - now;
-      if (diff <= 0) diff = 7 * 86400000;
-    }
-
-    var days = Math.floor(diff / 86400000);
-    var hours = Math.floor((diff % 86400000) / 3600000);
-    var mins = Math.floor((diff % 3600000) / 60000);
-    var secs = Math.floor((diff % 60000) / 1000);
-
-    document.getElementById('cdDays').textContent = pad(days);
-    document.getElementById('cdHours').textContent = pad(hours);
-    document.getElementById('cdMins').textContent = pad(mins);
-    document.getElementById('cdSecs').textContent = pad(secs);
-
-    requestAnimationFrame(function(){ setTimeout(tick, 500); });
-  }
-
-  tick();
-
   // WhatsApp capture: name + number -> wa.me deep link.
   // The visitor's own WhatsApp opens with the join message pre-filled to
   // Tushar's number; hitting send delivers name + number in one message.
-  // Zero backend, zero monthly fee — the waitlist lands in Tushar's WhatsApp.
-  var WL_NUMBER = '9179222991'; // Tushar's WhatsApp (wa.me format, no +)
+  // This local-first handoff opens WhatsApp; nothing is sent until the visitor submits it.
+  var WL_NUMBER = '919179222991'; // Tushar's WhatsApp in international wa.me format
   var form = document.getElementById('wlForm');
   if (form) {
     form.addEventListener('submit', function(e){
@@ -441,10 +394,10 @@ Main tumhare saath khada hoon.</span></div>
       var name = (document.getElementById('wlName').value || '').trim();
       var num  = (document.getElementById('wlNum').value || '').replace(/[^\d]/g, '');
       if (num.length < 10) { document.getElementById('wlNum').focus(); return; }
-      var msg = 'SHURU — VIP Waitlist\n'
+      var msg = 'Interested in Aham Brahmasmi 2.0\n'
               + 'Name: ' + name + '\n'
               + 'WhatsApp: ' + num + '\n\n'
-              + 'Please add me to the Aham Brahmasmi 2.0 waitlist.';
+              + 'Please send me the course details.';
       window.location.href = 'https://wa.me/' + WL_NUMBER + '?text=' + encodeURIComponent(msg);
     });
   }
