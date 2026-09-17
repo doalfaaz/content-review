@@ -27,7 +27,6 @@
    Every offer-context literal below must read OFFER.x — DEADLINE:'none' means no countdown copy, ever. */
 const OFFER = {
   PRICE: '₹1,999',
-  PRICE_EARLY: '₹999',
   HOURS: '15+ hr',
   HOURS_NOTE: '10+ on day one',
   LESSONS: '50+',
@@ -7493,7 +7492,7 @@ window.__DOALFAAZ_V357_TYPESET__ = { version: 'v357-ptype', law: 'break_where_th
   </div>
   <div class="card">
     <div class="pricerow">
-      <div class="price">${esc(v.offer_price_now || OFFER.PRICE_EARLY)}</div>
+      <div class="price">${esc(v.offer_price_now || OFFER.PRICE)}</div>
       <div class="tier"><span>${esc(v.offer_deadline || 'Ye price <b>early-bird</b> hai &mdash; ' + OFFER.ACCESS + ' access, koi deadline nahi.')}</span><br>
       <span>${esc(v.offer_price_later || 'Early-bird ke baad page band nahi hoga &mdash; price ' + OFFER.PRICE + ' ho jaayegi.')}</span></div>
     </div>
@@ -7528,7 +7527,7 @@ window.__DOALFAAZ_V357_TYPESET__ = { version: 'v357-ptype', law: 'break_where_th
     <div class="rt">${esc(v.dl_reason || 'Reason simple hai: early-bird sirf shuruaati batch ke liye. <b>Uske baad ' + OFFER.PRICE + ' &mdash; koi deadline nahi.</b>')}</div>
   </div>
   <div class="fact">
-    <div class="price">${esc(v.dl_price || 'Is tier par price <b>' + OFFER.PRICE_EARLY + '</b> &mdash; uske baad ' + OFFER.PRICE + '.')}</div>
+    <div class="price">${esc(v.dl_price || 'Is offer par price <b>' + OFFER.PRICE + '</b> hai. No second tier is published.')}</div>
     <div class="calm">${esc(v.dl_cta || 'Faisla shaant dimaag se lena.')}</div>
   </div>
   <div class="foot">
