@@ -591,8 +591,24 @@
   /* The drawer now starts BELOW the bar, so its old 38px top padding (which
      existed to dodge the bar) becomes dead space — trim it. */
   #sidebar.collapsed { padding-top: 14px !important; }
-  @media (pointer: coarse), (max-width: 640px) {
+  /* Touch devices: the drawer widens and touch cards drop their hover-only
+     affordances. Tablets are the exception on WIDTH only — an iPad has a
+     coarse pointer, so `pointer: coarse` matched it and inflated the drawer to
+     min(78vw,300px), i.e. 300px on an 11" iPad where the Mac rail is 220px.
+     The iPad does not need a phone-sized drawer: it runs the desktop-density
+     surface (see the .ce-phone classifier), and the drawer is a persistent rail
+     there, not a thumb-reach overlay. Guard the width behind the same
+     iPad/tablet test the classifier uses so the two layers agree.
+     (Owner report 2026-09-17: "not working ideally on iPad but works on Mac".) */
+  @media (pointer: coarse) and (not (min-width: 701px)),
+         (max-width: 640px) {
     .sidebar, .sidebar.collapsed { width: min(78vw, 300px) !important; min-width: 0 !important; }
+  }
+  @media (pointer: coarse) and (min-width: 701px) {
+    /* Tablet: keep the rail. Touch affordance cleanup below still applies. */
+    .sidebar, .sidebar.collapsed { width: 220px !important; min-width: 220px !important; }
+  }
+  @media (pointer: coarse), (max-width: 640px) {
     /* Touch cards: the desktop hover affordances are dead weight on rail
        faces (owner screenshot 2026-09-10: ✓ + checkbox stamped on every
        carousel). The action cluster never gets :hover on touch, so it must
@@ -2075,6 +2091,162 @@
   .ce-launch-workbench .ce-receipt-quiet-btn:hover { color: var(--accent-text); }
   .ce-launch-workbench .ce-receipt-quiet-note { margin-left: auto; color: var(--faint); font-size: 10px; }
 
+  /* ── P2 (merged plan 24 §0, 2026-09-17): the redesign surfaces ──────────────
+     Palette: Grow + Launch run the teal instrument accent. No warm accent
+     (tangerine/crimson) and no amber/red status hue may compute on this
+     chrome, so every var a warm consumer could read is rebound on the two
+     shells; --warn/--danger flatten to muted (a refusal is a fact with a fix
+     path, never red). Rules stay scoped under the shells so they outrank the
+     later-loading native-plan.css on specificity alone. */
+  .ce-grow-shell, .ce-launch-workbench {
+    --accent: #3ECFAE;
+    --accent-text: #3ECFAE;
+    --accent-border: rgba(62,207,174,.35);
+    --accent-tint: rgba(62,207,174,.14);
+    --accent-glow: rgba(62,207,174,.28);
+    --accent-hover: #5bdcc0;
+    --accent-press: #2fae8e;
+    --tangerine: #3ECFAE;
+    --tangerine-light: #6fe0c5;
+    --grad-accent: linear-gradient(135deg, #2ea98b, #1f7d65);
+    --grad-accent-h: linear-gradient(90deg, #3ECFAE, #2ea98b);
+    --grad-accent-text: linear-gradient(135deg, #3ECFAE, #6fe0c5);
+    --grad-bar: linear-gradient(180deg, #6fe0c5, #3ECFAE 45%, #2ea98b);
+    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(62,207,174,.06), transparent 45%);
+    --warn: var(--muted);
+    --danger: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The fortnight: one field panel, 14 day columns on a shared baseline —
+     solid accent = landed, bone hatch = local work, dashed tick = neither,
+     shaded slot = before the day ledger, hatched band = the landed-free run. */
+  .ce-grow-shell .ce-grow-hero { padding: 14px 16px 12px; border: 1px solid var(--hairline); border-radius: 12px; background: rgba(255,255,255,.035); }
+  .ce-grow-shell .ce-fort-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .ce-grow-shell .ce-fort-head .ce-grow-eyebrow { margin: 0; }
+  .ce-grow-shell .ce-fort-line { color: var(--ink); font-size: 13px; font-weight: 750; letter-spacing: -.01em; }
+  /* the operative answer: what came back, at hero scale (spec: 48-64px/800) */
+  .ce-grow-shell .ce-fort-num { font-size: 46px; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; vertical-align: -6px; color: var(--ink); }
+  .ce-grow-shell .ce-fort-cap { margin-left: auto; color: var(--faint); font-size: 9.5px; }
+  .ce-grow-shell .ce-fort-bars { position: relative; display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; height: 120px; margin-top: 12px; border-bottom: 1px solid var(--hairline); }
+  .ce-grow-shell .ce-day-slot { position: relative; display: flex; align-items: flex-end; justify-content: center; gap: 2px; min-width: 0; }
+  .ce-grow-shell .ce-day-slot.is-pre-ledger { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--faint) 14%, transparent) 0 1px, transparent 1px 5px); border-radius: 3px 3px 0 0; }
+  .ce-grow-shell .ce-day-slot.is-marked::after { content: ''; position: absolute; left: 20%; right: 20%; bottom: 0; border-bottom: 1px dashed var(--accent-border); }
+  .ce-grow-shell .ce-fort-col { position: relative; z-index: 1; flex: 1 1 0; max-width: 22px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-width: 0; }
+  .ce-grow-shell .ce-fort-v { font-style: normal; font-size: 9px; line-height: 1; margin-bottom: 3px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-fort-col:has(.ce-fort-bar.is-landed) .ce-fort-v { color: var(--accent-text); }
+  .ce-grow-shell .ce-fort-bar { display: block; width: 100%; border-radius: 2px 2px 0 0; }
+  .ce-grow-shell .ce-fort-bar.is-landed { background: var(--accent); }
+  .ce-grow-shell .ce-fort-bar.is-work { background: repeating-linear-gradient(45deg, rgba(237,232,223,.25) 0 1px, transparent 1px 4px); box-shadow: inset 0 0 0 1px rgba(237,232,223,.14); }
+  .ce-grow-shell .ce-fort-tick { display: block; width: 55%; max-width: 16px; margin-bottom: 1px; border-bottom: 1px dashed var(--card-border); }
+  .ce-grow-shell .ce-fort-gap { position: absolute; left: 0; top: 0; bottom: 0; z-index: 0; pointer-events: none; background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--faint) 16%, transparent) 0 1px, transparent 1px 6px); border: 1px dashed color-mix(in srgb, var(--faint) 30%, transparent); border-radius: 4px; }
+  .ce-grow-shell .ce-fort-gap i { position: absolute; top: 3px; left: 50%; transform: translateX(-50%); font-style: normal; color: var(--faint); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+  .ce-grow-shell .ce-fort-days { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; margin-top: 6px; }
+  .ce-grow-shell .ce-fort-days span { overflow: hidden; color: var(--faint); font-size: 8px; text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-fort-days span.is-today { color: var(--accent-text); }
+  .ce-grow-shell .ce-fort-legend { margin-top: 8px; color: var(--faint); font-size: 9px; letter-spacing: .02em; }
+
+  /* The tide: two stored-snapshot lanes — name, giant endpoint, flat delta.
+     The void zone is a real SVG hatch pattern (emitted inside the lane's own
+     <defs>), never an implied fill. */
+  .ce-grow-shell .ce-grow-tide { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .ce-grow-shell .ce-grow-tide > .ce-section-heading { grid-column: 1 / -1; }
+  .ce-grow-shell .ce-tide-lane { min-width: 0; padding: 12px 14px 10px; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(255,255,255,.02); }
+  .ce-grow-shell .ce-tide-lane.is-empty { border-style: dashed; background: transparent; }
+  .ce-grow-shell .ce-tide-lane.is-stale .ce-tide-svg { opacity: .55; }
+  .ce-grow-shell .ce-tide-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .ce-grow-shell .ce-tide-name { color: var(--faint); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .ce-grow-shell .ce-tide-end { color: var(--ink); font-size: 28px; font-weight: 760; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-tide-delta { color: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-tide-delta.is-dim, .ce-grow-shell .ce-tide-delta.is-down { color: var(--faint); }
+  .ce-grow-shell .ce-tide-svg { display: block; width: 100%; height: 110px; margin-top: 8px; }
+  .ce-grow-shell .ce-tide-void-fill { fill: url(#ce-tide-hatch); }
+  .ce-grow-shell .ce-tide-base { stroke: var(--hairline); stroke-width: 1; }
+  .ce-grow-shell .ce-tide-line { fill: none; stroke: var(--accent); stroke-width: 1.6; }
+  .ce-grow-shell .ce-tide-dot { fill: var(--muted); }
+  .ce-grow-shell .ce-tide-dot.is-last { fill: var(--accent); }
+  .ce-grow-shell .ce-tide-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; color: var(--faint); font-size: 9px; }
+  .ce-grow-shell .ce-tide-void { margin-top: 8px; padding: 12px 14px; border: 1px dashed var(--hairline); border-radius: 10px; color: var(--muted); font-size: 10.5px; line-height: 1.5; }
+  .ce-grow-shell .ce-tide-lane .ce-unmeasured-acts { margin-top: 8px; }
+
+  /* Their answers: last posts on one true scale against the year median —
+     44px rows, 40px thumb, 4px bone bar (accent past the median), the median
+     itself a dashed vertical hairline named under the list. */
+  .ce-grow-shell .ce-ans-row { appearance: none; -webkit-appearance: none; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 5px 2px; border: 0; border-bottom: 1px solid var(--card-border); background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .ce-grow-shell .ce-ans-row:last-child { border-bottom: 0; }
+  .ce-grow-shell .ce-ans-thumb { flex: 0 0 40px; width: 40px; height: 40px; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--card-border); border-radius: 4px; background: var(--bg); }
+  .ce-grow-shell .ce-ans-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .ce-grow-shell .ce-ans-thumb i[data-poem] { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; padding: 2px 4px; font-style: normal; font-family: var(--font-deva); font-size: 9px; line-height: 1.78; color: var(--muted); }
+  .ce-grow-shell .ce-ans-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+  .ce-grow-shell .ce-ans-top { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+  .ce-grow-shell .ce-ans-top strong { min-width: 0; overflow: hidden; color: var(--ink); font-size: 12px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-ans-when { color: var(--faint); font-size: 9px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-ans-age { margin-left: auto; padding: 1px 7px; border: 1px solid var(--hairline); border-radius: 99px; color: var(--faint); font-size: 9px; white-space: nowrap; }
+  .ce-grow-shell .ce-ans-track { position: relative; display: block; height: 4px; border-radius: 2px; background: rgba(237,232,223,.08); }
+  .ce-grow-shell .ce-ans-bar { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: rgba(237,232,223,.35); }
+  .ce-grow-shell .ce-ans-bar.is-over { background: var(--accent); }
+  .ce-grow-shell .ce-ans-med { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 1px dashed var(--faint); }
+  .ce-grow-shell .ce-ans-empty { padding: 12px 2px; color: var(--faint); font-size: 10.5px; }
+  .ce-grow-shell .ce-ans-legend { margin-top: 6px; color: var(--faint); font-size: 8px; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-ans-all > summary { min-height: 32px; color: var(--faint); font-size: 10px; cursor: pointer; list-style: none; }
+  .ce-grow-shell .ce-ans-all > summary::-webkit-details-marker { display: none; }
+
+  /* The one move keeps its decision card; a thin accent left edge marks it.
+     The rested variant stays the dashed stamp styled above (P1.10). */
+  .ce-grow-shell .ce-grow-move .ce-grow-next-move { border-left: 2px solid var(--accent-border); }
+
+  /* The proof ledger is one muted sentence — separators only, no boxes. */
+  .ce-grow-shell .ce-grow-ledger { padding: 0 2px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+  .ce-grow-shell .ce-grow-ledger b { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* The shared unmeasured box + provenance hairline close both surfaces. */
+  .ce-grow-shell .ce-unmeasured, .ce-launch-workbench .ce-unmeasured { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border: 1px dashed var(--hairline); border-radius: 10px; color: var(--muted); font-size: 10.5px; line-height: 1.5; }
+  .ce-grow-shell .ce-unmeasured-title, .ce-launch-workbench .ce-unmeasured-title { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .ce-grow-shell .ce-unmeasured-unlock, .ce-launch-workbench .ce-unmeasured-unlock { color: var(--faint); font-size: 9.5px; }
+  .ce-grow-shell .ce-unmeasured-acts, .ce-launch-workbench .ce-unmeasured-acts { display: flex; gap: 8px 16px; flex-wrap: wrap; margin-top: 6px; }
+  .ce-grow-shell .ce-unmeasured-acts .ce-surface-button, .ce-launch-workbench .ce-unmeasured-acts .ce-surface-button { min-height: 28px; padding: 0; border: 0; background: transparent; color: var(--accent-text); font-size: 10.5px; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
+  .ce-grow-shell .ce-unmeasured-acts .ce-surface-button:hover, .ce-launch-workbench .ce-unmeasured-acts .ce-surface-button:hover { transform: none; color: var(--accent-hover); }
+  .ce-grow-shell .ce-provenance, .ce-launch-workbench .ce-provenance { padding-top: 8px; border-top: 1px solid var(--hairline); color: var(--faint); font-size: 9px; line-height: 1.5; }
+
+  /* The receipt's evidence chain: chosen → acted → landed, each rung read off
+     the day's proof — lit rungs accent, missing rungs dim + dashed. */
+  .ce-launch-workbench .ce-evidence-chain { display: inline-flex; align-items: baseline; gap: 6px; flex-wrap: wrap; font-size: 10px; }
+  .ce-launch-workbench .ce-ev-rung { letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  .ce-launch-workbench .ce-ev-rung.is-on { color: var(--accent-text); }
+  .ce-launch-workbench .ce-ev-rung.is-off { color: var(--faint); border-bottom: 1px dashed var(--card-border); }
+  .ce-launch-workbench .ce-ev-sep { color: var(--faint); }
+
+  /* The launch move hero: today's real art face, the title, one Schedule
+     verb, and the honest rail-depth note. Face normalization mirrors
+     .ce-launch-day-art so the pure-renderer fills the 4/5 tile. */
+  .ce-launch-workbench .ce-launch-move { display: flex; align-items: center; gap: 14px; flex: 1 1 auto; min-width: 0; }
+  .ce-launch-workbench .ce-launch-move-art { position: relative; flex: 0 0 96px; width: 96px; aspect-ratio: 4 / 5; padding: 0; border: 1px solid var(--card-border); border-radius: 10px; overflow: hidden; background: var(--bg); cursor: pointer; }
+  .ce-launch-workbench .ce-launch-move-art .ce-real-face { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .ce-launch-workbench .ce-launch-move-art .ce-deck-placeholder { border: 0; border-radius: 0; width: 100% !important; height: 100% !important; }
+  .ce-launch-workbench .ce-launch-move-art .ce-queue-preview > * { width: 100% !important; }
+  .ce-launch-workbench .ce-launch-move-art .ce-static-carousel-cover { padding: 10px !important; border: 0 !important; border-radius: 0 !important; }
+  .ce-launch-workbench .ce-launch-move-copy { flex: 1 1 auto; min-width: 0; }
+  .ce-launch-workbench .ce-launch-move-copy .ce-launch-board-eyebrow { margin: 0 0 4px; }
+  .ce-launch-workbench .ce-launch-move-title { display: block; max-width: 100%; overflow: hidden; font-size: 16px; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; }
+  .ce-launch-workbench .ce-launch-move-depth { display: block; margin-top: 4px; color: var(--faint); font-size: 10px; }
+
+  /* The rail ledger below the fold: 36px hairline rows; refusals state the
+     fact in dim bone with a Fix path — never red. */
+  .ce-launch-workbench .ce-launch-queue-head { display: flex; align-items: baseline; gap: 10px; padding: 0 2px; }
+  .ce-launch-workbench .ce-launch-queue-head .ce-launch-board-eyebrow { margin: 0; }
+  .ce-launch-workbench .ce-launch-queue-note { color: var(--faint); font-size: 9.5px; }
+  .ce-launch-workbench .ce-lq-row { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 3px 2px; border-bottom: 1px solid var(--card-border); }
+  .ce-launch-workbench .ce-lq-row:last-child { border-bottom: 0; }
+  .ce-launch-workbench .ce-lq-title { flex: 1 1 auto; min-width: 0; overflow: hidden; color: var(--muted); font-size: 10.5px; text-overflow: ellipsis; white-space: nowrap; }
+  .ce-launch-workbench .ce-lq-day { flex: 0 0 auto; color: var(--faint); font-size: 9.5px; font-variant-numeric: tabular-nums; }
+  .ce-launch-workbench .ce-lq-state { flex: 0 1 auto; min-width: 0; overflow: hidden; color: var(--faint); font-size: 9.5px; text-overflow: ellipsis; white-space: nowrap; }
+  .ce-launch-workbench .ce-lq-state.is-ok { color: var(--accent-text); }
+  .ce-launch-workbench .ce-lq-state.is-failed { color: rgba(237,232,223,.55); }
+  .ce-launch-workbench .ce-lq-row:has(.ce-lq-state.is-failed) .ce-lq-title { color: rgba(237,232,223,.45); }
+  .ce-launch-workbench .ce-lq-fix { flex: 0 0 auto; min-height: 28px; padding: 0 2px; border: 0; background: transparent; color: var(--accent-text); font-size: 10px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .ce-launch-workbench .ce-lq-fix:hover { color: var(--accent-hover); }
+  .ce-launch-workbench .ce-lq-empty { padding: 12px 2px; color: var(--faint); font-size: 10.5px; }
+
   @media (max-width: 700px) {
     .ce-launch-contract { gap: 8px 14px; }
     .ce-launch-day-receipt { gap: 6px 10px; }
@@ -2099,6 +2271,22 @@
     html.ce-phone .ce-cont-cell { min-width: 0; flex-shrink: 1; }
     html.ce-phone .ce-grow-proof-ledger { gap: 4px 12px; }
     html.ce-phone .ce-grow-readiness { gap: 3px 16px; padding-right: 0 !important; }
+    /* P2 on phone: the fortnight compresses (slots keep a 14px floor so a
+       landed day still reads), tide lanes stack, thumbs and the move art
+       shrink one step. The 90px intelligence cap above is untouched. */
+    html.ce-phone .ce-grow-shell .ce-grow-hero { padding: 12px 12px 10px; }
+    html.ce-phone .ce-grow-shell .ce-fort-bars { height: 84px; }
+    html.ce-phone .ce-grow-shell .ce-day-slot { min-height: 14px; }
+    html.ce-phone .ce-grow-shell .ce-fort-v { font-size: 8px; }
+    html.ce-phone .ce-grow-shell .ce-fort-days span { font-size: 7px; }
+    html.ce-phone .ce-grow-shell .ce-fort-gap i { font-size: 7px; }
+    html.ce-phone .ce-grow-shell .ce-grow-tide { grid-template-columns: minmax(0, 1fr); }
+    html.ce-phone .ce-grow-shell .ce-tide-svg { height: 84px; }
+    html.ce-phone .ce-grow-shell .ce-tide-end { font-size: 24px; }
+    html.ce-phone .ce-grow-shell .ce-ans-thumb { flex-basis: 36px; width: 36px; height: 36px; }
+    html.ce-phone .ce-launch-workbench .ce-launch-move { flex-wrap: wrap; gap: 10px; }
+    html.ce-phone .ce-launch-workbench .ce-launch-move-art { flex-basis: 72px; width: 72px; }
+    html.ce-phone .ce-launch-workbench .ce-launch-move-title { font-size: 14px; }
   }
 
   /* ── Premium polish layer (owner 2026-09-03) — restraint over confetti:
@@ -2415,7 +2603,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=8f5e86052f"></script>
+<script src="./deck_index.js?v=73d607cf13"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=57931c8eb1" />
@@ -9580,6 +9768,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       state.studioSavePending = false;
       if (ok) {
         var saved = Object.assign({}, deck, { id: id, look: look, title: title, slides: nextSlides });
+        try { ceDayEventAdd('designed', { dayKey: '', ref: String(id), source: 'studio' }); } catch (_ev) {}
         window.__CE_DECKS_FULL__[id] = saved;
         if (saved.designId) window.__CE_DECKS_FULL__[saved.designId] = saved;
         // A save acknowledgement may arrive after the creator has continued
@@ -9653,6 +9842,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (paths) q.exportPaths = String(paths);
         q.exportedAt = new Date().toISOString();
         q.statusReason = 'Full-resolution PNG export receipt recorded by the native exporter.';
+        /* P2 (merged plan 24 §2.1): an export is local work — ledger it once
+           per piece (the add is idempotent at kind+day+ref grain). */
+        try { ceDayEventAdd('exported', { dayKey: '', ref: target, source: 'export' }); } catch (_ev) {}
       }
       /* 2026-09-10 audit A-7: a successful export settles a failed ship. The old
          code left the red ✗ chip on the card forever, so a card that had been
@@ -9738,6 +9930,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (state.poemSaveTimeout) { clearTimeout(state.poemSaveTimeout); state.poemSaveTimeout = null; }
       state.studioSavePending = false;
       if (ok) {
+        try { ceDayEventAdd('saved', { dayKey: '', ref: String(id), source: 'studio' }); } catch (_ev) {}
         window.__NATIVE_POEM_DESIGNS__ = window.__NATIVE_POEM_DESIGNS__ || {};
         window.__NATIVE_POEM_DESIGNS__[id] = { text: text, style: style, title: firstLine };
         // Autosave visibility: mirror the persisted text into the native rows
@@ -17612,46 +17805,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         ? String(__growReadyQueue.item.title || __growReadyQueue.item.text || __growReadyQueue.item.body || 'Your next ready piece')
         : '';
       var __growReadyPreview = __growReadyQueue ? queuePreviewHtml(__growReadyQueue, __growReadyIndex) : '';
-      var __growMix = [
-        { label: 'Posts', count: __growPosts, className: 'is-posts', go: 'library', lib: 'posts' },
-        { label: 'Poems', count: __growPoems, className: 'is-poems', go: 'library', lib: 'poems' },
-        { label: 'Carousels', count: __growDecks, className: 'is-carousels', go: 'library', lib: 'carousels' },
-        { label: 'Ideas', count: __growIdeas, className: 'is-ideas', go: 'ideas', lib: '' }
-      ];
-      // Momentum charts are honest by contract: only real local timestamps
-      // (savedAt / addedAt) are charted; audience analytics stay declared as
-      // not connected — never invented.
-      function __localDayKey(iso) {
-        var d = new Date(iso);
-        return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
-      }
-      var __chartDays = (function () {
-        var out = [];
-        var now = new Date();
-        for (var i = 13; i >= 0; i--) {
-          var day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-          out.push({
-            key: day.getFullYear() + '-' + ('0' + (day.getMonth() + 1)).slice(-2) + '-' + ('0' + day.getDate()).slice(-2),
-            label: (day.getMonth() + 1) + '/' + day.getDate()
-          });
-        }
-        return out;
-      })();
-      var __savedByDay = __chartDays.map(function (day) {
-        return { label: day.label, count: state.savedItems.filter(function (s) { return s && s.savedAt && __localDayKey(s.savedAt) === day.key; }).length };
-      });
-      var __queueByDay = __chartDays.map(function (day) {
-        return { label: day.label, count: state.queueItems.filter(function (q) { return q && q.addedAt && __localDayKey(q.addedAt) === day.key; }).length };
-      });
-      /* P0.13 (report 14): the two series used to self-normalize on their own
-         peaks, so a 1-save day and a 9-stage day drew the same bar height — a
-         scale lie. One shared peak now scales both charts, the peak is printed,
-         and zero days get a dashed ghost tick instead of a missing bar. */
-      var __momentumPeak = Math.max(1, Math.max.apply(null, __savedByDay.map(function (d) { return d.count; }).concat(__queueByDay.map(function (d) { return d.count; }))));
-      var __savedPeak = __momentumPeak;
-      var __queuePeak = __momentumPeak;
-      var __savedTotal14 = __savedByDay.reduce(function (a, b) { return a + b.count; }, 0);
-      var __queueTotal14 = __queueByDay.reduce(function (a, b) { return a + b.count; }, 0);
       /* P1.10 (report 14): the same days-safe count Launch shows decides whether
          the next-move card reads as stamped rest — a week with >=3 covered
          days is safe, so rest is a finished state, not an empty one. Mirrored
@@ -17675,93 +17828,198 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         else if (r.state !== 'failed' && r.state !== 'superseded') __growSafeLocal[dk] = true;
       });
       var __growDaysSafe = Object.keys(__growSafeMeta).length + Object.keys(__growSafeLocal).filter(function (k) { return !__growSafeMeta[k]; }).length;
-      /* P1.7 — proof ledger counts: the schedule truth ladder as disjoint
-         rungs. An item is counted once, at the furthest rung it has evidence
-         for: staged on the rail -> slot set (a day pinned) -> Meta confirmed.
-         Day verdicts stay off Grow — Launch alone owns won/quiet/stopped
-         vocabulary; this ledger ends at waitlist depth. */
-      var __proofMeta = 0, __proofSlot = 0, __proofStaged = 0;
+      /* The ledger sentence's Meta rung: queue pieces with real confirmation
+         evidence (a graph id or a post-send state). */
+      var __growMetaClock = 0;
       (state.queueItems || []).forEach(function (q) {
-        if (!q) return;
-        if (q.metaGraphId || q.metaState === 'scheduled' || q.metaState === 'published') { __proofMeta++; return; }
-        if (/^\d{4}-\d{2}-\d{2}$/.test(String(q.scheduleDate || '')) || /^day-\d+$/.test(String(q.scheduledDay || ''))) __proofSlot++;
-        else __proofStaged++;
+        if (q && (q.metaGraphId || q.metaState === 'scheduled' || q.metaState === 'published')) __growMetaClock++;
       });
-      var __wlCount = 0;
-      try { __wlCount = (JSON.parse(localStorage.getItem('ce_launch_waitlist') || '[]') || []).filter(function (w) { return w && w.status === 'added'; }).length; } catch (_e) { __wlCount = 0; }
-      /* P1 floor-tick: the 1/day pace mark sits where a single staged piece
-         reaches on the shared axis. From the column bottom: day label (~10px)
-         + flex gap (3px) to the bar baseline, plus the one-unit bar height. */
-      var __queueFloorPx = 16 + Math.round(60 / __queuePeak);
+
+      /* ── P2 (merged plan 24 §0, 2026-09-17): "the hand and the answer".
+         The fortnight hero draws both halves on one 14-day IST grid: solid
+         bars = real igMedia rows matched on their IST day (height =
+         likes+comments, true scale), hatched bars = ce_day_events work
+         (bucketed on local days — the same grid on this Mac). A day with
+         neither is a dashed ghost tick, drawn never hidden; the era before
+         the first ledger event is a shaded zone, never backfilled. ── */
+      var __gMeta = ceGrowMeta();
+      var __igRows = ceIgMediaRows();
+      var __workMap = ceDayWorkMap();
+      var __median = ceYearMedian();
+      var __fortSlots = [];
+      var __istParts = String(ceIstDateKey(new Date()) || ceLocalDateKey(new Date()) || '').split('-');
+      var __tY = Number(__istParts[0]) || 1970;
+      var __tM = (Number(__istParts[1]) || 1) - 1;
+      var __tD = Number(__istParts[2]) || 1;
+      for (var __fi = 13; __fi >= 0; __fi--) {
+        var __fd = new Date(Date.UTC(__tY, __tM, __tD - __fi));
+        var __fkey = __fd.getUTCFullYear() + '-' + String(__fd.getUTCMonth() + 1).padStart(2, '0') + '-' + String(__fd.getUTCDate()).padStart(2, '0');
+        __fortSlots.push({ key: __fkey, label: (__fd.getUTCMonth() + 1) + '/' + __fd.getUTCDate(), date: __fd, landed: 0, eng: 0, work: 0, quiet: false, pre: false });
+      }
+      var __slotByKey = {};
+      __fortSlots.forEach(function (s) { __slotByKey[s.key] = s; });
+      __igRows.forEach(function (m) {
+        var s = __slotByKey[m.day];
+        if (s) { s.landed++; s.eng += m.eng; }
+      });
+      __fortSlots.forEach(function (s) {
+        s.work = __workMap.byDay[s.key] || 0;
+        s.quiet = !!__workMap.quiet[s.key];
+        s.pre = !__workMap.firstDay || s.key < __workMap.firstDay;
+      });
+      var __landedN = 0, __engSum = 0, __landedPeak = 1, __workPeak = 1;
+      __fortSlots.forEach(function (s) {
+        __landedN += s.landed;
+        __engSum += s.eng;
+        if (s.eng > __landedPeak) __landedPeak = s.eng;
+        if (s.work > __workPeak) __workPeak = s.work;
+      });
+      /* The posting silence draws as a hatched band over the longest
+         landed-free run inside the window (>=3 days earns the label). */
+      var __runStart = -1, __runLen = 0, __gapStart = -1, __gapLen = 0;
+      __fortSlots.forEach(function (s, i) {
+        if (!s.landed) {
+          if (__runStart < 0) { __runStart = i; __runLen = 0; }
+          __runLen++;
+          if (__runLen > __gapLen) { __gapLen = __runLen; __gapStart = __runStart; }
+        } else { __runStart = -1; __runLen = 0; }
+      });
+      var __gapLabel = '';
+      if (__gapLen >= 3) {
+        var __gf = { day: 'numeric', month: 'short' };
+        __gapLabel = __gapLen + ' quiet days · ' + __fortSlots[__gapStart].date.toLocaleDateString('en-IN', __gf) + ' → ' + __fortSlots[__gapStart + __gapLen - 1].date.toLocaleDateString('en-IN', __gf);
+      }
+      var __ledgerYoung = !!(__workMap.firstDay && __workMap.firstDay > __fortSlots[0].key);
+      var __heroLine;
+      if (__gMeta.live) {
+        __heroLine = __landedN + ' landed → <b class="ce-fort-num">' + ceGrowFmtN(__engSum) + '</b> came back';
+        if (__landedN && __median && __median.value > 0) {
+          var __ratio = (__engSum / __landedN) / __median.value;
+          __heroLine += ' · the audience answered ' + (__ratio >= 10 ? String(Math.round(__ratio)) : (Math.round(__ratio * 10) / 10).toFixed(1)) + '× your usual' + (__landedN === 1 ? ' · n=1' : '');
+        }
+      } else if (!window.__CE_META_HAS_TOKEN__) {
+        __heroLine = 'local work only · the answer half needs Meta';
+      } else {
+        __heroLine = 'syncing Meta · the answer half lands with the first fetch';
+      }
+      var __heroCap = [];
+      if (__ledgerYoung) __heroCap.push('counting since ' + __workMap.firstDay);
+      if (!__workMap.firstDay) __heroCap.push('the day ledger starts with the next save or stage');
+      if (__gMeta.live) __heroCap.push('meta ' + (__gMeta.fetchedAtIst || 'live') + (__gMeta.stale ? ' · stale' : ''));
+      var __fortSlotsHtml = __fortSlots.map(function (s, i) {
+        var cols = '';
+        if (s.work) cols += '<span class="ce-fort-col"><i class="ce-fort-v">' + s.work + '</i><i class="ce-fort-bar is-work" style="height:' + Math.max(3, Math.round(s.work / __workPeak * 58)) + 'px"></i></span>';
+        if (s.eng) cols += '<span class="ce-fort-col"><i class="ce-fort-v">' + ceGrowFmtN(s.eng) + '</i><i class="ce-fort-bar is-landed" style="height:' + Math.max(3, Math.round(s.eng / __landedPeak * 58)) + 'px"></i></span>';
+        if (!s.work && !s.eng) cols = '<span class="ce-fort-tick" aria-hidden="true"></span>';
+        var gapHtml = '';
+        if (__gapLabel && i === __gapStart) gapHtml = '<span class="ce-fort-gap" style="width:calc(' + (__gapLen * 100) + '% + ' + ((__gapLen - 1) * 4) + 'px)"><i>' + escapeHtml(__gapLabel) + '</i></span>';
+        return '<div class="ce-day-slot' + (s.landed ? ' has-landed' : '') + (!s.work && !s.eng ? ' is-ghost' : '') + (s.pre ? ' is-pre-ledger' : '') + (s.quiet ? ' is-marked' : '') + '"'
+          + ' title="' + escapeHtml(s.label + ' · ' + (s.landed ? s.landed + ' landed · ' + ceGrowFmtN(s.eng) + ' likes+comments' : 'nothing landed') + (s.work ? ' · ' + s.work + ' local event' + (s.work === 1 ? '' : 's') : ' · no local work')) + '">'
+          + gapHtml + cols + '</div>';
+      }).join('');
+      var __fortDaysHtml = __fortSlots.map(function (s, i) {
+        return '<span' + (i === __fortSlots.length - 1 ? ' class="is-today"' : '') + '>' + s.label + '</span>';
+      }).join('');
+
+      /* The tide: dual follower lanes, snapshots only. Disconnected collapses
+         the whole Meta region to one dashed panel — the local sections above
+         stay fully live (state matrix, plan 24 §3). */
+      var __tideHtml;
+      if (!window.__CE_META_HAS_TOKEN__) {
+        __tideHtml = '<div class="ce-tide-lane is-empty"><div class="ce-tide-head"><span class="ce-tide-name">Audience unmeasured</span></div>'
+          + '<div class="ce-tide-void">connect Meta once — the follower snapshots start storing from the first sync</div>'
+          + '<div class="ce-unmeasured-acts"><button type="button" class="ce-surface-button" data-ce-insights-connect>Open Publishing handoff</button></div></div>';
+      } else {
+        __tideHtml = ceTideLaneHtml('Instagram', 'igFollowers', 14) + ceTideLaneHtml('Facebook Page', 'fbFollowers', 14);
+      }
+
+      /* The answers: the last posts vs the current-year median. Bars share one
+         true scale across the section; the hairline is the median with its
+         year printed — 2024/2025 medians are copied neighbors (n=0) and never
+         render, so the label always says the current year. */
+      var __ansShown = __igRows.slice(0, 12);
+      var __ansScale = Math.max(1, __median && __median.value > 0 ? __median.value : 1);
+      __ansShown.forEach(function (m) { if (m.eng > __ansScale) __ansScale = m.eng; });
+      var __ansRowHtml = function (m) {
+        var thumb = ceGrowThumbUrl(m);
+        var cap = String(m.caption || '').split('\n')[0].trim();
+        if (cap.length > 64) cap = cap.slice(0, 61) + '…';
+        var hours = Math.floor((Date.now() / 1000 - m.ts) / 3600);
+        var chip = hours >= 0 && hours < 72 ? '<span class="ce-ans-age">' + hours + 'h in · still counting · early</span>' : '';
+        var when = new Date(m.ts * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        return '<button type="button" class="ce-ans-row"' + (m.permalink ? ' data-ce-permalink="' + escapeHtml(m.permalink) + '" title="Open this post"' : '') + '>'
+          + '<span class="ce-ans-thumb">' + (thumb ? '<img src="' + escapeHtml(thumb) + '" alt="" loading="lazy">' : '<i data-poem>' + escapeHtml(cap || 'post') + '</i>') + '</span>'
+          + '<span class="ce-ans-main"><span class="ce-ans-top"><strong>' + ceGrowFmtN(m.eng) + '</strong><span class="ce-ans-when">' + escapeHtml(when) + '</span>' + chip + '</span>'
+          + '<span class="ce-ans-track"><i class="ce-ans-bar' + (__median && m.eng > __median.value ? ' is-over' : '') + '" style="width:' + Math.max(1.5, m.eng / __ansScale * 100).toFixed(1) + '%"></i>'
+          + (__median ? '<i class="ce-ans-med" style="left:' + Math.min(100, __median.value / __ansScale * 100).toFixed(1) + '%" title="' + escapeHtml('your ' + __median.year + ' usual · ' + ceGrowFmtN(__median.value)) + '"></i>' : '')
+          + '</span></span></button>';
+      };
+      var __ansInner;
+      if (!__gMeta.live) {
+        __ansInner = '<div class="ce-ans-empty">' + (window.__CE_META_HAS_TOKEN__ ? 'syncing Meta…' : 'unmeasured — connect Meta and the last posts line up against your usual') + '</div>';
+      } else if (!__ansShown.length) {
+        __ansInner = '<div class="ce-ans-empty">no posts in the window Meta returned — the next landing starts the ledger</div>';
+      } else {
+        __ansInner = __ansShown.map(__ansRowHtml).join('')
+          + (__igRows.length > 12
+            ? '<details class="ce-ans-all"><summary>all (' + __igRows.length + ')</summary><div class="ce-ans-all-rows">' + __igRows.slice(12).map(__ansRowHtml).join('') + '</div></details>'
+            : '');
+      }
+
+      /* The proof ledger as ONE footer sentence — every inventory count lives
+         here and nowhere else on the fold. */
+      var __postedWeek = __igRows.filter(function (m) { return m.ts > Date.now() / 1000 - 7 * 86400; }).length;
+      var __ledgerLine = (__gMeta.live
+          ? '<b>' + __postedWeek + '</b> posted this week on IG'
+          : 'IG week unmeasured — connect Meta')
+        + ' · <b>' + __growMetaClock + '</b> on Meta\u2019s clock'
+        + ' · <b>' + __growExported + '</b> exported'
+        + ' · library: <b>' + ceGrowFmtN(__growDecks) + '</b> designed carousels · <b>' + ceGrowFmtN(__growPoems) + '</b> poems · <b>' + ceGrowFmtN(__growPosts) + '</b> authored posts · <b>' + ceGrowFmtN(__growIdeas) + '</b> ideas';
 
       const growBox = document.createElement('div');
       growBox.className = 'ce-ops-shell ce-grow-shell';
       growBox.innerHTML = `
-        <section class="ce-grow-instrument" aria-label="Grow readiness" data-ready="${__growReady}" data-total="${(state.queueItems || []).length}">
-          <div class="ce-grow-instrument-main">
-            <h2>Grow</h2>
-            <div class="ce-grow-instrument-number"><strong>${__growReady}</strong><span>of ${(state.queueItems || []).length} ready</span></div>
-            <span class="ce-grow-instrument-hint">${__growReady ? (__growReady === 1 ? 'One piece is ready for your next move.' : __growReady + ' pieces are ready for your next move.') : 'Design one piece to create your next move.'}</span>
+        <section class="ce-grow-hero" aria-label="The fortnight" data-ready="${__growReady}" data-total="${(state.queueItems || []).length}">
+          <div class="ce-fort-head">
+            <span class="ce-grow-eyebrow">The fortnight · last 14 days</span>
+            <strong class="ce-fort-line">${__heroLine}</strong>
+            <span class="ce-fort-cap">${escapeHtml(__heroCap.join(' · '))}</span>
           </div>
-          <div class="ce-grow-instrument-meta">
-            <span><span class="ce-local-tag">Local only</span> ${window.__CE_META_HAS_TOKEN__ ? '· Meta connected' : '· Meta not connected'}</span>
-            <span>Saved on this Mac · ${__growQueued} staged · ${__growExported} exported</span>
-            <time>${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</time>
-          </div>
+          <div class="ce-fort-bars" role="img" aria-label="Posts landed vs local work per day, last 14 days">${__fortSlotsHtml}</div>
+          <div class="ce-fort-days" aria-hidden="true">${__fortDaysHtml}</div>
+          <div class="ce-fort-legend">solid = landed on IG (likes+comments) · hatched = local work · dashed tick = a day with neither${__workMap.firstDay && !__ledgerYoung ? '' : ' · shaded = before the day ledger'}</div>
         </section>
 
-        <section class="ce-grow-next-move${__growDaysSafe >= 3 ? ' is-rested' : ''}" aria-label="Next move">
-          <div class="ce-grow-next-art${__growReadyPreview ? '' : ' is-empty'}">${__growReadyPreview || '<span class="ce-grow-empty-mark">+</span>'}</div>
-          <div class="ce-grow-next-copy">
-            <span class="ce-grow-eyebrow">Next move</span>
-            <h2>${escapeHtml(__growReadyTitle || 'Design your first piece')}</h2>
-            <p>${__growReady ? 'This piece is ready in your Plan. Open it once, then decide.' : 'Nothing is ready yet. Start from your Library and keep the next decision small.'}</p>
-            ${__growDaysSafe >= 3 ? '<span class="ce-grow-rested-note">Rest is stamped - the week is safe.</span>' : ''}
-            ${__growReady
-              ? '<button type="button" class="ce-surface-button is-primary" data-ce-grow-open-ready>Open in Studio</button>'
-              : '<button type="button" class="ce-surface-button is-primary" data-ce-go="library" data-ce-library="carousels">Pick from Library</button>'}
-          </div>
+        <section class="ce-grow-tide" aria-label="Audience tide">
+          <div class="ce-section-heading"><div><h3>The tide</h3></div><span class="ce-data-note">followers · stored snapshots only · unsmoothed</span></div>
+          ${__tideHtml}
         </section>
 
-        <section class="ce-grow-momentum ce-ops-panel" aria-label="Momentum and content mix">
-          <div class="ce-section-heading"><div><h3>Momentum + mix</h3></div><span class="ce-data-note">Last 14 days · local activity on this Mac${window.__CE_META_HAS_TOKEN__ ? ' · Meta below is live' : ' · no analytics connected'}</span></div>
-          <div class="ce-grow-momentum-grid">
-            <div class="ce-grow-mix">
-              <span class="ce-grow-eyebrow">Content mix</span>
-              ${__growTotal === 0 ? `
-              <div class="ce-native-empty" role="status"><span class="ce-empty-title">Not enough data yet</span><span class="ce-empty-sub">Add content to your Library to see the mix.</span><button type="button" class="ce-surface-button" data-ce-go="ideas">Start from Ideas</button></div>` : `
-              <div class="ce-mix-bar" aria-label="How your saved content breaks down">
-                ${__growMix.filter(r => r.label !== 'Ideas' && r.count > 0).map(row => `<span class="${row.className}" style="flex:${Math.max(1, row.count)}; min-width:7px" title="${escapeHtml(row.label)}: ${row.count}"></span>`).join('')}
-              </div>
-              <div class="ce-mix-legend">
-                ${__growMix.filter(r => r.label !== 'Ideas').map(row => `<button type="button" data-ce-go="${row.go}" ${row.lib ? `data-ce-library="${row.lib}"` : ''}><span class="ce-legend-dot ${row.className}"></span><strong>${row.count.toLocaleString()}</strong><small>${escapeHtml(row.label)}</small></button>`).join('')}
-                <button type="button" data-ce-go="ideas"><span class="ce-legend-dot is-ideas"></span><strong>${__growIdeas.toLocaleString()}</strong><small>Ideas · not postable yet</small></button>
-              </div>`}
-            </div>
-            <div class="ce-grow-charts">
-              <div class="ce-chart-card"><div class="ce-chart-head"><strong>Saved pieces</strong><span>${__savedTotal14} in 14 days</span></div>
-                ${__savedTotal14 === 0 ? `<div class="ce-chart-empty">Nothing saved in this window yet — the next saved piece starts the count.</div>` : `<div class="ce-chart-bars" role="img" aria-label="Pieces saved per day over the last 14 days">${__savedByDay.map(d => `<div class="ce-chart-col${d.count ? '' : ' is-ghost'}" title="${d.label}: ${d.count} saved"><span class="ce-chart-val">${d.count || ''}</span><span class="ce-chart-bar" style="height:${d.count ? Math.round(d.count / __savedPeak * 60) + 4 : 2}px"></span><span class="ce-chart-day">${d.label}</span></div>`).join('')}</div>`}
-              </div>
-              <div class="ce-chart-card"><div class="ce-chart-head"><strong>Queue flow</strong><span>${__queueTotal14} staged in 14 days</span></div>
-                ${__queueTotal14 === 0 ? `<div class="ce-chart-empty">Nothing staged in this window yet.</div>` : `<div class="ce-chart-bars" role="img" aria-label="Pieces staged per day over the last 14 days">${__queueByDay.map(d => `<div class="ce-chart-col${d.count ? '' : ' is-ghost'}" title="${d.label}: ${d.count} staged"><span class="ce-chart-val">${d.count || ''}</span><span class="ce-chart-bar" style="height:${d.count ? Math.round(d.count / __queuePeak * 60) + 4 : 2}px"></span><span class="ce-floor-tick" style="bottom:${__queueFloorPx}px" aria-hidden="true"></span><span class="ce-chart-day">${d.label}</span></div>`).join('')}</div>`}
-              </div>
-              <div class="ce-chart-shared-axis">Shared axis · peak ${__momentumPeak}/day · dashed tick = a day with no local activity · accent tick = the 1/day floor</div>
+        <section class="ce-grow-answers" aria-label="The answers">
+          <div class="ce-section-heading"><div><h3>Their answers</h3></div><span class="ce-data-note">${__gMeta.live ? 'likes+comments · newest first' + (__gMeta.stale && __gMeta.fetchedAtIst ? ' · as of ' + escapeHtml(__gMeta.fetchedAtIst) : '') : 'needs Meta'}</span></div>
+          ${__ansInner}
+          ${__median && __ansShown.length ? '<div class="ce-ans-legend">your ' + escapeHtml(__median.year) + ' usual · ' + ceGrowFmtN(__median.value) + '</div>' : ''}
+        </section>
+
+        <section class="ce-grow-move" aria-label="Next move">
+          <div class="ce-grow-next-move${__growDaysSafe >= 3 ? ' is-rested' : ''}">
+            <div class="ce-grow-next-art${__growReadyPreview ? '' : ' is-empty'}">${__growReadyPreview || '<span class="ce-grow-empty-mark">+</span>'}</div>
+            <div class="ce-grow-next-copy">
+              <span class="ce-grow-eyebrow">Next move</span>
+              <h2>${escapeHtml(__growReadyTitle || 'Design your first piece')}</h2>
+              <p>${__growReady ? 'This piece is ready in your Plan. Open it once, then decide.' : 'Nothing is ready yet. Start from your Library and keep the next decision small.'}</p>
+              ${__growDaysSafe >= 3 ? '<span class="ce-grow-rested-note">Rest is stamped - the week is safe.</span>' : ''}
+              ${__growReady
+                ? '<button type="button" class="ce-surface-button is-primary" data-ce-grow-open-ready>Open in Studio →</button>'
+                : '<button type="button" class="ce-surface-button is-primary" data-ce-go="library" data-ce-library="carousels">Pick from Library</button>'}
             </div>
           </div>
         </section>
 
-        <section class="ce-grow-proof-ledger" aria-label="Proof ledger">
-          <span class="ce-proof-cell" data-class="exported">Exported <b>${__growExported}</b></span>
-          <span class="ce-proof-cell" data-class="meta-scheduled">Meta scheduled <b>${__proofMeta}</b></span>
-          <span class="ce-proof-cell" data-class="slot-set">Slot set <b>${__proofSlot}</b></span>
-          <span class="ce-proof-cell" data-class="staged">Staged <b>${__proofStaged}</b></span>
-          <span class="ce-proof-cell" data-class="waitlist">Waitlist <b>${__wlCount}</b></span>
-          <span class="ce-local-tag">Local only · 14d</span>
-        </section>
+        <div class="ce-grow-ledger">${__ledgerLine}</div>
 
-        <section class="ce-grow-audience-strip" aria-label="Audience">
-          ${window.__CE_META_HAS_TOKEN__ ? ceLaunchPulseHtml() : `<div class="ce-grow-audience-copy"><span class="ce-grow-eyebrow">Audience</span>${ceInsightStateHtml('grow')}</div>`}
-        </section>
+        ${ceUnmeasuredHtml()}
+        ${ceProvenanceHtml()}
 
         <details class="ce-grow-more-moves">
           <summary>More moves <span>Open only when you need another path</span></summary>
@@ -18068,6 +18326,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var __yesterdayKey = ceLocalDateKey(__yesterdayDate) || '';
       var __receipt = ceDayVerdict(__yesterdayKey);
       var __receiptDay = __yesterdayDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      /* P2 (merged plan 24 §0): the receipt's evidence chain — chosen → acted →
+         landed. Each rung reads straight off the day's evidence; a rung with
+         no proof draws dashed, never implied. A landed/confirmed rung also
+         lights the ones upstream of it — a post Meta saw was obviously chosen. */
+      var __rev = __receipt.ev || { staged: [], acted: [], landed: [], confirmed: [] };
+      var __evRungs = [
+        { k: 'chosen', on: !!(__rev.staged.length || __rev.acted.length || __rev.confirmed.length || __rev.landed.length) },
+        { k: 'acted', on: !!(__rev.acted.length || __rev.confirmed.length || __rev.landed.length) },
+        { k: 'landed', on: !!__rev.landed.length }
+      ];
+      var __evChainHtml = __evRungs.map(function (r) {
+        return '<span class="ce-ev-rung ' + (r.on ? 'is-on' : 'is-off') + '">' + r.k + (r.on ? ' ✓' : ' –') + '</span>';
+      }).join('<span class="ce-ev-sep">→</span>');
       // The contract's "today" frame is frozen at first open of the day — a
       // mid-session re-render must not rewrite the morning answer (no
       // recompute anxiety); the verdict itself stays live evidence.
@@ -18136,16 +18407,74 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             : __cv.verdict === 'Stopped' ? 'is-stopped'
             : __cv.verdict === 'Scheduled-unconfirmed' ? 'is-unconfirmed'
             : 'is-unmeasured';
-          __contCells.push('<span class="ce-cont-cell ' + __ccls + '" title="' + escapeHtml(__clabel + ' \u00b7 ' + __cv.verdict) + '"></span>');
+          __contCells.push('<span class="ce-cont-cell ' + __ccls + '" data-verdict="' + escapeHtml(__cv.verdict) + '" title="' + escapeHtml(__clabel + ' \u00b7 ' + __cv.verdict) + '"></span>');
         } else if (__ci === 0) {
           var __tv = { verdict: 'Unmeasured' };
           try { __tv = ceDayVerdict(__ck) || __tv; } catch (_tvErr) { __tv = { verdict: 'Unmeasured' }; }
-          __contCells.push('<span class="ce-cont-cell is-today" title="' + escapeHtml('Today \u00b7 ' + __tv.verdict) + '"><span class="ce-floor-tick" aria-hidden="true"></span></span>');
+          __contCells.push('<span class="ce-cont-cell is-today" data-verdict="' + escapeHtml(__tv.verdict) + '" title="' + escapeHtml('Today \u00b7 ' + __tv.verdict) + '"><span class="ce-floor-tick" aria-hidden="true"></span></span>');
         } else {
           var __cov = !!(__safeMeta[__ck] || __safeLocal[__ck]);
-          __contCells.push('<span class="ce-cont-cell is-future ' + (__cov ? 'is-covered' : 'is-open') + '" title="' + escapeHtml(__clabel + ' \u00b7 ' + (__cov ? 'On the rail' : 'Open')) + '"></span>');
+          __contCells.push('<span class="ce-cont-cell is-future ' + (__cov ? 'is-covered' : 'is-open') + '" data-verdict="' + (__cov ? 'covered' : 'open') + '" title="' + escapeHtml(__clabel + ' \u00b7 ' + (__cov ? 'On the rail' : 'Open')) + '"></span>');
         }
       }
+      /* P2 §0 — the move hero's art face + queue depth note, and the queue
+         ledger below the fold: every rail row plus refused bookings, stated
+         factually. A refusal is a fact with a fix path — never red. */
+      var __todayFace = __renderTilePiece(__todayPiece);
+      var __railReach = '';
+      (state.queueItems || []).forEach(function (q) {
+        var dk = String(q && q.scheduleDate || '');
+        if (dk && __todayKey && dk > __todayKey && dk > __railReach) __railReach = dk;
+      });
+      var __railReachNote = 'rail empty past today';
+      if (__railReach) {
+        var __rrp = __railReach.split('-');
+        var __rrd = new Date(Number(__rrp[0]), Number(__rrp[1]) - 1, Number(__rrp[2]));
+        if (!isNaN(Number(__rrd))) __railReachNote = 'rail reaches ' + __rrd.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      }
+      var __lqRows = [];
+      (state.queueItems || []).forEach(function (q) {
+        if (!q) return;
+        var title = String((q.item && (q.item.title || q.item.text || q.item.body)) || q.id || 'Untitled piece');
+        if (title.length > 72) title = title.slice(0, 69) + '…';
+        var day = String(q.scheduleDate || '');
+        var st = 'staged', cls = '', fix = '';
+        if (q.metaState === 'published') { st = 'live on Meta'; cls = 'is-ok'; }
+        else if (q.metaGraphId || q.metaState === 'scheduled') { st = 'on Meta\u2019s clock'; cls = 'is-ok'; }
+        else if (q.metaState === 'failed' || q.metaState === 'skipped' || q.stageError || /fail/i.test(String(q.auditStatus || '')) || /fail/i.test(String(q.exportStatus || ''))) {
+          var __qErr = String(q.metaError || q.stageError || '');
+          st = (q.metaState === 'skipped' ? 'Failed — skipped' : 'Failed — Meta refused') + (__qErr ? ': ' + __qErr : '');
+          cls = 'is-failed'; fix = '<button type="button" class="ce-lq-fix" data-ce-go="plan">Fix</button>';
+        }
+        __lqRows.push('<div class="ce-lq-row"><span class="ce-lq-title">' + escapeHtml(title) + '</span>'
+          + (day ? '<span class="ce-lq-day">' + escapeHtml(day) + '</span>' : '')
+          + '<span class="ce-lq-state ' + cls + '">' + escapeHtml(st) + '</span>' + fix + '</div>');
+      });
+      (window.__CE_SCHEDULE_REQ_STATE__ || []).forEach(function (r) {
+        var st = String(r && r.state || '');
+        if (st !== 'failed' && st !== 'needs_verification') return;
+        var deckId = String(r.deckId || r.id || 'booking').replace(/^(post|carousel|poem|asset):/, '').split(':').pop().slice(0, 40);
+        var err = String((r.result && r.result.error) || '');
+        if (/attachment/i.test(err)) err += ' — carousels take 2–10';
+        var label = st === 'failed' ? 'Failed — Meta refused' + (err ? ': ' + err : '') : 'Needs verification — Meta has not confirmed';
+        __lqRows.push('<div class="ce-lq-row"><span class="ce-lq-title">' + escapeHtml(deckId) + '</span>'
+          + '<span class="ce-lq-day">relay · ' + escapeHtml(String(r.platform || 'facebook')) + '</span>'
+          + '<span class="ce-lq-state is-failed">' + escapeHtml(label) + '</span>'
+          + '<button type="button" class="ce-lq-fix" data-ce-go="plan">Fix</button></div>');
+      });
+      (window.__CE_IG_QUEUE_STATE__ || []).forEach(function (r) {
+        var st = String(r && r.state || '');
+        if (st !== 'failed' && st !== 'needs_verification') return;
+        var cid = String(r.contentId || 'ig booking').replace(/^(post|carousel|poem|asset):/, '').slice(0, 40);
+        var label = st === 'failed' ? 'Failed — IG clock refused' + (r.error ? ': ' + String(r.error) : '') : 'Needs verification — IG unconfirmed';
+        __lqRows.push('<div class="ce-lq-row"><span class="ce-lq-title">' + escapeHtml(cid) + '</span>'
+          + '<span class="ce-lq-day">ig clock</span>'
+          + '<span class="ce-lq-state is-failed">' + escapeHtml(label) + '</span>'
+          + '<button type="button" class="ce-lq-fix" data-ce-go="plan">Fix</button></div>');
+      });
+      var __lqHtml = __lqRows.length
+        ? '<div class="ce-lq-rows">' + __lqRows.slice(0, 14).join('') + '</div>'
+        : '<div class="ce-lq-empty">Nothing on the rail yet — stage a piece from the board above.</div>';
       __launchLb.innerHTML = `
         <section class="ce-launch-contract" aria-label="Morning contract">
           <span><em>Yesterday</em><b>${escapeHtml(__receipt.verdict)}</b></span>
@@ -18157,21 +18486,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           <span class="ce-receipt-eyebrow">Yesterday · ${escapeHtml(__receiptDay)}</span>
           <strong class="ce-receipt-verdict">${escapeHtml(__receipt.verdict)}</strong>
           <span class="ce-receipt-evidence">${escapeHtml(__receipt.detail)}</span>
+          <span class="ce-evidence-chain" aria-label="Evidence chain">${__evChainHtml}</span>
           ${__receipt.verdict === 'Quiet' ? '<span class="ce-receipt-quiet-note">marked by you</span>' : ''}
           ${(__receipt.verdict === 'Unmeasured' || __receipt.verdict === 'Stopped') ? '<button type="button" class="ce-receipt-quiet-btn" data-ce-receipt-quiet>Mark quiet</button>' : ''}
         </section>
 
-        <section class="ce-launch-continuum" aria-label="Two-week day continuum">${__contCells.join('')}</section>
+        <section class="ce-launch-move" aria-label="Today's move">
+          ${__todayPiece ? `
+              <button type="button" class="ce-launch-move-art ce-launch-board-art" data-ce-launch-open-art="${escapeHtml(__todayPiece.id)}" title="Open in Studio" aria-label="Open today’s piece in Studio">${__todayFace}</button>
+              <div class="ce-launch-move-copy">
+                <span class="ce-launch-board-eyebrow">Today</span>
+                <button type="button" class="ce-launch-board-open ce-launch-move-title" data-ce-launch-open-art="${escapeHtml(__todayPiece.id)}" title="Open in Studio">${escapeHtml(__todayPiece.title || 'Open in Studio')}</button>
+                <span class="ce-launch-move-depth">${escapeHtml(__railReachNote)} · schedule only · never posts live</span>
+              </div>
+              <button class="ce-surface-button is-primary" data-ce-launch-tomorrow-stage="${escapeHtml(__todayPiece.id)}" title="Stage on the schedule rail — never posts live" type="button">Schedule →</button>
+          ` : `<div class="ce-launch-board-cand ce-launch-board-cand--empty"><span class="ce-launch-board-eyebrow">Today</span><strong>Nothing ready yet</strong><span class="ce-launch-rail-note">schedule only · never posts live</span></div>`}
+        </section>
+
+        <section class="ce-launch-continuum ce-launch-week" aria-label="Two-week day continuum">${__contCells.join('')}</section>
 
         <section class="ce-launch-board-head">
-          ${__todayPiece ? `
-            <div class="ce-launch-board-cand ce-launch-board-cand--slim">
-              <span class="ce-launch-board-eyebrow">Today</span>
-              <button type="button" class="ce-launch-board-open" data-ce-launch-open-art="${escapeHtml(__todayPiece.id)}" title="Open in Studio">${escapeHtml(__todayPiece.title || 'Open in Studio')}</button>
-              <button class="ce-surface-button is-primary" data-ce-launch-tomorrow-stage="${escapeHtml(__todayPiece.id)}" title="Stage on the schedule rail — never posts live" type="button">Stage</button>
-              <span class="ce-launch-rail-note">schedule only · never posts live</span>
-            </div>
-          ` : `<div class="ce-launch-board-cand ce-launch-board-cand--empty"><span class="ce-launch-board-eyebrow">Today</span><strong>Nothing ready yet</strong><button type="button" class="ce-surface-button is-primary" data-ce-launch-goto-library>Pick from Library</button><span class="ce-launch-rail-note">schedule only · never posts live</span></div>`}
           <div class="ce-launch-board-cadence" aria-label="Board length">
             ${[3, 7, 14, 30].map(function (n) { return '<button type="button" aria-label="Show ' + n + '-day board" title="Show ' + n + '-day board" data-ce-plan-days="' + n + '" class="' + (n === __planLen ? 'is-on' : '') + (!__designed.length ? ' is-disabled' : '') + '"' + (!__designed.length ? ' disabled aria-disabled="true"' : '') + '>' + n + 'd</button>'; }).join('')}
           </div>
@@ -18202,7 +18536,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               + (pillarName ? '<div class="ce-launch-day-meta"><span class="ce-launch-pillar-chip" title="' + escapeHtml(pillarName) + '">' + escapeHtml(pillarChip) + '</span>' + (whyLine ? '<span class="ce-launch-day-why">' + escapeHtml(whyLine) + '</span>' : '') + '</div>' : '')
               + '<span class="ce-launch-day-sr-title">' + escapeHtml(piece.title || '') + '</span>'
               + '<div class="ce-launch-day-actions">'
-              +   '<button type="button" class="' + (day.idx === 0 ? 'is-primary' : '') + '" data-ce-launch-stage-day="' + day.idx + '" title="' + (day.idx === 0 ? 'Stage today on the schedule rail — never posts live' : 'Set this day in Plan &amp; Queue — schedule only') + '">' + (day.idx === 0 ? 'Stage' : 'Set') + '</button>'
+              +   '<button type="button" data-ce-launch-stage-day="' + day.idx + '" title="' + (day.idx === 0 ? 'Stage today on the schedule rail — never posts live' : 'Set this day in Plan &amp; Queue — schedule only') + '">' + (day.idx === 0 ? 'Stage' : 'Set') + '</button>'
               +   '<details class="ce-launch-day-more"><summary aria-label="More options" title="More options">More</summary><div>'
               +     '<button type="button" data-ce-launch-shuffle-day="' + day.idx + '" title="Next-best designed piece for this day">Change piece</button>'
               +     '<button type="button" data-ce-launch-retire-day="' + day.idx + '" title="Remove this suggestion">Remove</button>'
@@ -18219,6 +18553,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           ${__daysSafeLocal ? '<span class="ce-local-tag">Local only until Meta confirms</span>' : ''}
           <span style="margin-left:auto">A missed day never doubles tomorrow.</span>
         </div>
+
+        <section class="ce-launch-queue" aria-label="Schedule rail">
+          <div class="ce-launch-queue-head"><span class="ce-launch-board-eyebrow">The rail</span><span class="ce-launch-queue-note">${__lqRows.length} row${__lqRows.length === 1 ? '' : 's'} · schedule only · never posts live</span></div>
+          ${__lqHtml}
+        </section>
 
         <section class="ce-launch-intelligence" aria-label="Launch board intelligence">
           <div class="ce-launch-intelligence-head">
@@ -18244,7 +18583,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           <summary><span>Waitlist</span><span class="ce-launch-wl-hint">${__wl.length ? __wl.length + " waiting" : "empty — add handles from comments"}</span>${__wl.length ? '<span class="ce-launch-waitlist-count">' + __wl.length + '</span>' : ''}</summary>
           <div class="ce-launch-wl-add">
             <input id="ce-wl-input" type="text" placeholder="@username, they commented SHURU" aria-label="Add waitlist handle">
-            <button type="button" class="ce-surface-button is-primary" data-ce-wl-add>Add</button>
+            <button type="button" class="ce-surface-button" data-ce-wl-add>Add</button>
           </div>
           ${__wl.length === 0
             ? '<div class="ce-launch-board-foot-body">Add a commenter after the post.</div>'
@@ -18260,6 +18599,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               }).join('') + '</ul>'
               + '<span class="ce-launch-wl-summary">' + __waitlistCount + ' waiting · ' + __wl.filter(function (w) { return w.status === 'sent'; }).length + ' link sent · ' + __wl.filter(function (w) { return w.status === 'confirmed'; }).length + ' confirmed</span>'}
         </details>
+
+        ${ceUnmeasuredHtml()}
+        ${ceProvenanceHtml()}
       `;
 
       view.appendChild(__launchLb);
@@ -18657,6 +18999,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         updatedMs: Date.now(),
         rejectedAt: st === 'rejected' ? new Date().toISOString() : null
       });
+      /* P2 (merged plan 24 §2.1): a new saved piece is local work — the
+         fortnight counts it by event ts. Rejections are triage, not output. */
+      if (st !== 'rejected') {
+        try { ceDayEventAdd('saved', { dayKey: '', ref: key, source: 'bank' }); } catch (_ev) {}
+      }
     }
 
     if (type === 'poem' && typeof cePoemOldestKey === 'function') {
@@ -18829,32 +19176,48 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       localStorage.setItem(CE_DAY_EVENTS_KEY, JSON.stringify(rows));
     } catch (_e) {}
   }
+  window.ceDayEventAdd = ceDayEventAdd; // QA append probe + owner gestures reach the store
   /* Evidence for one calendar day (local YYYY-MM-DD, the same key staging
      stamps). Confirmed = Meta schedule-confirmation evidence only; staged =
      local intent, including IG-clock arming, which fires from this Mac and is
      therefore NOT a Meta confirmation. */
   function ceDayEvidence(dayKey) {
-    var ev = { confirmed: [], staged: [], quiet: false };
+    var ev = { confirmed: [], staged: [], acted: [], landed: [], quiet: false };
     ceDayEvents().forEach(function (r) {
       if (!r || String(r.dayKey || '') !== dayKey) return;
-      if (r.kind === 'meta_scheduled' || r.kind === 'meta_published') ev.confirmed.push(r);
+      if (r.kind === 'meta_scheduled' || r.kind === 'meta_published') { ev.confirmed.push(r); ev.acted.push(r); }
       else if (r.kind === 'quiet') ev.quiet = true;
-      else ev.staged.push(r);
+      else {
+        ev.staged.push(r);
+        if (r.kind === 'scheduled') ev.acted.push(r);
+      }
     });
     (state.queueItems || []).forEach(function (q) {
       if (!q || String(q.scheduleDate || '') !== dayKey) return;
       if (q.metaGraphId || q.metaState === 'scheduled' || q.metaState === 'published') {
-        ev.confirmed.push({ kind: 'meta_scheduled', ref: String(q.metaGraphId || q.id || ''), source: 'queue' });
+        var crow = { kind: 'meta_scheduled', ref: String(q.metaGraphId || q.id || ''), source: 'queue' };
+        ev.confirmed.push(crow); ev.acted.push(crow);
       } else {
         ev.staged.push({ kind: 'staged', ref: String(q.id || ''), source: 'queue' });
+        /* acted = a dispatch toward Meta was attempted for this day (a send
+           stamp or a post-send state incl. failed — the attempt is evidence
+           even when the outcome was a refusal). */
+        if (q.metaAt || q.metaState === 'failed' || q.metaState === 'skipped') {
+          ev.acted.push({ kind: 'scheduled', ref: String(q.id || ''), source: 'queue' });
+        }
       }
     });
     (window.__CE_SCHEDULE_REQ_STATE__ || []).forEach(function (r) {
       var ms = Number(r && r.scheduleUnixMs) || 0;
       if (!ms || ceLocalDateKey(new Date(ms)) !== dayKey) return;
       var st = String(r.state || '');
-      if (st === 'scheduled' || st === 'published') ev.confirmed.push({ kind: 'meta_scheduled', ref: String(r.id || ''), source: 'relay' });
+      if (st === 'scheduled' || st === 'published') {
+        ev.confirmed.push({ kind: 'meta_scheduled', ref: String(r.id || ''), source: 'relay' });
+      }
       else if (st !== 'failed' && st !== 'superseded') ev.staged.push({ kind: 'staged', ref: String(r.id || ''), source: 'relay' });
+      /* a relay row that reached Meta's hands (any state incl. failed) means a
+         request was placed for this day — that is the acted rung. */
+      if (st) ev.acted.push({ kind: 'scheduled', ref: String(r.id || ''), source: 'relay' });
     });
     (state.queueItems || []).forEach(function (q) {
       var row = null;
@@ -18862,9 +19225,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (!row) return;
       var ms = (Number(row.fireUnix) || 0) * 1000;
       if (!ms || ceLocalDateKey(new Date(ms)) !== dayKey) return;
-      if (row.state === 'published') ev.confirmed.push({ kind: 'meta_published', ref: String(row.contentId || (q && q.id) || ''), source: 'ig-clock' });
-      else ev.staged.push({ kind: 'staged', ref: String(row.contentId || (q && q.id) || ''), source: 'ig-clock' });
+      if (row.state === 'published') {
+        var irow = { kind: 'meta_published', ref: String(row.contentId || (q && q.id) || ''), source: 'ig-clock' };
+        ev.confirmed.push(irow); ev.acted.push(irow);
+      }
+      else {
+        ev.staged.push({ kind: 'staged', ref: String(row.contentId || (q && q.id) || ''), source: 'ig-clock' });
+        ev.acted.push({ kind: 'scheduled', ref: String(row.contentId || (q && q.id) || ''), source: 'ig-clock' });
+      }
     });
+    /* P2 (merged plan 24 §0): the landed rung also reads the platform itself —
+       a real igMedia row timestamped on this day is Meta-observed confirmation
+       that work landed, whether or not it travelled this app's rail. */
+    var __mi = window.__CE_META_INSIGHTS_STATE__;
+    if (__mi && __mi.status === 'ready' && __mi.data && Array.isArray(__mi.data.igMedia)) {
+      __mi.data.igMedia.forEach(function (m) {
+        var t = Date.parse(String(m && m.timestamp || ''));
+        if (!t || ceIstDateKey(new Date(t)) !== dayKey) return;
+        ev.landed.push({ kind: 'ig_landed', ref: String(m.id || ''), source: 'meta' });
+      });
+    }
     return ev;
   }
   /* The verdict ladder. Quiet is owner-marked (never inferred from inactivity);
@@ -18874,22 +19254,247 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
      day is verifiably empty. */
   function ceDayVerdict(dayKey) {
     var ev = ceDayEvidence(dayKey);
-    if (ev.quiet) return { verdict: 'Quiet', className: 'is-quiet', detail: 'Marked quiet on purpose — not a miss.' };
+    if (ev.quiet) return { verdict: 'Quiet', className: 'is-quiet', detail: 'Marked quiet on purpose — not a miss.', ev: ev };
     if (ev.confirmed.length) {
       return {
-        verdict: 'Won', className: 'is-won',
-        detail: ev.confirmed.length + ' piece' + (ev.confirmed.length === 1 ? '' : 's') + ' confirmed on Meta\u2019s clock' + (ev.confirmed[0].ref ? ' · id ' + String(ev.confirmed[0].ref).slice(-8) : '')
+        verdict: 'Won', className: 'is-won', ev: ev,
+        detail: ev.confirmed.length + ' piece' + (ev.confirmed.length === 1 ? '' : 's') + ' confirmed on Meta\u2019s clock' + (ev.confirmed[0].ref ? ' · id ' + String(ev.confirmed[0].ref).slice(-8) : '') + (ev.landed.length ? ' · ' + ev.landed.length + ' landed on IG' : '')
+      };
+    }
+    /* P2: a platform-observed landing (igMedia row on this day) is Meta
+       confirmation of the strongest kind — the day is won even when nothing
+       travelled this app's rail. */
+    if (ev.landed && ev.landed.length) {
+      return {
+        verdict: 'Won', className: 'is-won', ev: ev,
+        detail: ev.landed.length + ' post' + (ev.landed.length === 1 ? '' : 's') + ' landed on IG — platform-observed' + (ev.staged.length ? ' · ' + ev.staged.length + ' also staged locally' : '')
       };
     }
     if (ev.staged.length) {
       return {
-        verdict: 'Scheduled-unconfirmed', className: 'is-unconfirmed',
+        verdict: 'Scheduled-unconfirmed', className: 'is-unconfirmed', ev: ev,
         detail: ev.staged.length + ' piece' + (ev.staged.length === 1 ? '' : 's') + ' staged locally — Meta has not confirmed the schedule yet.'
       };
     }
     var measured = !!(window.__CE_META_HAS_TOKEN__ && window.__CE_META_INSIGHTS_STATE__ && window.__CE_META_INSIGHTS_STATE__.status === 'ready');
-    if (!measured) return { verdict: 'Unmeasured', className: 'is-unmeasured', detail: 'Nothing on the rail and Meta is not connected — this day is unknown, not failed.' };
-    return { verdict: 'Stopped', className: 'is-stopped', detail: 'Meta is live and nothing was on the clock. Said straight, no red.' };
+    if (!measured) return { verdict: 'Unmeasured', className: 'is-unmeasured', ev: ev, detail: 'Nothing on the rail and Meta is not connected — this day is unknown, not failed.' };
+    return { verdict: 'Stopped', className: 'is-stopped', ev: ev, detail: 'Meta is live and nothing was on the clock. Said straight, no red.' };
+  }
+
+  /* ══ P2 redesign helpers (merged plan 24, 2026-09-17) — "the hand and the
+     answer". Every reader below resolves to a file-backed source: insights
+     payload (ce_meta_insights.json via the native fetch), the snapshot
+     history (ce_meta_insights_history.json, delivered on the payload as
+     `history` and mirrored to localStorage because cached payloads do not
+     carry it), likes-index.json, ig-stills-index.json, the native library
+     injections, and the ce_day_events ledger. Nothing here invents a number.
+     Invariant: dashed = not asserted · solid = counted · dim = went down. ══ */
+
+  var CE_GROW_WORK_KINDS = { designed: 1, staged: 1, saved: 1, scheduled: 1, exported: 1 };
+
+  function ceGrowMeta() {
+    var st = window.__CE_META_INSIGHTS_STATE__ || {};
+    var data = (st.status === 'ready' && st.data) ? st.data : null;
+    var fetchedAt = Number(data && data.fetchedAt) || 0;
+    var stale = !!(data && (data.stale || (fetchedAt && (Date.now() / 1000 - fetchedAt) > 24 * 3600)));
+    return {
+      live: !!(window.__CE_META_HAS_TOKEN__ && data),
+      status: String(st.status || 'idle'),
+      error: String(st.error || ''),
+      data: data,
+      fetchedAt: fetchedAt,
+      fetchedAtIst: String((data && data.fetchedAtIst) || ''),
+      stale: stale
+    };
+  }
+
+  function ceIgMediaRows() {
+    var st = window.__CE_META_INSIGHTS_STATE__ || {};
+    var out = [];
+    var media = (st.status === 'ready' && st.data && Array.isArray(st.data.igMedia)) ? st.data.igMedia : [];
+    media.forEach(function (m) {
+      if (!m) return;
+      var ms = Date.parse(String(m.timestamp || ''));
+      if (!ms || isNaN(ms)) return;
+      var likes = Number(m.likes) || 0;
+      var comments = Number(m.comments) || 0;
+      out.push({
+        id: String(m.id || ''),
+        ts: Math.floor(ms / 1000),
+        day: ceIstDateKey(new Date(ms)),
+        eng: likes + comments,
+        likes: likes,
+        comments: comments,
+        permalink: String(m.permalink || ''),
+        thumb: String(m.thumb || (String(m.mediaType || '').toUpperCase() === 'VIDEO' ? '' : m.mediaUrl) || ''),
+        caption: String(m.caption || ''),
+        mediaType: String(m.mediaType || 'IMAGE')
+      });
+    });
+    out.sort(function (a, b) { return b.ts - a.ts; });
+    return out;
+  }
+
+  function ceIgPermaShortcode(permalink) {
+    var m = String(permalink || '').match(/\/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
+    return m ? m[1] : '';
+  }
+
+  function ceGrowThumbUrl(row) {
+    if (row && row.thumb) return row.thumb;
+    var sc = ceIgPermaShortcode(row && row.permalink);
+    if (!sc) return '';
+    var idx = window.__CE_IG_STILLS__;
+    var has = !!(idx && ((idx.byShortcode && idx.byShortcode[sc]) || idx[sc]));
+    if (!has) return '';
+    var base = window.__CE_STILL_BASE__;
+    if (base) {
+      base = String(base);
+      if (base.charAt(base.length - 1) !== '/') base += '/';
+      return base + encodeURIComponent(sc) + '.jpg';
+    }
+    return 'ce-still://stills/' + encodeURIComponent(sc);
+  }
+
+  function ceIgHistoryRows() {
+    var st = window.__CE_META_INSIGHTS_STATE__ || {};
+    var rows = (st.status === 'ready' && st.data && Array.isArray(st.data.history)) ? st.data.history : null;
+    if (rows && rows.length) {
+      try { localStorage.setItem('ce_meta_history_mirror', JSON.stringify(rows)); } catch (_h) {}
+    } else {
+      try { rows = JSON.parse(localStorage.getItem('ce_meta_history_mirror') || 'null'); } catch (_h2) { rows = null; }
+    }
+    if (!Array.isArray(rows)) return [];
+    return rows.filter(function (r) { return r && Number(r.ts) > 0; })
+      .sort(function (a, b) { return Number(a.ts) - Number(b.ts); });
+  }
+
+  function ceYearMedian() {
+    var y = String(new Date().getFullYear());
+    try {
+      var m = window.__CE_LIKES_INDEX__ && window.__CE_LIKES_INDEX__.medians && window.__CE_LIKES_INDEX__.medians[y];
+      if (isFinite(Number(m)) && Number(m) > 0) return { year: y, value: Number(m) };
+    } catch (_e) {}
+    return null;
+  }
+
+  /* The fortnight substrate: ce_day_events bucketed by the day the work HAPPENED
+     (event ts), plus owner-marked quiet days (dayKey) and the first ledger day —
+     the pre-ledger era draws as a hatched "before the ledger" zone and is never
+     backfilled. */
+  function ceDayWorkMap() {
+    var byDay = {}, quiet = {}, firstDay = '', count = 0;
+    ceDayEvents().forEach(function (r) {
+      if (!r) return;
+      count++;
+      var d = null;
+      try { d = ceLocalDateKey(new Date(r.ts)); } catch (_e) { d = null; }
+      if (d && (!firstDay || d < firstDay)) firstDay = d;
+      if (r.kind === 'quiet') { var qk = String(r.dayKey || d || ''); if (qk) quiet[qk] = true; return; }
+      if (d && CE_GROW_WORK_KINDS[r.kind]) byDay[d] = (byDay[d] || 0) + 1;
+    });
+    return { byDay: byDay, quiet: quiet, firstDay: firstDay, count: count };
+  }
+
+  function ceStillsCount() {
+    var idx = window.__CE_IG_STILLS__;
+    if (!idx || typeof idx !== 'object') return 0;
+    if (isFinite(Number(idx.count))) return Number(idx.count);
+    return Object.keys(idx).filter(function (k) { return k !== 'byShortcode' && k !== 'byPoemId' && k !== 'count'; }).length;
+  }
+
+  function ceGrowFmtN(n) {
+    if (n == null || !isFinite(Number(n))) return '—';
+    return Number(n).toLocaleString('en-IN');
+  }
+
+  /* One tide lane: an unsmoothed, time-proportional SVG over a fixed trailing
+     window; everything before the first stored snapshot draws as a hatched
+     NOT STORED zone — unknown history is drawn as unknown. */
+  function ceTideLaneHtml(name, key, windowDays) {
+    var rows = ceIgHistoryRows();
+    var label = '<div class="ce-tide-head"><span class="ce-tide-name">' + escapeHtml(name) + '</span>';
+    if (!rows.length) {
+      return '<div class="ce-tide-lane is-empty">' + label + '<strong class="ce-tide-end">—</strong></div>'
+        + '<div class="ce-tide-void">no snapshots stored yet — the first one lands on the next sync</div></div>';
+    }
+    var tEnd = Number(rows[rows.length - 1].ts);
+    var t0 = tEnd - windowDays * 86400;
+    var W = 600, H = 56, pad = 6;
+    var firstTs = Number(rows[0].ts);
+    var x0 = Math.max(0, (firstTs - t0) / (tEnd - t0) * W);
+    var vis = rows.filter(function (r) { return Number(r.ts) >= t0; });
+    var vals = vis.map(function (r) { return Number(r[key]) || 0; }).filter(function (v) { return v > 0; });
+    var vMin = Math.min.apply(null, vals), vMax = Math.max.apply(null, vals);
+    if (!isFinite(vMin) || !isFinite(vMax)) { vMin = 0; vMax = 1; }
+    if (vMin === vMax) { vMin = vMin - 1; vMax = vMax + 1; }
+    var yFor = function (v) { return H - pad - ((v - vMin) / (vMax - vMin)) * (H - pad * 2 - 10); };
+    var xFor = function (ts) { return Math.min(W, Math.max(0, (ts - t0) / (tEnd - t0) * W)); };
+    var pts = vis.map(function (r) { return xFor(Number(r.ts)).toFixed(1) + ',' + yFor(Number(r[key]) || 0).toFixed(1); });
+    var dots = vis.map(function (r, i) {
+      var cx = xFor(Number(r.ts)), cy = yFor(Number(r[key]) || 0);
+      return '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + (i === vis.length - 1 ? '2.6' : '1.5') + '" class="ce-tide-dot' + (i === vis.length - 1 ? ' is-last' : '') + '"></circle>';
+    }).join('');
+    var latest = Number(rows[rows.length - 1][key]) || 0;
+    var first = vis.length ? (Number(vis[0][key]) || 0) : latest;
+    var spanDays = Math.max(1, Math.round((tEnd - Number(vis.length ? vis[0].ts : tEnd)) / 86400));
+    var delta = latest - first;
+    var meta = ceGrowMeta();
+    var deltaHtml = meta.stale
+      ? '<span class="ce-tide-delta is-dim">' + escapeHtml(meta.fetchedAtIst ? 'as of ' + meta.fetchedAtIst : 'stale') + '</span>'
+      : '<span class="ce-tide-delta' + (delta < 0 ? ' is-down' : '') + '">' + (delta > 0 ? '+' : delta < 0 ? '\u2212' : '') + (delta !== 0 ? ceGrowFmtN(Math.abs(delta)) : '0') + ' in ' + spanDays + ' day' + (spanDays === 1 ? '' : 's') + '</span>';
+    var firstLabel = new Date(firstTs * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    var hatchW = Math.max(0, x0);
+    return '<div class="ce-tide-lane' + (meta.stale ? ' is-stale' : '') + '">'
+      + label
+      + '<strong class="ce-tide-end">' + ceGrowFmtN(latest) + '</strong>' + deltaHtml + '</div>'
+      + '<svg class="ce-tide-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="' + escapeHtml(name) + ' follower snapshots, unsmoothed">'
+      + (hatchW > 2 ? '<defs><pattern id="ce-tide-hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="rgba(237,232,223,.04)"></rect><line x1="0" y1="0" x2="0" y2="7" stroke="rgba(237,232,223,.16)" stroke-width="1"></line></pattern></defs><rect x="0" y="0" width="' + hatchW.toFixed(1) + '" height="' + H + '" class="ce-tide-void-fill" fill="url(#ce-tide-hatch)"></rect>' : '')
+      + '<line x1="0" y1="' + (H - pad) + '" x2="' + W + '" y2="' + (H - pad) + '" class="ce-tide-base"></line>'
+      + (pts.length > 1 ? '<polyline points="' + pts.join(' ') + '" class="ce-tide-line"></polyline>' : '')
+      + dots
+      + '</svg>'
+      + '<div class="ce-tide-foot">'
+      + (hatchW > 2 ? '<span class="ce-tide-void-label">no snapshots before ' + escapeHtml(firstLabel) + '</span>' : '<span></span>')
+      + '<span>' + vis.length + ' snapshots · unsmoothed · axis ' + ceGrowFmtN(vMin) + '–' + ceGrowFmtN(vMax) + '</span>'
+      + '</div></div>';
+  }
+
+  /* The shared dashed UNMEASURED box — names the scopes Meta holds and carries
+     the two unlock verbs. Reads the payload's measured scopeGaps when present,
+     else the fixed known-missing list. */
+  function ceUnmeasuredHtml() {
+    var st = window.__CE_META_INSIGHTS_STATE__ || {};
+    var gaps = (st.status === 'ready' && st.data && Array.isArray(st.data.scopeGaps)) ? st.data.scopeGaps : [];
+    var names = gaps.length
+      ? gaps.map(function (g) { return String((g && g.permission) || ''); }).filter(Boolean).join(' + ')
+      : 'read_insights + instagram_manage_insights + pages_read_user_content';
+    var held = gaps.length
+      ? gaps.map(function (g) { return String((g && g.unlocks) || ''); }).filter(Boolean).join(' · ')
+      : 'reach · impressions · saves · shares · profile visits · FB post reactions';
+    return '<div class="ce-unmeasured">'
+      + '<span class="ce-unmeasured-title">Unmeasured — Meta holds these, this token cannot read them</span>'
+      + '<span class="ce-unmeasured-scopes">' + escapeHtml(held) + '</span>'
+      + '<span class="ce-unmeasured-unlock">unlock: ' + escapeHtml(names) + ' — re-connect Meta</span>'
+      + '<div class="ce-unmeasured-acts">'
+      + '<button type="button" class="ce-surface-button" data-ce-permalink="https://business.facebook.com/settings/system-users" title="Open Meta Business Suite → system users → add the scopes to the CE Scheduler token, then Refresh numbers">Open Meta permissions</button>'
+      + '<button type="button" class="ce-surface-button" data-ce-insights-refresh title="Re-pull the stored Meta insights">Refresh numbers</button>'
+      + '</div></div>';
+  }
+
+  /* The provenance hairline — every surface ends by naming its files. */
+  function ceProvenanceHtml(extra) {
+    var meta = ceGrowMeta();
+    var work = ceDayWorkMap();
+    var bits = [];
+    bits.push('ce_meta_insights.json' + (meta.fetchedAtIst ? ' · fetched ' + meta.fetchedAtIst : meta.live ? '' : ' · not synced'));
+    bits.push('ce_meta_insights_history.json · ' + ceIgHistoryRows().length + ' snapshots');
+    bits.push('likes-index.json');
+    bits.push('native-poems.json · native-deck-index.json · native-posts.json');
+    bits.push('ce_day_events · ' + work.count + ' events' + (work.firstDay ? ' · counting since ' + work.firstDay : ''));
+    bits.push('local only · measured on this Mac');
+    if (extra) bits.push(extra);
+    return '<div class="ce-provenance">' + escapeHtml(bits.join(' · ')) + '</div>';
   }
 
   function ceGetKanbanWeekDays() {
@@ -19427,6 +20032,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }
     var actionDesc = publishNow ? 'Posting live: ' : 'Sending ';
     showQueueToast((dryRun ? 'Dry-run Graph for ' : actionDesc) + items.length + ' piece' + (items.length === 1 ? '' : 's') + ' to @doalfaaz…' + (skipped ? ' (' + skipSummary + ' skipped)' : ''));
+    /* P2 (merged plan 24 §2.1): the dispatch itself is 'scheduled' intent — the
+       receipt's acted rung — until Meta's own confirmation lands it as
+       meta_scheduled/meta_published in the result handler. Dry runs are not
+       work and never enter the ledger. */
+    if (!dryRun) {
+      items.forEach(function (it) {
+        try { ceDayEventAdd('scheduled', { dayKey: String(it.scheduleDate || ''), ref: String(it.contentId || it.id || ''), source: 'dispatch' }); } catch (_ev) {}
+      });
+    }
     br.postMessage({ action: 'scheduleMeta', dryRun: !!dryRun, publishNow: !!publishNow, items: items });
     return items.length;
   }
@@ -19685,9 +20299,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       }
       localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
       if (!quiet) showAppToast('Updated in Plan & Queue', { icon: 'calendar' });
-      if (placement && placement.scheduleDate) {
-        try { ceDayEventAdd('staged', { dayKey: String(placement.scheduleDate), ref: contentId, source: 'queue' }); } catch (_ev) {}
-      }
+      /* P2 (merged plan 24 §2.1): every stage is ledger work — dated rows carry
+         the target day for the receipt; undated rows keep an empty dayKey (the
+         fortnight buckets by event ts; an empty dayKey never enters a receipt). */
+      try { ceDayEventAdd('staged', { dayKey: String(placement && placement.scheduleDate || ''), ref: contentId, source: 'queue' }); } catch (_ev) {}
       return true;
     }
 
@@ -19717,12 +20332,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (append) state.queueItems.push(entry);
     else state.queueItems.unshift(entry);
     localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
-    /* P0.9 (report 14): staging on a date is local intent — the day-event log
-       records it so the receipt can say Scheduled-unconfirmed until Meta's own
-       confirmation arrives. */
-    if (placement && placement.scheduleDate) {
-      try { ceDayEventAdd('staged', { dayKey: String(placement.scheduleDate), ref: contentId, source: 'queue' }); } catch (_ev) {}
-    }
+    /* P0.9 (report 14) + P2 (merged plan 24 §2.1): staging is local intent —
+       the day-event log records it so the receipt can say Scheduled-unconfirmed
+       until Meta's own confirmation arrives. Undated staging still counts as
+       work done today (ts buckets it); its empty dayKey keeps it out of any
+       single day's evidence. */
+    try { ceDayEventAdd('staged', { dayKey: String(placement && placement.scheduleDate || ''), ref: contentId, source: 'queue' }); } catch (_ev) {}
     if (!quiet) showAppToast(__draftStaged ? 'Draft staged, design it in Studio before posting' : '✓ Added to Plan & Queue', { icon: __draftStaged ? 'pencil' : 'calendar' });
 
     var meta = document.getElementById('meta');
