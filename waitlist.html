@@ -55,7 +55,7 @@ a { color: var(--gold); text-decoration: none; }
 }
 
 /* HERO */
-.hero { padding: 80px 0 48px; text-align: center; }
+.hero { padding: 56px 0 32px; text-align: center; }
 .hero-eyebrow {
   display: inline-block; font-size: 0.62rem; font-weight: 600;
   letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-dim);
@@ -93,6 +93,8 @@ a { color: var(--gold); text-decoration: none; }
 .offer-facts span { color:var(--text2); font-size:.82rem; }
 .offer-price { position:relative; margin:6px 0 14px; font-size:clamp(2.2rem,8vw,3.4rem); line-height:1; color:var(--gold); font-weight:600; font-variant-numeric:tabular-nums; }
 .offer-note { position:relative; color:var(--text2); font-size:.84rem; margin-top:18px; }
+.offer-cta { position:relative; display:inline-flex; align-items:center; justify-content:center; min-height:50px; margin-top:22px; padding:0 28px; border-radius:6px; background:var(--gold); color:var(--bg); font-size:.86rem; font-weight:600; letter-spacing:.04em; box-shadow:0 4px 20px rgba(200,169,110,.24); }
+.offer-cta:focus-visible,.cta-main:focus-visible { outline:3px solid var(--gold-pale); outline-offset:3px; }
 
 /* WAITLIST CTA */
 .cta-section { padding: 48px 0; text-align: center; }
@@ -243,6 +245,7 @@ footer {
       <div class="offer-price">₹1,999</div>
       <div class="offer-facts"><span>15+ hours</span><span>50+ lessons</span><span>Lifetime access</span><span>14-day refund</span></div>
       <p class="offer-note">Recorded, self-paced, and evergreen. No clock, no tiers, no pressure.</p>
+      <a class="offer-cta" href="#join">Ask for course details</a>
     </div>
   </div>
 </section>
