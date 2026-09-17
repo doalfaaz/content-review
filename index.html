@@ -1878,33 +1878,11 @@
   transform-origin: top left;
 }
 
-  /* Grow / Launch creator decision surfaces (wave53) */
-  .ce-grow-column { padding: 8px 4px 0; }
-  .ce-grow-colhead { display:flex; flex-direction:column; gap:2px; }
-  .ce-grow-stepnum { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); background:var(--grad-accent-text); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-  .ce-grow-colhead p { margin:0; font-size:12px; color:var(--muted); }
-  .ce-apply-tag { display:inline-block; margin-top:6px; font-style:normal; font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--accent-text); text-transform:uppercase; }
-  .ce-learn-panel { display:flex; flex-direction:column; gap:16px; }
-  .ce-learn-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
-  .ce-learn-cell { display:flex; flex-direction:column; gap:4px; padding:14px 16px; background:var(--card); border:1px solid var(--hairline); border-radius:10px; }
-  .ce-learn-cell strong { font-size:13px; }
-  .ce-learn-nodata { font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.02em; }
-  .ce-learn-cell small { font-size:11px; color:var(--faint); }
-  .ce-learn-note { margin:0; font-size:12px; line-height:1.5; color:var(--muted); }
-  .ce-launch-status-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
-  .ce-launch-blockers, .ce-launch-artifacts { display:flex; flex-direction:column; gap:10px; padding:18px 20px; background:var(--card); border:1px solid var(--hairline); border-radius:12px; }
-  .ce-launch-blockers ul { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:6px; }
-  .ce-launch-blockers li { font-size:13px; line-height:1.45; }
-  .ce-launch-blockers.is-clear p { margin:0; font-size:13px; color:var(--muted); }
-  .ce-launch-blockers small, .ce-launch-artifacts small { font-size:11px; color:var(--faint); }
-  .ce-launch-artifacts ul { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
-  .ce-launch-artifacts li { display:flex; justify-content:space-between; gap:12px; font-size:13px; }
-  .ce-launch-artifacts li span { color:var(--muted); font-size:12px; text-align:right; }
-  .ce-launch-none { margin:0; font-size:13px; color:var(--muted); }
-  .ce-handoff-waiting { font-size:12px; font-weight:600; color:var(--muted); align-self:center; }
-  .ce-launch-range { display:inline-flex; gap:4px; margin-left:8px; }
-  .ce-launch-range button { border:1px solid var(--card-border); background:transparent; color:var(--muted); border-radius:7px; padding:3px 8px; font-size:11px; font-weight:700; cursor:pointer; }
-  .ce-launch-range button.is-on { background:var(--accent-tint, rgba(255,255,255,.12)); color:var(--ink); border-color:var(--accent); }
+  /* Grow / Launch creator decision surfaces (wave53)
+     P0.6 (report 14): the retired Observe/Learn/Apply column styling, the
+     orphan launch status rows, the dead range picker, and the day-track
+     week-rack rules were all removed. Zero JS emits them; the class names are
+     deliberately not repeated here so the dead list cannot reseed itself. */
 
   /* Live Meta audience (Grow + Launch) — 2026-09-09 */
   .ce-audience-panel { display:flex; flex-direction:column; gap:14px; }
@@ -1981,22 +1959,85 @@
   .ce-aud-pulse-sync { margin-left:auto; font-size:10.5px; color:var(--faint); }
   .ce-launch-pulse em { font-style:normal; font-size:12px; color:var(--muted); }
   .ce-meta-chip.ce-meta-chip--skipped { color:var(--warn) !important; border-color:color-mix(in srgb, var(--warn) 45%, transparent) !important; background:color-mix(in srgb, var(--warn) 12%, transparent) !important; }
-  .ce-day-art { width:100%; aspect-ratio:4/5; border-radius:10px; overflow:hidden; background:var(--card); margin:8px 0 10px; cursor:pointer; }
-  .ce-day-art .ce-deck-placeholder, .ce-day-art [data-ce-deck], .ce-day-art > * { width:100%; height:100%; }
-  .ce-day-actions { display:flex; gap:6px; align-items:center; }
-  .ce-shuffle-mini { border:1px solid var(--card-border); background:transparent; color:var(--ink); border-radius:7px; padding:4px 8px; font-size:11px; font-weight:700; cursor:pointer; }
-  .ce-day-card .ce-phase-moves { max-height:4.6em; overflow:hidden; }
-  .ce-day-track { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(220px, 1fr); gap:12px; overflow-x:auto; padding-bottom:8px; scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.18) transparent; }
-  /* 2026-09-06: the 6th day card clipped at the viewport edge with no cue, so it
-     read as a broken layout rather than a scrollable track. Fade + thin scrollbar
-     make the overflow legible. */
-  .ce-day-track::-webkit-scrollbar { height:6px; }
-  .ce-day-track::-webkit-scrollbar-track { background:transparent; }
-  .ce-day-track::-webkit-scrollbar-thumb { background:rgba(255,255,255,.16); border-radius:3px; }
-  .ce-day-track::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,.28); }
-  .ce-week-wrap { position:relative; }
-  .ce-week-wrap::after { content:""; position:absolute; top:0; right:0; bottom:8px; width:44px;
-    pointer-events:none; background:linear-gradient(90deg, transparent, var(--bg, #0b0b0f) 78%); }
+
+  /* ── Grow + Launch P0 (report 14 FINAL, 2026-09-17) ──────────────────────────
+     These rules live in index.html because the surface stylesheet is shared;
+     every override below is one of the P0.1–P0.15 items, cited inline. */
+
+  /* P0.2 — readiness demotion: the instrument number is the only hero; the old
+     4-up card row becomes a thin local-inventory ledger (small tabular counts,
+     no card chrome, no second "N of M"). */
+  .ce-grow-readiness { margin-top: 4px !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+  .ce-grow-readiness > div { padding: 4px 14px 4px 0 !important; border-right: 0 !important; }
+  .ce-grow-readiness > div::after { display: none !important; }
+  .ce-grow-readiness span { color: var(--faint) !important; font-size: 9px !important; }
+  .ce-grow-readiness strong { margin-top: 0 !important; font-size: 13px !important; font-weight: 700 !important; color: var(--muted) !important; letter-spacing: 0 !important; }
+  .ce-grow-readiness small { color: var(--faint) !important; font-size: 9px !important; }
+
+  /* P0.12 — every fold count carries its provenance. */
+  .ce-local-tag { display: inline-block; padding: 1px 7px; border: 1px solid var(--hairline); border-radius: 99px; color: var(--faint); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+
+  /* P0.13 — one shared axis for both momentum series: zero days get a dashed
+     ghost tick (no activity ≠ failure), never a missing bar that reads as red. */
+  .ce-chart-col.is-ghost .ce-chart-bar { height: 2px !important; background: transparent !important; border-bottom: 1px dashed var(--card-border); box-shadow: none !important; }
+  .ce-chart-shared-axis { margin-top: 6px; color: var(--faint); font-size: 9.5px; }
+
+  /* P0.3 — the More-moves disclosure must be a real hit target. */
+  .ce-grow-more-moves > summary { min-height: 44px; }
+
+  /* P0.4 — Launch intelligence is a footnote, never a panel: hard cap. */
+  .ce-launch-intelligence { max-height: 90px !important; overflow: hidden !important; }
+
+  /* P0.9 / P0.14 — Day Receipt + morning contract strip. Launch alone owns the
+     day verdict; WON is only painted on schedule-confirmation evidence. Quiet /
+     Scheduled-unconfirmed / Stopped are dashed (owner-dignity grammar, no shame
+     red); UNMEASURED is a plain boxed unknown. */
+  .ce-launch-contract { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 7px 14px; border: 1px solid var(--hairline); border-radius: 10px; color: var(--muted); font-size: 11px; }
+  .ce-launch-contract em { font-style: normal; color: var(--faint); font-size: 9.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin-right: 6px; }
+  .ce-launch-contract b { color: var(--ink); font-weight: 700; }
+  .ce-launch-contract .ce-contract-move { margin-left: auto; }
+  .ce-launch-day-receipt { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 9px 14px; border: 1px solid var(--card-border); border-radius: 12px; background: var(--card); }
+  .ce-receipt-eyebrow { color: var(--faint); font-size: 9.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+  .ce-receipt-verdict { color: var(--ink); font-size: 14px; font-weight: 800; letter-spacing: -.01em; }
+  .ce-receipt-evidence { min-width: 0; color: var(--muted); font-size: 10.5px; line-height: 1.4; }
+  .ce-launch-day-receipt.is-won { border-color: color-mix(in srgb, var(--accent) 45%, var(--card-border)); }
+  .ce-launch-day-receipt.is-won .ce-receipt-verdict { color: var(--accent-text); }
+  .ce-launch-day-receipt.is-quiet .ce-receipt-verdict,
+  .ce-launch-day-receipt.is-unconfirmed .ce-receipt-verdict,
+  .ce-launch-day-receipt.is-stopped .ce-receipt-verdict { color: var(--muted); }
+  .ce-launch-day-receipt.is-quiet,
+  .ce-launch-day-receipt.is-unconfirmed,
+  .ce-launch-day-receipt.is-stopped { border-style: dashed; background: transparent; }
+  .ce-launch-day-receipt.is-unmeasured { border-style: dashed; border-color: var(--hairline); background: transparent; }
+  .ce-launch-day-receipt.is-unmeasured .ce-receipt-verdict { color: var(--faint); }
+
+  /* P0.7 — schedule-rail lock: the board says plainly that Stage never fires live. */
+  .ce-launch-rail-note { color: var(--faint); font-size: 9.5px; letter-spacing: .02em; white-space: nowrap; }
+
+  /* P0.10 — days-safe is a calm plain count with its source named; cadence copy
+     never implies posting debt. */
+  .ce-launch-daysafe { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 2px 4px; color: var(--muted); font-size: 11px; }
+  .ce-launch-daysafe strong { color: var(--ink); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .ce-launch-daysafe .ce-local-tag { align-self: center; }
+  @media (max-width: 700px) {
+    .ce-launch-contract { gap: 8px 14px; }
+    .ce-launch-day-receipt { gap: 6px 10px; }
+    /* P0.4 on phone: the 90px cap only holds if the strip is genuinely
+       compressed — a max-height + overflow clip of real content is a lie of
+       a different kind. One-line head, tight insights, same information.
+       Scoped under html.ce-phone so these beat the later-loading
+       native-plan.css mobile rules on specificity, not on !important wars. */
+    html.ce-phone .ce-launch-intelligence { padding: 4px 10px 5px !important; }
+    html.ce-phone .ce-launch-intelligence-head { display: flex !important; flex-direction: row !important; flex-wrap: nowrap; align-items: baseline; gap: 10px; padding-bottom: 2px !important; }
+    html.ce-phone .ce-launch-intelligence-head > div { display: flex !important; flex-wrap: nowrap; align-items: baseline; gap: 6px; flex: 0 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; }
+    html.ce-phone .ce-launch-intelligence-head > div > span,
+    html.ce-phone .ce-launch-intelligence-head > div > strong { white-space: nowrap; }
+    html.ce-phone .ce-launch-intelligence-head small { display: block; flex: 1 1 auto; min-width: 0; margin-top: 0 !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+    html.ce-phone .ce-launch-insight { padding: 3px 6px !important; }
+    html.ce-phone .ce-launch-insight strong { font-size: 15px !important; }
+    html.ce-phone .ce-launch-insight span { margin-top: 1px !important; font-size: 8px !important; }
+    html.ce-phone .ce-launch-rhythm { height: 5px !important; margin-top: 1px !important; }
+  }
 
   /* ── Premium polish layer (owner 2026-09-03) — restraint over confetti:
      instant press feedback, visible focus, quiet selection, smooth type. ── */
@@ -2312,10 +2353,10 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=41a267fc6e"></script>
-<script src="./deck_index.js?v=fe83e7a554"></script>
+<script src="./deck_index.js?v=a5daa32ebe"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
-<link rel="stylesheet" href="./native-plan.css?v=c53ee89878" />
+<link rel="stylesheet" href="./native-plan.css?v=57931c8eb1" />
 <link rel="stylesheet" href="./native-saved.css?v=0563340490" />
 <link rel="stylesheet" href="./native-studio.css?v=28e71d78ab" />
 <style id="ce-share-trim">
@@ -5929,6 +5970,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         q.metaIgQueued = !!r.igQueued;
         q.metaIgOnly = !!r.igOnly;
         q.metaAt = Date.now();
+        /* P0.9 (report 14): a Meta schedule-confirmation is day-event evidence.
+           The receipt's Won reads this, never the stage intent alone. */
+        if (r.ok) {
+          try {
+            ceDayEventAdd(q.metaState === 'published' ? 'meta_published' : 'meta_scheduled', {
+              dayKey: String(q.scheduleDate || ceLocalDateKey(new Date()) || ''),
+              ref: String(r.graphId || q.id || ''),
+              source: 'meta'
+            });
+          } catch (_ev) {}
+        }
         /* 2026-09-10 audit A-4: the ship path renders the PNG (exportPoemPNG's
            inline fallback) but never told the card, so a piece that actually
            shipped still read NOT_EXPORTED behind a red chip. Record the same
@@ -17529,8 +17581,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var __queueByDay = __chartDays.map(function (day) {
         return { label: day.label, count: state.queueItems.filter(function (q) { return q && q.addedAt && __localDayKey(q.addedAt) === day.key; }).length };
       });
-      var __savedPeak = Math.max(1, Math.max.apply(null, __savedByDay.map(function (d) { return d.count; })));
-      var __queuePeak = Math.max(1, Math.max.apply(null, __queueByDay.map(function (d) { return d.count; })));
+      /* P0.13 (report 14): the two series used to self-normalize on their own
+         peaks, so a 1-save day and a 9-stage day drew the same bar height — a
+         scale lie. One shared peak now scales both charts, the peak is printed,
+         and zero days get a dashed ghost tick instead of a missing bar. */
+      var __momentumPeak = Math.max(1, Math.max.apply(null, __savedByDay.map(function (d) { return d.count; }).concat(__queueByDay.map(function (d) { return d.count; }))));
+      var __savedPeak = __momentumPeak;
+      var __queuePeak = __momentumPeak;
       var __savedTotal14 = __savedByDay.reduce(function (a, b) { return a + b.count; }, 0);
       var __queueTotal14 = __queueByDay.reduce(function (a, b) { return a + b.count; }, 0);
 
@@ -17544,7 +17601,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             <span class="ce-grow-instrument-hint">${__growReady ? (__growReady === 1 ? 'One piece is ready for your next move.' : __growReady + ' pieces are ready for your next move.') : 'Design one piece to create your next move.'}</span>
           </div>
           <div class="ce-grow-instrument-meta">
-            <span>Local inventory · saved on this Mac · ${__growQueued} staged · ${__growExported} exported</span>
+            <span><span class="ce-local-tag">Local only</span> ${window.__CE_META_HAS_TOKEN__ ? '· Meta connected' : '· Meta not connected'}</span>
+            <span>Saved on this Mac · ${__growQueued} staged · ${__growExported} exported</span>
             <time>${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</time>
           </div>
         </section>
@@ -17561,14 +17619,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           </div>
         </section>
 
-        <section class="ce-readiness-row ce-grow-readiness" aria-label="Your content at a glance">
-          <div><span>Ready to publish</span><strong>${__growReady.toLocaleString()}</strong><small>of ${(state.queueItems || []).length} in your Plan</small></div>
-          <div><span>Designed carousels</span><strong>${__growDecks.toLocaleString()}</strong><small>ready to edit in Studio</small></div>
-          <div><span>Unedited poems</span><strong>${__growPoems.toLocaleString()}</strong><small>${__growPoems === 1 ? 'poem' : 'poems'} in Library</small></div>
-          <div><span>Authored posts</span><strong>${__growPosts.toLocaleString()}</strong><small>${__growPosts === 1 ? 'post' : 'posts'} ready to shape</small></div>
+        <section class="ce-readiness-row ce-grow-readiness" aria-label="Local inventory">
+          <div><span>Designed carousels</span><strong>${__growDecks.toLocaleString()}</strong><small>in Library · local only</small></div>
+          <div><span>Poems</span><strong>${__growPoems.toLocaleString()}</strong><small>${__growPoems === 1 ? 'poem' : 'poems'} in Library · local only</small></div>
+          <div><span>Authored posts</span><strong>${__growPosts.toLocaleString()}</strong><small>${__growPosts === 1 ? 'post' : 'posts'} · local only</small></div>
+          <div><span>Ideas</span><strong>${__growIdeas.toLocaleString()}</strong><small>not postable yet</small></div>
         </section>
         <section class="ce-grow-momentum ce-ops-panel" aria-label="Momentum and content mix">
-          <div class="ce-section-heading"><div><h3>Momentum + mix</h3></div><span class="ce-data-note">Last 14 days · local activity${window.__CE_META_HAS_TOKEN__ ? ' · Meta below is live' : ' · no analytics connected'}</span></div>
+          <div class="ce-section-heading"><div><h3>Momentum + mix</h3></div><span class="ce-data-note">Last 14 days · local activity on this Mac${window.__CE_META_HAS_TOKEN__ ? ' · Meta below is live' : ' · no analytics connected'}</span></div>
           <div class="ce-grow-momentum-grid">
             <div class="ce-grow-mix">
               <span class="ce-grow-eyebrow">Content mix</span>
@@ -17584,11 +17642,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             </div>
             <div class="ce-grow-charts">
               <div class="ce-chart-card"><div class="ce-chart-head"><strong>Saved pieces</strong><span>${__savedTotal14} in 14 days</span></div>
-                ${__savedTotal14 === 0 ? `<div class="ce-chart-empty">Save a piece from Library or Studio to start the streak.</div>` : `<div class="ce-chart-bars" role="img" aria-label="Pieces saved per day over the last 14 days">${__savedByDay.map(d => `<div class="ce-chart-col" title="${d.label}: ${d.count} saved"><span class="ce-chart-val">${d.count || ''}</span><span class="ce-chart-bar" style="height:${d.count ? Math.round(d.count / __savedPeak * 60) + 4 : 2}px"></span><span class="ce-chart-day">${d.label}</span></div>`).join('')}</div>`}
+                ${__savedTotal14 === 0 ? `<div class="ce-chart-empty">Nothing saved in this window yet — the next saved piece starts the count.</div>` : `<div class="ce-chart-bars" role="img" aria-label="Pieces saved per day over the last 14 days">${__savedByDay.map(d => `<div class="ce-chart-col${d.count ? '' : ' is-ghost'}" title="${d.label}: ${d.count} saved"><span class="ce-chart-val">${d.count || ''}</span><span class="ce-chart-bar" style="height:${d.count ? Math.round(d.count / __savedPeak * 60) + 4 : 2}px"></span><span class="ce-chart-day">${d.label}</span></div>`).join('')}</div>`}
               </div>
               <div class="ce-chart-card"><div class="ce-chart-head"><strong>Queue flow</strong><span>${__queueTotal14} staged in 14 days</span></div>
-                ${__queueTotal14 === 0 ? `<div class="ce-chart-empty">Stage a piece to see the rhythm here.</div>` : `<div class="ce-chart-bars" role="img" aria-label="Pieces staged per day over the last 14 days">${__queueByDay.map(d => `<div class="ce-chart-col" title="${d.label}: ${d.count} staged"><span class="ce-chart-val">${d.count || ''}</span><span class="ce-chart-bar" style="height:${d.count ? Math.round(d.count / __queuePeak * 60) + 4 : 2}px"></span><span class="ce-chart-day">${d.label}</span></div>`).join('')}</div>`}
+                ${__queueTotal14 === 0 ? `<div class="ce-chart-empty">Nothing staged in this window yet.</div>` : `<div class="ce-chart-bars" role="img" aria-label="Pieces staged per day over the last 14 days">${__queueByDay.map(d => `<div class="ce-chart-col${d.count ? '' : ' is-ghost'}" title="${d.label}: ${d.count} staged"><span class="ce-chart-val">${d.count || ''}</span><span class="ce-chart-bar" style="height:${d.count ? Math.round(d.count / __queuePeak * 60) + 4 : 2}px"></span><span class="ce-chart-day">${d.label}</span></div>`).join('')}</div>`}
               </div>
+              <div class="ce-chart-shared-axis">Shared axis · peak ${__momentumPeak}/day · dashed tick = a day with no local activity</div>
             </div>
           </div>
         </section>
@@ -17884,15 +17943,90 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var piece = day.piece || {};
         return !!__queuedContentIds[String(getContentKey('carousel', piece))];
       }).length;
+
+      /* ── P0.9 / P0.14 (report 14): the morning fold answers two questions in
+         under ten seconds — did yesterday count (the Day Receipt, evidence-gated)
+         and what posts today (the frozen contract strip). WON requires Meta
+         schedule-confirmation evidence; stage intent alone renders
+         Scheduled-unconfirmed. The verdict lives on Launch only — Grow never
+         becomes a second scoreboard. ── */
+      var __todayKey = ceLocalDateKey(new Date()) || '';
+      var __yesterdayDate = new Date(Date.now() - 86400000);
+      var __yesterdayKey = ceLocalDateKey(__yesterdayDate) || '';
+      var __receipt = ceDayVerdict(__yesterdayKey);
+      var __receiptDay = __yesterdayDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      // The contract's "today" frame is frozen at first open of the day — a
+      // mid-session re-render must not rewrite the morning answer (no
+      // recompute anxiety); the verdict itself stays live evidence.
+      var __contractToday = '';
+      try {
+        var __cc = JSON.parse(localStorage.getItem('ce_launch_contract_v1') || 'null');
+        if (__cc && __cc.dayKey === __todayKey && typeof __cc.todayTitle === 'string') __contractToday = __cc.todayTitle;
+      } catch (_e) { __contractToday = ''; }
+      if (!__contractToday && __todayPiece) {
+        __contractToday = String(__todayPiece.title || 'Today\u2019s piece');
+        try { localStorage.setItem('ce_launch_contract_v1', JSON.stringify({ dayKey: __todayKey, todayTitle: __contractToday })); } catch (_e) {}
+      }
+      var __todayQ = null;
+      if (__todayPiece) {
+        var __tcid = String(getContentKey('carousel', __todayPiece) || '');
+        __todayQ = (state.queueItems || []).filter(function (q) {
+          return q && q.item && String(getContentKey(q.type, q.item) || '') === __tcid;
+        })[0] || null;
+      }
+      var __todayConfirmed = !!(__todayQ && (__todayQ.metaGraphId || __todayQ.metaState === 'scheduled' || __todayQ.metaState === 'published'));
+      var __oneMove = !__designed.length
+        ? 'Design one piece in Studio'
+        : !__todayPiece
+          ? 'Pick a piece from Library'
+          : __todayConfirmed
+            ? 'Done — it is already on Meta\u2019s clock'
+            : __todayQ
+              ? 'On the rail — send it to Meta\u2019s clock from Plan when ready'
+              : 'Stage it — schedule only, never live';
+      /* Days safe (P0.10): distinct future days with a piece on the rail, split
+         by proof — Meta-confirmed vs local-only staged. The count never feeds a
+         debt: a missed day never raises tomorrow's quota. */
+      var __safeMeta = {}, __safeLocal = {};
+      (state.queueItems || []).forEach(function (q) {
+        var dk = String(q && q.scheduleDate || '');
+        if (!dk || !__todayKey || dk <= __todayKey) return;
+        if (q.metaGraphId || q.metaState === 'scheduled' || q.metaState === 'published') __safeMeta[dk] = true;
+        else __safeLocal[dk] = true;
+      });
+      (window.__CE_SCHEDULE_REQ_STATE__ || []).forEach(function (r) {
+        var ms = Number(r && r.scheduleUnixMs) || 0;
+        if (!ms) return;
+        var dk = ceLocalDateKey(new Date(ms));
+        if (!dk || dk <= __todayKey) return;
+        if (r.state === 'scheduled' || r.state === 'published') __safeMeta[dk] = true;
+        else if (r.state !== 'failed' && r.state !== 'superseded') __safeLocal[dk] = true;
+      });
+      var __daysSafeMeta = Object.keys(__safeMeta).length;
+      var __daysSafeLocal = Object.keys(__safeLocal).filter(function (k) { return !__safeMeta[k]; }).length;
+      var __daysSafe = __daysSafeMeta + __daysSafeLocal;
       __launchLb.innerHTML = `
+        <section class="ce-launch-contract" aria-label="Morning contract">
+          <span><em>Yesterday</em><b>${escapeHtml(__receipt.verdict)}</b></span>
+          <span><em>Today</em><b>${escapeHtml(__contractToday || (__todayPiece ? String(__todayPiece.title || 'Today\u2019s piece') : 'Nothing on the rail yet'))}</b></span>
+          <span class="ce-contract-move"><em>One move</em><b>${escapeHtml(__oneMove)}</b></span>
+        </section>
+
+        <section class="ce-launch-day-receipt ${__receipt.className}" aria-label="Day receipt for yesterday" data-day-key="${escapeHtml(__yesterdayKey)}">
+          <span class="ce-receipt-eyebrow">Yesterday · ${escapeHtml(__receiptDay)}</span>
+          <strong class="ce-receipt-verdict">${escapeHtml(__receipt.verdict)}</strong>
+          <span class="ce-receipt-evidence">${escapeHtml(__receipt.detail)}</span>
+        </section>
+
         <section class="ce-launch-board-head">
           ${__todayPiece ? `
             <div class="ce-launch-board-cand ce-launch-board-cand--slim">
               <span class="ce-launch-board-eyebrow">Today</span>
               <button type="button" class="ce-launch-board-open" data-ce-launch-open-art="${escapeHtml(__todayPiece.id)}" title="Open in Studio">${escapeHtml(__todayPiece.title || 'Open in Studio')}</button>
-              <button class="ce-surface-button is-primary" data-ce-launch-tomorrow-stage="${escapeHtml(__todayPiece.id)}" title="Stage in Plan & Queue" type="button">Stage</button>
+              <button class="ce-surface-button is-primary" data-ce-launch-tomorrow-stage="${escapeHtml(__todayPiece.id)}" title="Stage on the schedule rail — never posts live" type="button">Stage</button>
+              <span class="ce-launch-rail-note">schedule only · never posts live</span>
             </div>
-          ` : `<div class="ce-launch-board-cand ce-launch-board-cand--empty"><span class="ce-launch-board-eyebrow">Today</span><strong>Nothing ready yet</strong><button type="button" class="ce-surface-button is-primary" data-ce-launch-goto-library>Pick from Library</button></div>`}
+          ` : `<div class="ce-launch-board-cand ce-launch-board-cand--empty"><span class="ce-launch-board-eyebrow">Today</span><strong>Nothing ready yet</strong><button type="button" class="ce-surface-button is-primary" data-ce-launch-goto-library>Pick from Library</button><span class="ce-launch-rail-note">schedule only · never posts live</span></div>`}
           <div class="ce-launch-board-cadence" aria-label="Board length">
             ${[3, 7, 14, 30].map(function (n) { return '<button type="button" aria-label="Show ' + n + '-day board" title="Show ' + n + '-day board" data-ce-plan-days="' + n + '" class="' + (n === __planLen ? 'is-on' : '') + (!__designed.length ? ' is-disabled' : '') + '"' + (!__designed.length ? ' disabled aria-disabled="true"' : '') + '>' + n + 'd</button>'; }).join('')}
           </div>
@@ -17902,7 +18036,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
         <section class="ce-launch-board-strip${__designed.length ? '' : ' is-empty'}" aria-label=${'"'+__planLen+'-day posting board"'}>
           ${__designed.length ? `
-          ${__planDays.map(function (day) {
+          ${__planDays.filter(function (day) { return !!day.piece; }).map(function (day) {
             var piece = day.piece;
             var face = piece ? __renderTilePiece(piece) : '';
             // Clean rail pillar ("Teaching") — never the raw source label.
@@ -17919,27 +18053,32 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               +   '<span class="ce-launch-day-label">' + (escapeHtml(day.label)) + '</span>'
               +   (day.isDrop ? '<span class="ce-launch-day-chip">Drop</span>' : '')
               + '</div>'
-              + (piece
-                ? '<button type="button" class="ce-launch-day-art" data-ce-launch-open-art="' + escapeHtml(piece.id) + '" aria-label="Open ' + escapeHtml(piece.title || 'this piece') + ' in Studio" title="' + escapeHtml(piece.title || '') + '">' + face + '</button>'
-                    + (pillarName ? '<div class="ce-launch-day-meta"><span class="ce-launch-pillar-chip" title="' + escapeHtml(pillarName) + '">' + escapeHtml(pillarChip) + '</span>' + (whyLine ? '<span class="ce-launch-day-why">' + escapeHtml(whyLine) + '</span>' : '') + '</div>' : '')
-                    + '<span class="ce-launch-day-sr-title">' + escapeHtml(piece.title || '') + '</span>'
-                    + '<div class="ce-launch-day-actions">'
-                    +   '<button type="button" class="' + (day.idx === 0 ? 'is-primary' : '') + '" data-ce-launch-stage-day="' + day.idx + '" title="' + (day.idx === 0 ? 'Stage today in Plan &amp; Queue' : 'Set this day in Plan &amp; Queue') + '">' + (day.idx === 0 ? 'Stage' : 'Set') + '</button>'
-                    +   '<details class="ce-launch-day-more"><summary aria-label="More options" title="More options">More</summary><div>'
-                    +     '<button type="button" data-ce-launch-shuffle-day="' + day.idx + '" title="Next-best designed piece for this day">Change piece</button>'
-                    +     '<button type="button" data-ce-launch-retire-day="' + day.idx + '" title="Remove this suggestion">Remove</button>'
-                    +   '</div></details>'
-                    + '</div>'
-                : '<div class="ce-launch-day-art" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;">Pick from Library</div>')
+              + '<button type="button" class="ce-launch-day-art" data-ce-launch-open-art="' + escapeHtml(piece.id) + '" aria-label="Open ' + escapeHtml(piece.title || 'this piece') + ' in Studio" title="' + escapeHtml(piece.title || '') + '">' + face + '</button>'
+              + (pillarName ? '<div class="ce-launch-day-meta"><span class="ce-launch-pillar-chip" title="' + escapeHtml(pillarName) + '">' + escapeHtml(pillarChip) + '</span>' + (whyLine ? '<span class="ce-launch-day-why">' + escapeHtml(whyLine) + '</span>' : '') + '</div>' : '')
+              + '<span class="ce-launch-day-sr-title">' + escapeHtml(piece.title || '') + '</span>'
+              + '<div class="ce-launch-day-actions">'
+              +   '<button type="button" class="' + (day.idx === 0 ? 'is-primary' : '') + '" data-ce-launch-stage-day="' + day.idx + '" title="' + (day.idx === 0 ? 'Stage today on the schedule rail — never posts live' : 'Set this day in Plan &amp; Queue — schedule only') + '">' + (day.idx === 0 ? 'Stage' : 'Set') + '</button>'
+              +   '<details class="ce-launch-day-more"><summary aria-label="More options" title="More options">More</summary><div>'
+              +     '<button type="button" data-ce-launch-shuffle-day="' + day.idx + '" title="Next-best designed piece for this day">Change piece</button>'
+              +     '<button type="button" data-ce-launch-retire-day="' + day.idx + '" title="Remove this suggestion">Remove</button>'
+              +   '</div></details>'
+              + '</div>'
               + '</article>';
           }).join('')}
           ` : `<article class="ce-launch-empty-card"><span class="ce-launch-board-eyebrow">Your first post</span><strong>Start with one piece you would genuinely share.</strong><small>The board stays quiet until a designed piece exists.</small><button type="button" class="ce-surface-button is-primary" data-ce-launch-goto-library>Pick from Library</button></article>`}
         </section>
 
+        <div class="ce-launch-daysafe" aria-label="Days safe">
+          <strong>${__daysSafe} day${__daysSafe === 1 ? '' : 's'} safe</strong>
+          <span>${__daysSafeMeta} on Meta\u2019s clock${__daysSafeLocal ? ' \u00b7 ' + __daysSafeLocal + ' staged locally' : ''}</span>
+          ${__daysSafeLocal ? '<span class="ce-local-tag">Local only until Meta confirms</span>' : ''}
+          <span style="margin-left:auto">A missed day never doubles tomorrow.</span>
+        </div>
+
         <section class="ce-launch-intelligence" aria-label="Launch board intelligence">
           <div class="ce-launch-intelligence-head">
             <div><span>This week</span><strong>${__planLen}-day posting rhythm</strong></div>
-            <small>${(__boardPieces.length || __boardStaged) ? "Live from your board · nothing estimated" : "Nothing staged yet · pick pieces from Library and the week fills in"}</small>
+            <small>${(__boardPieces.length || __boardStaged) ? "Local only · live from your board · nothing estimated" : "Nothing staged yet · pick pieces from Library and the week fills in"}</small>
           </div>
           <div class="ce-launch-insights">
             <div class="ce-launch-insight${__boardPieces.length ? "" : " is-zero"}"><strong>${__boardPieces.length}/${__planLen}</strong><span>days covered</span></div>
@@ -18498,6 +18637,106 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var date = value instanceof Date ? value : new Date(value);
     if (isNaN(date.getTime())) return null;
     return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+  }
+
+  /* ── Day events + Day Receipt (report 14 §9 P0.9, 2026-09-17) ───────────────
+     `ce_day_events` is the append-only substrate the Launch day verdict reads.
+     Stage intent appends `staged`; a Meta schedule confirmation (a graph id on
+     the queue row, a relay row booked on Meta, a live publish) appends
+     `meta_scheduled` / `meta_published`. WON is evidence, never intent: without
+     a confirmation on file the receipt reads "Scheduled-unconfirmed" — a staged
+     piece is a plan, not a result. Nothing is ever imputed into the log. */
+  var CE_DAY_EVENTS_KEY = 'ce_day_events';
+  function ceDayEvents() {
+    try {
+      var rows = JSON.parse(localStorage.getItem(CE_DAY_EVENTS_KEY) || '[]');
+      return Array.isArray(rows) ? rows : [];
+    } catch (_e) { return []; }
+  }
+  function ceDayEventAdd(kind, detail) {
+    try {
+      var rows = ceDayEvents();
+      var d = detail || {};
+      var dayKey = String(d.dayKey || '');
+      var ref = String(d.ref || '');
+      // Idempotent at the fact grain: the same (kind, day, ref) lands once.
+      var dup = rows.some(function (r) {
+        return r && r.kind === kind && String(r.dayKey || '') === dayKey && String(r.ref || '') === ref;
+      });
+      if (dup) return;
+      rows.push({
+        id: 'ev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6),
+        ts: new Date().toISOString(),
+        kind: String(kind || 'note'),
+        dayKey: dayKey,
+        ref: ref,
+        source: String(d.source || 'local')
+      });
+      while (rows.length > 400) rows.shift();
+      localStorage.setItem(CE_DAY_EVENTS_KEY, JSON.stringify(rows));
+    } catch (_e) {}
+  }
+  /* Evidence for one calendar day (local YYYY-MM-DD, the same key staging
+     stamps). Confirmed = Meta schedule-confirmation evidence only; staged =
+     local intent, including IG-clock arming, which fires from this Mac and is
+     therefore NOT a Meta confirmation. */
+  function ceDayEvidence(dayKey) {
+    var ev = { confirmed: [], staged: [], quiet: false };
+    ceDayEvents().forEach(function (r) {
+      if (!r || String(r.dayKey || '') !== dayKey) return;
+      if (r.kind === 'meta_scheduled' || r.kind === 'meta_published') ev.confirmed.push(r);
+      else if (r.kind === 'quiet') ev.quiet = true;
+      else ev.staged.push(r);
+    });
+    (state.queueItems || []).forEach(function (q) {
+      if (!q || String(q.scheduleDate || '') !== dayKey) return;
+      if (q.metaGraphId || q.metaState === 'scheduled' || q.metaState === 'published') {
+        ev.confirmed.push({ kind: 'meta_scheduled', ref: String(q.metaGraphId || q.id || ''), source: 'queue' });
+      } else {
+        ev.staged.push({ kind: 'staged', ref: String(q.id || ''), source: 'queue' });
+      }
+    });
+    (window.__CE_SCHEDULE_REQ_STATE__ || []).forEach(function (r) {
+      var ms = Number(r && r.scheduleUnixMs) || 0;
+      if (!ms || ceLocalDateKey(new Date(ms)) !== dayKey) return;
+      var st = String(r.state || '');
+      if (st === 'scheduled' || st === 'published') ev.confirmed.push({ kind: 'meta_scheduled', ref: String(r.id || ''), source: 'relay' });
+      else if (st !== 'failed' && st !== 'superseded') ev.staged.push({ kind: 'staged', ref: String(r.id || ''), source: 'relay' });
+    });
+    (state.queueItems || []).forEach(function (q) {
+      var row = null;
+      try { row = (typeof ceIgQueueRowFor === 'function') ? ceIgQueueRowFor(q) : null; } catch (_e) { row = null; }
+      if (!row) return;
+      var ms = (Number(row.fireUnix) || 0) * 1000;
+      if (!ms || ceLocalDateKey(new Date(ms)) !== dayKey) return;
+      if (row.state === 'published') ev.confirmed.push({ kind: 'meta_published', ref: String(row.contentId || (q && q.id) || ''), source: 'ig-clock' });
+      else ev.staged.push({ kind: 'staged', ref: String(row.contentId || (q && q.id) || ''), source: 'ig-clock' });
+    });
+    return ev;
+  }
+  /* The verdict ladder. Quiet is owner-marked (never inferred from inactivity);
+     Won needs confirmation evidence; local intent alone reads
+     Scheduled-unconfirmed; a source we cannot check reads Unmeasured — never
+     Stopped-on-stale. Stopped is only painted when Meta IS connected and the
+     day is verifiably empty. */
+  function ceDayVerdict(dayKey) {
+    var ev = ceDayEvidence(dayKey);
+    if (ev.quiet) return { verdict: 'Quiet', className: 'is-quiet', detail: 'Marked quiet on purpose — not a miss.' };
+    if (ev.confirmed.length) {
+      return {
+        verdict: 'Won', className: 'is-won',
+        detail: ev.confirmed.length + ' piece' + (ev.confirmed.length === 1 ? '' : 's') + ' confirmed on Meta\u2019s clock' + (ev.confirmed[0].ref ? ' · id ' + String(ev.confirmed[0].ref).slice(-8) : '')
+      };
+    }
+    if (ev.staged.length) {
+      return {
+        verdict: 'Scheduled-unconfirmed', className: 'is-unconfirmed',
+        detail: ev.staged.length + ' piece' + (ev.staged.length === 1 ? '' : 's') + ' staged locally — Meta has not confirmed the schedule yet.'
+      };
+    }
+    var measured = !!(window.__CE_META_HAS_TOKEN__ && window.__CE_META_INSIGHTS_STATE__ && window.__CE_META_INSIGHTS_STATE__.status === 'ready');
+    if (!measured) return { verdict: 'Unmeasured', className: 'is-unmeasured', detail: 'Nothing on the rail and Meta is not connected — this day is unknown, not failed.' };
+    return { verdict: 'Stopped', className: 'is-stopped', detail: 'Meta is live and nothing was on the clock. Said straight, no red.' };
   }
 
   function ceGetKanbanWeekDays() {
@@ -19293,6 +19532,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       }
       localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
       if (!quiet) showAppToast('Updated in Plan & Queue', { icon: 'calendar' });
+      if (placement && placement.scheduleDate) {
+        try { ceDayEventAdd('staged', { dayKey: String(placement.scheduleDate), ref: contentId, source: 'queue' }); } catch (_ev) {}
+      }
       return true;
     }
 
@@ -19322,6 +19564,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (append) state.queueItems.push(entry);
     else state.queueItems.unshift(entry);
     localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+    /* P0.9 (report 14): staging on a date is local intent — the day-event log
+       records it so the receipt can say Scheduled-unconfirmed until Meta's own
+       confirmation arrives. */
+    if (placement && placement.scheduleDate) {
+      try { ceDayEventAdd('staged', { dayKey: String(placement.scheduleDate), ref: contentId, source: 'queue' }); } catch (_ev) {}
+    }
     if (!quiet) showAppToast(__draftStaged ? 'Draft staged, design it in Studio before posting' : '✓ Added to Plan & Queue', { icon: __draftStaged ? 'pencil' : 'calendar' });
 
     var meta = document.getElementById('meta');
