@@ -213,9 +213,9 @@
   border-color: var(--border);
 }
 .ce-nb-pass:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.3);
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
 }
 
 /* ── Card Action Cluster (Floating Top-Right on Hover Only) ── */
@@ -283,8 +283,8 @@
   font-size: 11px;
 }
 .ce-action-reject-btn:hover {
-  background: rgba(239, 68, 68, 0.25);
-  color: #ef4444;
+  background: color-mix(in srgb, var(--danger) 25%, transparent);
+  color: var(--danger);
   transform: scale(1.08);
 }
 

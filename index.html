@@ -813,6 +813,13 @@
   /* Expanded sidebar keeps the floating bar to its right; collapsed → full width. */
   .app-container:has(.sidebar:not(.collapsed)) .topbar { left: 220px; }
 
+  /* Poem-library chrome belongs ONLY on the poem shelf: html.ce-poem-library is
+     toggled per render (activeTab === 'library' && libraryType === 'poems'), so
+     off that surface Shuffle / Sort / the sort popover must not paint. */
+  html:not(.ce-poem-library) #poem-shuffle,
+  html:not(.ce-poem-library) #poem-sort,
+  html:not(.ce-poem-library) #poem-sort-popover { display: none !important; }
+
   .sidebar-toggle-btn {
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.06);
@@ -866,6 +873,10 @@
     background: rgba(120, 120, 150, 0.28);
     border-radius: 999px;
   }
+  /* Empty queue: one compact Inbox drop tile, never a 520px row of empty
+     columns under the banner. */
+  .ce-kanban-board.is-empty { min-height: 0; scroll-snap-type: none; }
+  .ce-kanban-board.is-empty .ce-kanban-col { flex: 0 0 280px; min-height: 0; }
   .ce-kanban-col {
     flex: 0 0 calc((100% - 48px) / 4);
     width: auto;
@@ -2011,8 +2022,9 @@
   /* P0.3 — the More-moves disclosure must be a real hit target. */
   .ce-grow-more-moves > summary { min-height: 44px; }
 
-  /* P0.4 — Launch intelligence is a footnote, never a panel: hard cap. */
-  .ce-launch-intelligence { max-height: 90px !important; overflow: hidden !important; }
+  /* P0.4 — Launch intelligence is a footnote, never a panel: hard cap, but the
+     capped content stays scrollable-reachable instead of clipped dead. */
+  .ce-launch-intelligence { max-height: 90px !important; overflow-y: auto !important; }
 
   /* P0.9 / P0.14 — Day Receipt + morning contract strip. Launch alone owns the
      day verdict; WON is only painted on schedule-confirmation evidence. Quiet /
@@ -2126,11 +2138,11 @@
   /* Write surface sizing (2026-09-17): the compose field sizes to its draft —
      no fixed-height void. native-plan.css still pins .ce-write-field textarea
      at 360px; the scoped rules below outrank it on specificity. The
-     #live-write-input input handler grows the box to scrollHeight; CSS owns
-     the floor (~240px desktop) and the html.ce-phone cap (38vh) so the
-     Undo/Redo/Copy/Add-to-Plan row stays reachable above the preview. */
+     #live-write-input input handler grows the box to scrollHeight and re-reads
+     the CSS max-height per call (ce-mobile.css owns the phone cap at 34vh), so
+     the Undo/Redo/Copy/Add-to-Plan row stays reachable above the preview. */
   .ce-write-shell .ce-write-field textarea { height: auto; min-height: 240px; }
-  html.ce-phone .ce-write-shell .ce-write-field textarea { min-height: 180px !important; max-height: 38vh; }
+  html.ce-phone .ce-write-shell .ce-write-field textarea { min-height: 180px !important; max-height: 34vh; }
 
   /* A disabled write control is a fact, not an alarm — flatten to muted. */
   .ce-write-shell .ce-write-actions button:disabled,
@@ -2186,15 +2198,15 @@
   .ce-grow-shell .ce-tide-lane.is-stale .ce-tide-svg { opacity: .55; }
   .ce-grow-shell .ce-tide-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
   .ce-grow-shell .ce-tide-name { color: var(--faint); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-  .ce-grow-shell .ce-tide-end { color: var(--ink); font-size: 28px; font-weight: 760; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-tide-end { color: var(--ink); font-size: 20px; font-weight: 760; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
   .ce-grow-shell .ce-tide-delta { color: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
   .ce-grow-shell .ce-tide-delta.is-dim, .ce-grow-shell .ce-tide-delta.is-down { color: var(--faint); }
-  .ce-grow-shell .ce-tide-svg { display: block; width: 100%; height: 110px; margin-top: 8px; }
+  .ce-grow-shell .ce-tide-svg { display: block; width: 100%; height: 56px; margin-top: 8px; }
   .ce-grow-shell .ce-tide-void-fill { fill: url(#ce-tide-hatch); }
   .ce-grow-shell .ce-tide-base { stroke: var(--hairline); stroke-width: 1; }
-  .ce-grow-shell .ce-tide-line { fill: none; stroke: var(--accent); stroke-width: 1.6; }
-  .ce-grow-shell .ce-tide-dot { fill: var(--muted); }
-  .ce-grow-shell .ce-tide-dot.is-last { fill: var(--accent); }
+  .ce-grow-shell .ce-tide-line { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+  .ce-grow-shell .ce-tide-dot { fill: var(--faint); }
+  .ce-grow-shell .ce-tide-dot.is-last { fill: var(--muted); }
   .ce-grow-shell .ce-tide-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; color: var(--faint); font-size: 9px; }
   .ce-grow-shell .ce-tide-void { margin-top: 8px; padding: 12px 14px; border: 1px dashed var(--hairline); border-radius: 10px; color: var(--muted); font-size: 10.5px; line-height: 1.5; }
   .ce-grow-shell .ce-tide-lane .ce-unmeasured-acts { margin-top: 8px; }
@@ -2225,6 +2237,21 @@
   .ce-grow-shell .ce-ans-med { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 1px dashed var(--faint); }
   .ce-grow-shell .ce-ans-empty { padding: 12px 2px; color: var(--faint); font-size: 10.5px; }
   .ce-grow-shell .ce-ans-legend { margin-top: 6px; color: var(--faint); font-size: 8px; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-ans-headline { margin: 6px 0 0; color: var(--accent); font-size: 11.5px; font-weight: 700; }
+  .ce-grow-shell .ce-ans-chart { margin-top: 10px; }
+  .ce-grow-shell .ce-ans-cols { position: relative; display: flex; align-items: flex-end; gap: 6px; height: 108px; }
+  .ce-grow-shell .ce-ans-col { flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+  .ce-grow-shell .ce-ans-col-v { flex: 0 0 auto; color: var(--muted); font-size: 9px; font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-ans-col-track { position: relative; flex: 0 0 auto; display: block; width: 100%; height: 78px; }
+  .ce-grow-shell .ce-ans-col-bar { position: absolute; bottom: 0; left: 18%; right: 18%; border-radius: 3px 3px 0 0; background: rgba(237,232,223,.30); }
+  .ce-grow-shell .ce-ans-col-bar.is-over { background: var(--accent); }
+  .ce-grow-shell .ce-ans-medline { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed var(--faint); pointer-events: none; z-index: 2; }
+  /* Batch-3 ship audit: the label sat over the newest (tallest) bar and the
+     bar painted on top of it — give the chip its own ground. */
+  .ce-grow-shell .ce-ans-medline > span { position: absolute; right: 0; top: -16px; color: var(--faint); font-size: 8px; letter-spacing: .06em; white-space: nowrap; font-variant-numeric: tabular-nums; padding: 1px 5px; border-radius: 6px; background: color-mix(in srgb, var(--bg) 82%, transparent); }
+  .ce-grow-shell .ce-ans-axis { display: flex; gap: 6px; margin-top: 4px; }
+  .ce-grow-shell .ce-ans-tick { flex: 1 1 0; min-width: 0; text-align: center; color: var(--faint); font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ce-grow-shell .ce-ans-tick .ce-ans-age { display: block; width: fit-content; margin: 2px auto 0; padding: 0 6px; border: 1px solid var(--hairline); border-radius: 99px; color: var(--faint); font-size: 8px; font-style: normal; }
   .ce-grow-shell .ce-ans-all > summary { min-height: 32px; color: var(--faint); font-size: 10px; cursor: pointer; list-style: none; }
   .ce-grow-shell .ce-ans-all > summary::-webkit-details-marker { display: none; }
 
@@ -2318,9 +2345,11 @@
     html.ce-phone .ce-grow-shell .ce-fort-days span { font-size: 7px; }
     html.ce-phone .ce-grow-shell .ce-fort-gap i { font-size: 7px; }
     html.ce-phone .ce-grow-shell .ce-grow-tide { grid-template-columns: minmax(0, 1fr); }
-    html.ce-phone .ce-grow-shell .ce-tide-svg { height: 84px; }
-    html.ce-phone .ce-grow-shell .ce-tide-end { font-size: 24px; }
+    html.ce-phone .ce-grow-shell .ce-tide-svg { height: 44px; }
+    html.ce-phone .ce-grow-shell .ce-tide-end { font-size: 18px; }
     html.ce-phone .ce-grow-shell .ce-ans-thumb { flex-basis: 36px; width: 36px; height: 36px; }
+    html.ce-phone .ce-grow-shell .ce-ans-cols { height: 84px; }
+    html.ce-phone .ce-grow-shell .ce-ans-col-track { height: 60px; }
     html.ce-phone .ce-launch-workbench .ce-launch-move { flex-wrap: wrap; gap: 10px; }
     html.ce-phone .ce-launch-workbench .ce-launch-move-art { flex-basis: 72px; width: 72px; }
     html.ce-phone .ce-launch-workbench .ce-launch-move-title { font-size: 14px; }
@@ -2435,9 +2464,9 @@
         <button class="nav-sub-btn" data-lib="carousels" type="button">Carousels <span class="nav-count-badge" id="nav-carousel-count"></span></button>
         <button class="nav-sub-btn" data-lib="posts" type="button">Posts <span class="nav-count-badge" id="nav-post-count"></span></button>
       </div>
-      <button class="nav-btn" data-tab="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12a1 1 0 0 1 1 1v16l-7-4-7 4V5a1 1 0 0 1 1-1Z"/></svg><span class="nav-label">Saved Bank</span> <span class="nav-count-badge" id="nav-saved-count">0</span></button>
+      <button class="nav-btn" data-tab="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12a1 1 0 0 1 1 1v16l-7-4-7 4V5a1 1 0 0 1 1-1Z"/></svg><span class="nav-label">Saved Bank</span> <span class="nav-count-badge" id="nav-saved-count"></span></button>
       <button class="nav-btn" data-tab="write"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l4-1L20 7l-3-3L5 16l-1 4Z"/><path d="M14 6l3 3"/></svg><span class="nav-label">Write</span></button>
-      <button class="nav-btn" data-tab="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8.5 3v18M15.5 3v18"/></svg><span class="nav-label">Plan & Queue</span> <span class="nav-count-badge" id="nav-queue-count">0</span></button>
+      <button class="nav-btn" data-tab="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8.5 3v18M15.5 3v18"/></svg><span class="nav-label">Plan & Queue</span> <span class="nav-count-badge" id="nav-queue-count"></span></button>
       <button class="nav-btn" data-tab="grow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M7 15l4-4 3 2 5-6"/></svg><span class="nav-label">Grow</span></button>
       <button class="nav-btn" data-tab="launch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16.5V7.5M8.5 11 12 7.5 15.5 11"/></svg><span class="nav-label">Launch</span></button>
     </div>
@@ -2656,18 +2685,18 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=efe91af179"></script>
-<script src="./deck_index.js?v=c3195c790b"></script>
+<script src="./deck_index.js?v=e5b3503406"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
-<link rel="stylesheet" href="./native-plan.css?v=b6e5ff7170" />
-<link rel="stylesheet" href="./native-saved.css?v=0563340490" />
+<link rel="stylesheet" href="./native-plan.css?v=beaf185ada" />
+<link rel="stylesheet" href="./native-saved.css?v=ed04947639" />
 <link rel="stylesheet" href="./native-studio.css?v=28e71d78ab" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=882102d528" />
+<link rel="stylesheet" href="./ce-mobile.css?v=7723292431" />
 <script src="./ce-touch-edit.js?v=d5b7d014e8"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
@@ -8314,6 +8343,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           ? '<button type="button" class="ce-filter-reset" data-filter-reset="1">Clear filters (' + ceLibraryFilterCount() + ')</button>'
           : '');
     pop.hidden = false;
+    /* As a child of the fixed .topbar the popover anchored to the bar's left
+       edge and the phone overflow rule clipped it entirely. Port it to <body>
+       and pin it under the button in viewport space (after unhide so
+       offsetWidth is real). */
+    if (pop.parentElement !== document.body) document.body.appendChild(pop);
+    var __r = btn.getBoundingClientRect();
+    pop.style.position = 'fixed';
+    pop.style.top = (__r.bottom + 6) + 'px';
+    pop.style.right = 'auto';
+    pop.style.left = Math.max(8, Math.min(__r.left, (window.innerWidth || 1200) - pop.offsetWidth - 8)) + 'px';
     btn.setAttribute('aria-expanded', 'true');
   }
   function ceLibrarySortInit() {
@@ -15683,13 +15722,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       return 999999;
     }
 
-    var filteredItems = allSaved.filter(function (s) {
+    /* One predicate drives both the list and the per-type pill counts below,
+       so a pill's disabled state can never disagree with what it would show. */
+    var savedRowPasses = function (s, typeKey) {
       if (!s) return false;
       if (activeFilter === 'shortlist' && s.status !== 'saved' && s.status !== 'in_progress') return false;
       if (activeFilter === 'in_progress' && s.status !== 'in_progress') return false;
       if (activeFilter === 'rejected' && s.status !== 'rejected') return false;
 
-      if (activeType !== 'all' && s.type !== activeType) return false;
+      if (typeKey && typeKey !== 'all' && s.type !== typeKey) return false;
 
       if (query) {
         var itm = s.item || {};
@@ -15697,6 +15738,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (!text.includes(query)) return false;
       }
       return true;
+    };
+
+    var filteredItems = allSaved.filter(function (s) { return savedRowPasses(s, activeType); });
+
+    /* Per-type counts over the list WITHOUT the type filter: a pill is dead
+       only when its own list is empty. 'all' is never counted to zero out —
+       it stays clickable as the escape hatch back to a non-empty list. */
+    var savedTypeCounts = { post: 0, carousel: 0, poem: 0 };
+    allSaved.forEach(function (s) {
+      if (savedRowPasses(s, 'all') && s && Object.prototype.hasOwnProperty.call(savedTypeCounts, s.type)) savedTypeCounts[s.type]++;
     });
 
     // Canonical score / rank ordering (same order as Library rails)
@@ -15801,13 +15852,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     });
 
     container.querySelectorAll('.ce-type-pill').forEach(function (btn) {
-      /* 2026-09-06 audit fix: filters active on an empty list = dead controls. Disable at zero. */
-      btn.disabled = (filteredItems.length === 0);
-      btn.style.opacity = filteredItems.length === 0 ? '.4' : '';
-      btn.style.cursor = filteredItems.length === 0 ? 'not-allowed' : '';
+      /* 2026-09-06 audit fix: filters active on an empty list = dead controls.
+         Per-type truth now: a pill dies only when ITS list is empty, and the
+         'all' pill never disables — it is the escape hatch out of an empty
+         type filter. */
+      var pillType = btn.getAttribute('data-type-filter');
+      var pillEmpty = pillType !== 'all' && !(savedTypeCounts[pillType] > 0);
+      btn.disabled = pillEmpty;
+      btn.style.opacity = pillEmpty ? '.4' : '';
+      btn.style.cursor = pillEmpty ? 'not-allowed' : '';
       btn.onclick = function () {
-        if (filteredItems.length === 0) return;
-        state.savedTypeFilter = btn.getAttribute('data-type-filter');
+        if (pillEmpty) return;
+        state.savedTypeFilter = pillType;
         renderMain();
       };
     });
@@ -16080,6 +16136,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     const meta = document.getElementById('meta');
     const poemSections = document.getElementById('poem-sections');
     if (!view) return;
+    /* Resources/native-ideas.js overwrites #view.className ('view
+       ce-ideas-parity') for its own surface — restore the main-content
+       contract every render. The ce-view-from-* enter class set by
+       ceApplySurfaceTransition just before renderMain must survive or the
+       tab-enter animation dies. */
+    view.className = 'main-content'
+      + (view.classList.contains('ce-view-from-right') ? ' ce-view-from-right'
+        : view.classList.contains('ce-view-from-left') ? ' ce-view-from-left' : '')
+      + (state.shelfDensity === 'dense' ? ' is-dense' : '');
     /* The phone topbar has a deliberately different width budget for the poem
        library: Photo/Paper and Shuffle share the first row, while Search and
        the utility buttons get a full second row. Keep the mode on <html> so
@@ -16087,6 +16152,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     try {
       document.documentElement.classList.toggle('ce-poem-library', state.activeTab === 'library' && state.libraryType === 'poems');
     } catch (_poemChrome) {}
+    /* Grow and Launch never read state.searchQuery — hide the field there so a
+       stale query stops silently re-filtering Library/Saved on return. */
+    var __searchEl = document.getElementById('search');
+    if (__searchEl) __searchEl.style.display = (state.activeTab === 'grow' || state.activeTab === 'launch') ? 'none' : '';
     if (typeof updateTopbarQueueBadge === 'function') updateTopbarQueueBadge();
     if (typeof updateTopbarSavedBadge === 'function') updateTopbarSavedBadge();
 
@@ -16772,7 +16841,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           </div>
           <div class="ce-write-field">
             <textarea id="live-write-input" spellcheck="true" placeholder="Type in Hindi or Romanized Hinglish…"></textarea>
-            <div class="ce-write-fieldbar"><span id="write-save-state">Saved on this Mac</span><strong id="write-count">0 characters</strong></div>
+            <div class="ce-write-fieldbar"><span id="write-save-state">Drafts save on this Mac</span><strong id="write-count">0 characters</strong></div>
           </div>
           <div class="ce-write-actions">
             <div><button type="button" id="write-undo-btn" title="Undo (⌘Z)">Undo</button><button type="button" id="write-redo-btn" title="Redo (⇧⌘Z)">Redo</button></div>
@@ -16780,9 +16849,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           </div>
         </section>
         <section class="ce-write-preview-panel">
-          <div class="ce-section-heading"><h3>Preview</h3><span class="ce-data-note">Design ${state.writeDesignIdx + 1}</span></div>
+          <div class="ce-section-heading"><h3>Preview</h3><span class="ce-data-note" id="write-design-note"></span></div>
           <div id="live-write-preview" class="ce-write-preview"></div>
-          <div class="ce-write-design-label"><span>Design options</span></div>
+          <div class="ce-write-design-label"><span>Design options</span><small id="write-design-count"></small></div>
           <div id="write-design-rail" class="ce-write-designs"></div>
         </section>
       `;
@@ -16792,13 +16861,28 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       const writePreview = document.getElementById('live-write-preview');
       const writeDesignRail = document.getElementById('write-design-rail');
       const writeCount = document.getElementById('write-count');
+      const writeSaveState = document.getElementById('write-save-state');
       const defaultWriteText = '';
       var writeHistory = [state.writeDraft || ''];
       var writeHistoryIndex = 0;
       var writeApplyingHistory = false;
+      /* Undo/Redo paint their real bounds: applyWriteHistory returns silently
+         at the stack edges, so the buttons must say so. */
+      var syncWriteHistoryButtons = function () {
+        var u = document.getElementById('write-undo-btn'), r = document.getElementById('write-redo-btn');
+        if (u) u.disabled = writeHistoryIndex <= 0;
+        if (r) r.disabled = writeHistoryIndex >= writeHistory.length - 1;
+      };
       var writeDraftItem = function (txt) {
         var lines = String(txt || '').split(/\n+/).map(function (line) { return line.trim(); }).filter(Boolean);
         return { id: 'compose_preview', title: lines[0] || 'Untitled draft', body: lines.slice(1).join('\n\n'), text: txt, pillar: state.writeType === 'poem' ? 'Poem' : 'Perspective', designAuthority: state.writeType === 'post' ? 'postcore' : 'poem' };
+      };
+      /* ONE signature per design index — the rail dedupes tiles on this and the
+         preview heading names the same family, so the two can never disagree. */
+      var writeDesignSig = function (idx) {
+        if (state.writeType === 'poem') return idx % 2 === 0 ? 'photo:' + (idx % PHOTO_PRESETS.length) : 'paper:' + (idx % PAPER_PRESETS.length);
+        var t = typeof postWinnerTemplates === 'function' ? postWinnerTemplates()[idx % (postTemplateCount() || 6)] : null;
+        return 'post:' + ((t && (t.id || t.name || t.key)) || idx);
       };
       const updatePreview = () => {
         const txt = (writeInput.value || defaultWriteText).trim();
@@ -16820,12 +16904,36 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           var writeRailText = txt || (state.writeType === 'poem'
             ? 'एक ठहरा हुआ सच\nजो दिल में रह गया।'
             : 'A thought worth keeping\nwritten in your own words.');
-          writeDesignRail.innerHTML = Array.from({ length: postTemplateCount() || 6 }, function (_, idx) {
-            var face = state.writeType === 'poem'
-              ? (idx % 2 === 0 ? renderPhotoPoemHtml({ id: 'live_1', text: writeRailText, theme: 'Custom' }, idx % PHOTO_PRESETS.length) : renderPaperPoemHtml({ id: 'live_1', text: writeRailText, theme: 'Custom' }, idx % PAPER_PRESETS.length))
-              : renderPostCoreFallbackHtml(writeDraftItem(writeRailText), idx % (postTemplateCount() || 6), '');
-            return `<button type="button" data-ce-write-design="${idx}" class="${idx === state.writeDesignIdx ? 'is-active' : ''}" aria-label="Try design ${idx + 1}">${face}</button>`;
+          var __wCount = postTemplateCount() || 6;
+          var __wSeen = {};
+          var __wSelSig = null;
+          var __wGroups = [{ key: 'photo', label: 'Photo backdrops', tiles: [] }, { key: 'paper', label: 'Paper backdrops', tiles: [] }, { key: 'post', label: 'Post designs', tiles: [] }];
+          for (var idx = 0; idx < __wCount; idx++) {
+            var sig = writeDesignSig(idx);
+            var group = state.writeType === 'poem'
+              ? (idx % 2 === 0 ? __wGroups[0] : __wGroups[1])
+              : __wGroups[2];
+            if (idx === state.writeDesignIdx) __wSelSig = sig;
+            if (__wSeen[sig]) continue;
+            __wSeen[sig] = 1;
+            group.tiles.push({ idx: idx, sig: sig });
+          }
+          var __wTotal = 0;
+          var __wFam = 0;
+          writeDesignRail.innerHTML = __wGroups.map(function (g) {
+            if (!g.tiles.length) return '';
+            __wFam++;
+            __wTotal += g.tiles.length;
+            return '<div class="ce-write-design-group"><div class="ce-write-design-group-label">' + g.label + ' · ' + g.tiles.length + '</div><div class="ce-write-design-group-grid">'
+              + g.tiles.map(function (t) {
+                var face = state.writeType === 'poem'
+                  ? (t.idx % 2 === 0 ? renderPhotoPoemHtml({ id: 'live_1', text: writeRailText, theme: 'Custom' }, t.idx % PHOTO_PRESETS.length) : renderPaperPoemHtml({ id: 'live_1', text: writeRailText, theme: 'Custom' }, t.idx % PAPER_PRESETS.length))
+                  : renderPostCoreFallbackHtml(writeDraftItem(writeRailText), t.idx % __wCount, '');
+                return '<button type="button" data-ce-write-design="' + t.idx + '" data-ce-signature="' + t.sig + '" class="' + (t.sig === __wSelSig ? 'is-active' : '') + '" aria-label="Try design ' + (t.idx + 1) + '">' + face + '</button>';
+              }).join('') + '</div></div>';
           }).join('');
+          var __wdc = document.getElementById('write-design-count');
+          if (__wdc) __wdc.textContent = __wTotal + ' designs · ' + __wFam + ' families';
           writeDesignRail.querySelectorAll('[data-ce-write-design]').forEach(function (button) {
             button.onclick = function () {
               state.writeDesignIdx = Number(button.getAttribute('data-ce-write-design') || 0);
@@ -16834,17 +16942,31 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             };
           });
         }
+        /* The heading names the design FAMILY (the rail dedupes tiles by
+           signature, so a bare "Design N" number asserts an identity the
+           index does not have). */
+        var __wdNote = document.getElementById('write-design-note');
+        if (__wdNote) {
+          var __wSig = writeDesignSig(state.writeDesignIdx || 0);
+          var __wSigM = __wSig.match(/^(photo|paper|post):(.*)$/);
+          if (state.writeType === 'poem' && __wSigM) {
+            __wdNote.textContent = (__wSigM[1] === 'photo' ? 'Photo preset ' : 'Paper preset ') + (Number(__wSigM[2]) + 1);
+          } else {
+            var __wTpl = typeof postWinnerTemplates === 'function' ? postWinnerTemplates()[(state.writeDesignIdx || 0) % (postTemplateCount() || 6)] : null;
+            __wdNote.textContent = (__wTpl && __wTpl.name) ? __wTpl.name : 'Post design ' + ((state.writeDesignIdx || 0) + 1);
+          }
+        }
+        syncWriteHistoryButtons();
         if (window.__CE_FIT_ALL__) window.__CE_FIT_ALL__();
       };
       if (writeInput) {
-        /* Size-to-content: the CSS floor/phone-cap lives on .ce-write-field
-           textarea; here the box grows with the draft. The 38vh phone cap is
-           re-read per call so rotation stays correct; CSS max-height is the
-           backstop either way. */
+        /* Size-to-content: the CSS floor/cap lives on .ce-write-field textarea
+           (ce-mobile.css owns the phone cap at 34vh); here the box grows with
+           the draft and JS re-reads the CSS max-height per call so rotation
+           and breakpoint changes stay correct — the stylesheet is the single
+           owner of the cap. */
         var autosizeWriteInput = function () {
-          var cap = document.documentElement.classList.contains('ce-phone')
-            ? Math.round((window.innerHeight || 800) * 0.38)
-            : 0;
+          var cap = parseFloat(getComputedStyle(writeInput).maxHeight);
           writeInput.style.height = 'auto';
           var next = writeInput.scrollHeight;
           if (cap > 0 && next > cap) next = cap;
@@ -16859,7 +16981,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           autosizeWriteInput();
           if (writeComposing) return;
           state.writeDraft = writeInput.value;
-          localStorage.setItem('ce_write_draft', state.writeDraft);
+          try {
+            localStorage.setItem('ce_write_draft', state.writeDraft);
+            if (writeSaveState) writeSaveState.textContent = 'Saved ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+          } catch (_wse) {
+            if (writeSaveState) writeSaveState.textContent = 'Save failed - storage full';
+          }
           if (!writeApplyingHistory && writeHistory[writeHistoryIndex] !== state.writeDraft) {
             writeHistory = writeHistory.slice(0, writeHistoryIndex + 1);
             writeHistory.push(state.writeDraft);
@@ -16882,6 +17009,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         writeApplyingHistory = false;
         autosizeWriteInput();
         updatePreview();
+        syncWriteHistoryButtons();
       };
       document.getElementById('write-undo-btn').onclick = function () { applyWriteHistory(writeHistoryIndex - 1); };
       document.getElementById('write-redo-btn').onclick = function () { applyWriteHistory(writeHistoryIndex + 1); };
@@ -17398,7 +17526,20 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           id: 'later', label: 'Later', sub: 'Past-dated or beyond this week', isPool: false
         }]);
       }
-      var kanbanColsHtml = ceKanbanCols.map(function(col) {
+      /* Empty-queue board: nine near-empty 380px-min columns under the
+         'Nothing staged yet' banner read as a broken grid. With nothing
+         staged, keep ONLY the Inbox drop tile — the pool entry lives in
+         kanbanDays (ceKanbanCols filters it out as isPool), so the /inbox/i
+         match and the index-0 fallback both resolve to it. */
+      var ceBoardEmpty = (state.queueItems || []).length === 0;
+      var ceBoardCols = ceKanbanCols;
+      if (ceBoardEmpty) {
+        var ceInboxCol = (Array.isArray(kanbanDays) ? kanbanDays : []).filter(function (col) {
+          return /inbox/i.test(String(col.id || '') + ' ' + String(col.key || '') + ' ' + String(col.label || ''));
+        })[0] || ceKanbanCols[0];
+        ceBoardCols = ceInboxCol ? [ceInboxCol] : [];
+      }
+      var kanbanColsHtml = ceBoardCols.map(function(col) {
         var itemsInCol = state.queueItems.map((item, originalIdx) => ({ item, originalIdx })).filter(function (entry) {
           return getQueueItemDay(entry.item) === col.id && queueMatchesPlanSearch(entry.item);
         });
@@ -17587,7 +17728,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                 </div>`).join('')}
             </div>
           ` : `
-            <div class="ce-kanban-board">
+            <div class="ce-kanban-board${ceBoardEmpty ? ' is-empty' : ''}">
               ${kanbanColsHtml}
             </div>
           `}
@@ -18365,14 +18506,46 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           + (__median ? '<i class="ce-ans-med" style="left:' + Math.min(100, __median.value / __ansScale * 100).toFixed(1) + '%" title="' + escapeHtml('your ' + __median.year + ' usual · ' + ceGrowFmtN(__median.value)) + '"></i>' : '')
           + '</span></span></button>';
       };
+      var __ansTrackH = document.documentElement.classList.contains('ce-phone') ? 60 : 78;
+      var __ansChartHtml = function (rows) {
+        var cols = '';
+        var ticks = '';
+        for (var i = rows.length - 1; i >= 0; i--) {
+          var m = rows[i];
+          var hours = Math.floor((Date.now() / 1000 - m.ts) / 3600);
+          var when = new Date(m.ts * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+          cols += '<button type="button" class="ce-ans-col" data-ce-eng="' + m.eng + '"'
+            + (m.permalink ? ' data-ce-permalink="' + escapeHtml(m.permalink) + '" title="Open this post"' : '') + '>'
+            + '<span class="ce-ans-col-v">' + ceGrowFmtN(m.eng) + '</span>'
+            + '<span class="ce-ans-col-track"><i class="ce-ans-col-bar' + (__median && m.eng > __median.value ? ' is-over' : '') + '" style="height:' + Math.max(2, m.eng / __ansScale * 100).toFixed(1) + '%"></i></span>'
+            + '</button>';
+          ticks += '<span class="ce-ans-tick">' + escapeHtml(when)
+            + (hours >= 0 && hours < 72 ? '<i class="ce-ans-age">' + hours + 'h in</i>' : '')
+            + '</span>';
+        }
+        return '<div class="ce-ans-chart" data-ce-ans-chart="1" role="img" aria-label="likes plus comments per post, oldest to newest">'
+          + '<div class="ce-ans-cols">'
+          + (__median && __median.value > 0
+            ? '<i class="ce-ans-medline" style="bottom:' + Math.min(__ansTrackH, __median.value / __ansScale * __ansTrackH).toFixed(1) + 'px"><span>' + escapeHtml('your ' + __median.year + ' usual · ' + ceGrowFmtN(__median.value)) + '</span></i>'
+            : '')
+          + cols + '</div>'
+          + '<div class="ce-ans-axis">' + ticks + '</div></div>';
+      };
       var __ansVelocity = (__gMeta.live && typeof ceEngagementVelocityHtml === 'function') ? ceEngagementVelocityHtml() : '';
+      var __ansChrono = __ansShown.slice().reverse();
+      var __ansTrend = 'none';
+      if (__gMeta.live && __ansChrono.length >= 2) {
+        var __ansAllUp = __ansChrono.every(function (m, i) { return i === 0 || m.eng > __ansChrono[i - 1].eng; });
+        __ansTrend = __ansAllUp ? 'up' : (__median && __ansChrono[__ansChrono.length - 1].eng > __median.value ? 'over' : 'none');
+      }
+      var __ansHeadline = __ansTrend === 'up' ? 'the audience answered stronger each day since you came back' : (__ansTrend === 'over' ? 'the newest answer beat your usual — the return is landing' : '');
       var __ansInner;
       if (!__gMeta.live) {
         __ansInner = '<div class="ce-ans-empty">' + (window.__CE_META_HAS_TOKEN__ ? 'syncing Meta…' : 'unmeasured — connect Meta and the last posts line up against your usual') + '</div>';
       } else if (!__ansShown.length) {
         __ansInner = '<div class="ce-ans-empty">no posts in the window Meta returned — the next landing starts the ledger</div>';
       } else {
-        __ansInner = __ansShown.map(__ansRowHtml).join('')
+        __ansInner = __ansChartHtml(__ansShown)
           + (__igRows.length > 12
             ? '<details class="ce-ans-all"><summary>all (' + __igRows.length + ')</summary><div class="ce-ans-all-rows">' + __igRows.slice(12).map(__ansRowHtml).join('') + '</div></details>'
             : '');
@@ -18403,15 +18576,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           <div class="ce-fort-legend">solid = landed on IG (likes+comments) · hatched = local work · dashed tick = a day with neither${__workMap.firstDay && !__ledgerYoung ? '' : ' · shaded = before the day ledger'}</div>
         </section>
 
-        <section class="ce-grow-tide" aria-label="Audience tide">
-          <div class="ce-section-heading"><div><h3>The tide</h3></div><span class="ce-data-note">followers · stored snapshots only · unsmoothed</span></div>
-          ${__tideHtml}
-        </section>
-
         <section class="ce-grow-answers" aria-label="The answers">
-          <div class="ce-section-heading"><div><h3>Their answers</h3></div>${__ansVelocity}<span class="ce-data-note">${__gMeta.live ? 'likes+comments · newest first' + (__gMeta.stale && __gMeta.fetchedAtIst ? ' · as of ' + escapeHtml(__gMeta.fetchedAtIst) : '') : 'needs Meta'}</span></div>
+          <div class="ce-section-heading"><div><h3>Their answers</h3>${__ansHeadline ? '<p class="ce-ans-headline" data-ce-ans-trend="' + __ansTrend + '">' + escapeHtml(__ansHeadline) + '</p>' : ''}</div>${__ansVelocity}<span class="ce-data-note">${__gMeta.live ? 'likes+comments · oldest → newest' + (__gMeta.stale && __gMeta.fetchedAtIst ? ' · as of ' + escapeHtml(__gMeta.fetchedAtIst) : '') : 'needs Meta'}</span></div>
           ${__ansInner}
           ${__median && __ansShown.length ? '<div class="ce-ans-legend">your ' + escapeHtml(__median.year) + ' usual · ' + ceGrowFmtN(__median.value) + '</div>' : ''}
+        </section>
+
+        <section class="ce-grow-tide" aria-label="Audience tide">
+          <div class="ce-section-heading"><div><h3>The tide</h3></div><span class="ce-data-note">followers lag — they move weeks after the work · the slow number · snapshots only, unsmoothed</span></div>
+          ${__tideHtml}
         </section>
 
         <section class="ce-grow-move" aria-label="Next move">
@@ -21056,7 +21229,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var countEl = document.getElementById('topbar-queue-count');
     var navEl = document.getElementById('nav-queue-count');
     var studioBadge = document.getElementById('studio-plan-badge');
-    var count = Array.isArray(state.queueItems) ? state.queueItems.length : 0;
+    /* Count only actionable rows — sent history and already-exported pieces are
+       done work, not pending queue (same skip test as ceReflowStaleQueue). */
+    var count = Array.isArray(state.queueItems)
+      ? state.queueItems.filter(function (q) { return q && q.status !== 'sent' && q.exportStatus !== 'EXPORTED'; }).length
+      : 0;
     if (countEl) countEl.textContent = count;
     if (navEl) { navEl.textContent = count; navEl.style.display = count > 0 ? '' : 'none'; }
     /* E01 STUDIO SHIP GRAMMAR: the count rides the "Send to Plan" primary now. The old code hid the

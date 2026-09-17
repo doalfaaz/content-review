@@ -394,6 +394,9 @@ html.ce-phone .ce-card-status-chip { display: none !important; }
 html.ce-phone .ce-saved-card .ce-card-action-cluster {
   opacity: 1 !important; transform: none !important; pointer-events: auto !important; display: flex !important;
 }
+/* Same touch law on the launch board: the day-tile "More" rests at opacity:.35
+   and only lifts on :hover/:focus-within — invisible on a phone. */
+html.ce-phone .ce-launch-day-more { opacity: 1; }
 
 
 /* class twin of @media (max-width: 700px) { */
@@ -1599,6 +1602,16 @@ html.ce-phone .ce-saved-tab-btn { white-space: nowrap; flex: 0 0 auto; padding: 
    header carries none and the workspace uses 16px: the strip gets 370px vs the 321px it needs. */
 html.ce-phone .ce-saved-workspace { padding-left: 16px; padding-right: 16px; }
 html.ce-phone .ce-saved-header { padding-left: 0; padding-right: 0; }
+/* Saved→Poems grid pushed the whole app sideways on phone: native-saved sets a
+   hard 3×minmax(310px,420px) poem grid (~978px min) inside a ~358px workspace,
+   and the base grid plus the 1-/2-card :has() variants carry the same 310px
+   floor. One fluid track floor on phone; columns fall out of auto-fill. */
+html.ce-phone .ce-saved-grid,
+html.ce-phone .ce-saved-grid--poem,
+html.ce-phone .ce-saved-grid:has(> .ce-saved-card:only-child),
+html.ce-phone .ce-saved-grid:has(> .ce-saved-card:first-child:nth-last-child(2)) {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
 
 /* ── Phone tap-target completion (auditor M-2, 2026-09-13) ─────────────────────
    The D-1 sweep listed the controls genuinely under the house dense floor (36):
@@ -1801,7 +1814,8 @@ html.ce-phone a,
 html.ce-phone input,
 html.ce-phone select,
 html.ce-phone textarea,
-html.ce-phone [role="button"] {
+html.ce-phone [role="button"],
+html.ce-phone .ce-launch-day-more summary {
   min-width: 44px !important;
   min-height: 44px !important;
   box-sizing: border-box !important;
