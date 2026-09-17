@@ -50,34 +50,34 @@ a { color: var(--gold); text-decoration: none; }
 .nav-brand { font-size: 0.7rem; font-weight: 500; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; }
 .nav-status {
   font-size: 0.6rem; font-weight: 500; color: var(--green); letter-spacing: 0.1em;
-  text-transform: uppercase; padding: 4px 12px; border: 1px solid rgba(74,222,128,0.2);
-  border-radius: 100px; background: var(--green-bg);
+  text-transform: uppercase; padding: 2px 0 2px 12px; border-left: 1px solid rgba(74,222,128,0.35);
+  background: transparent;
 }
 
 /* HERO */
-.hero { padding: 56px 0 32px; text-align: center; }
+.hero { padding: 22px 0 16px; text-align: center; }
 .hero-eyebrow {
   display: inline-block; font-size: 0.62rem; font-weight: 600;
-  letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-dim);
-  margin-bottom: 28px; padding: 6px 18px; border: 1px solid var(--border-gold);
-  border-radius: 100px; background: var(--gold-glow);
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dim);
+  margin-bottom: 14px; padding: 0 0 9px; border-bottom: 1px solid var(--border-gold);
+  background: transparent;
 }
 .hero h1 {
   font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; letter-spacing: -0.02em;
-  line-height: 1.2; margin-bottom: 16px;
+  line-height: 1.18; margin-bottom: 12px;
 }
 .hero h1 em { font-style: italic; color: var(--gold); }
-.hero-sub { font-size: 1rem; color: var(--text2); max-width: 500px; margin: 0 auto 20px; line-height: 1.6; }
+.hero-sub { font-size: 0.98rem; color: var(--text2); max-width: 500px; margin: 0 auto 12px; line-height: 1.5; }
 .hero-voice {
-  font-size: 0.88rem; color: var(--text2); max-width: 480px; margin: 0 auto;
-  font-style: italic; line-height: 1.7;
+  font-size: 0.86rem; color: var(--text2); max-width: 480px; margin: 0 auto;
+  font-style: italic; line-height: 1.55;
 }
 
 /* OFFER */
-.offer-section { padding: 40px 0; }
+.offer-section { padding: 18px 0; }
 .offer-card {
   background: var(--surface); border: 1px solid var(--border-gold);
-  border-radius: var(--radius-lg); padding: 36px 32px; text-align: center;
+  border-radius: var(--radius-lg); padding: 24px 26px; text-align: center;
   position: relative; overflow: hidden;
 }
 .offer-card::before {
@@ -87,14 +87,15 @@ a { color: var(--gold); text-decoration: none; }
 }
 .offer-label {
   font-size: 0.62rem; font-weight: 600; letter-spacing: 0.22em;
-  text-transform: uppercase; color: var(--gold-dim); margin-bottom: 20px;
+  text-transform: uppercase; color: var(--gold-dim); margin-bottom: 10px;
 }
 .offer-facts { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 18px; position:relative; }
 .offer-facts span { color:var(--text2); font-size:.82rem; }
-.offer-price { position:relative; margin:6px 0 14px; font-size:clamp(2.2rem,8vw,3.4rem); line-height:1; color:var(--gold); font-weight:600; font-variant-numeric:tabular-nums; }
-.offer-note { position:relative; color:var(--text2); font-size:.84rem; margin-top:18px; }
-.offer-cta { position:relative; display:inline-flex; align-items:center; justify-content:center; min-height:50px; margin-top:22px; padding:0 28px; border-radius:6px; background:var(--gold); color:var(--bg); font-size:.86rem; font-weight:600; letter-spacing:.04em; box-shadow:0 4px 20px rgba(200,169,110,.24); }
+.offer-price { position:relative; margin:4px 0 10px; font-size:clamp(2.1rem,7vw,3.2rem); line-height:1; color:var(--gold); font-weight:600; font-variant-numeric:tabular-nums; }
+.offer-note { position:relative; color:var(--text2); font-size:.83rem; margin-top:10px; }
+.offer-cta { position:relative; display:inline-flex; align-items:center; justify-content:center; min-height:50px; margin-top:14px; padding:0 28px; border-radius:6px; background:var(--gold); color:var(--bg); font-size:.86rem; font-weight:600; letter-spacing:.04em; box-shadow:0 4px 20px rgba(200,169,110,.24); }
 .offer-cta:focus-visible,.cta-main:focus-visible { outline:3px solid var(--gold-pale); outline-offset:3px; }
+@media (max-width: 560px) { .offer-cta { display:flex; width:100%; } }
 
 /* WAITLIST CTA */
 .cta-section { padding: 48px 0; text-align: center; }
@@ -124,6 +125,7 @@ a { color: var(--gold); text-decoration: none; }
   outline: none; transition: border-color 0.15s;
 }
 .capture-form input:focus { border-color: var(--gold-dim); }
+.capture-form input:focus-visible { outline:3px solid var(--gold-pale); outline-offset:2px; border-color:var(--gold); }
 .capture-form input::placeholder { color: var(--text3); }
 .capture-form .cta-main { width: 100%; margin-top: 4px; }
 .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
@@ -193,6 +195,7 @@ a { color: var(--gold); text-decoration: none; }
 .proof-item { text-align: center; }
 .proof-item .num { font-size: 1.3rem; font-weight: 600; color: var(--gold); letter-spacing: -0.02em; }
 .proof-item .lbl { font-size: 0.65rem; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 2px; }
+.proof-note { text-align: center; font-size: 0.72rem; color: var(--text3); line-height: 1.6; margin: -16px 0 32px; }
 
 /* NO-PRESSURE */
 .no-pressure {
@@ -269,11 +272,12 @@ footer {
 <!-- PROOF -->
 <div class="container">
   <div class="proof-row">
-    <div class="proof-item"><div class="num">1,000+</div><div class="lbl">Students</div></div>
-    <div class="proof-item"><div class="num">5</div><div class="lbl">Live Batches</div></div>
     <div class="proof-item"><div class="num">3 years</div><div class="lbl">Of Study</div></div>
-    <div class="proof-item"><div class="num">450+</div><div class="lbl">Books Distilled</div></div>
+    <div class="proof-item"><div class="num">15+ hrs</div><div class="lbl">Recorded</div></div>
+    <div class="proof-item"><div class="num">50+</div><div class="lbl">Lessons</div></div>
+    <div class="proof-item"><div class="num">1</div><div class="lbl">Price, No Tiers</div></div>
   </div>
+  <p class="proof-note">Figures describe the recorded course itself. No student counts or outcome claims are listed here because none are on record.</p>
 </div>
 
 <!-- WHAT YOU GET (teaser, no price) -->
