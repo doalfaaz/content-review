@@ -96,6 +96,33 @@ a { color: var(--gold); text-decoration: none; }
 .offer-cta { position:relative; display:inline-flex; align-items:center; justify-content:center; min-height:50px; margin-top:14px; padding:0 28px; border-radius:6px; background:var(--gold); color:var(--bg); font-size:.86rem; font-weight:600; letter-spacing:.04em; box-shadow:0 4px 20px rgba(200,169,110,.24); }
 .offer-cta:focus-visible,.cta-main:focus-visible { outline:3px solid var(--gold-pale); outline-offset:3px; }
 @media (max-width: 560px) { .offer-cta { display:flex; width:100%; } }
+/* Small phones (320-360px): the hero stack plus a 24px-padded offer card pushed the CTA
+   to top=727px, i.e. BELOW a real 390x700 fold — measured live at 320x700 on
+   2026-09-18. Tighten the padding and the hero rhythm so the primary action stays
+   reachable without a scroll. The action must never be the thing that falls off. */
+@media (max-width: 360px) {
+  .offer-section { padding: 12px 0; }
+  .offer-card { padding: 18px 18px; }
+  .offer-price { margin: 2px 0 8px; }
+  .hero { padding-top: 4px; }
+  .hero-sub { margin-bottom: 9px; }
+  .hero-voice { font-size: 0.82rem; line-height: 1.45; }
+}
+/* Very short screens (<=600px tall, e.g. 320x568 SE): the hero stack alone is ~390px,
+   so the whole offer has to compress to keep the action above such a fold. The action
+   leads; supporting prose follows it rather than pushing it down. */
+@media (max-height: 600px) and (max-width: 400px) {
+  .hero { padding: 26px 0 20px; }
+  .hero h1 { font-size: clamp(1.7rem, 7.6vw, 2.1rem); margin-bottom: 8px; }
+  .hero-sub { font-size: 0.9rem; margin-bottom: 7px; }
+  .hero-voice { font-size: 0.78rem; line-height: 1.4; }
+  .offer-section { padding: 8px 0; }
+  .offer-card { padding: 14px 16px; }
+  .offer-price { font-size: clamp(1.8rem, 9vw, 2.3rem); margin: 2px 0 6px; }
+  .offer-facts { gap: 6px 14px; }
+  .offer-note { font-size: 0.82rem; }
+  .offer-cta { margin-top: 10px; min-height: 46px; }
+}
 
 /* WAITLIST CTA */
 .cta-section { padding: 48px 0; text-align: center; }
@@ -247,8 +274,8 @@ footer {
       <div class="offer-label">The offer, stated once</div>
       <div class="offer-price">₹1,999</div>
       <div class="offer-facts"><span>15+ hours</span><span>50+ lessons</span><span>Lifetime access</span><span>14-day refund</span></div>
-      <p class="offer-note">Recorded, self-paced, and evergreen. No clock, no tiers, no pressure.</p>
       <a class="offer-cta" href="#join">Ask for course details</a>
+      <p class="offer-note">Recorded, self-paced, and evergreen. No clock, no tiers, no pressure.</p>
     </div>
   </div>
 </section>
