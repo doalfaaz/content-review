@@ -11981,10 +11981,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // Mac stages are untouched — this only lifts the AUTO floor on portrait.
       var __ceStagePortrait = (function () {
         try {
-          var st = document.querySelector('.studio-stage');
-          if (!st) return false;
-          var r = st.getBoundingClientRect();
-          return r.width > 0 && r.height > 0 && r.height > r.width && (r.height / r.width) > 1.2;
+          // m07 F2: measure the WINDOW, not the stage. The stage flips
+          // portrait->landscape when the tools dock opens, which made Auto
+          // paint 4:5 at open and 4:3 after any re-render (same pill, two
+          // canvases). Phone windows are always portrait; Mac windows are
+          // not. This keeps the floor's intent and kills the instability.
+          var w = window.innerWidth, hgt = window.innerHeight;
+          return w > 0 && hgt > 0 && (hgt / w) > 1.2;
         } catch (_sp) { return false; }
       })();
       var __ceAutoRatio = poemRatioToken(state.studioCanvasRatioOverride);

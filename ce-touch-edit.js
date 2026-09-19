@@ -119,12 +119,32 @@
   /* ---- Persistence + sync -------------------------------------------------
      ce_deck_edits: { deckId: { look, slides, updatedAt } } in localStorage —
      the offline copy the site boots with (your edits survive reload).
-     Sync endpoint: the Mac runs the sync server behind a Tailscale Funnel
-     capability path (server 404s anything without the secret prefix — audited
-     2026-09-09: the store must never be publicly writable at the bare host).
+     Sync endpoint: the Mac runs the sync server behind a capability path.
+     P0-1 (b-core, 2026-09-19): the capability is a PER-INSTALL random token
+     that lives only on the Mac (~/.director_os/secrets/ce-sync-capability) —
+     it is NOT in this bundle, which is public. Discovery asks the Mac's own
+     LAN rail for it same-origin (seed, below), and for the funnel host the
+     capability is resolved through the /pair bootstrap or the owner's stored
+     ce_sync_endpoint. A bundle that carries no capability is the point.
      Every save POSTs the deck there; the Mac app reads the same store, so both
      sides show ONE version (last-write-wins per deck by updatedAt). */
-  var SYNC_PATH = '/39c4ee5650102ee027bd87bcc4e9a2ea';
+  var SYNC_PATH = '';   /* P0-1: no capability ships in the public bundle. */
+  function ceSyncCapPath() {
+    /* The LAN rail seeds `ce_sync_cap` same-origin (Mac-issued, never public).
+       A stored endpoint may itself carry the capability (legacy cache) — in
+       that case no separate cap is needed. */
+    try { return localStorage.getItem('ce_sync_cap') || ''; } catch (_c) { return ''; }
+  }
+  function ceSyncWithCap(base) {
+    /* Append the capability to a bare host/port base when the stored cap is
+       not already present in it. A base with no cap and no stored cap is
+       returned unchanged so the caller's /health probe fails honestly. */
+    var cap = ceSyncCapPath();
+    if (!cap) return base;
+    if (base.indexOf('/' + cap) >= 0) return base;
+    return String(base).replace(/\/+$/, '') + '/' + cap;
+  }
+
   /* Share mode is URL-marked ONLY (Atlas MC-2 root fix, 2026-09-10): the
      owner's root URL is ALWAYS the full app. Manager links carry #share
      (?share=1 also accepted) and get the trimmed read-only view + icon rail.
@@ -261,13 +281,61 @@
     try { localStorage.removeItem('ce_last_sync_error'); } catch (_) {}
   }
   function findSyncEndpoint(cb) {
+    /* P0-1 pairing bootstrap: a device holding the WRITE KEY (pasted once from
+       the Mac — the high-privilege secret) may ask the funnel's /pair door for
+       the capability. A visitor without the key gets 404 and learns nothing;
+       the bundle itself carries no capability, so reading the public JS is
+       worth nothing. Resolves the legacy "capability in the bundle" exposure. */
+    var CE_FUNNEL_HOST = 'https://tushars-macbook-air.tail697d80.ts.net';
+    function pairViaFunnel(done) {
+      var key = getWriteKey();
+      if (!key) { done(false); return; }
+      fetch(CE_FUNNEL_HOST + '/pair', { mode: 'cors', headers: { 'X-CE-Sync-Key': key } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          if (j && j.ok && j.cap) {
+            try {
+              localStorage.setItem('ce_sync_cap', String(j.cap));
+              localStorage.setItem('ce_sync_endpoint', CE_FUNNEL_HOST + '/' + j.cap);
+            } catch (_s) {}
+            done(true);
+          } else done(false);
+        })
+        .catch(function () { done(false); });
+    }
     function discover() {
       var cands = [];
       if (location.hostname === 'doalfaaz.github.io' || location.protocol === 'file:') {
-        // Tailscale Funnel HTTPS (valid cert, works on cellular + any browser).
-        cands = ['https://tushars-macbook-air.tail697d80.ts.net' + SYNC_PATH];
+        /* P0-1: the public door carries no capability anymore. The funnel is
+           still the transport, but the path must be resolved at pair time:
+           the owner's device stores ce_sync_endpoint once (seeded by the Mac
+           through the LAN rail, or entered via the pairing flow below) and it
+           is revalidated by the cached-endpoint probe. A brand-new public
+           visitor resolves nothing — by design. */
+        cands = [];
+        var cachedEp = '';
+        try { cachedEp = localStorage.getItem('ce_sync_endpoint') || ''; } catch (_e) {}
+        if (cachedEp) cands.push(cachedEp.replace(/\/+$/, ''));
+        if (!cands.length && getWriteKey()) {
+          // Owner device that has never paired on this origin (or lost its
+          // cache): ask the funnel for the capability, then proceed.
+          pairViaFunnel(function (ok) {
+            if (!ok) { markUnreachable('discovery-failed'); cb(null); return; }
+            window.__CE_SYNC_ENDPOINT__ = localStorage.getItem('ce_sync_endpoint') || '';
+            cb(window.__CE_SYNC_ENDPOINT__ || null);
+          });
+          return;
+        }
       } else if (/^https?:\/\/(localhost|127\.|192\.168\.|10\.)/.test(location.origin)) {
-        cands = [location.origin.replace(/:\d+$/, ':4145') + SYNC_PATH];
+        // LAN rail / loopback dev. First candidate: the rail's same-origin
+        // /ce-sync proxy (this is what the seed stores, so a missing cache
+        // still resolves); second: direct loopback for local dev. Capability
+        // appended from the Mac-issued ce_sync_cap seed (never a bundle
+        // constant — P0-1).
+        var cap = ceSyncCapPath();
+        var lanProxy = location.origin.replace(/\/+$/, '') + '/ce-sync' + (cap ? '/' + cap : '');
+        var direct = ceSyncWithCap(location.origin.replace(/:\d+$/, ':4145'));
+        cands = [lanProxy, direct];
       }
       var i = 0;
       var tryNext = function () {
@@ -391,7 +459,31 @@
         function () { return null; }
       );
     }
+    /* R14-05 (2026-09-19): the GET /set fallback carries the deck base64 in the
+       request LINE; the sync server's stdlib readline ceiling (65537) answers
+       414 BEFORE any handler runs, and the old code called markReachable() for
+       every non-403 status — so an oversize deck "synced" green into the void.
+       Cap the raw deck JSON at 44 KB (44*1024*4/3 ≈ 58.7 KB b64 + path/key/query
+       stays under 64 KB) and say so honestly instead of firing a doomed 414. */
+    var GET_SET_MAX_JSON_BYTES = 45056;   // 44 KB deck JSON ceiling for GET fallback
     function attempt(key, viaGet) {
+      if (viaGet) {
+        /* Byte length, not .length: the app's content is Devanagari — each
+           Hindi char is 1 UTF-16 unit but 3 UTF-8 bytes, and b64 encodes the
+           UTF-8 form, so a code-unit count under-reads the request line by up
+           to 3x. TextEncoder where available, escaped-length fallback. */
+        var jsonBytes = 0;
+        try {
+          var json = JSON.stringify(payload);
+          jsonBytes = (typeof TextEncoder === 'function')
+            ? new TextEncoder().encode(json).length
+            : encodeURIComponent(json).replace(/%[0-9A-Fa-f]{2}/g, 'x').length;
+        } catch (_b) {}
+        if (jsonBytes > GET_SET_MAX_JSON_BYTES) {
+          markUnreachable('deck-too-large-for-phone-sync');   // toast: "edit this deck on the Mac"
+          return Promise.resolve({ status: 0, oversize: true });
+        }
+      }
       return send(key, viaGet).then(function (res) {
         if (res && res.status === 403) {
           // Wrong/missing write key — clear it, prompt once, retry same verb.
@@ -408,7 +500,11 @@
       });
     }
     attempt(getWriteKey(), false).then(function (res) {
-      if (!res) markUnreachable('write-failed'); else markReachable();
+      // A 4xx/5xx (or the client-side oversize refusal, status 0) is a
+      // REJECTION, not reachability — the old `!res ? unreachable : reachable`
+      // marked 414/413/429 green. Only a real 2xx/3xx means the write landed.
+      if (!res || !res.status || res.status >= 400) markUnreachable('write-rejected-' + (res && res.status ? res.status : 'network'));
+      else markReachable();
     }).catch(function () { markUnreachable('write-failed'); });
   };
 
@@ -1397,6 +1493,15 @@
         pinned.style.setProperty('width', '100vw', 'important');
         pinned.style.setProperty('height', '96px', 'important');
         pinned.style.setProperty('overflow-y', 'auto', 'important');
+        pinned.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+      }
+      /* m04-10: pinned caption strip measured scrollHeight 132 > clientHeight 95
+         with no visual affordance — the last line looked truncated. A bottom
+         fade on the scroll viewport signals "more below" without changing the
+         owner-locked sheet height law. */
+      if (scroll) {
+        scroll.style.setProperty('mask-image', 'linear-gradient(180deg,#000 calc(100% - 28px), rgba(0,0,0,.45))', 'important');
+        scroll.style.setProperty('-webkit-mask-image', 'linear-gradient(180deg,#000 calc(100% - 28px), rgba(0,0,0,.45))', 'important');
       }
     }
     function toggle(event) {

@@ -728,7 +728,9 @@
 #dock-canvas-section .ce-template-swatch[aria-selected="true"] {
   border-color: var(--accent);
   background: #0b0b0d;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 72%, transparent);
+  /* m07 F4: was color-mix(... 72%) → composited rgb(141,57,72) = 2.62:1 vs the
+     dock bg (fails WCAG 2.1 non-text 3:1). 100% → rgb(191,75,93) = 4.07:1. */
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 100%, transparent);
 }
 
 .ce-template-preview-frame {
@@ -737,6 +739,7 @@
   overflow: hidden;
   border-radius: 8px;
   pointer-events: none;
+  container-type: size; /* m07 F1: the mini must scale to THIS frame, not a desktop constant */
 }
 
 .ce-template-preview-scale {
@@ -745,9 +748,20 @@
   top: 0;
   width: 451px;
   height: 338px;
-  transform: scale(.195);
+  /* m07 F1 (was transform: scale(.195), a constant sized for a ~110px desktop
+     swatch): the phone 5-col grid shrinks the frame to 52.8-66.8px, so every
+     mini was a 60-76% crop — signatures gone, center-aligned lines cut
+     mid-glyph. Scale the 451x338 document to the real frame instead:
+     min(width-fit, height-fit) with a small border allowance. */
+  transform: scale(min(calc((100cqw - 8px) / 451px), calc((100cqh - 8px) / 338px)));
   transform-origin: top left;
   pointer-events: none;
+}
+@supports not (width: 1cqw) { /* Safari <16 fallback */
+  .ce-template-preview-scale { transform: scale(.195); }
+  @media (max-width: 700px) {
+    .ce-template-preview-scale { transform: scale(.125); }
+  }
 }
 
 .studio-dock .photo-strip {

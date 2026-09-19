@@ -601,7 +601,7 @@ html.ce-phone /* Look grid 3-up with readable faces. */
     font-weight: 700 !important;
     border-radius: 10px !important;
     color: #fff !important;
-    background: linear-gradient(135deg, #d4576b, #a83242) !important;
+    background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
     border: 1px solid rgba(255,255,255,0.14) !important;
   }
   /* hide the native-only Export button in the menu on phone (the pack replaces it) */
@@ -616,7 +616,7 @@ html.ce-phone .studio-topbar #studio-download-pack-btn {
   font-weight: 700 !important;
   border-radius: 10px !important;
   color: #fff !important;
-  background: linear-gradient(135deg, #d4576b, #a83242) !important;
+  background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
   border: 1px solid rgba(255,255,255,0.14) !important;
 }
 html.ce-phone .studio-topbar #studio-export-btn { display: none !important; }
@@ -1229,6 +1229,23 @@ html.ce-phone .studio-primary-actions {
 }
 html.ce-phone .studio-primary-actions > * { min-width: 0 !important; }
 html.ce-phone #studio-post-btn { margin-left: auto !important; max-width: 100%; white-space: nowrap; }
+/* m04-01: keep all ship actions on ONE row (scrollable) instead of the 3-row
+   155px header with Send-to-Plan floating alone on row 3. Measured row-2
+   content: Download 150 + Schedule 89 + ••• 44 + Send 113 + 3x6 gaps = 414 >
+   368, so the row scrolls horizontally instead of folding. */
+html.ce-phone .studio-topbar .studio-primary-actions {
+  flex: 1 1 100% !important;
+  display: flex !important;
+  gap: 6px !important;
+  order: 3 !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+html.ce-phone .studio-topbar .studio-primary-actions::-webkit-scrollbar { display: none; }
+html.ce-phone .studio-topbar #studio-post-btn { margin-left: 0 !important; }
 html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock #dock-canvas-section {
   order: 1 !important;
 }
@@ -1972,7 +1989,7 @@ html.ce-phone {
   --accent-glow: rgba(191, 75, 93, 0.32);
   --crimson: #bf4b5d;
   --crimson-light: #d96a7c;
-  --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+  --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
   --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
   --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
   --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
@@ -1991,7 +2008,7 @@ html.ce-phone body.bright-theme {
   --accent-glow: rgba(191, 75, 93, 0.25);
   --crimson: #bf4b5d;
   --crimson-light: #d96a7c;
-  --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+  --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
   --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
   --grad-accent-text: linear-gradient(135deg, #bf4b5d, #8e2f3d);
   --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
@@ -2010,7 +2027,7 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
   --accent-press: #8e2f3d;
   --crimson: #bf4b5d;
   --crimson-light: #d96a7c;
-  --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+  --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
   --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
   --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
   --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
@@ -2027,7 +2044,7 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
     --accent-glow: rgba(191, 75, 93, 0.32);
     --crimson: #bf4b5d;
     --crimson-light: #d96a7c;
-    --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+    --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
     --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
     --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
@@ -2043,7 +2060,7 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
     --accent-glow: rgba(191, 75, 93, 0.25);
     --crimson: #bf4b5d;
     --crimson-light: #d96a7c;
-    --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+    --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
     --grad-accent-text: linear-gradient(135deg, #bf4b5d, #8e2f3d);
     --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
@@ -2059,7 +2076,7 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
     --accent-press: #8e2f3d;
     --crimson: #bf4b5d;
     --crimson-light: #d96a7c;
-    --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
+    --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
     --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
     --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
@@ -2070,13 +2087,13 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
    writes style.cssText with a NON-important #2e6f5e), so a stylesheet
    !important rebinds it to the crimson family. */
 html.ce-phone #ce-web-schedule-btn {
-  background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
+  background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
   border-color: rgba(255, 255, 255, 0.14) !important;
   color: #fff !important;
 }
 @media (max-width: 700px) {
   #ce-web-schedule-btn {
-    background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
+    background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
     border-color: rgba(255, 255, 255, 0.14) !important;
     color: #fff !important;
   }
@@ -2089,11 +2106,11 @@ html.ce-phone .is-poems { background: #d96a7c !important; }
 }
 /* The download-pack gradient predates the token set — same crimson family. */
 html.ce-phone .studio-topbar #studio-download-pack-btn {
-  background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
+  background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
 }
 @media (max-width: 700px) {
   .studio-workspace .studio-topbar #studio-download-pack-btn {
-    background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
+    background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
   }
 }
 
@@ -2206,10 +2223,14 @@ html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-can
   position: fixed !important;
   top: auto !important;
   right: 12px !important;
-  bottom: calc(42vh + 8px) !important;
+  /* m04-03 + m05-07: the sheet is min(50vh,460px); 42vh was a magic number
+     that guaranteed an overlap band (at 932px the chip's bottom edge sat
+     inside the sheet's top). Anchor to the sheet's real height. */
+  bottom: calc(min(50vh, 460px) + 8px) !important;
   left: auto !important;
-  writing-mode: vertical-rl !important;
-  padding: 10px 4px !important;
+  content: "below authored" !important;   /* was the full sentence; fits the 129px gutter */
+  writing-mode: horizontal-tb !important; /* was vertical-rl — the owner's "rotated badge" */
+  padding: 4px 10px !important;           /* was 10px 4px (vertical-mode padding) */
 }
 html.ce-phone .studio-workspace.is-carousel-mode .studio-canvas-wrap[data-ce-fit-below-authored]::after {
   top: 6px !important;
@@ -2227,10 +2248,11 @@ html.ce-phone .studio-workspace.is-carousel-mode .studio-canvas-wrap[data-ce-fit
     position: fixed !important;
     top: auto !important;
     right: 12px !important;
-    bottom: calc(42vh + 8px) !important;
+    bottom: calc(min(50vh, 460px) + 8px) !important;
     left: auto !important;
-    writing-mode: vertical-rl !important;
-    padding: 10px 4px !important;
+    content: "below authored" !important;
+    writing-mode: horizontal-tb !important;
+    padding: 4px 10px !important;
   }
   .studio-workspace.is-carousel-mode .studio-canvas-wrap[data-ce-fit-below-authored]::after {
     top: 6px !important;
@@ -2292,4 +2314,56 @@ html.ce-phone .ce-launch-intelligence-head > div > strong {
     text-overflow: ellipsis !important;
     min-width: 0 !important;
   }
+}
+
+/* ============================================================================
+   m04 (2026-09-19) — mobile deep-audit fixes, phone-scoped
+   ============================================================================ */
+
+/* m04-04: the two 1px dock separators belong to the photo/typo sections, but
+   the phone tools-open sheet reorders sections by CSS `order`, so they paint
+   as the owner's "two EMPTY full-width rows" between CLOSE TOOLS and STYLE.
+   On phone they carry no meaning: hide them in the sheet. */
+html.ce-phone .studio-workspace.ce-tools-open #studio-dock #dock-sep-1,
+html.ce-phone .studio-workspace.ce-tools-open #studio-dock #dock-sep-2 {
+  display: none !important;
+}
+
+/* m04-06: .main-content/#view is the phone scroller; without scroll-padding
+   every scrollIntoView/anchor jump parked rail heads 55px under the fixed
+   search header (measured 360/390/430, all rails). */
+html.ce-phone .main-content,
+html.ce-phone #view {
+  scroll-padding-top: calc(var(--topbar-h, 55px) + env(safe-area-inset-top, 0px) + 8px);
+}
+
+/* m04-09: 4px clearance between the Presentation title and the scope pills at
+   390/430 with headless fonts; SF Pro on device collides (owner screenshot).
+   Wrap instead of collide. (When the sheet opens, ce-touch-edit.js portals
+   the dock to <body>, so the selector must not depend on .studio-workspace.) */
+html.ce-phone .ce-dock-column-head,
+html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column-head {
+  flex-wrap: wrap !important;
+  row-gap: 6px !important;
+}
+
+/* m07 F3: 7 backdrops in the desktop 6-col grid paint a 6+1 orphan row on
+   phone. 4 columns give 4+3, both rows full-width, thumbs 82-100px (still
+   square, tap targets grow from ~50px). */
+html.ce-phone #studio-dock #studio-photo-strip {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+/* m04-12: the fixed toast sat at bottom 24px and overlapped the sticky Tools
+   row (toast t769-b820 vs Tools row t800-b844 = 20px collision at 390).
+   m05-09: with the tools SHEET open the bottom half belongs to the sheet, so
+   the toast docks just below the topbar there instead. */
+html.ce-phone #ce-app-toast,
+html.ce-phone #ce-queue-toast {
+  bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+}
+html.ce-phone body:has(.ce-tools-open) #ce-app-toast,
+html.ce-phone body:has(.ce-tools-open) #ce-queue-toast {
+  bottom: auto !important;
+  top: calc(env(safe-area-inset-top, 0px) + 96px) !important;
 }
