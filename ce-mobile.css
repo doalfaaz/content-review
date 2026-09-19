@@ -1229,22 +1229,21 @@ html.ce-phone .studio-primary-actions {
 }
 html.ce-phone .studio-primary-actions > * { min-width: 0 !important; }
 html.ce-phone #studio-post-btn { margin-left: auto !important; max-width: 100%; white-space: nowrap; }
-/* m04-01: keep all ship actions on ONE row (scrollable) instead of the 3-row
-   155px header with Send-to-Plan floating alone on row 3. Measured row-2
-   content: Download 150 + Schedule 89 + ••• 44 + Send 113 + 3x6 gaps = 414 >
-   368, so the row scrolls horizontally instead of folding. */
+/* m04-01 + m01 FIX-2: keep the ship actions together on the header without
+   folding to the 3-row 155px layout. A single scrollable row crushed labels
+   (Download for phone clipped 22px, Send to Plan clipped 19px — m01 measured),
+   so the row WRAPS with flex-shrink:0: full labels, two rows, ~110px header. */
 html.ce-phone .studio-topbar .studio-primary-actions {
   flex: 1 1 100% !important;
   display: flex !important;
   gap: 6px !important;
   order: 3 !important;
-  flex-wrap: nowrap !important;
-  overflow-x: auto !important;
-  scrollbar-width: none !important;
-  -webkit-overflow-scrolling: touch;
+  flex-wrap: wrap !important;
+  overflow-x: visible !important;
+  row-gap: 6px !important;
   padding-bottom: 2px;
 }
-html.ce-phone .studio-topbar .studio-primary-actions::-webkit-scrollbar { display: none; }
+html.ce-phone .studio-topbar .studio-primary-actions > * { flex-shrink: 0 !important; }
 html.ce-phone .studio-topbar #studio-post-btn { margin-left: 0 !important; }
 html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock #dock-canvas-section {
   order: 1 !important;

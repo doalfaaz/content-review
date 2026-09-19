@@ -1850,9 +1850,9 @@
   .ce-rail-actions{display:flex;align-items:center;gap:6px;}
   .ce-rail-nav-btn{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--ink);font-size:16px;cursor:pointer;line-height:1;transition:transform 150ms var(--ease-spring),background-color 150ms ease,border-color 150ms ease,color 150ms ease;padding:0 0 2px 0;}
   .ce-rail-nav-btn:hover{background:rgba(255,255,255,0.12);border-color:var(--accent);color:var(--accent);transform:scale(1.05);}
-  .ce-rail-nav-btn:disabled{cursor:default;opacity:.35;}
+  .ce-rail-nav-btn:disabled{cursor:default;opacity:.5;} /* m01 FIX-4: .35 measured 3.01:1; .5 → 4.82:1 */
   .ce-rail-nav-btn:disabled:hover{transform:none;background:rgba(255,255,255,0.05);border-color:var(--border);color:var(--ink);}
-  .ce-rail-toggle-btn{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.05);color:var(--ink);cursor:pointer;transition:background-color 150ms ease,border-color 150ms ease,color 150ms ease;}
+  .ce-rail-toggle-btn{font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.05);color:var(--ink);cursor:pointer;transition:background-color 150ms ease,border-color 150ms ease,color 150ms ease;} /* m01 FIX-8: 11px measured 4.87-4.9 median; 12px is comfortably above 4.5 */
   .ce-rail-toggle-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25);}
   .ce-rail-track{display:flex;gap:18px;overflow-x:auto;padding:4px 6px 4px;scroll-padding-inline:6px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.18) transparent;scroll-behavior:smooth;}
   .ce-rail-track::-webkit-scrollbar{height:4px;}

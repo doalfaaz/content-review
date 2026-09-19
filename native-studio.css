@@ -297,7 +297,7 @@
   color: var(--ink); font-size: 13px; font-weight: 800; letter-spacing: 1px; cursor: pointer;
 }
 .studio-more-actions > summary::-webkit-details-marker { display: none; }
-.studio-more-actions[open] > summary { border-color: var(--accent-border); color: var(--accent); }
+.studio-more-actions[open] > summary { border-color: var(--accent-border); color: #d96a7c; } /* m01 FIX-3: was var(--accent) = 3.49:1; #d96a7c = 5.39:1 */
 .studio-more-menu {
   position: absolute; right: 0; top: calc(100% + 8px); z-index: 100; display: grid; gap: 5px;
   min-width: 150px; padding: 6px; border: 1px solid var(--border); border-radius: 10px;
@@ -409,8 +409,9 @@
 
 .studio-icon-btn:disabled {
   /* Manager deep audit 2026-09-07: .32 crossed into illegibility — the undo/
-     redo cluster read as a render bug, not a disabled state. */
-  opacity: .45;
+     redo cluster read as a render bug, not a disabled state.
+     m01 FIX-4 (2026-09-19): .45 still measured 3.37-4.14:1; .6 → 6.34:1. */
+  opacity: .6;
   cursor: default;
 }
 
@@ -4580,6 +4581,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
    compact pills, no longer debris floating above the grid. */
 .studio-workspace.is-carousel-mode .ce-dock-column-head .ce-look-scope-row {
   margin: 0 !important;
+  margin-left: 10px !important; /* m01 FIX-5: title ink right == row left (gap 0.00) in both engines */
   gap: 6px !important;
 }
 .studio-workspace.is-carousel-mode .ce-dock-column-head .ce-look-scope-row > span {
@@ -4697,8 +4699,14 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   min-height: 0 !important;
 }
 .studio-workspace.is-carousel-mode .ce-inspector-pinned .ce-deck-caption-input {
-  flex: 1 1 auto !important;
-  min-height: 120px !important;
+  flex: 0 0 auto !important;
+  /* m01 FIX-6: min-height 120px pushed the input bottom 11px and the counter
+     37px below the viewport at 390x844/402x874; the 58vh sheet caps the paint
+     at 44px anyway. Let the textarea scroll internally. */
+  min-height: 44px !important;
+}
+.studio-workspace.is-carousel-mode .ce-inspector-pinned {
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 .studio-workspace.is-post-mode .ce-inspector-section,

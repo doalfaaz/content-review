@@ -1580,6 +1580,16 @@
         pinned.style.setProperty('height', '96px', 'important');
         pinned.style.setProperty('overflow-y', 'auto', 'important');
         pinned.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+        /* m01 FIX-6: the caption block inside needs 155px but the pinned band
+           is 96px; the input's min-height 120px (native-studio) is the driver.
+           With the band scrollable + bottom padding, the input and counter are
+           reachable by a small scroll instead of dead below the fold. */
+        pinned.style.setProperty('padding-bottom', 'calc(10px + env(safe-area-inset-bottom, 0px))', 'important');
+      }
+      var pinnedInput = dock.querySelector('.ce-inspector-pinned .ce-deck-caption-input');
+      if (pinnedInput) {
+        pinnedInput.style.setProperty('min-height', '44px', 'important');
+        pinnedInput.style.setProperty('flex', '0 0 auto', 'important');
       }
       /* m04-10: pinned caption strip measured scrollHeight 132 > clientHeight 95
          with no visual affordance — the last line looked truncated. A bottom
