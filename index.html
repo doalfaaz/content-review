@@ -1293,6 +1293,7 @@
     flex: 1;
     overflow-y: auto;
     padding: var(--topbar-h, 42px) 24px 24px; /* top bar floats above; --topbar-h is published by ceSyncTopbarHeight() below */
+    scroll-padding-top: calc(var(--topbar-h, 42px) + 8px); /* m03 FIX-1: anchored stops must land below the fixed bar */
     background: var(--bg);
     color: var(--ink);
     transition: background 0.2s ease, color 0.2s ease;
@@ -1843,15 +1844,17 @@
 </style>
 <link rel="stylesheet" href="./legacy-renderers/renderers.scoped.css">
 <style>
-  .ce-rail{margin:0 0 36px;}
-  .ce-rail-head{font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:.85;padding:0 4px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .ce-rail{margin:0 0 14px;}
+  .ce-rail-head{font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:.85;padding:0 4px 4px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:-1px;z-index:30;background:var(--bg);}
   .ce-rail-count-chip{font-size:11px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--muted);background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:999px;padding:2px 8px;}
   .ce-rail-actions{display:flex;align-items:center;gap:6px;}
   .ce-rail-nav-btn{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--ink);font-size:16px;cursor:pointer;line-height:1;transition:transform 150ms var(--ease-spring),background-color 150ms ease,border-color 150ms ease,color 150ms ease;padding:0 0 2px 0;}
   .ce-rail-nav-btn:hover{background:rgba(255,255,255,0.12);border-color:var(--accent);color:var(--accent);transform:scale(1.05);}
+  .ce-rail-nav-btn:disabled{cursor:default;opacity:.35;}
+  .ce-rail-nav-btn:disabled:hover{transform:none;background:rgba(255,255,255,0.05);border-color:var(--border);color:var(--ink);}
   .ce-rail-toggle-btn{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.05);color:var(--ink);cursor:pointer;transition:background-color 150ms ease,border-color 150ms ease,color 150ms ease;}
   .ce-rail-toggle-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25);}
-  .ce-rail-track{display:flex;gap:18px;overflow-x:auto;padding:4px 6px 14px;scroll-padding-inline:6px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.18) transparent;scroll-behavior:smooth;}
+  .ce-rail-track{display:flex;gap:18px;overflow-x:auto;padding:4px 6px 4px;scroll-padding-inline:6px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.18) transparent;scroll-behavior:smooth;}
   .ce-rail-track::-webkit-scrollbar{height:4px;}
   .ce-rail-track::-webkit-scrollbar-track{background:transparent;}
   .ce-rail-track::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.16);border-radius:999px;transition:background-color .2s ease;}
@@ -5001,9 +5004,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var ep = localStorage.getItem('ce_sync_endpoint');
       if (ep) {
         var clean = String(ep).replace(/\/+$/, '');
-        // A discovered endpoint ALREADY carries the capability path (P0-3 seeding
-        // law) — appending it twice 404s. Only add it when absent.
-        return clean.indexOf('39c4ee5650102ee027bd87bcc4e9a2ea') >= 0 ? clean : clean + '/39c4ee5650102ee027bd87bcc4e9a2ea';
+        /* P0-1 (b-core, 2026-09-19): the capability is no longer a bundle
+           constant. A discovered endpoint either already carries the path
+           (Mac-seeded / paired) or the Mac-issued `ce_sync_cap` is appended —
+           both come from the device's own store, never from this public file. */
+        var cap = '';
+        try { cap = localStorage.getItem('ce_sync_cap') || ''; } catch (_c) {}
+        if (!cap || clean.indexOf('/' + cap) >= 0) return clean;
+        return clean + '/' + cap;
       }
     } catch (_e) {}
     return null;
@@ -16879,7 +16887,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
           var track = document.createElement('div');
           track.className = 'ce-rail-track';
-          track.style.minHeight = '220px';
+          track.style.minHeight = '214px';
           track.__ceItems = railItems;
           track.__ceBase = gm.base;
           track.__ceKind = 'carousel';
@@ -16896,6 +16904,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               track.scrollBy({ left: Math.max(400, Math.round(track.clientWidth * 0.75)), behavior: 'smooth' });
             };
           }
+          /* m03 FIX-5: disable the arrows at rail ends so a dead button never
+             looks tappable (they previously stayed lit while scrollBy no-opped). */
+          var syncRailNav = function () {
+            var atStart = track.scrollLeft <= 2;
+            var atEnd = track.scrollLeft >= track.scrollWidth - track.clientWidth - 2;
+            if (prevBtn) { prevBtn.disabled = atStart; }
+            if (nextBtn) { nextBtn.disabled = atEnd; }
+          };
+          track.addEventListener('scroll', syncRailNav, { passive: true });
+          requestAnimationFrame(syncRailNav);
 
           var toggleBtn = head.querySelector('.ce-rail-toggle-btn');
           if (toggleBtn) {
@@ -17051,7 +17069,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
           var track = document.createElement('div');
           track.className = 'ce-rail-track';
-          track.style.minHeight = '220px';
+          track.style.minHeight = '214px';
           track.__ceItems = railItems;
           track.__ceBase = gm.base;
           track.__ceKind = 'post';
@@ -17068,6 +17086,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               track.scrollBy({ left: Math.max(400, Math.round(track.clientWidth * 0.75)), behavior: 'smooth' });
             };
           }
+          /* m03 FIX-5 (posts twin): disable arrows at rail ends. */
+          var syncRailNav = function () {
+            var atStart = track.scrollLeft <= 2;
+            var atEnd = track.scrollLeft >= track.scrollWidth - track.clientWidth - 2;
+            if (prevBtn) { prevBtn.disabled = atStart; }
+            if (nextBtn) { nextBtn.disabled = atEnd; }
+          };
+          track.addEventListener('scroll', syncRailNav, { passive: true });
+          requestAnimationFrame(syncRailNav);
 
           var toggleBtn = head.querySelector('.ce-rail-toggle-btn');
           if (toggleBtn) {

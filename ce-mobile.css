@@ -661,8 +661,9 @@ html.ce-phone .studio-topbar {
     scroll-snap-type: x proximity !important;
     scroll-padding-inline: 16px !important;
     padding-inline: 16px !important;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 32px), rgba(0,0,0,0.4) 100%);
-    mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 32px), rgba(0,0,0,0.4) 100%);
+    padding-bottom: 4px !important; /* m03 FIX-2: phone twin of the base pad */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 26px), rgba(0,0,0,0.72) 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 26px), rgba(0,0,0,0.72) 100%);
   }
   .ce-rail-track > * {
     scroll-snap-align: start !important;
@@ -951,6 +952,25 @@ html.ce-phone .ce-carousel-editor.ce-tools-open .ce-tools-toggle::after {
 html.ce-phone .ce-rail-track > * { width: min(44vw, 190px, calc((100vw - 102px) / 2)) !important; }
 html.ce-phone .ce-rail-track { gap: 14px !important; }
 html.ce-phone .ce-rail-track .ce-shelf-kicker { display: none !important; }
+
+/* m03 FIX-1C: the sticky rail head paints full-bleed (it must cover the cards
+   sliding under it) while keeping the label's x-identity with the cards.
+   Opacity moves onto the head's children so the new background band stays
+   fully opaque — at .85 on the parent, cards ghosted 15% through the band. */
+html.ce-phone .ce-rail-head { margin: 0 -20px; padding-left: 24px; padding-right: 24px; opacity: 1 !important; }
+html.ce-phone .ce-rail-head > * { opacity: .85; }
+
+/* m03 FIX-3: the All/grid mode inherited the desktop single-column wall
+   (minmax(280px,1fr) = 1 column at 342px content width). Phone gets the same
+   two-up budget as the rail: measured before, the STORY rail grid ran 35,306px
+   at 390 (42 screens); two-up drops it to ~8.6k. */
+@media (max-width: 700px) {
+  .ce-rail-track.is-grid-view {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+  html.ce-phone .ce-rail-track.is-grid-view > * { width: auto !important; }
+}
 
 
 /* ---------------------------------------------------------------------------
