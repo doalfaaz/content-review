@@ -11871,6 +11871,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return committed;
   }
 
+  /* m05-01: the phone touch layer (ce-touch-edit.js) lives in its own IIFE and
+     cannot reach these closure functions — long-press on the poem was a no-op
+     because poemBeginTextEdit was never reachable. Publish the poem edit
+     entry points on window (same contract the deck path already has via
+     __CE_ARM_TOUCH_EDITING__). */
+  try {
+    window.poemBeginTextEdit = poemBeginTextEdit;
+    window.poemFinishTextEdit = poemFinishTextEdit;
+    window.poemSelectTextBox = poemSelectTextBox;
+  } catch (_pe) {}
+
   function poemApplyTypography(property, value, label) {
     if (state.currentType !== 'poem') return;
     if (state.studioPoemEditing) poemFinishTextEdit();
@@ -11890,7 +11901,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     try { if (typeof ceFitPoemStudioCanvas === 'function') ceFitPoemStudioCanvas(); } catch (_fitAfter) {}
     syncPoemTypographyControls();
     if (studioCommitHistory(label, before)) {
-      studioSetMessage(label + '. Saved automatically.');
+      /* m05-02: the "Saved automatically." suffix was a lie on the phone (no
+         native bridge → studioSavePoem can only refuse). Gate the claim on
+         bridge availability; the web surface persists via ce_poem_designs and
+         says exactly that. */
+      var __canSaveNative = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge);
+      studioSetMessage(__canSaveNative ? (label + '. Saved automatically.') : (label + ' — changes stay on this page.'));
       if (typeof studioTriggerAutoSave === 'function') studioTriggerAutoSave();
     }
   }
@@ -13924,13 +13940,40 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var toolsToggleBtn = dockControls.querySelector('#ce-tools-toggle');
         var toolsEditorEl = dockControls.closest('.ce-carousel-editor') || document.querySelector('.ce-carousel-editor');
         if (toolsToggleBtn && toolsEditorEl) {
-          toolsToggleBtn.onclick = function () {
+          /* m05-08: a tap can deliver pointerup but no click when the node is
+             swapped mid-gesture. Fire on pointerup too, deduped with a 400ms
+             latch, and delegate from the PERSISTENT dockControls so a
+             re-render can never orphan the binding. */
+          var ceToolsToggleFire = function () {
+            var now = Date.now();
+            if (dockControls.__ceToggleLatch && now - dockControls.__ceToggleLatch < 400) return;
+            dockControls.__ceToggleLatch = now;
             var toolsOpen = toolsEditorEl.classList.toggle('ce-tools-open');
             toolsToggleBtn.setAttribute('aria-expanded', toolsOpen ? 'true' : 'false');
             var toolsLabel = toolsToggleBtn.querySelector('.ce-tools-toggle-label');
             if (toolsLabel) toolsLabel.textContent = toolsOpen ? 'Close tools' : 'Tools';
             try { if (typeof fitCarouselEditorSlides === 'function') fitCarouselEditorSlides(); } catch (_toolsFit) {}
           };
+          toolsToggleBtn.onclick = ceToolsToggleFire;
+          if (!dockControls.__ceToolsPtrBound) {
+            dockControls.__ceToolsPtrBound = true;
+            dockControls.addEventListener('pointerup', function (e) {
+              if (e.pointerType !== 'touch') return;
+              var hit = e.target && e.target.closest && e.target.closest('#ce-tools-toggle');
+              if (!hit) return;
+              e.preventDefault();
+              var now = Date.now();
+              if (dockControls.__ceToggleLatch && now - dockControls.__ceToggleLatch < 400) return;
+              dockControls.__ceToggleLatch = now;
+              var ed = dockControls.closest('.ce-carousel-editor') || document.querySelector('.ce-carousel-editor');
+              if (!ed) return;
+              var toolsOpen = ed.classList.toggle('ce-tools-open');
+              hit.setAttribute('aria-expanded', toolsOpen ? 'true' : 'false');
+              var lbl = hit.querySelector('.ce-tools-toggle-label');
+              if (lbl) lbl.textContent = toolsOpen ? 'Close tools' : 'Tools';
+              try { if (typeof fitCarouselEditorSlides === 'function') fitCarouselEditorSlides(); } catch (_tp) {}
+            });
+          }
         }
       }
     }
@@ -14575,12 +14618,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           dockToggle.setAttribute('aria-expanded', 'false');
           dockToggle.setAttribute('aria-controls', 'studio-dock');
           dockToggle.innerHTML = '<span class="ce-tools-toggle-label">Tools</span><span class="ce-tools-toggle-hint"></span>';
-          dockToggle.onclick = function () {
+          /* m05-08: tap survivability — click alone stranded the sheet when a
+             re-render swapped the node mid-gesture; pointerup fires reliably
+             (proven in the lane's p14 log). One 400ms latch dedupes the pair. */
+          var ceDockToggleFire = function () {
+            var now = Date.now();
+            if (dockEl0.__ceToggleLatch && now - dockEl0.__ceToggleLatch < 400) return;
+            dockEl0.__ceToggleLatch = now;
             var ws = document.querySelector('.studio-workspace');
             if (!ws) return;
             var openNow = ws.classList.toggle('ce-tools-open');
-            dockToggle.setAttribute('aria-expanded', openNow ? 'true' : 'false');
-            var lbl = dockToggle.querySelector('.ce-tools-toggle-label');
+            var tgl = document.getElementById('ce-dock-tools-toggle');
+            if (tgl) tgl.setAttribute('aria-expanded', openNow ? 'true' : 'false');
+            var lbl = tgl && tgl.querySelector('.ce-tools-toggle-label');
             if (lbl) lbl.textContent = openNow ? 'Close tools' : 'Tools';
             setTimeout(function () {
               try { ceFitPoemStudioCanvas(); } catch (_pf) {}
@@ -14588,6 +14638,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               try { if (typeof fitCarouselEditorSlides === 'function') fitCarouselEditorSlides(); } catch (_ff) {}
             }, 80);
           };
+          dockToggle.onclick = ceDockToggleFire;
+          if (!dockEl0.__ceDockPtrBound) {
+            dockEl0.__ceDockPtrBound = true;
+            dockEl0.addEventListener('pointerup', function (e) {
+              if (e.pointerType !== 'touch') return;
+              var hit = e.target && e.target.closest && e.target.closest('#ce-dock-tools-toggle');
+              if (!hit) return;
+              e.preventDefault();
+              ceDockToggleFire();
+            }, true);
+          }
           dockEl0.insertBefore(dockToggle, dockEl0.firstChild);
         }
         var hintEl = dockToggle.querySelector('.ce-tools-toggle-hint');
