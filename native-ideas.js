@@ -352,7 +352,13 @@
       var draft = draftLines.join('\n').trim() || bodyText || cardText(item);
       if (typeof window.__CE_STATE__ !== 'undefined') {
         window.__CE_STATE__.writeDraft = draft;
-        try { localStorage.setItem('ce_write_draft', draft); } catch (_e) {}
+        /* F-E3 fix (2026-09-18): route through the shared persist contract so a
+           quota failure surfaces instead of silently dropping the drafted idea
+           while the button still claims '✓ Taken to Write'. */
+        var __draftOk = (typeof window.cePersistOrWarn === 'function')
+          ? window.cePersistOrWarn('ce_write_draft', draft)
+          : (function () { try { localStorage.setItem('ce_write_draft', draft); return true; } catch (_e) { return false; } })();
+        if (!__draftOk) { setStatus(button, '⚠ Draft not saved', false); return; }
       }
       if (typeof window.__CE_NAVIGATE__ === 'function') window.__CE_NAVIGATE__('write');
       setStatus(button, '✓ Taken to Write', true);
@@ -369,18 +375,8 @@
     var groups = groupedItems();
     var visibleCount = groups.reduce(function (total, group) { return total + group.items.length; }, 0);
     if (groups.length && !Object.keys(openGroups).some(function (key) { return openGroups[key]; })) openGroups[groups[0].key] = true;
-    var meta = document.getElementById('meta');
-    if (meta) {
-      var suffix = context.query || filter !== 'all' || language !== 'english' || structuredOnly ? ' · filtered' : '';
-      /* Corpus-count truth (2026-09-17): the honest number is the browsable
-         corpus — the deduped list this surface renders (dedup strips
-         title-placeholder junk rows, not real ideas). The summary line below
-         still carries the shown count. */
-      var corpusIdeas = all.length || ((typeof window.ceCorpusCounts === 'function')
-        ? window.ceCorpusCounts().ideas
-        : (Array.isArray(window.__HTML_IDEAS__) && window.__HTML_IDEAS__.length ? window.__HTML_IDEAS__.length : 0));
-      meta.textContent = corpusIdeas + ' ideas across spiritual & psychological topics' + suffix;
-    }
+    /* The hidden #meta topbar channel is gone (W9, 2026-09-18) — the summary
+       line inside the surface below is the visible owner of the count. */
     view.className = 'view ce-ideas-parity';
     view.innerHTML = controlsHtml() +
       '<div class="ce-ideas-summary"><span>' + visibleCount + ' ideas to explore</span>' + (structuredOnly ? '<span>structured outlines</span>' : '') + '</div>' +
@@ -489,7 +485,12 @@
       row.readyToPost = false;
       row.scheduled = true;
       row.scheduleSlot = String(date) + ' · ' + String(label);
-      try { localStorage.setItem('ce_queue_items', JSON.stringify(st.queueItems)); } catch (_e) {}
+      try {
+        /* F-03 fix (2026-09-18): same shared contract — this writes the SAME
+           ce_queue_items store index.html guards exclusively. */
+        if (typeof window.cePersistOrWarn === 'function') window.cePersistOrWarn('ce_queue_items', JSON.stringify(st.queueItems));
+        else localStorage.setItem('ce_queue_items', JSON.stringify(st.queueItems));
+      } catch (_e) {}
       if (typeof window.__CE_UPDATE_TOPBAR_QUEUE__ === 'function') window.__CE_UPDATE_TOPBAR_QUEUE__();
     } catch (_e2) {}
   };

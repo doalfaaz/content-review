@@ -81,13 +81,13 @@
     --accent-glow: rgba(217, 106, 124, 0.22);
     /* 2026-09-17: the old Tangerine→Crimson flow collapsed to one crimson family —
        var names kept so existing consumers rebind at definition. */
-    --tangerine: #bf4b5d;
-    --tangerine-light: #d96a7c;
+    --crimson: #bf4b5d;
+    --crimson-light: #d96a7c;
     --grad-accent: linear-gradient(135deg, #bf4b5d, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #bf4b5d, #8e2f3d);
     --grad-bar: linear-gradient(180deg, #e0879a, #d96a7c 45%, #bf4b5d);
     --grad-accent-text: linear-gradient(135deg, #bf4b5d, #d96a7c);
-    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(217, 106, 124, 0.06), transparent 45%);
+    --crimson-wash: radial-gradient(circle at 85% 10%, rgba(217, 106, 124, 0.06), transparent 45%);
     /* Status (semantic, not decorative). --danger stays a restrained garnet for
        true destructive affordances; --warn flattens to muted — a fact with a fix
        path is never red (grow/launch precedent). */
@@ -154,13 +154,13 @@
     --accent-border: rgba(217, 106, 124, 0.38);
     --accent-glow: rgba(217, 106, 124, 0.22);
     /* Same crimson gradient family on cream; text/bar gradients run deep-first. */
-    --tangerine: #bf4b5d;
-    --tangerine-light: #d96a7c;
+    --crimson: #bf4b5d;
+    --crimson-light: #d96a7c;
     --grad-accent: linear-gradient(135deg, #bf4b5d, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #bf4b5d, #8e2f3d);
     --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
     --grad-accent-text: linear-gradient(135deg, #8e2f3d, #bf4b5d);
-    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(217, 106, 124, 0.09), transparent 45%);
+    --crimson-wash: radial-gradient(circle at 85% 10%, rgba(217, 106, 124, 0.09), transparent 45%);
     --danger: #962c3d;
     --warn: var(--muted);
     --info: #0055d4;
@@ -192,7 +192,7 @@
     border-color: rgba(0, 0, 0, 0.16);
     color: var(--ink);
   }
-  .ce-subpillar-filter-select, .ce-scrub-idx { display: none !important; }
+  .ce-scrub-idx { display: none !important; }
 
   @media (prefers-reduced-transparency: reduce) {
     .sidebar,
@@ -622,8 +622,13 @@
        hover-only, because Plan/Studio/Reject is the owner's phone triage
        workflow and there is no other door to it. */
     .ce-card-select-toggle { display: none !important; }
-    .ce-card-status-chip { display: none !important; }
     .pure-card:not(.ce-saved-card) .ce-card-action-cluster { display: none !important; }
+    /* A14 resolved (2026-09-18): the Queued/Saved chip is informational only
+       (pointer-events:none) and emits solely on cards that carry that state —
+       hiding it on touch removed the only signal that a piece was already
+       queued or banked. The clean-face law hides ACTION controls, not the
+       status fact: show it persistently on touch. */
+    .ce-card-status-chip { opacity: 1 !important; }
     .ce-saved-card .ce-card-action-cluster {
       opacity: 1 !important;
       transform: none !important;
@@ -1955,7 +1960,7 @@
   .ce-aud-gaps strong { font-size:11.5px; font-weight:700; color:var(--ink); }
   .ce-aud-gaps ul { margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; }
   .ce-aud-gaps li { font-size:11.5px; color:var(--muted); line-height:1.45; }
-  .ce-aud-gaps code { font-size:10.5px; background:var(--surface); padding:1px 5px; border-radius:4px; color:var(--tangerine-light); }
+  .ce-aud-gaps code { font-size:10.5px; background:var(--surface); padding:1px 5px; border-radius:4px; color:var(--crimson-light); }
   .ce-aud-gap-status { font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--warn); }
   .ce-aud-gaps small { font-size:10.5px; color:var(--faint); }
   .ce-aud-mini { display:flex; flex-direction:column; gap:8px; }
@@ -2123,13 +2128,13 @@
     --accent-glow: rgba(217,106,124,.22);
     --accent-hover: #d96a7c;
     --accent-press: #8e2f3d;
-    --tangerine: #bf4b5d;
-    --tangerine-light: #d96a7c;
+    --crimson: #bf4b5d;
+    --crimson-light: #d96a7c;
     --grad-accent: linear-gradient(135deg, #bf4b5d, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #bf4b5d, #8e2f3d);
     --grad-accent-text: linear-gradient(135deg, #bf4b5d, #d96a7c);
     --grad-bar: linear-gradient(180deg, #e0879a, #d96a7c 45%, #bf4b5d);
-    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(217,106,124,.06), transparent 45%);
+    --crimson-wash: radial-gradient(circle at 85% 10%, rgba(217,106,124,.06), transparent 45%);
     --warn: var(--muted);
     --danger: var(--muted);
     font-variant-numeric: tabular-nums;
@@ -2161,14 +2166,14 @@
   .ce-grow-shell .ce-aud-delta.is-up, .ce-launch-workbench .ce-aud-delta.is-up { color: var(--accent-text); background: color-mix(in srgb, var(--accent) 14%, transparent); }
 
   /* The fortnight: one field panel, 14 day columns on a shared baseline —
-     solid accent = landed, bone hatch = local work, dashed tick = neither,
+     solid accent = landed, solid bone = local work, dashed tick = neither,
      shaded slot = before the day ledger, hatched band = the landed-free run. */
   .ce-grow-shell .ce-grow-hero { padding: 14px 16px 12px; border: 1px solid var(--hairline); border-radius: 12px; background: rgba(255,255,255,.035); }
   .ce-grow-shell .ce-fort-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
   .ce-grow-shell .ce-fort-head .ce-grow-eyebrow { margin: 0; }
   .ce-grow-shell .ce-fort-line { color: var(--ink); font-size: 13px; font-weight: 750; letter-spacing: -.01em; }
   /* the operative answer: what came back, at hero scale (spec: 48-64px/800) */
-  .ce-grow-shell .ce-fort-num { font-size: 46px; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; vertical-align: -6px; color: var(--ink); }
+  .ce-grow-shell .ce-fort-num { font-size: 46px; font-weight: 800; letter-spacing: -.01em; line-height: 1; font-variant-numeric: tabular-nums; vertical-align: -6px; color: var(--ink); margin-right: 4px; }
   .ce-grow-shell .ce-fort-cap { margin-left: auto; color: var(--faint); font-size: 9.5px; }
   .ce-grow-shell .ce-fort-bars { position: relative; display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; height: 120px; margin-top: 12px; border-bottom: 1px solid var(--hairline); }
   .ce-grow-shell .ce-day-slot { position: relative; display: flex; align-items: flex-end; justify-content: center; gap: 2px; min-width: 0; }
@@ -2179,7 +2184,10 @@
   .ce-grow-shell .ce-fort-col:has(.ce-fort-bar.is-landed) .ce-fort-v { color: var(--accent-text); }
   .ce-grow-shell .ce-fort-bar { display: block; width: 100%; border-radius: 2px 2px 0 0; }
   .ce-grow-shell .ce-fort-bar.is-landed { background: var(--accent); }
-  .ce-grow-shell .ce-fort-bar.is-work { background: repeating-linear-gradient(45deg, rgba(237,232,223,.25) 0 1px, transparent 1px 4px); box-shadow: inset 0 0 0 1px rgba(237,232,223,.14); }
+  /* Local work paints SOLID bone — a faint hatch read as "nothing happened"
+     on days the owner was actively working (audit L2/L3, 2026-09-18). Landed
+     posts keep the accent; real local work keeps a real bar. */
+  .ce-grow-shell .ce-fort-bar.is-work { background: rgba(237,232,223,.5); box-shadow: inset 0 0 0 1px rgba(237,232,223,.22); }
   .ce-grow-shell .ce-fort-tick { display: block; width: 55%; max-width: 16px; margin-bottom: 1px; border-bottom: 1px dashed var(--card-border); }
   .ce-grow-shell .ce-fort-gap { position: absolute; left: 0; top: 0; bottom: 0; z-index: 0; pointer-events: none; background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--faint) 16%, transparent) 0 1px, transparent 1px 6px); border: 1px dashed color-mix(in srgb, var(--faint) 30%, transparent); border-radius: 4px; }
   .ce-grow-shell .ce-fort-gap i { position: absolute; top: 3px; left: 50%; transform: translateX(-50%); font-style: normal; color: var(--faint); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
@@ -2310,6 +2318,9 @@
   .ce-launch-workbench .ce-lq-fix { flex: 0 0 auto; min-height: 28px; padding: 0 2px; border: 0; background: transparent; color: var(--accent-text); font-size: 10px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .ce-launch-workbench .ce-lq-fix:hover { color: var(--accent-hover); }
   .ce-launch-workbench .ce-lq-empty { padding: 12px 2px; color: var(--faint); font-size: 10.5px; }
+  /* A11: rows past the first 14 must be reachable, never silently dropped. */
+  .ce-launch-workbench .ce-lq-more > summary { min-height: 32px; color: var(--faint); font-size: 10px; cursor: pointer; list-style: none; }
+  .ce-launch-workbench .ce-lq-more > summary::-webkit-details-marker { display: none; }
 
   @media (max-width: 700px) {
     .ce-launch-contract { gap: 8px 14px; }
@@ -2504,12 +2515,12 @@
       </button>
       <div class="ce-sort-popover" id="poem-sort-popover" role="listbox" aria-label="Sort poems by" hidden></div>
 
-      <!-- Saved/Queue launchers live in the sidebar only — topbar duplicates were cut -->
-
-      <div class="topbar-meta" id="meta" style="display:none;"></div>
+      <!-- Saved/Queue launchers live in the sidebar only — topbar duplicates were cut.
+           The legacy #meta channel (permanently display:none, wrote queue counts
+           nobody could see) was removed with its writers in the 2026-09-18 audit pass. -->
 
       <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
-        <input type="text" class="search-input" id="search" placeholder="Search..." autocomplete="off" />
+        <input type="text" class="search-input" id="search" placeholder="Search..." autocomplete="off" aria-label="Search" />
         <button class="theme-toggle-btn" id="settings-toggle" type="button" title="Publishing handoff" aria-label="Publishing handoff">
           <span class="ce-ic ce-ic--gear ce-ic--14" aria-hidden="true"></span>
         </button>
@@ -2685,18 +2696,17 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=efe91af179"></script>
-<script src="./deck_index.js?v=e5b3503406"></script>
+<script src="./deck_index.js?v=419cb498b8"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=beaf185ada" />
 <link rel="stylesheet" href="./native-saved.css?v=ed04947639" />
-<link rel="stylesheet" href="./native-studio.css?v=28e71d78ab" />
+<link rel="stylesheet" href="./native-studio.css?v=26543b4453" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<link rel="stylesheet" href="./ce-mobile.css?v=7723292431" />
 <script src="./ce-touch-edit.js?v=d5b7d014e8"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
@@ -2764,6 +2774,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 </script>
 
 <script src="./share-decks.js?v=5e7d79ee88"></script>
+<link rel="stylesheet" href="./ce-mobile.css?v=4e1037c4df" />
 <!-- Ideas surface density + crimson rebind (2026-09-17). The parity renderer
      ships tall outline cards and the catalog is ~600 ideas, so the tab read
      as pink-tinted text walls. Cards now render as compact rows that expand
@@ -2986,7 +2997,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     overflow: hidden;
   }
 </style>
-<script src="./native-ideas.js?v=14526cabff"></script>
+<script src="./native-ideas.js?v=1b383c1667"></script>
 <script>
 /* Ideas rows expand/collapse companion: the parity renderer rebuilds
    #view innerHTML on every filter/group change, so row state lives in a
@@ -5010,7 +5021,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function ceBankTombstones() {
     try { return JSON.parse(localStorage.getItem('ce_saved_bank_tombstones') || '{}') || {}; } catch (_e) { return {}; }
   }
-  function cePersistTombstones(t) { try { localStorage.setItem('ce_saved_bank_tombstones', JSON.stringify(t)); } catch (_e) {} }
+  /* One persistence-truth contract (2026-09-18): a queue/saved write that
+     fails silently is lost work the owner never hears about. Data-critical
+     writes go through here — the catch surfaces the same honest failure the
+     draft chip already owns. */
+  function cePersistOrWarn(key, value) {
+    try { localStorage.setItem(key, value); return true; }
+    catch (_e) {
+      try { showQueueToast('Save failed - storage full', true); } catch (_t) {}
+      return false;
+    }
+  }
+  /* F-E3/F-03 (2026-09-18 R2 error-honesty + regression lanes): native-ideas.js
+     writes the SAME data-critical stores (ce_write_draft, ce_queue_items) from a
+     separate script that cannot see this IIFE scope, so it used a bare
+     `try{setItem}catch{}` — a quota throw there lost the owner's taken-forward
+     draft or a scheduled idea silently, while the button still said
+     '✓ Taken to Write'. Publishing the contract on window lets every writer in
+     the page use one failure surface instead of each script hand-rolling one. */
+  window.cePersistOrWarn = cePersistOrWarn;
+  function cePersistTombstones(t) { cePersistOrWarn('ce_saved_bank_tombstones', JSON.stringify(t)); }
   function ceBankKnownKeys() {
     try { return JSON.parse(localStorage.getItem('ce_saved_bank_keys') || '[]') || []; } catch (_e) { return []; }
   }
@@ -5048,7 +5078,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
          EXPLICIT delete event via ceSavedBankDeleted(). The key snapshot is still
          maintained for observability, never for destruction. */
       if (isFullBankPush) {
-        try { localStorage.setItem('ce_saved_bank_keys', JSON.stringify(Object.keys(liveKeys))); } catch (_e) {}
+        cePersistOrWarn('ce_saved_bank_keys', JSON.stringify(Object.keys(liveKeys)));
       }
       /* Safety cap: a single push carrying >25 tombstones is a red flag, not a
          sync — drop them all and keep the live rows (explicit deletes arrive in
@@ -5100,7 +5130,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           changed = true;
         });
         if (changed) {
-          try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems || [])); } catch (_e) {}
+          cePersistOrWarn('ce_saved_bank', JSON.stringify(state.savedItems || []));
           try { if (state.activeTab === 'saved' && typeof renderMain === 'function') renderMain(); } catch (_e) {}
           try { if (typeof updateTopbarSavedBadge === 'function') updateTopbarSavedBadge(); } catch (_e) {}
         }
@@ -5210,9 +5240,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         }
       });
       state.queueItems = [];
-      localStorage.setItem('ce_queue_items', '[]');
-      localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems));
-      localStorage.setItem('ce_queue_migrated_v1', '1');
+      cePersistOrWarn('ce_queue_items', '[]');
+      cePersistOrWarn('ce_saved_bank', JSON.stringify(state.savedItems));
+      cePersistOrWarn('ce_queue_migrated_v1', '1');
     }
   } catch (_qMigrateErr) {}
 
@@ -5281,7 +5311,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function poemLineHeight(value) {
     var lineHeight = Number(value);
     if (!Number.isFinite(lineHeight)) return POEM_TYPOGRAPHY.lineHeight;
-    return Math.round(Math.max(1.35, Math.min(2.2, lineHeight)) * 100) / 100;
+    return Math.round(Math.max(1.6, Math.min(2.2, lineHeight)) * 100) / 100;
   }
 
   function poemTextColor(value) {
@@ -6577,7 +6607,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         changed++;
       });
       if (changed) {
-        try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+        cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
         if (typeof renderMain === 'function') renderMain();
         var br2 = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
         if (br2) br2.postMessage({ action: 'getIgQueue' });
@@ -6737,7 +6767,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       released++;
     });
     if (released) {
-      try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+      cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
       try { renderMain(); } catch (_e) {}
     }
     var still = Array.isArray(info.stillOnMeta) ? info.stillOnMeta.length : 0;
@@ -6831,7 +6861,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     };
     var STATE_COLOR = {
       pending: 'var(--muted)', queued: 'var(--muted)', scheduling: 'var(--accent-text)',
-      scheduled: '#60a5fa', published: '#34d399', failed: 'var(--muted)',
+      scheduled: '#60a5fa', published: 'var(--success)', failed: 'var(--muted)',
       superseded: 'var(--muted)', needs_verification: 'var(--muted)'
     };
     // Newest first; terminal rows older than a day don't need board real estate.
@@ -6948,7 +6978,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (!q) return '';
     var chip = 'display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;letter-spacing:.04em;padding:2px 7px;border-radius:99px;border:1px solid;';
     if (q.metaState === 'published') {
-      return '<span class="ce-meta-chip" style="' + chip + 'color:#34d399;border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.1);">Live ✓</span>';
+      return '<span class="ce-meta-chip" style="' + chip + 'color:var(--success);border-color:color-mix(in srgb,var(--success) 40%,transparent);background:color-mix(in srgb,var(--success) 10%,transparent);">Live ✓</span>';
     }
     if (q.metaState === 'failed') {
       // 2026-09-10 audit A-3: the old .slice(0,24) cut the message mid-token
@@ -7746,7 +7776,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   window.ceCorpusCounts = ceCorpusCounts;
 
   /* ── Poem mix (display order only). Looks stay hashed by content_id. ── */
-  var CE_YEAR_LIKE_MEDIANS = { 2017: 752, 2018: 4342, 2019: 9634, 2020: 7866, 2021: 12003, 2022: 8696, 2023: 8626, 2024: 8626, 2025: 1259, 2026: 1259 };
+  var CE_YEAR_LIKE_MEDIANS = { 2017: 752, 2018: 4342, 2019: 9634, 2020: 7866, 2021: 12003, 2022: 8696, 2023: 8626, 2026: 1259 };
+  /* 2024 and 2025 have ZERO measured samples in the likes census — no honest
+     median exists for them. They inherit the nearest measured year explicitly
+     here instead of storing fabricated values inside the measured table. */
+  var CE_YEAR_MEDIAN_INHERIT = { 2024: 2023, 2025: 2026 };
 
   function ceNormCaptionKey(s) {
     var t = String(s || '');
@@ -7925,7 +7959,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     else if (src.like_count != null) likes = Number(src.like_count);
     else if (src.metrics && src.metrics.likes != null) likes = Number(src.metrics.likes);
     var y = cePoemYear(poem);
-    var med = y && CE_YEAR_LIKE_MEDIANS[y];
+    var med = y && (CE_YEAR_LIKE_MEDIANS[y] || CE_YEAR_LIKE_MEDIANS[CE_YEAR_MEDIAN_INHERIT[y]]);
     if (isFinite(likes) && likes >= 0 && med) return likes / med;
     return null;
   }
@@ -9816,7 +9850,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (state.queueItems && state.queueItems[qIdx]) {
         state.queueItems[qIdx].design = Object.assign(state.queueItems[qIdx].design || {}, { look: restoredLook });
         if (state.queueItems[qIdx].item) state.queueItems[qIdx].item.look = restoredLook;
-        try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+        cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
       }
     }
 
@@ -10201,7 +10235,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           if (qIdx >= 0) {
             state.queueItems[qIdx].item = saved;
             state.queueItems[qIdx].design = Object.assign({}, state.queueItems[qIdx].design || {}, { look: look });
-            localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+            cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
           }
         }
         if (hasNewerEdits) {
@@ -10270,7 +10304,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (q.metaState === 'failed') { delete q.metaState; delete q.metaError; }
       touched++;
     });
-    if (touched) localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+    if (touched) cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
     return touched;
   }
 
@@ -10361,7 +10395,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           if (qIdx >= 0) {
             state.queueItems[qIdx].item = Object.assign({}, state.queueItems[qIdx].item, { text: text });
             state.queueItems[qIdx].design = Object.assign({}, state.queueItems[qIdx].design || {}, { type: style.type, style: style });
-            localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+            cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
           }
         }
         state.studioDirty = false;
@@ -10610,8 +10644,51 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
 
   function studioHookChipLabel(angle) {
-    var map = { Original: 'As written', Question: 'Ask a question', 'Short form': 'Keep it short', Short: 'Keep it short', Quoted: 'Quote card' };
+    var map = {
+      Original: 'As written', Question: 'Ask a question', 'Short form': 'Keep it short', Short: 'Keep it short', Quoted: 'Quote card',
+      // Soft-CTA angles (same chip chrome as hooks)
+      Save: 'Save for later', Reflect: 'Soft reflect', Share: 'Send someone', Tag: 'Tag them', Comment: 'One-word ask',
+      'When it returns': 'When it returns', Gentle: 'Gentle close'
+    };
     return map[angle] || angle;
+  }
+
+  // Soft-CTA slot: authored "Save karo…" body before the profile closer, or an
+  // explicit role/type of cta. Profile / hook / poem / block never qualify.
+  function studioIsCtaSlide(slide, index, total, slides) {
+    if (!slide) return false;
+    var role = String(slide.role || slide.type || slide.kind || '').toLowerCase();
+    if (role === 'cta') return true;
+    if (role === 'hook' || role === 'poem' || role === 'profile' || role === 'block' || role === 'title') return false;
+    // Soft-CTA text heuristic ONLY qualifies the classic penultimate slot
+    // whose closer is a profile face. A real insight/body slide elsewhere in
+    // the deck that merely starts with "save"/"share" must never open the CTA
+    // picker and risk being overwritten by a generated soft close.
+    if (Array.isArray(slides) && total >= 2 && index === total - 2) {
+      var last = slides[total - 1] || {};
+      var lastRole = String(last.role || last.type || '').toLowerCase();
+      if (lastRole === 'profile') {
+        var plain = stripHookPlain(slide.html || slide.text || slide.cta || '');
+        if (/^(save\b|save kar|us din ke liye save|is carousel ko|tag\b|share\b|comment\b|भेज)/i.test(plain)
+          || /\b(save karo|save kar lo|save this|save karna)\b/i.test(plain)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function studioFindCtaSlideIndex(slides) {
+    if (!Array.isArray(slides) || !slides.length) return -1;
+    var total = slides.length;
+    var i;
+    for (i = 0; i < total; i++) {
+      if (String((slides[i] && (slides[i].role || slides[i].type)) || '').toLowerCase() === 'cta') return i;
+    }
+    for (i = 0; i < total; i++) {
+      if (studioIsCtaSlide(slides[i], i, total, slides)) return i;
+    }
+    return -1;
   }
 
   function studioMarkEditableFields(root) {
@@ -11177,8 +11254,20 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var from = Number(e.dataTransfer.getData('text/plain'));
         var to = Number(card.getAttribute('data-ce-slide-index'));
         if (!Number.isFinite(from) || !Number.isFinite(to) || from === to) return;
+        /* F-32-1 FIX (2026-09-18 R2 drag-drop lane): the from-index used to be
+           read from the drag payload and spliced out blindly. When the slide
+           array shrank between dragstart and drop (undo mid-drag, or a native
+           hydration/re-render replacing deck.slides while a drag was in flight),
+           `splice(from,1)[0]` returned undefined and `splice(to,0,undefined)`
+           inserted a PHANTOM slide — deck.slides grew by one, and that ghost
+           serialized into autosave/export as a blank child (a 15-slide FB deck
+           silently became 16). Bounds-check before mutating, and never mutate
+           on a failed move. */
+        if (!(from >= 0 && from < slides.length)) return;
+        if (!(to >= 0 && to < slides.length)) return;
         var before = studioSnapshot();
         var moved = slides.splice(from, 1)[0];
+        if (typeof moved === 'undefined') return;
         slides.splice(to, 0, moved);
         if (deck && deck.slides) deck.slides = slides;
         studioSyncDeckSlides(deck);
@@ -12612,6 +12701,47 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     try { sessionStorage.setItem('ce_authored_cover_v2_' + id, JSON.stringify(rec)); } catch (_e) {}
   }
 
+  // Soft-CTA Original must survive angle swaps the same way cover hooks do —
+  // otherwise the first applied alternative becomes the new "Original".
+  window.__CE_AUTHORED_CTA__ = window.__CE_AUTHORED_CTA__ || {};
+  function authoredCtaKey(deckId, slideIdx) {
+    return String(deckId || '') + '::' + String(slideIdx);
+  }
+  function authoredCtaFor(deckId, slideIdx) {
+    if (!deckId && deckId !== 0) return null;
+    var key = authoredCtaKey(deckId, slideIdx);
+    var rec = window.__CE_AUTHORED_CTA__[key];
+    if (rec && rec.text) return rec;
+    try {
+      var raw = sessionStorage.getItem('ce_authored_cta_v1_' + key);
+      if (raw) {
+        rec = JSON.parse(raw);
+        if (rec && rec.text) {
+          window.__CE_AUTHORED_CTA__[key] = rec;
+          return rec;
+        }
+      }
+    } catch (_e) {}
+    return null;
+  }
+  function rememberAuthoredCta(deckId, slideIdx, slide) {
+    if ((!deckId && deckId !== 0) || authoredCtaFor(deckId, slideIdx)) return;
+    var html = '';
+    var text = '';
+    if (typeof slide === 'string') {
+      html = slide;
+      text = stripHookPlain(slide);
+    } else if (slide && typeof slide === 'object') {
+      html = String(slide.html || slide.text || slide.cta || '');
+      text = stripHookPlain(slide.text || slide.html || slide.cta || '');
+    }
+    if (!html && !text) return;
+    var rec = { html: html, text: text };
+    var key = authoredCtaKey(deckId, slideIdx);
+    window.__CE_AUTHORED_CTA__[key] = rec;
+    try { sessionStorage.setItem('ce_authored_cta_v1_' + key, JSON.stringify(rec)); } catch (_e) {}
+  }
+
   function studioEscHookText(s) {
     return String(s == null ? '' : s).replace(/[&<>]/g, function (c) {
       return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c];
@@ -13063,6 +13193,237 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return hooks;
   }
 
+  // Carousel soft-CTA picker — same contract as generateAlternativeHooks:
+  // prefer authored cta_options / ctas from the deck row, then voice-safe
+  // soft closes. Never invent hard-sell pitch copy.
+  function generateAlternativeCtas(post, currentCta, slide) {
+    var raw = String(currentCta || (slide && (slide.html || slide.text || slide.cta)) || (post && (post.cta || post.soft_cta)) || '').trim();
+    var clean = stripHookPlain(raw);
+    if (!clean) {
+      clean = 'Save kar lo. Jis din zaroorat pade, yaad aa jaaye.';
+    }
+    var cleanKey = clean.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
+    var ctas = [{ angle: 'Original', tag: 'Authored CTA', text: clean }];
+    var seen = {};
+    seen[cleanKey] = true;
+
+    function pushCta(angle, tag, text, options) {
+      var value = String(text || '').trim();
+      if (!value) return;
+      var key = stripHookPlain(value).toLocaleLowerCase().replace(/\s+/g, ' ').trim();
+      if (!key || seen[key]) return;
+      // Soft CTA blacklist: hard sell / guru commands stay out of generated rows.
+      // Authored options from the deck always pass.
+      var authored = !!(options && options.authored);
+      var banned = /\b(buy now|limited time|act now|click link|dm for price|only \d+ seats|hustle|manifest|unlock (?:your )?potential)\b/i;
+      var hardSell = /^(buy |purchase |enroll |join now|sign up now)/i;
+      if (!authored && (banned.test(key) || hardSell.test(value))) return;
+      seen[key] = true;
+      ctas.push({ angle: angle, tag: tag, text: value, generated: !authored });
+    }
+
+    var sources = [post, slide, post && post.metadata, deckCtaCarrier(post)];
+    function deckCtaCarrier(row) {
+      if (!row) return null;
+      var id = row.id || row.content_id || row.designId;
+      if (!id || !window.__CE_DECKS_FULL__) return null;
+      return window.__CE_DECKS_FULL__[id] || null;
+    }
+    var explicit = [];
+    sources.forEach(function (src) {
+      if (!src || typeof src !== 'object') return;
+      ['cta_options', 'ctaOptions', 'alternativeCtas', 'ctas', 'soft_ctas', 'softCtas'].some(function (field) {
+        var value = src[field];
+        if (!Array.isArray(value) || !value.length) return false;
+        explicit = explicit.concat(value);
+        return true;
+      });
+    });
+    // Deck index already ships `hooks` for covers; some rows also stash soft
+    // closes under a trailing authored list named cta / ending.
+    if (post && Array.isArray(post.ending_options)) explicit = explicit.concat(post.ending_options);
+    if (post && Array.isArray(post.endings)) explicit = explicit.concat(post.endings);
+
+    explicit.forEach(function (entry, index) {
+      var value = typeof entry === 'string' ? entry : (entry && (entry.text || entry.cta || entry.html || entry.title));
+      if (!value) return;
+      var angle = (entry && typeof entry === 'object' && (entry.angle || entry.name)) || ('Authored option ' + (index + 1));
+      var tag = (entry && typeof entry === 'object' && entry.tag) || 'Authored alternative';
+      pushCta(String(angle), String(tag), stripHookPlain(value), { authored: true });
+    });
+
+    // Curated soft bank — DoAlfaaz voice, no pitch. Topic match only as a hint.
+    var lower = clean.toLowerCase();
+    var titleBits = String((post && (post.title || post.hook || post.crux)) || '').toLowerCase();
+    var topic = lower + ' ' + titleBits;
+
+    pushCta('Save', 'Soft save', 'Save kar lo. Jis din zaroorat pade, yaad aa jaaye.');
+    pushCta('When it returns', 'Return cue', 'Us din ke liye save karo jab wahi pattern phir aaye aur tum khud ko blame karne lago.');
+    pushCta('Reflect', 'Soft reflect', 'Agar ek bhi line apni lagi — save karo. Reflect karo. Koi pitch nahi.');
+    pushCta('Share', 'Send someone', 'Kisi ko bhejo jo yeh pehchaan maangta hai — bina lecture ke.');
+    pushCta('Comment', 'One-word ask', 'Comment mein woh ek lafz likho jo abhi andar chubh raha hai.');
+    pushCta('Gentle', 'Gentle close', 'Jab ready ho, wapas padhna. Compassion se — blame se nahi.');
+
+    if (/grief|dukh|loss|maut|death|toot/i.test(topic)) {
+      pushCta('When it returns', 'Grief cue', 'Save karo. Jab agla tootna aaye, khol ke padhna. Tum akele nahi toot rahe.');
+    } else if (/nervous|trigger|window of tolerance|overwhelm/i.test(topic)) {
+      pushCta('When it returns', 'Body cue', 'Agli baar jab seena tight ho — rukna mat, bas notice karna. Save kar lo.');
+    } else if (/healing|trauma|zakhm/i.test(topic)) {
+      pushCta('Reflect', 'Healing cue', 'Save kar lo — agar kisi ne tumhari healing ko jaldi mein nipta diya.');
+    } else if (/pyaar|love|rishta|attachment|raga/i.test(topic)) {
+      pushCta('Share', 'Love cue', 'Kisi ko bhejo jo \"mujhe farak nahi padta\" ko strength samajhta hai.');
+    } else if (/aalas|laziness|procrastinat|shuru/i.test(topic)) {
+      pushCta('Save', 'Start cue', 'Is carousel ko us din ke liye save kar lo — jab dimaag bolega \"main shuru hi nahi kar sakta.\"');
+    }
+
+    // Keep the picker usable but calm — Original + up to 7 alternatives.
+    if (ctas.length > 8) ctas = ctas.slice(0, 8);
+    return ctas;
+  }
+
+  function studioApplyCtaSlide(slides, slideIdx, ctaText, ctaHtml, deckId, angle) {
+    if (!Array.isArray(slides) || !slides.length) return;
+    var idx = Number(slideIdx);
+    if (!Number.isFinite(idx) || idx < 0 || idx >= slides.length) {
+      idx = studioFindCtaSlideIndex(slides);
+    }
+    if (idx < 0) idx = Math.max(0, slides.length - 2);
+    var slide = slides[idx];
+    if (!slide) return;
+    var painted = ctaHtml || studioPaintHookHtml(ctaText, slide.html || '');
+    slide.text = ctaText;
+    slide.html = painted;
+    slide.cta = ctaText;
+    slide.ctaAngle = String(angle || '');
+    // Keep role as cta when it already was; never promote a profile closer.
+    var role = String(slide.role || slide.type || '').toLowerCase();
+    if (role !== 'profile' && role !== 'poem' && role !== 'hook' && role !== 'block') {
+      if (role === 'cta' || !role) slide.role = 'cta';
+    }
+    if (deckId && window.__CE_DECKS_FULL__ && window.__CE_DECKS_FULL__[deckId] && window.__CE_DECKS_FULL__[deckId].slides && window.__CE_DECKS_FULL__[deckId].slides[idx]) {
+      window.__CE_DECKS_FULL__[deckId].slides[idx].html = painted;
+      window.__CE_DECKS_FULL__[deckId].slides[idx].text = ctaText;
+      window.__CE_DECKS_FULL__[deckId].slides[idx].cta = ctaText;
+      window.__CE_DECKS_FULL__[deckId].slides[idx].ctaAngle = String(angle || '');
+    }
+    state.currentSlideIdx = idx;
+    state.studioEditTarget = { kind: 'content', slide: idx };
+  }
+
+  function studioApplyCtaFromElement(el, slides) {
+    if (!el) return;
+    var ctaText = el.getAttribute('data-ce-cta-text');
+    var angle = el.getAttribute('data-ce-cta-angle');
+    var ctaHtml = el.getAttribute('data-ce-cta-html') || '';
+    var slideIdx = Number(el.getAttribute('data-ce-cta-slide'));
+    if (!ctaText) return;
+    var deckId = state.currentItem && (state.currentItem.id || state.currentItem.content_id);
+    if (angle === 'Original' && deckId != null) {
+      var authored = authoredCtaFor(deckId, slideIdx);
+      if (authored && authored.text) {
+        ctaText = authored.text;
+        ctaHtml = authored.html || ctaHtml;
+      }
+    }
+    var before = studioSnapshot();
+    state.studioDraftText = ctaText;
+    studioApplyCtaSlide(slides, slideIdx, ctaText, ctaHtml, deckId, angle);
+    state.studioDirty = true;
+    studioCommitHistory('CTA: ' + angle, before);
+    var __synthNow = (function () { var d = studioDeck(); return !!(d && d.__synth); })();
+    studioSetMessage((angle === 'Original' ? 'Restored original CTA' : 'Applied ' + angle + ' CTA') + (__synthNow ? ' · Preview, save to keep it' : ''));
+    if (typeof studioTriggerAutoSave === 'function') studioTriggerAutoSave();
+    updateStudioCanvas();
+  }
+
+  function studioCtaSweepMarkup(altCtas, currentAngle, authoredHtml, slideIdx) {
+    if (!altCtas || altCtas.length < 2) return '';
+    var curIdx = 0;
+    altCtas.forEach(function (h, i) { if (h.angle === currentAngle) curIdx = i; });
+    var cards = altCtas.map(function (h, i) {
+      var isOrig = h.angle === 'Original';
+      var painted = isOrig && authoredHtml ? authoredHtml : studioPaintHookHtml(h.text, authoredHtml);
+      var isCur = h.angle === currentAngle;
+      var chipLabel = studioHookChipLabel(h.angle);
+      var preview = stripHookPlain(h.text || '').replace(/\s+/g, ' ').trim();
+      return '<button type="button" class="ce-hook-card ce-hook-row-item ce-cta-card' + (isCur ? ' is-active active' : '') + '" data-ce-cta-index="' + i + '" data-ce-cta-slide="' + slideIdx + '" data-ce-cta-text="' + escapeHtml(h.text) + '" data-ce-cta-html="' + escapeHtml(painted) + '" data-ce-cta-angle="' + escapeHtml(h.angle) + '" aria-pressed="' + (isCur ? 'true' : 'false') + '" role="option" aria-selected="' + (isCur ? 'true' : 'false') + '">'
+        + '<div class="ce-hook-row-header">'
+        + '<span class="ce-hook-card-angle ce-hook-row-badge">' + escapeHtml(chipLabel) + '</span>'
+        + '<span class="ce-hook-card-index ce-hook-row-index">' + (i + 1) + ' / ' + altCtas.length + '</span>'
+        + '<span class="ce-hook-row-indicator' + (isCur ? ' is-active' : '') + '">' + (isCur ? '✓' : '') + '</span>'
+        + '</div>'
+        + '<div class="ce-hook-card-preview ce-hook-row-text">' + escapeHtml(preview) + '</div>'
+        + '</button>';
+    }).join('');
+    return '<div class="ce-hook-sweep ce-hook-options-sweep ce-cta-sweep" id="ce-cta-sweep" data-ce-cta-count="' + altCtas.length + '" data-ce-cta-index="' + curIdx + '">'
+      + '<button type="button" class="ce-hook-sweep-nav" id="ce-cta-sweep-prev" aria-label="Previous CTA" style="display:none;"' + (curIdx === 0 ? ' disabled' : '') + '>‹</button>'
+      + '<div class="ce-hook-sweep-track ce-hook-options-list" id="ce-cta-sweep-track" role="listbox" aria-label="CTA options">' + cards + '</div>'
+      + '<button type="button" class="ce-hook-sweep-nav" id="ce-cta-sweep-next" aria-label="Next CTA" style="display:none;"' + (curIdx >= altCtas.length - 1 ? ' disabled' : '') + '>›</button>'
+      + '</div>';
+  }
+
+  function studioBindCtaChoices(dockControls, slides) {
+    if (!dockControls) return;
+    dockControls.querySelectorAll('.ce-cta-card').forEach(function (chip) {
+      chip.onclick = function () {
+        dockControls.querySelectorAll('.ce-cta-card').forEach(function (c) {
+          c.classList.remove('is-active', 'active');
+          c.setAttribute('aria-pressed', 'false');
+          c.setAttribute('aria-selected', 'false');
+          var ind = c.querySelector('.ce-hook-row-indicator, .ce-hook-row-check');
+          if (ind) { ind.textContent = ''; ind.classList.remove('is-active'); }
+        });
+        chip.classList.add('is-active', 'active');
+        chip.setAttribute('aria-pressed', 'true');
+        chip.setAttribute('aria-selected', 'true');
+        var curInd = chip.querySelector('.ce-hook-row-indicator, .ce-hook-row-check');
+        if (curInd) { curInd.textContent = '✓'; curInd.classList.add('is-active'); }
+        studioApplyCtaFromElement(chip, slides);
+      };
+    });
+    var track = dockControls.querySelector('#ce-cta-sweep-track');
+    var sweep = dockControls.querySelector('#ce-cta-sweep');
+    function centerCardInTrack(trackEl, cardEl, behavior) {
+      if (!trackEl || !cardEl) return;
+      var delta = cardEl.getBoundingClientRect().left - trackEl.getBoundingClientRect().left;
+      var target = trackEl.scrollLeft + delta - (trackEl.clientWidth - cardEl.offsetWidth) / 2;
+      if (trackEl.scrollTo) {
+        trackEl.scrollTo({ left: Math.max(0, target), behavior: behavior || 'auto' });
+      } else {
+        trackEl.scrollLeft = Math.max(0, target);
+      }
+    }
+    function activateCtaAt(idx) {
+      if (!track) return;
+      var cards = Array.prototype.slice.call(track.querySelectorAll('.ce-cta-card'));
+      if (!cards.length) return;
+      var next = Math.max(0, Math.min(cards.length - 1, idx));
+      var card = cards[next];
+      if (!card) return;
+      if (sweep) sweep.setAttribute('data-ce-cta-index', String(next));
+      centerCardInTrack(track, card, 'smooth');
+      studioApplyCtaFromElement(card, slides);
+    }
+    var prev = dockControls.querySelector('#ce-cta-sweep-prev');
+    var next = dockControls.querySelector('#ce-cta-sweep-next');
+    if (prev) prev.onclick = function () {
+      var cur = sweep ? Number(sweep.getAttribute('data-ce-cta-index') || 0) : 0;
+      activateCtaAt(cur - 1);
+    };
+    if (next) next.onclick = function () {
+      var cur = sweep ? Number(sweep.getAttribute('data-ce-cta-index') || 0) : 0;
+      activateCtaAt(cur + 1);
+    };
+    if (track && sweep) {
+      var active = track.querySelector('.ce-cta-card.is-active');
+      if (active) {
+        requestAnimationFrame(function () {
+          centerCardInTrack(track, active, 'instant');
+        });
+      }
+    }
+  }
+
   function buildPostNav(post) {
     var all;
     if (window.__CE_NATIVE_APP__) {
@@ -13235,6 +13596,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var roleLabel = studioHumanRole(slides[selected], selected, totalSlides);
     var curSlide = slides[selected] || {};
     var isHookSlide = selected === 0 || String(curSlide.role || '').toLowerCase() === 'hook';
+    var isCtaSlide = !isHookSlide && studioIsCtaSlide(curSlide, selected, totalSlides, slides);
 
     // Owner 2026-09-07 (dock reorganization): the "This slide" role caption is
     // dead weight — the role already lives on the selected filmstrip card and
@@ -13370,6 +13732,40 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         + '</section>')
       : '';
 
+    var ctaAuthoredHtml = '';
+    var ctaOriginalPlain = '';
+    var carouselAltCtas = [];
+    var currentCtaAngle = 'Original';
+    var ctasGroupForSlide = '';
+    if (isCtaSlide) {
+      var ctaDeckId = state.currentItem && (state.currentItem.id || state.currentItem.content_id);
+      var __synthCtaDeck = !!(deck && deck.__synth);
+      if (!__synthCtaDeck) rememberAuthoredCta(ctaDeckId, selected, curSlide);
+      var authoredCtaRec = __synthCtaDeck ? null : authoredCtaFor(ctaDeckId, selected);
+      ctaAuthoredHtml = authoredCtaRec ? authoredCtaRec.html : String(curSlide.html || '');
+      ctaOriginalPlain = authoredCtaRec ? authoredCtaRec.text : stripHookPlain(curSlide.html || curSlide.text || curSlide.cta || '');
+      var liveCtaPlain = stripHookPlain(curSlide.html || curSlide.text || curSlide.cta || '');
+      carouselAltCtas = (typeof generateAlternativeCtas === 'function')
+        ? generateAlternativeCtas(state.currentItem || deck, ctaOriginalPlain || liveCtaPlain, curSlide)
+        : [];
+      if (curSlide.ctaAngle) {
+        currentCtaAngle = String(curSlide.ctaAngle);
+      } else {
+        carouselAltCtas.forEach(function (c) {
+          if (stripHookPlain(c.text).toLowerCase() === liveCtaPlain.toLowerCase()) currentCtaAngle = c.angle;
+        });
+        if (authoredCtaRec && liveCtaPlain.toLowerCase() === String(authoredCtaRec.text || '').toLowerCase()) {
+          currentCtaAngle = 'Original';
+        }
+      }
+      ctasGroupForSlide = (carouselAltCtas.length > 1)
+        ? ('<section class="ce-inspector-section ce-dock-hooks ce-dock-ctas" role="group" aria-label="CTA options">'
+          + '<span class="ce-inspector-label">CTA variations · ' + carouselAltCtas.length + '</span>'
+          + studioCtaSweepMarkup(carouselAltCtas, currentCtaAngle, ctaAuthoredHtml, selected)
+          + '</section>')
+        : '';
+    }
+
     var captionSection = (isPost || state.currentType === 'poem') ? studioEditControls(deck, slides || []) : studioCarouselCaptionMarkup(deck);
 
     var leftRail = document.getElementById('studio-left-rail');
@@ -13475,7 +13871,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // (margin-top:auto pins it to the panel bottom). Hook variations keep the
       // Content panel to themselves and absorb its leftover height.
       var slideColumn = dockColumn('Slide', '', textInspector + spacingSection + poemTools + structureActions);
-      var contentColumn = dockColumn('Content', '', hooksGroupForCover + (contentSwitchMarkup || ''));
+      var contentColumn = dockColumn('Content', '', hooksGroupForCover + ctasGroupForSlide + (contentSwitchMarkup || ''));
       var presentationColumn = dockColumn('Presentation', lookScope, looksRail);
       // Owner 2026-09-08 13:37: Presentation (design picker) leads on the LEFT —
       // it is what you actually operate on a carousel; Content (slides + hooks)
@@ -13688,6 +14084,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       };
     }
     studioBindHookChoices(dockControls, slides || []);
+    studioBindCtaChoices(dockControls, slides || []);
 
     dockControls.querySelectorAll('[data-ce-switch-content]').forEach(function (button) {
       button.onclick = function () {
@@ -14304,7 +14701,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         }
         if (!sEntry.status) sEntry.status = 'saved';
         ceTouchSavedBankEntry(sEntry);
-        try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
+        try { if (cePersistOrWarn('ce_saved_bank', JSON.stringify(state.savedItems)) && window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
         if (typeof updateTopbarSavedBadge === 'function') updateTopbarSavedBadge();
       }
     }
@@ -14352,7 +14749,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           }
         }
       }
-      try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+      cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
     }
 
     // 3. Library sync for Posts & Decks
@@ -15666,8 +16063,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (!view) return;
     const poemSections = document.getElementById('poem-sections');
     if (poemSections) poemSections.style.display = 'none';
-    var meta = document.getElementById('meta');
-    if (meta) meta.style.display = 'none';
 
     var container = document.createElement('div');
     container.className = 'ce-saved-workspace';
@@ -15812,7 +16207,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           addToQueue(saved.type, saved.item, saved.design);
           saved.status = 'in_progress';
         });
-        try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
+        try { if (cePersistOrWarn('ce_saved_bank', JSON.stringify(state.savedItems)) && window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
         state.savedSelectedIds.clear();
         updateTopbarSavedBadge();
         updateTopbarQueueBadge();
@@ -15963,7 +16358,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           addToQueue(saved.type, itm, dsg);
           saved.status = 'in_progress';
           ceTouchSavedBankEntry(saved);
-          try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
+          try { if (cePersistOrWarn('ce_saved_bank', JSON.stringify(state.savedItems)) && window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
           updateTopbarSavedBadge();
           showAppToast('Added to Plan calendar', { icon: 'calendar' });
           if (typeof navigateTo === 'function') navigateTo('plan');
@@ -16133,7 +16528,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   };
   function __ceRenderMainImpl() {
     const view = document.getElementById('view');
-    const meta = document.getElementById('meta');
     const poemSections = document.getElementById('poem-sections');
     if (!view) return;
     /* Resources/native-ideas.js overwrites #view.className ('view
@@ -16207,8 +16601,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var postsNow = (typeof ceSafePurePosts === 'function') ? ceSafePurePosts() : (window.__NATIVE_POSTS__ || []);
         window.__CE_LAST_LIBRARY__ = { poems: poems, clean: cleanAll, decks: decksNow, posts: postsNow };
 
-        if (meta) meta.textContent = '';
-
         var nativePoemCount = (window.__NATIVE_POEMS__ && window.__NATIVE_POEMS__.length) || 0;
         if (window.__CE_NATIVE_APP__ && window.__INIT_ERROR__) {
           renderNativeEmptyState(view, '', 'Could not load poems', String(window.__INIT_ERROR__));
@@ -16230,6 +16622,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         window.__CE_POEM_MOUNTED_COUNT__ = 0;
         var poemGen = ++state.poemChunkGen;
         var poemCursor = 0;
+        var __lastShelfPhotoIdx = -1;
         var poemLoadMoreBtn = null;
         if (window.__CE_POEM_IO__) { try { window.__CE_POEM_IO__.disconnect(); } catch (_e) {} window.__CE_POEM_IO__ = null; }
 
@@ -16252,6 +16645,24 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             const surfaceSection = state.poemSection === 'paper' ? 'paper' : 'photo';
             const canonicalIdx = canonicalPoemPresetIndex(poem, surfaceSection);
             const surfaceStyle = poemSurfaceStyleFor(poem, surfaceSection, canonicalIdx);
+            /* Shelf dedupe (audit L4 P0, 2026-09-18): the photo bank holds 7
+               backgrounds for ~2,000 poems, so adjacent tiles can collide on
+               the same image and read as one duplicated card. The nudge is
+               SHELF-ONLY: the face renders the next photo while the poem's
+               canonical style (preset, pos, align, its own photoIdx) stays
+               untouched for Studio — photoIdx is design identity here, so it
+               must never be rewritten. */
+            var shelfStyle = surfaceStyle;
+            if (surfaceSection === 'photo') {
+              var __resolvedPhoto = (surfaceStyle && surfaceStyle.photoIdx != null)
+                ? Number(surfaceStyle.photoIdx)
+                : ((PHOTO_PRESETS[canonicalIdx % PHOTO_PRESETS.length] || {}).photoIdx || 0);
+              if (__resolvedPhoto === __lastShelfPhotoIdx && PHOTO_BACKGROUNDS.length > 1) {
+                __resolvedPhoto = (__resolvedPhoto + 1) % PHOTO_BACKGROUNDS.length;
+                shelfStyle = Object.assign({}, surfaceStyle, { photoIdx: __resolvedPhoto });
+              }
+              __lastShelfPhotoIdx = __resolvedPhoto;
+            }
             var actions = ceBuildCardActionHtml('poem', poem);
             const poemId = cePoemStableId(poem);
             // E-005: long poems get a faithful Read overlay; short ones keep
@@ -16272,7 +16683,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             var __poemFaceHtml = '';
             try {
               __poemFaceHtml = surfaceSection === 'photo'
-                ? renderPhotoPoemHtml(poem, canonicalIdx, surfaceStyle)
+                ? renderPhotoPoemHtml(poem, canonicalIdx, shelfStyle)
                 : renderPaperPoemHtml(poem, canonicalIdx, surfaceStyle);
             } catch (_pf) { __poemFaceHtml = ''; }
             if (!__poemFaceHtml || !String(__poemFaceHtml).trim()) {
@@ -16383,7 +16794,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         });
         window.__CE_LAST_LIBRARY__ = window.__CE_LAST_LIBRARY__ || {};
         window.__CE_LAST_LIBRARY__.decks = decks;
-        if (meta) meta.textContent = '';
 
         var nativeDeckCount = (window.__NATIVE_DECK_INDEX__ && window.__NATIVE_DECK_INDEX__.length) || 0;
         if (window.__CE_NATIVE_APP__ && window.__INIT_ERROR__) {
@@ -16435,14 +16845,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           var rail = document.createElement('div');
           rail.className = 'ce-rail';
 
-          var subMap = {};
-          railItems.forEach(function (d) {
-            var sk = d.__subPillar || subpillarKey(gm.pillar, d);
-            (subMap[sk] = subMap[sk] || []).push(d);
-          });
-          var subKeys = Object.keys(subMap);
-          var hasSubpillars = subKeys.length > 1;
-
           var head = document.createElement('div');
           head.className = 'ce-rail-head';
           var countLabel = railItems.length + ' ' + (railItems.length === 1 ? 'carousel' : 'carousels');
@@ -16493,35 +16895,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             };
           }
 
-          var subSelect = head.querySelector('.ce-subpillar-filter-select');
-          if (subSelect) {
-            subSelect.onchange = function () {
-              var val = subSelect.value;
-              var filteredItems = val === 'all' ? railItems : (subMap[val] || []);
-              track.__ceItems = filteredItems;
-              track.__ceChunkMounted = 0;
-              track.innerHTML = '';
-
-              var countEl = head.querySelector('.ce-rail-count');
-              if (countEl) countEl.textContent = filteredItems.length;
-
-              var isGrid = track.classList.contains('is-grid-view');
-              toggleBtn.textContent = isGrid ? 'Rail' : 'All';
-
-              if (isGrid) {
-                // A7-P1-2 (bounded mount law): the old unbounded while loop
-                // mounted all 957 cards in one synchronous pass — a multi-
-                // second main-thread lock, repeated per keystroke. Mount in
-                // chunks across animation frames instead: same end state,
-                // never a frozen UI.
-                ceMountGridDrain(track, 'carousel');
-              } else {
-                track.__ceChunkSize = CE_RAIL_CHUNK_SIZE;
-                ceAppendRailChunk(track, 'carousel');
-              }
-              if (window.__CE_FIT_ALL__) requestAnimationFrame(window.__CE_FIT_ALL__);
-            };
-          }
+          /* The sub-pillar filter select was retired before this audit — its
+             markup is never emitted, so the onchange plumbing below was dead
+             code reading nodes that cannot exist (A13, removed 2026-09-18). */
 
           if (gi < 2) {
             track.__ceChunkSize = CE_RAIL_CHUNK_SIZE;
@@ -16592,7 +16968,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         });
         window.__CE_LAST_LIBRARY__ = window.__CE_LAST_LIBRARY__ || {};
         window.__CE_LAST_LIBRARY__.posts = posts;
-        if (meta) meta.textContent = '';
 
         var nativePostCount = (window.__NATIVE_POSTS__ && window.__NATIVE_POSTS__.length) || 0;
         if (window.__CE_NATIVE_APP__ && window.__INIT_ERROR__) {
@@ -16641,14 +17016,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           var railItems = Array.isArray(gm.items) ? gm.items.slice() : [];
           var rail = document.createElement('div');
           rail.className = 'ce-rail';
-
-          var subMap = {};
-          railItems.forEach(function (d) {
-            var sk = d.__subPillar || subpillarKey(gm.pillar, d);
-            (subMap[sk] = subMap[sk] || []).push(d);
-          });
-          var subKeys = Object.keys(subMap);
-          var hasSubpillars = subKeys.length > 1;
 
           var head = document.createElement('div');
           head.className = 'ce-rail-head';
@@ -16700,30 +17067,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             };
           }
 
-          var subSelect = head.querySelector('.ce-subpillar-filter-select');
-          if (subSelect) {
-            subSelect.onchange = function () {
-              var val = subSelect.value;
-              var filteredItems = val === 'all' ? railItems : (subMap[val] || []);
-              track.__ceItems = filteredItems;
-              track.__ceChunkMounted = 0;
-              track.innerHTML = '';
-
-              var countEl = head.querySelector('.ce-rail-count');
-              if (countEl) countEl.textContent = filteredItems.length;
-
-              var isGrid = track.classList.contains('is-grid-view');
-              toggleBtn.textContent = isGrid ? 'Rail' : 'All';
-
-              if (isGrid) {
-                ceMountGridDrain(track, 'post');
-              } else {
-                track.__ceChunkSize = CE_RAIL_CHUNK_SIZE;
-                ceAppendRailChunk(track, 'post');
-              }
-              if (window.__CE_FIT_ALL__) requestAnimationFrame(window.__CE_FIT_ALL__);
-            };
-          }
+          /* Same retired sub-pillar select — dead plumbing removed with the
+             carousel twin above (A13, 2026-09-18). */
 
           if (gi < 2) {
             track.__ceChunkSize = CE_RAIL_CHUNK_SIZE;
@@ -16801,7 +17146,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           __deduped[__seen[__key]] = __it;
         }
       }
-      if (meta) meta.textContent = '';
 
       const grid = document.createElement('div');
       grid.className = 'standard-grid';
@@ -16825,8 +17169,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
     } else if (state.activeTab === 'write') {
       if (poemSections) poemSections.style.display = 'none';
-      if (meta) meta.textContent = '';
-      localStorage.setItem('ce_write_type', state.writeType);
+      try { localStorage.setItem('ce_write_type', state.writeType); } catch (_wse) {}
 
       const writeBox = document.createElement('div');
       writeBox.className = 'ce-write-shell';
@@ -16840,7 +17183,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             </div>
           </div>
           <div class="ce-write-field">
-            <textarea id="live-write-input" spellcheck="true" placeholder="Type in Hindi or Romanized Hinglish…"></textarea>
+            <textarea id="live-write-input" spellcheck="true" placeholder="Type in Hindi or Romanized Hinglish…" aria-label="Write a poem or post"></textarea>
             <div class="ce-write-fieldbar"><span id="write-save-state">Drafts save on this Mac</span><strong id="write-count">0 characters</strong></div>
           </div>
           <div class="ce-write-actions">
@@ -16937,7 +17280,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           writeDesignRail.querySelectorAll('[data-ce-write-design]').forEach(function (button) {
             button.onclick = function () {
               state.writeDesignIdx = Number(button.getAttribute('data-ce-write-design') || 0);
-              localStorage.setItem('ce_write_design', String(state.writeDesignIdx));
+              try { localStorage.setItem('ce_write_design', String(state.writeDesignIdx)); } catch (_wse) {}
               updatePreview();
             };
           });
@@ -17005,7 +17348,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         writeApplyingHistory = true;
         writeInput.value = writeHistory[writeHistoryIndex];
         state.writeDraft = writeInput.value;
-        localStorage.setItem('ce_write_draft', state.writeDraft);
+        try {
+          localStorage.setItem('ce_write_draft', state.writeDraft);
+        } catch (_wse) {
+          if (writeSaveState) writeSaveState.textContent = 'Save failed - storage full';
+        }
         writeApplyingHistory = false;
         autosizeWriteInput();
         updatePreview();
@@ -17022,8 +17369,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         button.onclick = function () {
           state.writeType = button.getAttribute('data-ce-write-type') || 'post';
           state.writeDesignIdx = 0;
-          localStorage.setItem('ce_write_type', state.writeType);
-          localStorage.setItem('ce_write_design', '0');
+          try {
+            localStorage.setItem('ce_write_type', state.writeType);
+            localStorage.setItem('ce_write_design', '0');
+          } catch (_wse) {}
           renderMain();
         };
       });
@@ -17082,8 +17431,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // filters metaState==='failed' + Ready and re-dispatches them; render the
       // button only when failures exist so the toolbar never shows a dead control.
       const planFailedMeta = state.queueItems.filter(function (q) { return q && q.metaState === 'failed' && q.readyToPost; }).length;
-      const planAwaiting = state.queueItems.length - planScheduled;
-      if (meta) meta.textContent = '';
+      const planAwaiting = ceQueuePendingCount() - planScheduled;
 
       var CE_META_COMPOSER_URL = 'https://business.facebook.com/latest/composer/?asset_id=1420259618046160&nav_ref=internal_nav&ref=biz_web_content_manager_published_posts&context_ref=POSTS';
       var CE_META_CALENDAR_URL = 'https://business.facebook.com/latest/content_calendar?asset_id=1420259618046160&calendar_type=MONTH';
@@ -17351,7 +17699,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           fillMkt();
         }
 
-        localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+        cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
         if (typeof updateTopbarQueueBadge === 'function') updateTopbarQueueBadge();
         if (filled === 0 && stamped === 0) {
           showQueueToast('Week already has 2 poems + 1 post/carousel each day');
@@ -17565,7 +17913,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var planMetaReadyCount = (state.queueItems || []).filter(function (q) {
         return q && q.readyToPost && state.planSelectedIds && state.planSelectedIds.has(q.id);
       }).length;
-      var planPostNowLabel = 'Post now';
+      /* W12 (audit 2026-09-18): the label must not assert an action the flag
+         disables. Unarmed = preview-only, so it says so on the button, not
+         just in the title tooltip. */
+      var planPostNowLabel = window.__CE_META_PUBLISH_ALLOWED__ ? 'Post now' : 'Preview post';
       var planScheduleLabel = window.__CE_META_HAS_TOKEN__ ? 'Schedule to Meta' + (planMetaReadyCount ? ' (' + planMetaReadyCount + ')' : '') : 'Schedule + Prep';
       var planScheduleTitle = window.__CE_META_HAS_TOKEN__
         ? "Send the selected Ready pieces to Meta's clock at their board dates/times (confirm first). Facebook schedules natively; Instagram fires from this Mac at the minute."
@@ -17631,7 +17982,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             </div>
 
             ${state.queueItems.length ? `<div class="ce-plan-summary" aria-label="Plan summary" style="gap:8px;">
-              <span><strong>${state.queueItems.length}</strong> staged</span>
+              <span><strong>${ceQueuePendingCount()}</strong> staged</span>
               <span><strong>${planReady}</strong> ready</span>
               <span><strong>${planScheduled}</strong> on calendar</span>
               <span><strong>${planExported}</strong> exported</span>
@@ -17980,7 +18331,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             if (ceQueueShipEligible(q)) { q.readyToPost = true; marked++; }
             else { skipped++; }
           });
-          localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+          cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
           showQueueToast(skipped
             ? marked + ' marked Ready · ' + skipped + ' skipped (draft/empty/sent)'
             : 'All ' + marked + ' pieces marked Ready');
@@ -17996,7 +18347,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (btnViewKanban) {
         btnViewKanban.onclick = function () {
           state.planViewMode = 'kanban';
-          localStorage.setItem('ce_plan_view_mode', 'kanban');
+          try { localStorage.setItem('ce_plan_view_mode', 'kanban'); } catch (_e) {}
           renderMain();
         };
       }
@@ -18004,7 +18355,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (btnViewList) {
         btnViewList.onclick = function () {
           state.planViewMode = 'list';
-          localStorage.setItem('ce_plan_view_mode', 'list');
+          try { localStorage.setItem('ce_plan_view_mode', 'list'); } catch (_e) {}
           renderMain();
         };
       }
@@ -18020,7 +18371,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           if (queued && queued.item) addToSavedBank(queued.type, queued.item, queued.design, 'saved');
         });
         state.queueItems = [];
-        localStorage.setItem('ce_queue_items', '[]');
+        cePersistOrWarn('ce_queue_items', '[]');
         updateTopbarQueueBadge();
         updateTopbarSavedBadge();
         showAppToast(`Moved ${count} item${count === 1 ? '' : 's'} to Saved Bank`, { icon: 'star' });
@@ -18037,7 +18388,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           if (queued && queued.item) addToSavedBank(queued.type, queued.item, queued.design, 'saved');
         });
         state.queueItems = [];
-        localStorage.setItem('ce_queue_items', '[]');
+        cePersistOrWarn('ce_queue_items', '[]');
         showQueueToast('Queue cleared, drafts kept in Saved Bank');
         updateTopbarQueueBadge();
         renderMain();
@@ -18124,7 +18475,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               delete state.queueItems[idx].metaState;
               delete state.queueItems[idx].metaError;
             }
-            localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+            cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
             var matchedDay = kanbanDays.find(d => d.id === newDay);
             showQueueToast('✓ Moved to ' + (matchedDay ? matchedDay.label : newDay));
             renderMain();
@@ -18143,7 +18494,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               delete state.queueItems[idx].metaState;
               delete state.queueItems[idx].metaError;
             }
-            localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+            cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
             showQueueToast(newTime ? 'Time set to ' + newTime : 'Time cleared — pick one before scheduling');
           }
         };
@@ -18167,7 +18518,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             var pidA = '';
             try { pidA = (typeof cePoemItemId === 'function') ? cePoemItemId(q.item) : String((q.item && (q.item.id || q.item.content_id)) || ''); } catch (_e) {}
             if (pidA && state.igCaptionById) { delete state.igCaptionById[pidA]; ceSaveIgCaptions(); }
-            try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_s) {}
+            try { cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_s) {}
             showQueueToast('Caption back to auto');
             renderMain();
             return;
@@ -18190,7 +18541,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             q.caption = cap;
           }
           q.__capPicked = true;
-          try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_s) {}
+          try { cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_s) {}
           showQueueToast('Caption set: ' + cap.slice(0, 30) + (cap.length > 30 ? '…' : ''));
         };
       });
@@ -18245,7 +18596,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             var matchedDay = kanbanDays.find(function (d) { return d.id === targetColId; });
             showQueueToast('✓ Moved to ' + (matchedDay ? matchedDay.label : targetColId));
           }
-          localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+          cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
           renderMain();
         };
       });
@@ -18260,7 +18611,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               ? !!toggle.checked
               : toggle.getAttribute('aria-pressed') !== 'true';
             queued.readyToPost = next;
-            localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+            cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
             renderMain();
           }
         };
@@ -18273,7 +18624,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           const queued = state.queueItems[idx];
           if (queued && queued.type === 'idea' && queued.item) {
             state.writeDraft = String(queued.item.text || queued.item.body || '');
-            localStorage.setItem('ce_write_draft', state.writeDraft);
+            try {
+              localStorage.setItem('ce_write_draft', state.writeDraft);
+            } catch (_wse) {
+              var __wss = document.getElementById('write-save-state');
+              if (__wss) __wss.textContent = 'Save failed - storage full';
+            }
             navigateTo('write');
             return;
           }
@@ -18285,8 +18641,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         btn.onclick = (e) => {
           e.stopPropagation();
           const idx = Number(btn.getAttribute('data-idx'));
+          /* F-09-2 FIX (2026-09-18 R2): the handler used to fire its own
+             unconditional "Moved back to Saved Bank" toast right after the call,
+             clobbering (single shared #ce-app-toast node, last write wins) both
+             the armed-refusal warning and the Undo affordance that
+             removeQueueItemToSaved/Force had just rendered. That made an
+             ARMED piece read as successfully removed while it stayed armed on
+             Meta — adjacent to F-09-1's live-fire class. The callee already
+             owns the correct message for every outcome (refused / moved /
+             undo), so the handler no longer toasts at all. */
           removeQueueItemToSaved(idx, false);
-          showAppToast('Moved back to Saved Bank', { icon: 'star' });
         };
       });
 
@@ -18302,8 +18666,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         btn.onclick = (e) => {
           e.stopPropagation();
           const idx = Number(btn.getAttribute('data-idx'));
+          /* Same single-toast-owner rule as .queue-del-btn above (F-09-2):
+             the callee's own message is the honest one for every outcome —
+             including the armed refusal, which the old unconditional
+             "✓ Moved to Saved Bank (Shortlist)" used to hide. */
           removeQueueItemToSaved(idx, false);
-          showAppToast('✓ Moved to Saved Bank (Shortlist)', { icon: 'star' });
         };
       });
 
@@ -18311,7 +18678,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       renderSavedBankTab(view);
     } else if (state.activeTab === 'grow') {
       if (poemSections) poemSections.style.display = 'none';
-      if (meta) meta.textContent = '';
       // Live Meta audience: cache-TTL'd native fetch; safe to ask on every render.
       if (window.__CE_META_HAS_TOKEN__) ceRequestMetaInsights(false);
 
@@ -18536,9 +18902,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var __ansTrend = 'none';
       if (__gMeta.live && __ansChrono.length >= 2) {
         var __ansAllUp = __ansChrono.every(function (m, i) { return i === 0 || m.eng > __ansChrono[i - 1].eng; });
-        __ansTrend = __ansAllUp ? 'up' : (__median && __ansChrono[__ansChrono.length - 1].eng > __median.value ? 'over' : 'none');
+        /* 'over' needs ≥2 of the newest 3 above the usual — a single newest
+           post over the line is announced as 'one', never as a landed return.
+           'cooling' is the state the rail used to swallow entirely: every
+           recent answer under the usual gets an honest sentence instead of
+           silence (audit F-L3-1/F-L3-2). */
+        var __ansOverN = __median ? __ansChrono.slice(-3).filter(function (m) { return m.eng > __median.value; }).length : 0;
+        __ansTrend = __ansAllUp ? 'up'
+          : (__ansOverN >= 2 ? 'over'
+          : (__ansOverN === 1 ? 'one'
+          : (__median ? 'cooling' : 'none')));
       }
-      var __ansHeadline = __ansTrend === 'up' ? 'the audience answered stronger each day since you came back' : (__ansTrend === 'over' ? 'the newest answer beat your usual — the return is landing' : '');
+      var __ansHeadline = __ansTrend === 'up' ? 'the audience answered stronger each day since you came back'
+        : (__ansTrend === 'over' ? 'the newest answers beat your usual — the return is landing'
+        : (__ansTrend === 'one' ? 'the newest answer beat your usual — one post so far'
+        : (__ansTrend === 'cooling' ? 'the newest answers came in under your usual — the return is still being written' : '')));
       var __ansInner;
       if (!__gMeta.live) {
         __ansInner = '<div class="ce-ans-empty">' + (window.__CE_META_HAS_TOKEN__ ? 'syncing Meta…' : 'unmeasured — connect Meta and the last posts line up against your usual') + '</div>';
@@ -18565,7 +18943,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       const growBox = document.createElement('div');
       growBox.className = 'ce-ops-shell ce-grow-shell';
       growBox.innerHTML = `
-        <section class="ce-grow-hero" aria-label="The fortnight" data-ready="${__growReady}" data-total="${(state.queueItems || []).length}">
+        <section class="ce-grow-hero" aria-label="The fortnight" data-ready="${__growReady}" data-total="${ceQueuePendingCount()}">
           <div class="ce-fort-head">
             <span class="ce-grow-eyebrow">The fortnight · last 14 days</span>
             <strong class="ce-fort-line">${__heroLine}</strong>
@@ -18573,7 +18951,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           </div>
           <div class="ce-fort-bars" role="img" aria-label="Posts landed vs local work per day, last 14 days">${__fortSlotsHtml}</div>
           <div class="ce-fort-days" aria-hidden="true">${__fortDaysHtml}</div>
-          <div class="ce-fort-legend">solid = landed on IG (likes+comments) · hatched = local work · dashed tick = a day with neither${__workMap.firstDay && !__ledgerYoung ? '' : ' · shaded = before the day ledger'}</div>
+          <div class="ce-fort-legend">accent = landed on IG (likes+comments) · bone = local work · dashed tick = a day with neither${__workMap.firstDay && !__ledgerYoung ? '' : ' · shaded = before the day ledger'}</div>
         </section>
 
         <section class="ce-grow-answers" aria-label="The answers">
@@ -18592,8 +18970,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             <div class="ce-grow-next-art${__growReadyPreview ? '' : ' is-empty'}">${__growReadyPreview || '<span class="ce-grow-empty-mark">+</span>'}</div>
             <div class="ce-grow-next-copy">
               <span class="ce-grow-eyebrow">Next move</span>
-              <h2>${escapeHtml(__growReadyTitle || 'Design your first piece')}</h2>
-              <p>${__growReady ? 'This piece is ready in your Plan. Open it once, then decide.' : 'Nothing is ready yet. Start from your Library and keep the next decision small.'}</p>
+              <h2>${escapeHtml(__growReadyTitle || (__growTotal > 0 ? 'Your next piece is already made' : 'Design your first piece'))}</h2>
+              <p>${__growReady ? 'This piece is ready in your Plan. Open it once, then decide.' : (__growTotal > 0 ? 'Nothing is queued yet — the Library holds ' + ceGrowFmtN(__growTotal) + ' finished pieces. Pick one and approve the week.' : 'Nothing is ready yet. Start from your Library and keep the next decision small.')}</p>
               ${__growDaysSafe >= 3 ? '<span class="ce-grow-rested-note">Rest is stamped - the week is safe.</span>' : ''}
               ${__growReady
                 ? '<button type="button" class="ce-surface-button is-primary" data-ce-grow-open-ready>Open in Studio →</button>'
@@ -18641,7 +19019,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // arc phases, the waitlist ledger, and the guard ladder, all compact and below
       // the decision rail.
       if (poemSections) poemSections.style.display = 'none';
-      if (meta) meta.textContent = '';
       if (window.__CE_META_HAS_TOKEN__) ceRequestMetaInsights(false);
 
       var __launchDecks = (Array.isArray(window.__NATIVE_DECK_INDEX__) ? window.__NATIVE_DECK_INDEX__ : []).filter(function (d) {
@@ -19059,7 +19436,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           + '<button type="button" class="ce-lq-fix" data-ce-go="plan">Fix</button></div>');
       });
       var __lqHtml = __lqRows.length
-        ? '<div class="ce-lq-rows">' + __lqRows.slice(0, 14).join('') + '</div>'
+        ? '<div class="ce-lq-rows">' + __lqRows.slice(0, 14).join('')
+          + (__lqRows.length > 14
+            ? '<details class="ce-lq-more"><summary>+' + (__lqRows.length - 14) + ' more on the rail — open the full list</summary>' + __lqRows.slice(14).join('') + '</details>'
+            : '')
+          + '</div>'
         : '<div class="ce-lq-empty">Nothing on the rail yet — stage a piece from the board above.</div>';
       __launchLb.innerHTML = `
         <section class="ce-launch-contract" aria-label="Morning contract">
@@ -19322,16 +19703,38 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var handle = String((__wlInput && __wlInput.value) || '').trim().replace(/^@/, '');
         if (!handle) { showAppToast('Type the handle first, they commented SHURU', { isError: true }); return; }
         __wl.push({ handle: handle, status: 'added', at: new Date().toISOString() });
-        localStorage.setItem('ce_launch_waitlist', JSON.stringify(__wl));
+        /* H10 #3 sibling: the ADD path was already routed through the contract,
+           but it still re-rendered as if the write landed. Revert + say so on
+           false so all three waitlist verbs behave identically. */
+        if (!cePersistOrWarn('ce_launch_waitlist', JSON.stringify(__wl))) {
+          __wl.pop();
+          renderMain();
+          return;
+        }
         renderMain();
       };
       __launchLb.querySelectorAll('[data-ce-wl-advance]').forEach(function (button) {
         button.onclick = function () {
           var wi = Number(button.getAttribute('data-ce-wl-advance'));
           if (!__wl[wi]) return;
+          /* F-E2 FIX (2026-09-18, H10 OPEN-HARD #3): this used a bare
+             localStorage.setItem with no try/catch, so a QuotaExceededError
+             escaped the onclick → renderMain() was never reached → the click
+             died with zero UI feedback while the row stayed stale (memory
+             mutated, screen unchanged, disk unchanged). Route through the one
+             persist contract and keep memory/disk/screen in agreement: on
+             failure, revert the in-memory mutation, say so, and re-render so
+             the user sees the true state instead of a half-applied one. */
+          var __prevStatus = __wl[wi].status, __prevAt = __wl[wi].at;
           __wl[wi].status = __wl[wi].status === 'added' ? 'sent' : 'confirmed';
           __wl[wi].at = new Date().toISOString();
-          localStorage.setItem('ce_launch_waitlist', JSON.stringify(__wl));
+          if (!cePersistOrWarn('ce_launch_waitlist', JSON.stringify(__wl))) {
+            __wl[wi].status = __prevStatus;
+            __wl[wi].at = __prevAt;
+            showAppToast('Status not saved - storage full', { isError: true });
+            renderMain();
+            return;
+          }
           renderMain();
         };
       });
@@ -19339,8 +19742,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         button.onclick = function () {
           var wi = Number(button.getAttribute('data-ce-wl-remove'));
           if (!__wl[wi]) return;
-          __wl.splice(wi, 1);
-          localStorage.setItem('ce_launch_waitlist', JSON.stringify(__wl));
+          /* Same contract as advance above (F-E2): never let the removal
+             survive only in memory when the write failed. */
+          var __removed = __wl.splice(wi, 1)[0];
+          if (!cePersistOrWarn('ce_launch_waitlist', JSON.stringify(__wl))) {
+            __wl.splice(wi, 0, __removed);
+            showAppToast('Not removed - storage full', { isError: true });
+            renderMain();
+            return;
+          }
           renderMain();
         };
       });
@@ -19421,7 +19831,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var title = opts.title != null ? String(opts.title) : parts.title;
     var detail = opts.detail != null ? String(opts.detail) : parts.detail;
 
-    var accent = (variant === 'error' || variant === 'warn') ? 'var(--muted)' : '#34d399';
+    var accent = (variant === 'error' || variant === 'warn') ? 'var(--muted)' : 'var(--success)';
     toast.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:99999;'
       + 'width:min(392px, calc(100vw - 40px)); box-sizing:border-box;'
       + 'padding:13px 14px 13px 13px; border-radius:14px;'
@@ -19608,12 +20018,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       state.savedItems = poems.concat(other);
     }
 
-    try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
+    try { if (cePersistOrWarn('ce_saved_bank', JSON.stringify(state.savedItems)) && window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
     if (st === 'rejected' && Array.isArray(state.queueItems)) {
       state.queueItems = state.queueItems.filter(function (queued) {
         return !queued || getContentKey(queued.type, queued.item) !== key;
       });
-      try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e2) {}
+      try { cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e2) {}
       updateTopbarQueueBadge();
     }
     updateTopbarSavedBadge();
@@ -19634,7 +20044,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       entry.status = 'saved';
       entry.rejectedAt = null;
       ceTouchSavedBankEntry(entry);
-      try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
+      try { if (cePersistOrWarn('ce_saved_bank', JSON.stringify(state.savedItems)) && window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
       updateTopbarSavedBadge();
       showAppToast('✓ Restored to Shortlist', { icon: 'star' });
       if (state.activeTab === 'saved' || state.activeTab === 'library') renderMain();
@@ -19654,7 +20064,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
          place a tombstone may be minted — a confirmed user delete, never a diff. */
       var __goneKey = null;
       try { if (window.__CE_SAVED_BANK_DELETED__) { var it = (__gone && __gone.item) || {}; var id = it.id || (__gone && __gone.contentId) || ''; if (id) __goneKey = String((__gone && __gone.type) || 'piece') + '|' + id; } } catch (_dk) {}
-      try { localStorage.setItem('ce_saved_bank', JSON.stringify(state.savedItems)); } catch (_e) {}
+      cePersistOrWarn('ce_saved_bank', JSON.stringify(state.savedItems));
       try { if (__goneKey && window.__CE_SAVED_BANK_DELETED__) window.__CE_SAVED_BANK_DELETED__([__goneKey]); else if (window.__CE_SAVED_BANK_PUSH__) window.__CE_SAVED_BANK_PUSH__(); } catch (_e) {}
       updateTopbarSavedBadge();
       showAppToast('Deleted permanently from Saved Bank', { icon: 'delete' });
@@ -19669,13 +20079,23 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (!q) return false;
     /* Owner order 2026-09-13: removing an ARMED piece from the board used to leave the Meta post
        scheduled — it would still fire, with nothing on the board pointing at it. Say so, and offer
-       the real delete, instead of silently orphaning a live post. */
-    if (q.metaGraphId) {
-      showAppToast('This piece is still on Meta\u2019s clock', {
+       the real delete, instead of silently orphaning a live post.
+       F-09-1 FIX (2026-09-18 R2 interaction-integrity lane): the guard used to test ONLY
+       `q.metaGraphId`. An Instagram-only armed piece never receives a graph id — its arm lives in
+       the native ce_ig_queue.json entry (`ceIgQueueRowFor(q)`) — so it fell straight through and
+       was moved to Saved Bank while the live IG clock entry stayed armed and still fired at
+       fireUnix with nothing on the board pointing at it. The predicate is now the SAME union the
+       unschedule path uses (`metaGraphId || ceIgArmedRow(q)`), and the refusal's action routes to
+       `ceUnscheduleQueueItems`, which already knows how to cancel the IG clock entry. */
+    if (q.metaGraphId || ceIgArmedRow(q)) {
+      var igOnlyArmed = !q.metaGraphId;
+      showAppToast(igOnlyArmed ? 'This piece is still armed on the app clock' : 'This piece is still on Meta\u2019s clock', {
         isError: true, variant: 'warn',
-        detail: 'Removing it here would leave the scheduled Meta post armed \u2014 it would still go live. Remove it from Meta first.',
+        detail: igOnlyArmed
+          ? 'Removing it here would leave the Instagram entry armed \u2014 it would still go live. Cancel it first.'
+          : 'Removing it here would leave the scheduled Meta post armed \u2014 it would still go live. Remove it from Meta first.',
         action: {
-          label: 'Remove from Meta',
+          label: igOnlyArmed ? 'Cancel on clock' : 'Remove from Meta',
           onClick: function () { ceUnscheduleQueueItems([q]); }
         },
         onUndo: function () { removeQueueItemToSavedForce(queueIdx, rejectInstead); }
@@ -19691,14 +20111,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var removedQ = Object.assign({}, q);
     addToSavedBank(q.type, q.item, q.design, targetStatus);
     state.queueItems.splice(queueIdx, 1);
-    try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+    cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
     updateTopbarQueueBadge();
     updateTopbarSavedBadge();
     showAppToast(rejectInstead ? 'Removed from Queue ➔ Moved to Rejected' : 'Removed from Queue ➔ Kept in Saved Bank', {
       icon: rejectInstead ? 'xmark' : 'star',
       onUndo: function () {
         state.queueItems.splice(queueIdx, 0, removedQ);
-        try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+        cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
         updateTopbarQueueBadge();
         renderMain();
       }
@@ -19997,9 +20417,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var d = dayNum(m.day);
       if (!isFinite(d) || d < best.n) return;
       eng += m.eng; n++;
-      /* Still-counting posts (<24h) can't score against the year median —
-         the answers rail already labels them 'still counting · early'. */
-      if (m.ts && (__nowS - m.ts) >= 86400) { mEng += m.eng; mN++; }
+      /* Still-counting posts can't score against the year median — the
+         answers rail labels them 'still counting · early' for 72h, so the
+         maturity floor here must match that same 72h, not a shorter 24h
+         window that quietly scored early posts. */
+      if (m.ts && (__nowS - m.ts) >= 72 * 3600) { mEng += m.eng; mN++; }
       if (d === best.n && (!firstTs || m.ts < firstTs)) firstTs = m.ts;
     });
     return {
@@ -20355,7 +20777,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         scheduled++;
       });
     });
-    try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+    cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
     if (typeof updateTopbarQueueBadge === 'function') updateTopbarQueueBadge();
     showQueueToast('Placed ' + scheduled + ' piece' + (scheduled === 1 ? '' : 's') + ' a week+ out (owner law — 9am–9pm human-ish times)');
     if (state.activeTab === 'plan' && typeof renderMain === 'function') renderMain();
@@ -20471,7 +20893,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         });
       }
     }
-    try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+    cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
     if (typeof updateTopbarQueueBadge === 'function') updateTopbarQueueBadge();
     showQueueToast('Dates preserved and set for ' + scheduled + ' piece' + (scheduled === 1 ? '' : 's') + (targetKey ? (' on ' + targetKey) : '') + '.');
     if (state.activeTab === 'plan' && typeof renderMain === 'function') renderMain();
@@ -20557,7 +20979,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     // writer of the queue store) — a flag that does not survive a repaint is worse
     // than no repair at all.
     if (n) {
-      try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+      cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
     }
     return n;
   }
@@ -20693,7 +21115,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         poemStyle: (q.design && q.design.style) || null
       });
     });
-    try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+    cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
     var skipSummary = Object.keys(skippedReasons).map(function (r) { return skippedReasons[r] + ' ' + r; }).join(', ');
     if (!items.length) {
       showQueueToast(alreadyOnMeta
@@ -20967,7 +21389,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       else addToQueue('poem', poem, null, placement, { quiet: true, append: true });
       out.push(contentId);
     });
-    try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e) {}
+    cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
     if (typeof updateTopbarQueueBadge === 'function') updateTopbarQueueBadge();
     showQueueToast('Test batch of ' + out.length + ' poems set for 2026-10-02 (local plan only, not posted to Meta)');
     return state.queueItems.filter(function (q) {
@@ -20998,7 +21420,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (type === 'poem' && !state.queueItems[existingIdx].igCaption) {
         try { state.queueItems[existingIdx].igCaption = ceResolveIgCaption(state.queueItems[existingIdx]); } catch (_c2) {}
       }
-      localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+      cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
       if (!quiet) showAppToast('Updated in Plan & Queue', { icon: 'calendar' });
       /* P2 (merged plan 24 §2.1): every stage is ledger work — dated rows carry
          the target day for the receipt; undated rows keep an empty dayKey (the
@@ -21032,20 +21454,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }, placement && typeof placement === 'object' ? placement : {});
     if (append) state.queueItems.push(entry);
     else state.queueItems.unshift(entry);
-    localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems));
+    /* F-E1/F-10-1 FIX (2026-09-18): gate the success toast on the persist
+       result. cePersistOrWarn writes 'Save failed - storage full' into the one
+       shared #ce-app-toast node on failure; the old unconditional success toast
+       fired in the SAME synchronous task and painted over it before the next
+       frame, so a quota-failed stage read as "✓ Added to Plan & Queue" while
+       localStorage stayed unchanged — work that looked saved and was gone on
+       reload. The count below (and the badge) still update: the row IS in
+       memory, so the honest message is the failure, not silence. */
+    var __persisted = cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
     /* P0.9 (report 14) + P2 (merged plan 24 §2.1): staging is local intent —
        the day-event log records it so the receipt can say Scheduled-unconfirmed
        until Meta's own confirmation arrives. Undated staging still counts as
        work done today (ts buckets it); its empty dayKey keeps it out of any
        single day's evidence. */
     try { ceDayEventAdd('staged', { dayKey: String(placement && placement.scheduleDate || ''), ref: contentId, source: 'queue' }); } catch (_ev) {}
-    if (!quiet) showAppToast(__draftStaged ? 'Draft staged, design it in Studio before posting' : '✓ Added to Plan & Queue', { icon: __draftStaged ? 'pencil' : 'calendar' });
+    if (!quiet && __persisted) showAppToast(__draftStaged ? 'Draft staged, design it in Studio before posting' : '✓ Added to Plan & Queue', { icon: __draftStaged ? 'pencil' : 'calendar' });
 
-    var meta = document.getElementById('meta');
-    if (meta && state.activeTab === 'plan') {
-      var planExported = state.queueItems.filter(q => q.exportStatus === 'EXPORTED').length;
-      meta.textContent = `${state.queueItems.length} staged in queue · ${planExported} exported`;
-    }
+    /* The queue-count topbar write died with the hidden #meta channel (W9,
+       2026-09-18) — the live queue badge below is the visible owner of that
+       count now. */
     updateTopbarQueueBadge();
     return true;
   }
@@ -21090,7 +21518,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     });
     if (row) {
       row.readyToPost = true;
-      try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e2) {}
+      try { cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e2) {}
       if (typeof updateTopbarQueueBadge === 'function') updateTopbarQueueBadge();
     }
     if (msg) showNotification(msg + ' (' + state.queueItems.length + ' staged)');
@@ -21131,6 +21559,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var stale = [];
     state.queueItems.forEach(function (q) {
       if (!q || q.status === 'sent' || q.exportStatus === 'EXPORTED') return;
+      /* F-10-2 / F-1 FIX (2026-09-18 R2 state-machine + time lanes): an ARMED
+         row's date is a FACT held by an engine, not a display column. Reflow
+         used to re-date armed pieces (a past `2026-09-10` row with a live
+         metaGraphId got rewritten to today 9:00 PM) while Meta still held the
+         ORIGINAL slot — the board then showed a day the piece was never
+         scheduled for, and the "Not on Meta's clock" chip needed the whole
+         propagation window to contradict it. Armed rows are engine-owned:
+         skip them here and let the board classify them 'later' instead of
+         inventing a slot. Same union predicate the unschedule path uses. */
+      if (q.metaGraphId || (typeof ceIgArmedRow === 'function' && ceIgArmedRow(q))) return;
       var dk = String(q.scheduleDate || '').trim();
       var t = String(q.scheduleTime || '').trim();
       if (!dk) return; /* Inbox rows stay in Inbox — that is the staging flow */
@@ -21186,7 +21624,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       }
       moved++;
     });
-    try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e3) {}
+    try { cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e3) {}
     return moved;
   }
   window.__CE_REFLOW_STALE_QUEUE__ = ceReflowStaleQueue;
@@ -21216,7 +21654,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           q.scheduleTime = cadence[c];
           q.scheduleSlot = days[i].label + ' ' + cadence[c];
           q.scheduled = true;
-          try { localStorage.setItem('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e4) {}
+          try { cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_e4) {}
           return true;
         }
       }
@@ -21225,15 +21663,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   window.__CE_STAGE_INTO_NEXT_SLOT__ = ceStageIntoNextSlot;
 
+  /* One queue truth (audit F-L4-1, 2026-09-18): the actionable count — sent
+     history and already-exported pieces are done work, not pending queue
+     (same skip test as ceReflowStaleQueue). Every surface that prints a queue
+     number reads this; raw queueItems.length diverges the moment a row is
+     sent or exported. */
+  function ceQueuePendingCount() {
+    return Array.isArray(state.queueItems)
+      ? state.queueItems.filter(function (q) { return q && q.status !== 'sent' && q.exportStatus !== 'EXPORTED'; }).length
+      : 0;
+  }
   function updateTopbarQueueBadge() {
     var countEl = document.getElementById('topbar-queue-count');
     var navEl = document.getElementById('nav-queue-count');
     var studioBadge = document.getElementById('studio-plan-badge');
-    /* Count only actionable rows — sent history and already-exported pieces are
-       done work, not pending queue (same skip test as ceReflowStaleQueue). */
-    var count = Array.isArray(state.queueItems)
-      ? state.queueItems.filter(function (q) { return q && q.status !== 'sent' && q.exportStatus !== 'EXPORTED'; }).length
-      : 0;
+    var count = ceQueuePendingCount();
     if (countEl) countEl.textContent = count;
     if (navEl) { navEl.textContent = count; navEl.style.display = count > 0 ? '' : 'none'; }
     /* E01 STUDIO SHIP GRAMMAR: the count rides the "Send to Plan" primary now. The old code hid the

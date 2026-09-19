@@ -209,9 +209,9 @@
 }
 .studio-close-btn:hover,
 .studio-close-btn:focus-visible {
-  border-color: rgba(239, 68, 68, 0.4);
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  border-color: rgba(217, 106, 124, 0.4);
+  background: rgba(217, 106, 124, 0.15);
+  color: #d96a7c;
   transform: translateY(-1px);
   outline: none;
 }
@@ -2941,7 +2941,7 @@
 .ce-palette-shuffle-btn,
 .ce-beautify-btn {
   /* One-accent lock: the old violet/pink gradient pills were the last
-     off-palette chrome in the studios. House glass + tangerine tint. */
+     off-palette chrome in the studios. House glass + crimson tint. */
   background: var(--accent-tint);
   border: 1px solid var(--accent-border);
   color: var(--ink);

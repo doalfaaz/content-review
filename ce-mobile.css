@@ -384,11 +384,13 @@ html.ce-phone .ce-shelf-track, html.ce-phone .ce-library-shelf { overflow-x: aut
 @media (pointer: coarse), (max-width: 640px) {
   .ce-card-select-toggle { display: none !important; }
   .pure-card:not(.ce-saved-card) .ce-card-action-cluster { display: none !important; }
-  .ce-card-status-chip { display: none !important; }
 }
 html.ce-phone .ce-card-select-toggle,
-html.ce-phone .pure-card:not(.ce-saved-card) .ce-card-action-cluster,
-html.ce-phone .ce-card-status-chip { display: none !important; }
+html.ce-phone .pure-card:not(.ce-saved-card) .ce-card-action-cluster { display: none !important; }
+/* A14 resolved (2026-09-18): the Queued/Saved status chip is informational
+   only and emits solely on cards carrying that state — touch hides the
+   ACTION controls, not the status fact. */
+html.ce-phone .ce-card-status-chip { opacity: 1 !important; }
 /* Never-remove-features law: Saved Bank actions stay reachable on touch —
    persistent, not hover-only. */
 html.ce-phone .ce-saved-card .ce-card-action-cluster {
@@ -1556,17 +1558,25 @@ html.ce-phone .search-input {
    The 2x2 stat grid inherited a single-column border pass, so every cell kept a
    bottom border and the last row drew a stray rule under a 2-column layout. Pin the
    only-correct combination: bottom border on the TOP row only, no right border in the
-   right column, and the empty-state CTA raised out of the sub-40 hit box. */
-html.ce-phone .ce-readiness-row { grid-template-columns: repeat(2, 1fr); }
-html.ce-phone .ce-readiness-row > div {
+   right column, and the empty-state CTA raised out of the sub-40 hit box.
+   W16 (2026-09-18): these rules were written for the OLD standalone readiness grid.
+   The only .ce-readiness-row left in the app is Grow's inventory row
+   (index.html `<section class="ce-readiness-row ce-grow-readiness">`), whose shell
+   forces `display:flex !important` with `border:0 !important; padding:0 !important`
+   — so every declaration below could never compute: a grid property on a flex
+   container, and cell borders/padding the shell nulls out. Scoped away from the
+   grow row so the rules either do their original job or stop lying to the next
+   editor. The row deliberately stays a wrapped inline line (see index.html). */
+html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) { grid-template-columns: repeat(2, 1fr); }
+html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) > div {
   border-right: 1px solid var(--card-border);
   border-bottom: 1px solid var(--card-border);
   padding: 14px 16px;
 }
-html.ce-phone .ce-readiness-row > div:nth-child(2n) { border-right: 0; }
-html.ce-phone .ce-readiness-row > div:nth-child(n+3) { border-bottom: 0; }
-html.ce-phone .ce-readiness-row > div:last-child { border-right: 0; border-bottom: 0; }
-html.ce-phone .ce-readiness-row strong { font-size: 23px; line-height: 1.05; }
+html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) > div:nth-child(2n) { border-right: 0; }
+html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) > div:nth-child(n+3) { border-bottom: 0; }
+html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) > div:last-child { border-right: 0; border-bottom: 0; }
+html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) strong { font-size: 23px; line-height: 1.05; }
 html.ce-phone .ce-saved-empty-cta { min-height: 40px !important; }
 
 /* ── Saved-Bank tab strip (audit 2026-09-12) ──────────────────────────────────
@@ -1820,6 +1830,20 @@ html.ce-phone .ce-launch-day-more summary {
   min-height: 44px !important;
   box-sizing: border-box !important;
 }
+/* The same floor at phone width in the APP: the ce-phone class is only set
+   by the Pages/phone payload's classifier, so inside the Mac app a narrow
+   window got the @media layout rules above but not this floor (audit L11,
+   2026-09-18 — the phone-viewport sweep measured pre-link native sizes and
+   read as "no floor at all"). Layout transforms stay class-gated; the hit
+   area is width-scoped so any ≤700px context honors the law. */
+@media (max-width: 700px) {
+  button, a, input, select, textarea, [role="button"],
+  .ce-launch-day-more summary {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+  }
+}
 /* Range/color controls need the same reachable box without changing their
    authored track thickness or swatch treatment. */
 html.ce-phone input[type="range"] { min-height: 44px !important; }
@@ -1926,13 +1950,13 @@ html.ce-phone {
   --accent-tint: rgba(191, 75, 93, 0.16);
   --accent-border: rgba(191, 75, 93, 0.42);
   --accent-glow: rgba(191, 75, 93, 0.32);
-  --tangerine: #bf4b5d;
-  --tangerine-light: #d96a7c;
+  --crimson: #bf4b5d;
+  --crimson-light: #d96a7c;
   --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
   --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
   --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
   --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
-  --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.07), transparent 45%);
+  --crimson-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.07), transparent 45%);
 }
 /* body.bright-theme re-declares the family one element closer to the
    controls, so the phone rebind must be restated at body depth or cream
@@ -1945,13 +1969,13 @@ html.ce-phone body.bright-theme {
   --accent-tint: rgba(191, 75, 93, 0.12);
   --accent-border: rgba(191, 75, 93, 0.38);
   --accent-glow: rgba(191, 75, 93, 0.25);
-  --tangerine: #bf4b5d;
-  --tangerine-light: #d96a7c;
+  --crimson: #bf4b5d;
+  --crimson-light: #d96a7c;
   --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
   --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
   --grad-accent-text: linear-gradient(135deg, #bf4b5d, #8e2f3d);
   --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
-  --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.09), transparent 45%);
+  --crimson-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.09), transparent 45%);
 }
 /* Grow/Launch shells rebind the family to teal AT SHELL LEVEL, so the
    html-level rebind above never reaches inside them; restate at the same
@@ -1964,13 +1988,13 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
   --accent-glow: rgba(191, 75, 93, 0.28);
   --accent-hover: #d96a7c;
   --accent-press: #8e2f3d;
-  --tangerine: #bf4b5d;
-  --tangerine-light: #d96a7c;
+  --crimson: #bf4b5d;
+  --crimson-light: #d96a7c;
   --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
   --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
   --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
   --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
-  --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.06), transparent 45%);
+  --crimson-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.06), transparent 45%);
 }
 @media (max-width: 700px) {
   :root {
@@ -1981,13 +2005,13 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
     --accent-tint: rgba(191, 75, 93, 0.16);
     --accent-border: rgba(191, 75, 93, 0.42);
     --accent-glow: rgba(191, 75, 93, 0.32);
-    --tangerine: #bf4b5d;
-    --tangerine-light: #d96a7c;
+    --crimson: #bf4b5d;
+    --crimson-light: #d96a7c;
     --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
     --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
     --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
-    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.07), transparent 45%);
+    --crimson-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.07), transparent 45%);
   }
   body.bright-theme {
     --accent: #b13a4c;
@@ -1997,13 +2021,13 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
     --accent-tint: rgba(191, 75, 93, 0.12);
     --accent-border: rgba(191, 75, 93, 0.38);
     --accent-glow: rgba(191, 75, 93, 0.25);
-    --tangerine: #bf4b5d;
-    --tangerine-light: #d96a7c;
+    --crimson: #bf4b5d;
+    --crimson-light: #d96a7c;
     --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
     --grad-accent-text: linear-gradient(135deg, #bf4b5d, #8e2f3d);
     --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
-    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.09), transparent 45%);
+    --crimson-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.09), transparent 45%);
   }
   .ce-grow-shell, .ce-launch-workbench {
     --accent: #bf4b5d;
@@ -2013,13 +2037,13 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
     --accent-glow: rgba(191, 75, 93, 0.28);
     --accent-hover: #d96a7c;
     --accent-press: #8e2f3d;
-    --tangerine: #bf4b5d;
-    --tangerine-light: #d96a7c;
+    --crimson: #bf4b5d;
+    --crimson-light: #d96a7c;
     --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
     --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
     --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
-    --tangerine-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.06), transparent 45%);
+    --crimson-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.06), transparent 45%);
   }
 }
 /* The injected web Schedule button hardcodes teal inline (ce-touch-edit.js
