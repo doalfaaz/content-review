@@ -762,6 +762,97 @@
       }
     };
   };
+  /* ---- Post now from the phone (owner 2026-09-19, b-postnow) ----------------
+     The studio header's ghost "Post now ▾" lands here when there is no native
+     bridge. The phone NEVER holds a token: it queues a publish REQUEST on the
+     Mac's sync server (POST /post-request, write-key gated). The request lands
+     in the SAME queue file the Mac relay already drains, so the Mac executes
+     it through its own consent arm and the row's state/result syncs back as
+     the honest status below. */
+  function cePostNowWatch(key, id) {
+    var tries = 0;
+    var say = function (m) { if (window.showAppToast) window.showAppToast(m); };
+    var tick = function () {
+      tries++;
+      ceScheduleRow(key, id).then(function (row) {
+        if (!row) { if (tries < 30) setTimeout(tick, 4000); return; }
+        var st = String(row.state || '');
+        if (st === 'scheduled' || st === 'published') {
+          say('Armed on your Mac — @doalfaaz goes live within ~3 min.');
+          return;
+        }
+        if (st === 'failed' || st === 'needs_verification' || st === 'superseded') {
+          var res = row && row.result;
+          var msg = (res && (res.error || res.message || res.detail)) || (row && row.error) || 'the Mac refused it';
+          if (msg && typeof msg === 'object') msg = JSON.stringify(msg);
+          say('Post did not go through: ' + String(msg).slice(0, 140));
+          return;
+        }
+        if (tries < 30) setTimeout(tick, 4000);   // ~2 min of honest watching
+      });
+    };
+    setTimeout(tick, 4000);
+  }
+  window.__CE_PHONE_POSTNOW__ = function (opts) {
+    var say = function (m) { if (window.showAppToast) window.showAppToast(m); };
+    var st = window.state || {};
+    var item = st.currentItem;
+    if (!item) { say('Open a piece first — nothing was sent.'); return; }
+    var type = st.currentType || 'carousel';
+    var deck = window.studioDeck ? window.studioDeck() : null;
+    var slides = (deck && Array.isArray(deck.slides) && deck.slides.length) ? deck.slides.length
+      : (type === 'poem' ? 1 : (Number(item.slideCount || item.slides) || 1));
+    var deckId = String(item.id || item.content_id || (deck && deck.id) || '');
+    if (!deckId) { say('This piece has no id — nothing was sent.'); return; }
+    /* The caption ships VERBATIM in the engine's media payload, so build it
+       through the same getMetaFormattedCaption the Mac dispatch uses —
+       picked line (or none) + handle + hashtags, never a phone-only rewrite. */
+    var caption = '';
+    try {
+      var q = { type: type, item: item, igCaption: (opts && opts.caption) || '', igNoCaption: !!(opts && opts.caption === null) };
+      caption = (typeof window.__getMetaFormattedCaption === 'function')
+        ? String(window.__getMetaFormattedCaption(q) || '')
+        : String(q.igCaption || '');
+    } catch (_c) { caption = String((opts && opts.caption) || ''); }
+    if (!caption.trim()) { say('Pick a caption — nothing was sent.'); return; }
+    var payload = { deckId: deckId, caption: caption, slidesCount: slides, platform: 'instagram', kind: 'post_now', type: type };
+    var submit = function (key) {
+      var ep = window.__CE_SYNC_ENDPOINT__;
+      if (!ep) { say('Mac unreachable — sync endpoint not found. Nothing was sent.'); return Promise.resolve(null); }
+      return fetch(ep + '/post-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key },
+        body: JSON.stringify(payload)
+      }).then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); });
+    };
+    var finish = function (res, usedKey) {
+      if (res && res.s === 200 && res.j && res.j.ok) {
+        say('Posting from your Mac within ~3 min — @doalfaaz goes live.');
+        if (res.j.id && usedKey) cePostNowWatch(usedKey, res.j.id);
+        return;
+      }
+      say((res && res.j && res.j.error) ? res.j.error : 'The Mac refused the post — nothing was sent.');
+    };
+    if (window.__CE_SYNC_UNREACHABLE__) { say('Mac unreachable — nothing was sent.'); return; }
+    findSyncEndpoint(function (base) {
+      if (base) window.__CE_SYNC_ENDPOINT__ = base;
+      ensureWriteKey(function (key) {
+        if (!key) { say('Write key needed — nothing was sent.'); return; }
+        submit(key).then(function (res) {
+          if (res && res.s === 403) {
+            try { localStorage.removeItem('ce_sync_key'); } catch (_) {}
+            ensureWriteKey(function (k2) {
+              if (!k2) { say('Write key needed — nothing was sent.'); return; }
+              submit(k2).then(function (r2) { finish(r2, k2); }, function () { say('Network failed — nothing was sent.'); });
+            });
+            return;
+          }
+          finish(res, key);
+        }, function () { say('Mac unreachable — nothing was sent.'); });
+      });
+    });
+  };
+
   // Inject the Schedule button next to the pack button inside the studio topbar.
   function armScheduleButton() {
     // Owner 2026-09-11 (audit: "duplicate Schedule affordance"): this web-layer

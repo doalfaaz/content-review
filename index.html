@@ -2568,6 +2568,19 @@
                "Send to Plan"; Schedule moves into this menu as "Place in next open slot" (it is
                the only route to ceStageIntoNextSlot); Queue and the "Plan (n)" item are gone,
                with the queue count moving onto the primary so it can no longer vanish at 0. -->
+          <!-- b-postnow (owner 2026-09-19): "post directly live — just select that
+               poem, keep captions there only in dropdown way, click one, post, done.
+               subtler, simple clean." A SUBTLE secondary ghost beside the Send to
+               Plan primary (primary stays Send to Plan). The menu lists this piece's
+               caption-bank picks (most-recently-used first) + No caption + Edit
+               caption; one tap arms an inline confirm chip, and the confirm fires
+               the SAME consent-gated single-piece publish Plan's Post now uses
+               (native bridge present) or queues a publish REQUEST to the Mac's
+               sync server (phone — the phone never holds a token). -->
+          <details class="studio-postnow" id="studio-postnow">
+            <summary class="pill-btn" id="studio-postnow-btn" title="Post this piece live now — pick a caption, one confirm">Post now ▾</summary>
+            <div class="studio-postnow-menu" id="studio-postnow-menu" role="menu"></div>
+          </details>
           <button class="pill-btn is-primary" id="studio-post-btn" title="Stage this piece Ready and open your Plan">Send to Plan (<span id="studio-plan-badge">0</span>)</button>
         </div>
       </div>
@@ -2701,13 +2714,13 @@
 <link rel="stylesheet" href="./native-ideas.css?v=e386a06980" />
 <link rel="stylesheet" href="./native-plan.css?v=beaf185ada" />
 <link rel="stylesheet" href="./native-saved.css?v=ed04947639" />
-<link rel="stylesheet" href="./native-studio.css?v=26543b4453" />
+<link rel="stylesheet" href="./native-studio.css?v=7ee8d1873e" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<script src="./ce-touch-edit.js?v=d5b7d014e8"></script>
+<script src="./ce-touch-edit.js?v=dc40808457"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -16568,7 +16581,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var era = state.poemEra || 'all';
         var poemBase = [];
         var cleanAll = [];
-        try { cleanAll = (typeof allCleanPoems === 'function') ? allCleanPoems() : []; } catch (_c2) { cleanAll = []; }
+        /* l12 fix: the shelf must render the RANKED list — allRankedPoems() applies
+           the owner's filter + sort; allCleanPoems() ignored both, making the Sort
+           and Filter controls placebos that toasted success over an unchanged shelf. */
+        try { cleanAll = (typeof allRankedPoems === 'function') ? allRankedPoems() : ((typeof allCleanPoems === 'function') ? allCleanPoems() : []); } catch (_c2) { cleanAll = []; }
+        /* An explicit non-cadence sort is a deliberate override: shuffle and the
+           viral/older mix would randomize it away, so both are skipped for it. */
+        var _keepOrder = !!(state.librarySort && state.librarySort !== 'cadence');
         try {
           if (era === 'repair' || era === 'other' || era === 'tocheck') {
             poemBase = allNativePoemRows().filter(function (p) { return cePoemMatchesEra(p, era); });
@@ -16576,12 +16595,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             var allSansLong = cleanAll.filter(function (p) { return cePoemMatchesEra(p, 'all'); });
             /* Owner 2026-09-13: fresh draw per session (see ceShufflePoemList). Shuffled
                BEFORE the mix so the viral/older cadence ratio is untouched. */
-            var allDrawn = (typeof ceShufflePoemList === 'function') ? ceShufflePoemList(allSansLong) : allSansLong;
-            poemBase = (typeof mixViralOlder === 'function') ? mixViralOlder(allDrawn) : allDrawn;
+            var allDrawn = (!_keepOrder && typeof ceShufflePoemList === 'function') ? ceShufflePoemList(allSansLong) : allSansLong;
+            poemBase = (_keepOrder || typeof mixViralOlder !== 'function') ? allDrawn : mixViralOlder(allDrawn);
           } else {
             var sliced = cleanAll.filter(function (p) { return cePoemMatchesEra(p, era); });
-            var slicedDrawn = (typeof ceShufflePoemList === 'function') ? ceShufflePoemList(sliced) : sliced;
-            poemBase = (typeof mixViralOlder === 'function') ? mixViralOlder(slicedDrawn) : slicedDrawn;
+            var slicedDrawn = (!_keepOrder && typeof ceShufflePoemList === 'function') ? ceShufflePoemList(sliced) : sliced;
+            poemBase = (_keepOrder || typeof mixViralOlder !== 'function') ? slicedDrawn : mixViralOlder(slicedDrawn);
           }
         } catch (_era) { poemBase = cleanAll || []; }
         var poems = poemBase.filter(p => {
@@ -20984,7 +21003,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return n;
   }
 
-  function ceDispatchMetaGraphSchedule(dryRun, publishNow, explicitItems) {
+  function ceDispatchMetaGraphSchedule(dryRun, publishNow, explicitItems, opts) {
     if (window.__CE_AUDIT_READ_ONLY__ && !dryRun) dryRun = true;
     var selected = (Array.isArray(explicitItems) ? explicitItems : cePlanSelectedItems());
     var readySel = selected.filter(function (q) { return q && q.readyToPost; });
@@ -21045,7 +21064,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         + String(first && first.type || '') + ' · ' + String(first && first.item && (first.item.title || first.item.name) || '').slice(0, 48)
         + (slides > 1 ? ' · all ' + slides + ' slides' : '')
         + '\n\nThis publishes live immediately. Cancel to keep it local.';
-      if (!window.confirm(confirmMsg)) {
+      /* b-postnow: the studio ghost-menu carries its own inline confirm chip,
+         so callers that already collected the owner's yes pass skipConfirm —
+         the token gate above still applies verbatim. */
+      if (!(opts && opts.skipConfirm) && !window.confirm(confirmMsg)) {
         // Owner report: "when I tried Post now it didn't talk" — cancelling the sheet
         // produced NO response at all, so the app looked dead. Say what happened.
         showAppToast('Post now cancelled — nothing was published', {
@@ -21184,9 +21206,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
          form is 112, the body alone is 85). The body is deliberately NOT a
          fallback here — it is already on the card. */
       var ig = '';
-      try { ig = ceResolveIgCaption(q) || ''; } catch (_ig) { ig = String((q && q.igCaption) || '').trim(); }
+      try { ig = (q && q.igNoCaption) ? '' : (ceResolveIgCaption(q) || ''); } catch (_ig) { ig = String((q && q.igCaption) || '').trim(); }
       if (q && ig && !q.igCaption) q.igCaption = ig;
-      var poemCore = String(ig || item.caption || (q && q.caption) || '').trim();
+      var poemCore = (q && q.igNoCaption) ? '' : String(ig || item.caption || (q && q.caption) || '').trim();
       return (poemCore ? poemCore + '\n\n' : '')
         + '@doalfaaz\n\n#doalfaaz #poetry #hindishayari #urdupoetry #shayari #banaras #ishq #mohabbat #rooh';
     }
@@ -22480,6 +22502,134 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       navigateTo('plan');
       showNotification('Ready in Plan — Post now is armed');
     };
+
+    /* b-postnow (owner 2026-09-19): the ghost "Post now ▾" beside Send to Plan.
+       One tap on a caption arms an inline confirm chip; the confirm fires the
+       SAME consent-gated publish as Plan's Post now — the token check, the
+       publish_refused toast and the result handler are all the existing ones.
+       No modals: the chip IS the confirm (dispatch runs with skipConfirm). */
+    var studioPostNow = document.getElementById('studio-postnow');
+    if (studioPostNow) {
+      var postNowMenu = document.getElementById('studio-postnow-menu');
+      var cePostNowMru = function () {
+        try { return JSON.parse(localStorage.getItem('ce_caption_mru') || '{}') || {}; } catch (_m) { return {}; }
+      };
+      var cePostNowMruHit = function (cap) {
+        if (!cap) return;
+        try {
+          var m = cePostNowMru();
+          m[cap] = Date.now();
+          var keys = Object.keys(m);
+          if (keys.length > 40) {
+            keys.sort(function (a, b) { return (m[a] || 0) - (m[b] || 0); });
+            keys.slice(0, keys.length - 40).forEach(function (k) { delete m[k]; });
+          }
+          localStorage.setItem('ce_caption_mru', JSON.stringify(m));
+        } catch (_s) {}
+      };
+      var cePostNowChoices = function () {
+        var item = state.currentItem || {};
+        var bank = (typeof ceCaptionBank === 'function') ? ceCaptionBank() : { groups: [] };
+        var gid = state.igCaptionGroupId
+          || ((typeof ceAutopickCaptionGroup === 'function') ? ceAutopickCaptionGroup((item.text || item.body || item.title) || '', item) : '');
+        var group = null;
+        (bank.groups || []).forEach(function (g) { if (g.id === gid) group = g; });
+        if (!group) group = (bank.groups || [])[0];
+        var mru = cePostNowMru();
+        var mruSort = function (arr) { return (arr || []).slice().sort(function (a, b) { return (mru[b] || 0) - (mru[a] || 0); }); };
+        var pool = mruSort(group && group.captions);
+        (bank.groups || []).forEach(function (g) { if (g !== group) pool = pool.concat(mruSort(g.captions)); });
+        var cur = '';
+        try {
+          cur = String((typeof ceResolveIgCaption === 'function')
+            ? ceResolveIgCaption({ type: state.currentType || 'poem', item: item, igCaption: state.igCaption })
+            : '').trim();
+        } catch (_r) {}
+        var seen = {}, out = [];
+        if (cur) { out.push(cur); seen[cur] = 1; }
+        for (var i = 0; i < pool.length && out.length < 5; i++) {
+          var c = String(pool[i] || '').trim();
+          if (c && !seen[c]) { seen[c] = 1; out.push(c); }
+        }
+        return out;
+      };
+      var cePostNowFire = function (cap) {
+        var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
+        if (br) {
+          var q = (typeof studioStageCurrent === 'function') ? studioStageCurrent('', true) : null;
+          if (!q || !q.id) { showQueueToast('Could not stage this piece — nothing was published.', true); return; }
+          if (cap == null) { q.igNoCaption = true; q.igCaption = ''; }
+          else { q.igNoCaption = false; q.igCaption = cap; }
+          try { cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems)); } catch (_p) {}
+          cePostNowMruHit(cap);
+          studioPostNow.removeAttribute('open');
+          ceDispatchMetaGraphSchedule(false, true, [q], { skipConfirm: true });
+        } else if (typeof window.__CE_PHONE_POSTNOW__ === 'function') {
+          studioPostNow.removeAttribute('open');
+          cePostNowMruHit(cap);
+          window.__CE_PHONE_POSTNOW__({ caption: (cap == null ? null : cap) });
+        } else {
+          showQueueToast('Posting needs the Mac app or the phone sync — nothing was sent.', true);
+        }
+      };
+      var renderPostNowMenu = function (mode, picked) {
+        if (!postNowMenu) return;
+        if (mode === 'confirm') {
+          postNowMenu.innerHTML =
+            '<div class="ce-postnow-meta">' + escapeHtml(picked == null ? 'No caption' : picked) + '</div>'
+            + '<button type="button" class="ce-postnow-confirm" id="ce-postnow-confirm">Post to @doalfaaz now ✓</button>'
+            + '<button type="button" class="ce-postnow-back" id="ce-postnow-back">← captions</button>';
+          postNowMenu.querySelector('#ce-postnow-confirm').onclick = function () { cePostNowFire(picked); };
+          postNowMenu.querySelector('#ce-postnow-back').onclick = function () { renderPostNowMenu(); };
+          return;
+        }
+        var cur = String(state.igCaption || '').trim();
+        var html = '<div class="ce-postnow-meta">Caption for this post</div>';
+        cePostNowChoices().forEach(function (c) {
+          html += '<button type="button" class="ce-postnow-cap' + (c === cur ? ' is-current' : '') + '" data-cap="' + escapeHtml(c) + '" role="menuitem">' + escapeHtml(c) + '</button>';
+        });
+        html += '<div class="ce-postnow-sep"></div>'
+          + '<button type="button" class="ce-postnow-cap" id="ce-postnow-nocap" role="menuitem">No caption</button>'
+          + '<button type="button" class="ce-postnow-cap" id="ce-postnow-edit" role="menuitem">Edit caption…</button>';
+        postNowMenu.innerHTML = html;
+        postNowMenu.querySelectorAll('.ce-postnow-cap[data-cap]').forEach(function (b) {
+          b.onclick = function () { renderPostNowMenu('confirm', b.getAttribute('data-cap')); };
+        });
+        var nocap = postNowMenu.querySelector('#ce-postnow-nocap');
+        if (nocap) nocap.onclick = function () { renderPostNowMenu('confirm', null); };
+        var edit = postNowMenu.querySelector('#ce-postnow-edit');
+        if (edit) edit.onclick = function () {
+          studioPostNow.removeAttribute('open');
+          var ed = document.getElementById('ce-full-caption-editor');
+          if (ed) {
+            try { ed.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (_sv) {}
+            ed.focus();
+          }
+        };
+      };
+      studioPostNow.addEventListener('toggle', function () {
+        if (!studioPostNow.open) return;
+        renderPostNowMenu();
+        /* The phone web bundle has no native caption-bank injection — fetch the
+           carried static bank once and re-render, so the dropdown reads the SAME
+           bank the Mac ships (ceCaptionBank() falls back to the 8-line seed
+           until this lands). */
+        if (!window.__CE_CAPTION_BANK__ && !window.__CE_CAPTION_BANK_FETCHED__) {
+          window.__CE_CAPTION_BANK_FETCHED__ = true;
+          try {
+            fetch('./caption-bank.json')
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (j) {
+                if (j && Array.isArray(j.groups) && j.groups.length) {
+                  window.__CE_CAPTION_BANK__ = j;
+                  if (studioPostNow.open) renderPostNowMenu();
+                }
+              })
+              .catch(function () {});
+          } catch (_f) {}
+        }
+      });
+    }
 
     document.getElementById('studio-copy-btn').onclick = () => {
       if (state.currentItem) {

@@ -309,6 +309,48 @@
 .studio-more-actions:not([open]) > .studio-more-menu { display: none; }
 .studio-more-menu .pill-btn { width: 100%; justify-content: flex-start; white-space: nowrap; }
 
+/* b-postnow (owner 2026-09-19): the ghost "Post now ▾" — a SUBTLE secondary
+   ship action beside the Send to Plan primary. Same pill family, never
+   primary-red; its menu anchors and dismisses exactly like the ••• menu. */
+.studio-postnow { position: relative; }
+.studio-postnow > summary {
+  list-style: none; display: inline-flex; align-items: center; justify-content: center;
+  gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: transparent;
+  color: var(--muted); font-size: 12px; font-weight: 600; padding: 6px 10px;
+  cursor: pointer; white-space: nowrap;
+}
+.studio-postnow > summary::-webkit-details-marker { display: none; }
+.studio-postnow > summary:hover { color: var(--ink); background: rgba(120,120,150,0.1); }
+.studio-postnow[open] > summary { border-color: var(--accent-border); color: var(--accent); }
+.studio-postnow-menu {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 100; display: grid; gap: 4px;
+  min-width: 240px; max-width: 300px; padding: 6px; border: 1px solid var(--border);
+  border-radius: 10px; background: var(--surface); box-shadow: 0 16px 36px rgba(0,0,0,.28);
+}
+.studio-postnow:not([open]) > .studio-postnow-menu { display: none; }
+.studio-postnow-menu .ce-postnow-meta {
+  font-size: 10.5px; color: var(--muted); padding: 2px 10px 4px;
+  max-height: 4.1em; overflow: hidden;
+}
+.studio-postnow-menu .ce-postnow-cap {
+  display: block; width: 100%; text-align: left; border: 1px solid transparent;
+  background: transparent; color: var(--ink); font-size: 12px; font-weight: 500;
+  line-height: 1.35; padding: 8px 10px; border-radius: 8px; cursor: pointer;
+}
+.studio-postnow-menu .ce-postnow-cap:hover { background: rgba(120,120,150,0.1); border-color: var(--border); }
+.studio-postnow-menu .ce-postnow-cap.is-current { color: var(--accent); }
+.studio-postnow-menu .ce-postnow-sep { height: 1px; background: var(--border); margin: 3px 2px; }
+.studio-postnow-menu .ce-postnow-confirm {
+  width: 100%; border: 1px solid var(--accent-border); background: var(--accent);
+  color: #fff; font-size: 12.5px; font-weight: 700; padding: 9px 12px;
+  border-radius: 8px; cursor: pointer; text-align: center;
+}
+.studio-postnow-menu .ce-postnow-back {
+  border: 0; background: transparent; color: var(--muted); font-size: 11px;
+  font-weight: 600; padding: 6px 10px; cursor: pointer; text-align: left;
+}
+.studio-postnow-menu .ce-postnow-back:hover { color: var(--ink); }
+
 /* H01-2 (CE-A2, 2026-09-15): the Studio dock/topbar carried 28 of 45 visible
    interactives under the 44px touch floor (ratio pills 32x26, undo/redo 32x32,
    8 icon tools 34x32, caption chips h25-27, Back/Send-to-Plan h28). One rule,
