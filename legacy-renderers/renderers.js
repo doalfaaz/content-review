@@ -6356,7 +6356,7 @@ function suggestLooks(card){
 /* ── dehleez : threshold before/after ──────────────────────── */
 .pc-dehleez{ background:#faf8f1; color:#191712; }
 .pc-dehleez .wash{ position:absolute; left:0; top:0; width:1080px; height:568px; background:#ece7d9; }
-.pc-dehleez .tag{ font-size:21px; letter-spacing:7px; text-transform:uppercase; color:#9a937f; }
+.pc-dehleez .tag{ font-size:21px; letter-spacing:0; text-transform:uppercase; color:#9a937f; }
 .pc-dehleez .t1{ position:absolute; left:140px; top:120px; }
 .pc-dehleez .t2{ position:absolute; left:140px; top:706px; }
 .pc-dehleez .before{ position:absolute; left:140px; top:196px; width:700px; font-size:42px; line-height:1.6; color:#7d766a; }
@@ -6382,7 +6382,7 @@ function suggestLooks(card){
 .pc-pravesh{ background:#1a1712; color:#211c12; }
 .pc-pravesh .paper{ position:absolute; left:40px; top:110px; width:1000px; height:1130px; background:#f5f0e2; }
 .pc-pravesh .stub{ position:absolute; left:40px; top:110px; width:212px; height:1130px; background:#ede6d1; }
-.pc-pravesh .admit{ position:absolute; left:88px; top:260px; height:820px; writing-mode:vertical-rl; transform:rotate(180deg); font-size:30px; letter-spacing:12px; font-weight:700; color:#b3541c; }
+.pc-pravesh .admit{ position:absolute; left:88px; top:260px; height:820px; writing-mode:vertical-rl; transform:rotate(180deg); font-size:30px; letter-spacing:0; font-weight:700; color:#b3541c; }
 .pc-pravesh .serial{ position:absolute; left:158px; top:420px; height:520px; writing-mode:vertical-rl; transform:rotate(180deg); font-family:ui-monospace,Menlo,monospace; font-size:20px; letter-spacing:6px; color:#8a7f6a; }
 .pc-pravesh .perf{ position:absolute; left:252px; top:110px; width:0; height:1130px; border-left:4px dotted #b7ad93; }
 .pc-pravesh .notch{ width:44px; height:44px; border-radius:50%; background:#1a1712; }

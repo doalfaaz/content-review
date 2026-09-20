@@ -287,6 +287,26 @@
   color: var(--danger);
   transform: scale(1.08);
 }
+/* wl10148 / L50-07 / WL2356 (L01-app 2026-09-19): the permanent-delete icon
+   sat 4px from the Restore pill (measured 1440px: gap=4, delete 28x28) — the
+   destructive control had no separation from its neighbour. Destructive
+   affordances get a hairline separator plus a floor of empty space on both
+   sides, and the cluster gap widens so a mis-tap cannot land on delete. */
+.ce-action-reject-btn.is-delete {
+  margin-left: 14px;
+  position: relative;
+}
+.ce-action-reject-btn.is-delete::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  width: 1px;
+  height: 16px;
+  margin-top: -8px;
+  background: rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+}
 
 /* ── Card Status Chips (Top-Left on Shelf Cards) ── */
 .ce-card-status-chip {

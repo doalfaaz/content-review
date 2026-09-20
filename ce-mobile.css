@@ -107,11 +107,20 @@
     padding: 8px 14px !important;
     font-size: 13px !important;
   }
-  /* The ••• menu opens over the dock, not clipped at the right edge. */
+  /* The ••• menu opens over the dock, not clipped at the right edge.
+     WL2721/wl4887 (2026-09-19): `right: 0` anchors the menu's RIGHT edge to the
+     SUMMARY's right edge, and the summary sits near the LEFT of the phone
+     topbar — so the 150px menu rendered at x = -96, entirely off-screen, and
+     "Save to Bank" was visible-but-unreachable by finger. Anchor the menu to the
+     viewport instead (fixed) and clamp it inside: left/right insets keep it on
+     screen whatever the summary's position. */
   .studio-more-menu {
-    right: 0 !important;
-    left: auto !important;
-    max-width: 82vw !important;
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    top: auto !important;
+    max-width: none !important;
+    width: auto !important;
   }
 
   /* Filmstrip: swipe track stays, cards shrink to fit 1.6 per view.
@@ -349,6 +358,27 @@ html.ce-share #sidebar-nav button { min-width: 44px !important;
     padding: 0 !important; }
 
 html.ce-phone #sidebar > * { min-width: 0 !important; }
+
+/* ---------- Phone Devanagari stack (L10-10, 2026-09-19) ----------
+   This layer declared ZERO font-family, so phone prose inherited whatever
+   the desktop tokens resolved to — and the two authored phone stacks that
+   DID name a face led with 'Noto Sans Devanagari', which resolves on NO
+   target (canvas-width probe 2026-09-19: 224.35px == the unknown-face
+   baseline on headless Chromium; it is not bundled, not on iOS, not on
+   macOS). Kohinoor Devanagari + Devanagari Sangam MN ship with macOS and
+   iOS (probe: 240.29 / 235.69 — real faces). --font-deva already orders
+   them correctly; assert it on the phone Devanagari surfaces so the phone
+   layer names a face instead of inheriting system-ui. The same stack is
+   now hard-written into the inline emitters (ce-editorial-footer,
+   ce-poem-signature, poem fullview) that used to lead with Noto. */
+html.ce-phone .ce-editorial-footer,
+html.ce-phone .ce-poem-signature,
+html.ce-phone .ce-poem-text-block,
+html.ce-phone [data-poem],
+html.ce-phone .ce-grow-shell .ce-ans-thumb i[data-poem],
+html.ce-phone #studio-editable-text {
+  font-family: var(--font-deva, "Kohinoor Devanagari", "Noto Sans Devanagari", "Devanagari Sangam MN", sans-serif);
+}
 
 html.ce-phone .topbar, html.ce-phone .app-topbar { flex-wrap: nowrap !important;
     height: calc(52px + env(safe-area-inset-top, 0px)) !important;
@@ -601,7 +631,7 @@ html.ce-phone /* Look grid 3-up with readable faces. */
     font-weight: 700 !important;
     border-radius: 10px !important;
     color: #fff !important;
-    background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
+    background: linear-gradient(135deg, #d4576b, #a83242) !important;
     border: 1px solid rgba(255,255,255,0.14) !important;
   }
   /* hide the native-only Export button in the menu on phone (the pack replaces it) */
@@ -616,7 +646,7 @@ html.ce-phone .studio-topbar #studio-download-pack-btn {
   font-weight: 700 !important;
   border-radius: 10px !important;
   color: #fff !important;
-  background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
+  background: linear-gradient(135deg, #d4576b, #a83242) !important;
   border: 1px solid rgba(255,255,255,0.14) !important;
 }
 html.ce-phone .studio-topbar #studio-export-btn { display: none !important; }
@@ -661,9 +691,8 @@ html.ce-phone .studio-topbar {
     scroll-snap-type: x proximity !important;
     scroll-padding-inline: 16px !important;
     padding-inline: 16px !important;
-    padding-bottom: 4px !important; /* m03 FIX-2: phone twin of the base pad */
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 26px), rgba(0,0,0,0.72) 100%);
-    mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 26px), rgba(0,0,0,0.72) 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 32px), rgba(0,0,0,0.4) 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 32px), rgba(0,0,0,0.4) 100%);
   }
   .ce-rail-track > * {
     scroll-snap-align: start !important;
@@ -941,6 +970,13 @@ html.ce-phone .ce-carousel-editor.ce-tools-open .ce-tools-toggle::after {
   .ce-rail-track > * { width: min(44vw, 190px) !important; }
   .ce-rail-track { gap: 14px !important; }
   .ce-rail-track .ce-shelf-kicker { display: none !important; }
+  /* W3-P3 (2026-09-19): the same block that shrinks the cards must drop the
+     track's 220px inline min-height (authored for a 310-440px desktop card).
+     While the cards were taller than the floor this never bound; at phone card
+     widths the flex default `align-items: stretch` grew every card past its
+     artwork and painted a dead strip inside the panel. Full note at the
+     html.ce-phone twin below. */
+  .ce-rail-track { min-height: 0 !important; align-items: flex-start !important; }
 }
 /* Owner 2026-09-11 (recursive re-audit, W5): the shelf must keep the
    two-up glance AND honestly promise a swipe. Cards start at x=40 (main
@@ -953,23 +989,33 @@ html.ce-phone .ce-rail-track > * { width: min(44vw, 190px, calc((100vw - 102px) 
 html.ce-phone .ce-rail-track { gap: 14px !important; }
 html.ce-phone .ce-rail-track .ce-shelf-kicker { display: none !important; }
 
-/* m03 FIX-1C: the sticky rail head paints full-bleed (it must cover the cards
-   sliding under it) while keeping the label's x-identity with the cards.
-   Opacity moves onto the head's children so the new background band stays
-   fully opaque — at .85 on the parent, cards ghosted 15% through the band. */
-html.ce-phone .ce-rail-head { margin: 0 -20px; padding-left: 24px; padding-right: 24px; opacity: 1 !important; }
-html.ce-phone .ce-rail-head > * { opacity: .85; }
+/* ── W3-P3 (2026-09-19): the dead band under every phone carousel panel ──────
+   Owner: "the carousels front/home screen shows weird extra space below each
+   carousel panel."
 
-/* m03 FIX-3: the All/grid mode inherited the desktop single-column wall
-   (minmax(280px,1fr) = 1 column at 342px content width). Phone gets the same
-   two-up budget as the rail: measured before, the STORY rail grid ran 35,306px
-   at 390 (42 screens); two-up drops it to ~8.6k. */
-@media (max-width: 700px) {
-  .ce-rail-track.is-grid-view {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 14px !important;
-  }
-  html.ce-phone .ce-rail-track.is-grid-view > * { width: auto !important; }
+   ROOT CAUSE (measured at 402x874 against the merged phone bundle, 8 rails):
+   the rail builder sets `track.style.minHeight = '220px'` as an INLINE style on
+   the track (index.html renderMain — the carousels branch and the posts twin),
+   a floor authored for the DESKTOP card: 310-440px wide, 4:5 art = 388-550px
+   tall. The phone layer then shrinks the cards to min(44vw, 190px, (100vw-102)/2)
+   = 150px wide, so the same 4:5 art is only 185px tall. A flex container's
+   default `align-items: normal` (stretch) grows every card to the 220px track
+   box: card 202px vs 187px of natural content.
+
+   The 15px is not padding and not margin — it is the card's own 1px border +
+   transparent background painting BELOW the artwork, inside the rounded frame
+   (the artwork itself is clipped to 185px by `overflow:hidden`), so it reads as
+   a strip of dead panel under each cover. elementFromPoint 8px under the art
+   returns `DIV.pure-card.deck-card`, i.e. the strip belongs to the card.
+
+   FIX: let the track take its natural height on the phone layer. `min-height:0`
+   beats the inline style (author `!important` > inline), and `align-items:flex-start`
+   keeps the box model honest even if a taller sibling ever appears. This is the
+   phone layer only — the desktop rail keeps the 220px floor it was written for
+   (there the cards are taller than the floor anyway, so it never binds). */
+html.ce-phone .ce-rail-track {
+  min-height: 0 !important;
+  align-items: flex-start !important;
 }
 
 
@@ -1229,22 +1275,6 @@ html.ce-phone .studio-primary-actions {
 }
 html.ce-phone .studio-primary-actions > * { min-width: 0 !important; }
 html.ce-phone #studio-post-btn { margin-left: auto !important; max-width: 100%; white-space: nowrap; }
-/* m04-01 + m01 FIX-2: keep the ship actions together on the header without
-   folding to the 3-row 155px layout. A single scrollable row crushed labels
-   (Download for phone clipped 22px, Send to Plan clipped 19px — m01 measured),
-   so the row WRAPS with flex-shrink:0: full labels, two rows, ~110px header. */
-html.ce-phone .studio-topbar .studio-primary-actions {
-  flex: 1 1 100% !important;
-  display: flex !important;
-  gap: 6px !important;
-  order: 3 !important;
-  flex-wrap: wrap !important;
-  overflow-x: visible !important;
-  row-gap: 6px !important;
-  padding-bottom: 2px;
-}
-html.ce-phone .studio-topbar .studio-primary-actions > * { flex-shrink: 0 !important; }
-html.ce-phone .studio-topbar #studio-post-btn { margin-left: 0 !important; }
 html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock #dock-canvas-section {
   order: 1 !important;
 }
@@ -1798,6 +1828,18 @@ html.ce-phone textarea,
 html.ce-phone select {
   min-height: 44px !important;
 }
+/* WL1371 (2026-09-19): the Grow/Launch "unmeasured" CTAs painted at 10.5px on
+   phone — under the 11px label floor both bar systems in this app honour. The
+   desktop rule at index.html:2315 is scoped .ce-grow-shell .ce-unmeasured-acts
+   .ce-surface-button, so the generic phone .ce-surface-button rule could not
+   reach it; match that specificity and raise the label only (size, not layout). */
+html.ce-phone .ce-grow-shell .ce-unmeasured-acts .ce-surface-button,
+html.ce-phone .ce-launch-workbench .ce-unmeasured-acts .ce-surface-button,
+html.ce-phone .ce-grow-shell .ce-unmeasured-unlock,
+html.ce-phone .ce-launch-workbench .ce-unmeasured-unlock {
+  font-size: 11px !important;
+}
+
 html.ce-phone .ce-rail-nav-btn,
 html.ce-phone .ce-rail-toggle-btn,
 html.ce-phone .ce-icon-tool,
@@ -1988,7 +2030,7 @@ html.ce-phone {
   --accent-glow: rgba(191, 75, 93, 0.32);
   --crimson: #bf4b5d;
   --crimson-light: #d96a7c;
-  --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
+  --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
   --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
   --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
   --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
@@ -2007,7 +2049,7 @@ html.ce-phone body.bright-theme {
   --accent-glow: rgba(191, 75, 93, 0.25);
   --crimson: #bf4b5d;
   --crimson-light: #d96a7c;
-  --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
+  --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
   --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
   --grad-accent-text: linear-gradient(135deg, #bf4b5d, #8e2f3d);
   --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
@@ -2026,11 +2068,27 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
   --accent-press: #8e2f3d;
   --crimson: #bf4b5d;
   --crimson-light: #d96a7c;
-  --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
+  --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
   --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
   --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
   --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
   --crimson-wash: radial-gradient(circle at 85% 10%, rgba(191, 75, 93, 0.06), transparent 45%);
+}
+/* wb-ds / W4-A2 (2026-09-19): same half-applied-theme defect as the desktop rule
+   (index.html W4-A1). This shell-level rebind is UNSCOPED by theme, so on cream the
+   shells kept the dark-theme pink while html.ce-phone body.bright-theme had already
+   deepened --accent-text to #b13a4c. Measured at 402x874: 6 failures on Grow and 8 on
+   Launch, all 10-11px accent LABELS at 3.08:1 (AA needs 4.5:1). The phone bright value
+   is #b13a4c (its own deeper crimson, not the desktop #8e2f3d). A/B verified: Grow 6 -> 0,
+   Launch 8 -> 1; dark theme unchanged. */
+html.ce-phone body.bright-theme .ce-grow-shell,
+html.ce-phone body.bright-theme .ce-launch-workbench,
+html.ce-phone body.bright-theme .ce-write-shell {
+  --accent-text: #b13a4c;
+  --accent-hover: #bf4b5d;
+  --crimson-light: #b13a4c;
+  --grad-accent-text: linear-gradient(135deg, #b13a4c, #bf4b5d);
+  --grad-bar: linear-gradient(180deg, #bf4b5d, #a83242 45%, #b13a4c);
 }
 @media (max-width: 700px) {
   :root {
@@ -2043,7 +2101,7 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
     --accent-glow: rgba(191, 75, 93, 0.32);
     --crimson: #bf4b5d;
     --crimson-light: #d96a7c;
-    --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
+    --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
     --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
     --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
@@ -2059,7 +2117,7 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
     --accent-glow: rgba(191, 75, 93, 0.25);
     --crimson: #bf4b5d;
     --crimson-light: #d96a7c;
-    --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
+    --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
     --grad-accent-text: linear-gradient(135deg, #bf4b5d, #8e2f3d);
     --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
@@ -2075,7 +2133,7 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
     --accent-press: #8e2f3d;
     --crimson: #bf4b5d;
     --crimson-light: #d96a7c;
-    --grad-accent: linear-gradient(135deg, #b8455a, #8e2f3d);
+    --grad-accent: linear-gradient(135deg, #d96a7c, #8e2f3d);
     --grad-accent-h: linear-gradient(90deg, #d96a7c, #bf4b5d);
     --grad-accent-text: linear-gradient(135deg, #d96a7c, #bf4b5d);
     --grad-bar: linear-gradient(180deg, #d96a7c, #bf4b5d 45%, #8e2f3d);
@@ -2086,13 +2144,13 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
    writes style.cssText with a NON-important #2e6f5e), so a stylesheet
    !important rebinds it to the crimson family. */
 html.ce-phone #ce-web-schedule-btn {
-  background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
+  background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
   border-color: rgba(255, 255, 255, 0.14) !important;
   color: #fff !important;
 }
 @media (max-width: 700px) {
   #ce-web-schedule-btn {
-    background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
+    background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
     border-color: rgba(255, 255, 255, 0.14) !important;
     color: #fff !important;
   }
@@ -2105,11 +2163,11 @@ html.ce-phone .is-poems { background: #d96a7c !important; }
 }
 /* The download-pack gradient predates the token set — same crimson family. */
 html.ce-phone .studio-topbar #studio-download-pack-btn {
-  background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
+  background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
 }
 @media (max-width: 700px) {
   .studio-workspace .studio-topbar #studio-download-pack-btn {
-    background: linear-gradient(135deg, #b8455a, #8e2f3d) !important;
+    background: linear-gradient(135deg, #d96a7c, #8e2f3d) !important;
   }
 }
 
@@ -2124,6 +2182,11 @@ html.ce-phone .ce-write-field textarea {
   min-height: 150px !important;
   max-height: 34vh !important;
   field-sizing: content;
+  /* WL1487 (2026-09-19): the author rule pins this Devanagari surface at 17px,
+     under the 18px phone body floor. The phone rule only changed min-height,
+     so the write surface — the one place the owner types Hindi on a phone —
+     was the app's only sub-18px body text. 18px is the floor, not a target. */
+  font-size: 18px !important;
 }
 html.ce-phone .ce-write-fieldbar { padding: 10px 22px 12px !important; }
 @media (max-width: 700px) {
@@ -2132,6 +2195,7 @@ html.ce-phone .ce-write-fieldbar { padding: 10px 22px 12px !important; }
     min-height: 150px !important;
     max-height: 34vh !important;
     field-sizing: content;
+    font-size: 18px !important;
   }
   .ce-write-fieldbar { padding: 10px 22px 12px !important; }
 }
@@ -2222,14 +2286,10 @@ html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-can
   position: fixed !important;
   top: auto !important;
   right: 12px !important;
-  /* m04-03 + m05-07: the sheet is min(50vh,460px); 42vh was a magic number
-     that guaranteed an overlap band (at 932px the chip's bottom edge sat
-     inside the sheet's top). Anchor to the sheet's real height. */
-  bottom: calc(min(50vh, 460px) + 8px) !important;
+  bottom: calc(42vh + 8px) !important;
   left: auto !important;
-  content: "below authored" !important;   /* was the full sentence; fits the 129px gutter */
-  writing-mode: horizontal-tb !important; /* was vertical-rl — the owner's "rotated badge" */
-  padding: 4px 10px !important;           /* was 10px 4px (vertical-mode padding) */
+  writing-mode: vertical-rl !important;
+  padding: 10px 4px !important;
 }
 html.ce-phone .studio-workspace.is-carousel-mode .studio-canvas-wrap[data-ce-fit-below-authored]::after {
   top: 6px !important;
@@ -2247,11 +2307,10 @@ html.ce-phone .studio-workspace.is-carousel-mode .studio-canvas-wrap[data-ce-fit
     position: fixed !important;
     top: auto !important;
     right: 12px !important;
-    bottom: calc(min(50vh, 460px) + 8px) !important;
+    bottom: calc(42vh + 8px) !important;
     left: auto !important;
-    content: "below authored" !important;
-    writing-mode: horizontal-tb !important;
-    padding: 4px 10px !important;
+    writing-mode: vertical-rl !important;
+    padding: 10px 4px !important;
   }
   .studio-workspace.is-carousel-mode .studio-canvas-wrap[data-ce-fit-below-authored]::after {
     top: 6px !important;
@@ -2315,54 +2374,143 @@ html.ce-phone .ce-launch-intelligence-head > div > strong {
   }
 }
 
-/* ============================================================================
-   m04 (2026-09-19) — mobile deep-audit fixes, phone-scoped
-   ============================================================================ */
-
-/* m04-04: the two 1px dock separators belong to the photo/typo sections, but
-   the phone tools-open sheet reorders sections by CSS `order`, so they paint
-   as the owner's "two EMPTY full-width rows" between CLOSE TOOLS and STYLE.
-   On phone they carry no meaning: hide them in the sheet. */
-html.ce-phone .studio-workspace.ce-tools-open #studio-dock #dock-sep-1,
-html.ce-phone .studio-workspace.ce-tools-open #studio-dock #dock-sep-2 {
-  display: none !important;
+/* ---- Phone re-author scale + touch floor (L2-03/L2-05, 2026-09-19) ----
+   The pre-classifier surface was a linear shrink: 1350/1358 painted text
+   elements resolved byte-identical family+size+weight at 1440x1000 and
+   390x700, and every primary CTA painted 40px — under the 44px thumb floor.
+   With the classifier now live, this block owns the two residual deltas the
+   chrome rules did not: a distinct phone reading scale on the copy that
+   reads (hero/section titles/body), and a true 44px primary-action floor.
+   Chart micro-labels (ce-fort/ans/tide day slots, ticks, legends) stay at
+   their authored micro sizes — data ink, not prose; the ≥14px law governs
+   text a reader reads as sentences, not axis labels. */
+html.ce-phone .ce-grow-shell .ce-grow-hero strong,
+html.ce-phone .ce-grow-shell .ce-grow-hero h2,
+html.ce-phone .ce-grow-shell .ce-grow-hero h3 {
+  font-size: 19px !important;
+  line-height: 1.3 !important;
+}
+html.ce-phone .ce-launch-workbench h2,
+html.ce-phone .ce-launch-workbench h3,
+html.ce-phone .ce-launch-workbench .ce-launch-board-title {
+  font-size: 17px !important;
+  line-height: 1.3 !important;
+}
+/* Primary actions: real 44px thumb floor, not 40px. */
+html.ce-phone .ce-surface-button.is-primary,
+html.ce-phone .pill-btn.is-primary,
+html.ce-phone .primary-action-btn,
+html.ce-phone button.is-primary {
+  min-height: 44px !important;
+  font-size: 13px !important;
+}
+/* Route-level dominant CTA weight: the one primary control per view keeps
+   the full 44px hit area and a heavier face so it reads as THE action. */
+html.ce-phone #plan-schedule-all-ready-btn,
+html.ce-phone #plan-fill-week-empty,
+html.ce-phone #write-plan-btn {
+  min-height: 44px !important;
+  font-weight: 750 !important;
 }
 
-/* m04-06: .main-content/#view is the phone scroller; without scroll-padding
-   every scrollIntoView/anchor jump parked rail heads 55px under the fixed
-   search header (measured 360/390/430, all rails). */
-html.ce-phone .main-content,
-html.ce-phone #view {
-  scroll-padding-top: calc(var(--topbar-h, 55px) + env(safe-area-inset-top, 0px) + 8px);
+
+/* ── WL1251 (2026-09-19): tabular figures on the phone counter surfaces ────────
+   index.html pins font-variant-numeric: tabular-nums on 23 desktop ledger
+   rules; the phone layer carried ZERO. Every counter below is re-authored for
+   the phone (or painted by the same markup the desktop ledger styles), so on
+   a phone the digits were proportional and the value jittered as it changed —
+   the exact defect tabular figures exist to prevent, on the surface where the
+   numbers are read at arm's length.
+
+   Scoped to html.ce-phone so the desktop paint is untouched, and written as a
+   standalone appended block: no existing selector is edited or removed, so
+   this cannot regress a layout that currently works.
+
+   Chart micro-labels are deliberately NOT included — the type-floor note above
+   (ce-fort/ans/tide day slots, ticks, legends) keeps data ink at its authored
+   micro sizes, and those are axis marks rather than counters. */
+html.ce-phone .nav-count-badge,
+html.ce-phone .ce-launch-insight strong,
+html.ce-phone .ce-launch-intelligence-head > div > strong,
+html.ce-phone .ce-readiness-row strong,
+html.ce-phone .ce-grow-shell .ce-ans-top strong,
+html.ce-phone .ce-grow-shell .ce-grow-readiness strong,
+html.ce-phone .ce-grow-proof-ledger strong,
+html.ce-phone #plan-schedule-all-ready-btn,
+html.ce-phone #send-to-plan-btn,
+html.ce-phone .ce-queue-count,
+html.ce-phone .ce-saved-count,
+html.ce-phone [data-ce-count] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
-/* m04-09: 4px clearance between the Presentation title and the scope pills at
-   390/430 with headless fonts; SF Pro on device collides (owner screenshot).
-   Wrap instead of collide. (When the sheet opens, ce-touch-edit.js portals
-   the dock to <body>, so the selector must not depend on .studio-workspace.) */
-html.ce-phone .ce-dock-column-head,
-html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-column-head {
-  flex-wrap: wrap !important;
-  row-gap: 6px !important;
-}
+/* ── PRINT (wl6347 / WL0612 / GRAND-034 / wl10477, Q03 2026-09-19) ─────────────
+   The app carried ZERO print rules: `grep -c 'media print' Resources/*.css
+   Resources/*.html` returned 0 and `window.print` was never called, so the
+   default Cmd+P painted the dark UI — the sidebar, the topbar, every glass
+   panel — as a ghost sheet with unreadable dark-on-dark ink and the poem or
+   carousel the owner actually wanted buried inside app chrome.
 
-/* m07 F3: 7 backdrops in the desktop 6-col grid paint a 6+1 orphan row on
-   phone. 4 columns give 4+3, both rows full-width, thumbs 82-100px (still
-   square, tap targets grow from ~50px). */
-html.ce-phone #studio-dock #studio-photo-strip {
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-}
+   This block does NOT add a print button (that is a product decision for the
+   owner). It makes the browser's own print path honest: force the light token
+   set so ink is dark on white, and drop the app chrome so the content the owner
+   prints is the content that reaches the page.
 
-/* m04-12: the fixed toast sat at bottom 24px and overlapped the sticky Tools
-   row (toast t769-b820 vs Tools row t800-b844 = 20px collision at 390).
-   m05-09: with the tools SHEET open the bottom half belongs to the sheet, so
-   the toast docks just below the topbar there instead. */
-html.ce-phone #ce-app-toast,
-html.ce-phone #ce-queue-toast {
-  bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-}
-html.ce-phone body:has(.ce-tools-open) #ce-app-toast,
-html.ce-phone body:has(.ce-tools-open) #ce-queue-toast {
-  bottom: auto !important;
-  top: calc(env(safe-area-inset-top, 0px) + 96px) !important;
+   Scoped entirely inside @media print — the screen paint is untouched. */
+@media print {
+  /* Force the light palette regardless of the on-screen theme: printing a
+     dark-first UI on white paper is the ghost sheet this row names. */
+  :root, body, body.bright-theme {
+    --bg: #ffffff;
+    --sidebar-bg: #ffffff;
+    --surface: #ffffff;
+    --card: #ffffff;
+    --card-hover: #ffffff;
+    --card-border: rgba(0,0,0,0.12);
+    --border: rgba(0,0,0,0.16);
+    --border-strong: rgba(0,0,0,0.28);
+    --ink: #111111;
+    --muted: #444444;
+    --faint: #444444;
+    --hairline: #999999;
+    --accent-text: #7a2230;
+  }
+  html, body {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+  /* Chrome that has no meaning on paper. */
+  #sidebar, .sidebar, .topbar, .app-topbar, #boot-cover,
+  .ce-phone-rail, .ce-touch-dock, .toast, .ce-toast, [class*="toast"],
+  .studio-topbar, .studio-more-menu, .studio-primary-actions,
+  .ce-sort-popover, #poem-sort-popover, .ce-filter-chips,
+  button, [role="button"], nav, .ce-pip, .ce-status-banner {
+    display: none !important;
+  }
+  /* Anything that was scrolled/clipped to a fixed height must expand so the
+     full content prints instead of a single viewport slice. */
+  html, body, .app-container, main, .view, #view, .ce-scroll,
+  .ce-studio-stage, .ce-render-block-content {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    position: static !important;
+  }
+  /* Glass / translucent surfaces print as flat ink. */
+  * {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  /* Keep an authored page break from splitting a card mid-glyph. */
+  .ce-card, .ce-carousel-slide, .slide, article, section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  /* Devanagari must not be letter-spaced on paper either (glyph law). */
+  .ce-devanagari, [lang="hi"], .slide--devanagari {
+    letter-spacing: 0 !important;
+  }
 }

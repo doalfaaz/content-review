@@ -136,6 +136,11 @@ a { color: var(--gold); text-decoration: none; }
 }
 .cta-main:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,169,110,0.4); opacity: 1; }
 .cta-sub { font-size: 0.78rem; color: var(--text3); margin-top: 14px; line-height: 1.5; }
+/* L31-FAILURE-STATE-MATRIX (WL2490): the invalid-submit message must be painted,
+   not swallowed. Own class so it can never be mistaken for the reassurance line. */
+#wlErr[hidden] { display: none; }
+#wlErr { font-size: 0.8rem; color: #ff9a8a; margin-top: 12px; line-height: 1.55; }
+.capture-form input[aria-invalid="true"] { border-color: #ff9a8a; }
 .cta-promise {
   display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;
   padding: 8px 18px; border: 1px solid rgba(74,222,128,0.2);
@@ -145,9 +150,17 @@ a { color: var(--gold); text-decoration: none; }
 
 /* CAPTURE FORM — name + WhatsApp number -> wa.me deep link */
 .capture-form { max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+/* L24-01 / WL9729 (2026-09-19): the fields were identified only by a 1.1:1 fill
+   and a 1.28:1 hairline against the page, so neither boundary met the 3:1
+   non-text floor (WCAG 1.4.11) — the inputs read as unlabelled voids on the
+   conversion page. The fill stays a dark theme surface; the BOUNDARY is promoted
+   to a solid #6a6a6a: 3.68:1 against the page (--bg #09090c) and 3.34:1 against
+   the field's own fill (#161619), both measured in headless Chrome at 390x844
+   DPR3. Focus is unchanged and still reads louder (gold-dim border + 3px
+   gold-pale outline, 8.86:1). */
 .capture-form input {
   width: 100%; padding: 14px 18px; background: var(--bg3); color: var(--text);
-  border: 1px solid var(--border); border-radius: 6px;
+  border: 1px solid #6a6a6a; border-radius: 6px;
   font-family: var(--sans); font-size: 0.92rem; font-weight: 300;
   outline: none; transition: border-color 0.15s;
 }
@@ -290,8 +303,9 @@ footer {
       <input type="tel" id="wlNum" name="whatsapp" placeholder="Your WhatsApp number" autocomplete="tel" inputmode="tel" required maxlength="15">
       <button type="submit" class="cta-main">Ask for course details on WhatsApp →</button>
     </form>
-    <p class="cta-sub">Your WhatsApp opens with the message ready.<br>Nothing is sent until you press Send.</p>
     <div class="cta-promise">₹1,999 · lifetime access · 14-day refund</div>
+    <p class="cta-sub" id="wlErr" role="alert" aria-live="polite" hidden></p>
+    <p class="cta-sub">Your WhatsApp opens with the message ready.<br>Nothing is sent until you press Send.</p>
     <p class="capture-or">Prefer Instagram? <a href="https://www.instagram.com/doalfaaz/" target="_blank" rel="noopener">message @doalfaaz directly</a>.</p>
   </div>
 </section>
@@ -427,7 +441,25 @@ Main tumhare saath khada hoon.</span></div>
       e.preventDefault();
       var name = (document.getElementById('wlName').value || '').trim();
       var num  = (document.getElementById('wlNum').value || '').replace(/[^\d]/g, '');
-      if (num.length < 10) { document.getElementById('wlNum').focus(); return; }
+      var numEl = document.getElementById('wlNum');
+      var nameEl = document.getElementById('wlName');
+      var errEl = document.getElementById('wlErr');
+      // L31-FAILURE-STATE-MATRIX (WL2490): an invalid submit used to be a silent
+      // focus()+return — zero painted message in any language, so the visitor
+      // believed the join had failed at random. Paint the reason, mark the field.
+      function reject(el, msg) {
+        if (errEl) { errEl.textContent = msg; errEl.hidden = false; }
+        el.focus();
+        el.setAttribute('aria-invalid', 'true');
+      }
+      if (errEl) { errEl.hidden = true; errEl.textContent = ''; }
+      nameEl.removeAttribute('aria-invalid');
+      numEl.removeAttribute('aria-invalid');
+      if (!name) { reject(nameEl, 'Please enter your name so the message can be addressed.'); return; }
+      if (num.length < 10 || num.length > 13) {
+        reject(numEl, 'Please enter a WhatsApp number with country code and at least 10 digits — e.g. 91XXXXXXXXXX.');
+        return;
+      }
       var msg = 'Interested in Aham Brahmasmi 2.0\n'
               + 'Name: ' + name + '\n'
               + 'WhatsApp: ' + num + '\n\n'

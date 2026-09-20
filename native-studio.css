@@ -37,7 +37,9 @@
      Mirrors the app tokens: lifted --faint for text, --hairline for 1px structural borders,
      --accent-text for small accent LABELS (accent itself stays for fills/borders). */
   --faint: #8a8496;
-  --hairline: #625e6d;
+  /* WL0872 / WL7537 (2026-09-19): same lift as the app tokens — #625e6d read 2.74:1 on the
+     studio's own --card and 2.50:1 on --card-hover, under the 3:1 non-text floor. */
+  --hairline: #757085;
   --accent-text: #e0576b;
   --accent: #c43b4e;
   --accent-hover: #d4576b;
@@ -63,15 +65,18 @@
 }
 
 @keyframes bui-pulse {
+  /* WL0823 (2026-09-19): this keyframe interpolated box-shadow blur (6px->10px)
+     on an infinite animation — the one paint-bound loop in the app, which the
+     compositor cannot accelerate. opacity and transform already carry the pulse;
+     the glow is now a constant on the element, so the whole animation runs on
+     the compositor. */
   0%, 100% {
     opacity: 1;
     transform: scale(1);
-    box-shadow: 0 0 6px var(--accent-glow, rgba(196, 59, 78, 0.32));
   }
   50% {
     opacity: 0.75;
     transform: scale(1.2);
-    box-shadow: 0 0 10px var(--accent-glow, rgba(196, 59, 78, 0.48));
   }
 }
 
@@ -297,7 +302,7 @@
   color: var(--ink); font-size: 13px; font-weight: 800; letter-spacing: 1px; cursor: pointer;
 }
 .studio-more-actions > summary::-webkit-details-marker { display: none; }
-.studio-more-actions[open] > summary { border-color: var(--accent-border); color: #d96a7c; } /* m01 FIX-3: was var(--accent) = 3.49:1; #d96a7c = 5.39:1 */
+.studio-more-actions[open] > summary { border-color: var(--accent-border); color: var(--accent-text); } /* wl3181 (2026-09-19): was var(--accent) = 3.49:1 on the studio surface, under AA for this 13px label. */
 .studio-more-menu {
   position: absolute; right: 0; top: calc(100% + 8px); z-index: 100; display: grid; gap: 5px;
   min-width: 150px; padding: 6px; border: 1px solid var(--border); border-radius: 10px;
@@ -409,9 +414,8 @@
 
 .studio-icon-btn:disabled {
   /* Manager deep audit 2026-09-07: .32 crossed into illegibility — the undo/
-     redo cluster read as a render bug, not a disabled state.
-     m01 FIX-4 (2026-09-19): .45 still measured 3.37-4.14:1; .6 → 6.34:1. */
-  opacity: .6;
+     redo cluster read as a render bug, not a disabled state. */
+  opacity: .45;
   cursor: default;
 }
 
@@ -729,9 +733,7 @@
 #dock-canvas-section .ce-template-swatch[aria-selected="true"] {
   border-color: var(--accent);
   background: #0b0b0d;
-  /* m07 F4: was color-mix(... 72%) → composited rgb(141,57,72) = 2.62:1 vs the
-     dock bg (fails WCAG 2.1 non-text 3:1). 100% → rgb(191,75,93) = 4.07:1. */
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 100%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 72%, transparent);
 }
 
 .ce-template-preview-frame {
@@ -740,7 +742,6 @@
   overflow: hidden;
   border-radius: 8px;
   pointer-events: none;
-  container-type: size; /* m07 F1: the mini must scale to THIS frame, not a desktop constant */
 }
 
 .ce-template-preview-scale {
@@ -749,20 +750,9 @@
   top: 0;
   width: 451px;
   height: 338px;
-  /* m07 F1 (was transform: scale(.195), a constant sized for a ~110px desktop
-     swatch): the phone 5-col grid shrinks the frame to 52.8-66.8px, so every
-     mini was a 60-76% crop — signatures gone, center-aligned lines cut
-     mid-glyph. Scale the 451x338 document to the real frame instead:
-     min(width-fit, height-fit) with a small border allowance. */
-  transform: scale(min(calc((100cqw - 8px) / 451px), calc((100cqh - 8px) / 338px)));
+  transform: scale(.195);
   transform-origin: top left;
   pointer-events: none;
-}
-@supports not (width: 1cqw) { /* Safari <16 fallback */
-  .ce-template-preview-scale { transform: scale(.195); }
-  @media (max-width: 700px) {
-    .ce-template-preview-scale { transform: scale(.125); }
-  }
 }
 
 .studio-dock .photo-strip {
@@ -1594,7 +1584,14 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 88px 88px 80px;
-  font-family: 'Poppins', -apple-system, sans-serif;
+  /* WL1613 (2026-09-19): Poppins is the locked card face and carries NO
+     Devanagari, so every Hindi furniture word on a postcore card (kickers,
+     badges, seals, "पढ़ें") fell through to whatever the system picked and
+     rendered in a different typeface than the Latin around it - the fallback
+     was doing the real work while the declaration claimed Poppins. Poppins
+     stays FIRST; the Devanagari-capable faces are named explicitly after it so
+     the substitution is a decision instead of an accident. */
+  font-family: 'Poppins', 'Kohinoor Devanagari', 'Noto Sans Devanagari', 'Laila', -apple-system, sans-serif;
 }
 
 /* 1. Witness Lamp Post: Deep Velvet Midnight with Warm Candlelight Glow */
@@ -1665,7 +1662,13 @@
   z-index: 5;
 }
 .pc-broadsheet .pl {
-  font-family: 'Playfair Display', 'Georgia', 'Laila', serif !important;
+  /* WL0808 (2026-09-19): this named 'Playfair Display' first, but no @font-face
+     for it exists anywhere in the app or the bundle (0 woff2, 0 declarations), so
+     broadsheet headlines silently fell through to Georgia — a Latin face — for
+     Devanagari text. Name only families the app actually ships or the OS
+     provides: Laila is bundled, Kohinoor/Sangam are the system Devanagari
+     faces, Georgia stays last for the Latin-only case. */
+  font-family: 'Laila', 'Kohinoor Devanagari', 'Devanagari Sangam MN', Georgia, serif !important;
   font-size: 82px !important;
   line-height: 1.32 !important;
   font-weight: 800 !important;
@@ -1811,6 +1814,20 @@
 }
 .pc-whiteroom .pl.last {
   color: #7b2cbf !important;
+}
+/* WL1614 / L5-C13 (L01-app 2026-09-19): `.pl` carries the poem's own
+   Devanagari lines (renderers.js poemLines()). Every variant above set a
+   Latin-display negative track (-0.01em..-0.02em ≈ -0.8px..-1.64px at 78-82px)
+   plus `overflow-wrap: anywhere` — negative tracking collides matras and
+   anusvara/nukta marks, and `anywhere` severs a conjunct mid-cluster. One
+   consolidated override AFTER the variant blocks (same specificity, later
+   wins) so every postcore face obeys the Devanagari law; Latin furniture
+   (.mark/.kickline) keeps its own tracking and is untouched. */
+.ce-postcore-face .pl,
+.ce-postcore-face .pl.last {
+  letter-spacing: 0 !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
 }
 .pc-whiteroom .mark {
   position: relative !important;
@@ -2258,6 +2275,16 @@
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 1px var(--accent), 0 8px 24px rgba(0,0,0,0.35) !important;
   background: color-mix(in srgb, var(--accent) 12%, rgba(255,255,255,0.05)) !important;
+}
+/* WL0863 (2026-09-19): the hook-template cards are real <button>s but carried
+   no focus indicator at all, so a keyboard user tabbing the hook rail could
+   not see where they were. The is-active style above is a SELECTION state, not
+   focus — it stays. This is the focus ring, matching the studio's own
+   focus-visible language (native-studio.css:4719). */
+.ce-hook-card:focus-visible,
+.ce-cta-card:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px !important;
 }
 .ce-hook-card-angle {
   font-size: 10px !important;
@@ -3535,6 +3562,37 @@
 }
 .ce-typo-slider input[type="range"] { width: 100%; accent-color: var(--accent); cursor: ew-resize; }
 .ce-typo-slider output { font-variant-numeric: tabular-nums; text-align: right; color: var(--ink); }
+/* WL0567 (2026-09-19): the three spacing sliders were a 3px-high pointer
+   target with no visible focus indicator — below the 44px touch floor and
+   unreachable-looking for keyboard users. Give the control a real hit box
+   (min 44px tall) and a visible focus ring, without changing the painted
+   track thickness the owner iterated on. */
+.ce-typo-slider input[type="range"] {
+  min-height: 44px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+.ce-typo-slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 22%, transparent);
+}
+.ce-typo-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6.5px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+}
+.ce-typo-slider input[type="range"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
 
 /* Owner cursor law: text reads as a text editor; hand only while moving */
 .studio-workspace .ce-render-block-content :is(.hook,.body,.poem,.profile,.sub,.bubble .body),
@@ -4581,7 +4639,6 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
    compact pills, no longer debris floating above the grid. */
 .studio-workspace.is-carousel-mode .ce-dock-column-head .ce-look-scope-row {
   margin: 0 !important;
-  margin-left: 10px !important; /* m01 FIX-5: title ink right == row left (gap 0.00) in both engines */
   gap: 6px !important;
 }
 .studio-workspace.is-carousel-mode .ce-dock-column-head .ce-look-scope-row > span {
@@ -4699,14 +4756,8 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   min-height: 0 !important;
 }
 .studio-workspace.is-carousel-mode .ce-inspector-pinned .ce-deck-caption-input {
-  flex: 0 0 auto !important;
-  /* m01 FIX-6: min-height 120px pushed the input bottom 11px and the counter
-     37px below the viewport at 390x844/402x874; the 58vh sheet caps the paint
-     at 44px anyway. Let the textarea scroll internally. */
-  min-height: 44px !important;
-}
-.studio-workspace.is-carousel-mode .ce-inspector-pinned {
-  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  flex: 1 1 auto !important;
+  min-height: 120px !important;
 }
 
 .studio-workspace.is-post-mode .ce-inspector-section,

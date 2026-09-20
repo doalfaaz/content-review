@@ -95,13 +95,7 @@
         if (window.__CE_TOUCH_TRACE__) console.log('[ce-touch] commit data', { newText: newText.slice(0, 30), idx: idx, hasDeck: !!(deck && deck.slides), hasState: !!state });
         if (deck && deck.slides && deck.slides[idx]) {
           deck.slides[idx].text = newText;
-          /* m05-03: .html = flattened text destroyed authored markup (<b>/<br>).
-             Keep the editable's innerHTML when the node is still attached —
-             the renderers rely on pre-line for authored text, and innerHTML
-             preserves both paths. */
-          var liveHtml = '';
-          try { liveHtml = el.innerHTML || ''; } catch (_ih) { liveHtml = ''; }
-          deck.slides[idx].html = liveHtml || newText;
+          deck.slides[idx].html = newText;
           deck.updatedAt = Date.now();
           state.studioDirty = true;
           if (window.__CE_PERSIST_DECK_EDIT__) window.__CE_PERSIST_DECK_EDIT__(deck);
@@ -119,33 +113,6 @@
         commit();
       });
     });
-
-    /* m05-01: poems are NOT data-ce-block nodes — their editable text is
-       #studio-editable-text (data-ce-poem-id). Long-press must enter the
-       EXISTING poem edit machinery (poemBeginTextEdit → poemFinishTextEdit →
-       autosave), not the deck-commit path above. No touch-action:none here:
-       poem drag lives on the handle, not the text. */
-    var poemText = stage.querySelector('#studio-editable-text');
-    if (poemText && !poemText.__ceTouchArmed) {
-      poemText.__ceTouchArmed = true;
-      var plpTimer = 0, plpPt = null;
-      poemText.addEventListener('pointerdown', function (e) {
-        if (e.pointerType === 'mouse') return;
-        if (poemText.getAttribute('contenteditable') === 'true') return;
-        plpPt = { x: e.clientX, y: e.clientY };
-        clearTimeout(plpTimer);
-        plpTimer = setTimeout(function () {
-          try { navigator.vibrate && navigator.vibrate(12); } catch (_) {}
-          try { if (typeof window.poemSelectTextBox === 'function') window.poemSelectTextBox(true, true); } catch (_) {}
-          try { if (typeof window.poemBeginTextEdit === 'function') window.poemBeginTextEdit(); } catch (_) {}
-        }, LONG_PRESS_MS);
-      });
-      poemText.addEventListener('pointermove', function (e) {
-        if (plpPt && Math.abs(e.clientX - plpPt.x) + Math.abs(e.clientY - plpPt.y) > 12) { clearTimeout(plpTimer); plpTimer = 0; }
-      });
-      poemText.addEventListener('pointerup', function () { clearTimeout(plpTimer); plpTimer = 0; });
-      poemText.addEventListener('pointercancel', function () { clearTimeout(plpTimer); plpTimer = 0; });
-    }
   }
   window.__CE_ARM_TOUCH_EDITING__ = armTouchEditing;
 
@@ -299,14 +266,7 @@
     if (window.__CE_SYNC_UNREACHABLE__) return;
     window.__CE_SYNC_UNREACHABLE__ = true;
     try { localStorage.setItem('ce_last_sync_error', mode + ' @ ' + new Date().toISOString()); } catch (_) {}
-    /* m05-11: once per session across reloads (reloads were re-nagging), and
-       the advice names the working fallback — the owner IS in a browser. */
-    var alreadyToasted = false;
-    try { alreadyToasted = sessionStorage.getItem('ce_sync_toasted') === '1'; } catch (_) {}
-    if (window.showAppToast && !alreadyToasted) {
-      try { sessionStorage.setItem('ce_sync_toasted', '1'); } catch (_) {}
-      window.showAppToast('Mac sync offline — use Download for phone / Send to Plan.');
-    }
+    if (window.showAppToast) window.showAppToast('Mac unreachable — open in Safari or use Download-for-phone');
     console.warn('[ce-sync] unreachable:', mode);
   }
   var reachFlapGuard = 0;
@@ -453,8 +413,10 @@
   /* ---- Write key (P0-2) ---------------------------------------------------
      Writes on the sync server require the shared write key (X-CE-Sync-Key
      header / ?k= param). The owner pastes it ONCE via prompt(); it lives in
-     localStorage `ce_sync_key`. Reads stay key-free — the manager read-view
-     never triggers this. */
+     localStorage `ce_sync_key`. This helper is for WRITES: the server now
+     key-gates the data reads too (/bank, /schedule-requests, /decks), so a
+     caller that needs one of those must send the same key — see
+     ops/ce_deck_sync.py do_GET (WL1696). */
   function getWriteKey() {
     try { return localStorage.getItem('ce_sync_key') || ''; } catch (_) { return ''; }
   }
@@ -478,19 +440,7 @@
       slides: deck.slides,
       updatedAt: Date.now()
     };
-    /* m05-03: the whole write used to sit in one bare try{} — an observed real
-       session could leave ce_deck_edits:{} with no trace. Serialize first so a
-       stringify throw is caught by the same warn, and surface the failure. */
-    var serialized;
-    try { serialized = JSON.stringify(store); } catch (err) {
-      console.warn('[ce-touch] deck-edit serialize failed:', err);
-      if (window.showAppToast) window.showAppToast('Edit could not be saved on this device.');
-      return;
-    }
-    try { localStorage.setItem('ce_deck_edits', serialized); } catch (err) {
-      console.warn('[ce-touch] deck-edit persist failed:', err);
-      if (window.showAppToast) window.showAppToast('Edit could not be saved on this device.');
-    }
+    try { localStorage.setItem('ce_deck_edits', JSON.stringify(store)); } catch (_) {}
     if (!window.__CE_SYNC_ENDPOINT__) return;
     var payload = { deckId: deck.id, deck: store[deck.id] };
     var base = window.__CE_SYNC_ENDPOINT__;
@@ -507,7 +457,21 @@
             body: JSON.stringify(payload)
           });
       return req.then(
-        function (r) { return { status: r.status }; },
+        function (r) {
+          /* WL0498 (2026-09-19): the body was discarded, so a losing LWW write
+             (200 {ok:true, stale:true}) looked exactly like a win — the phone
+             reported the edit as synced while the server had kept the older
+             copy. Read the body so the caller can tell the two apart; a body
+             that is not JSON (or empty) leaves stale=false, unchanged. */
+          return r.text().then(
+            function (txt) {
+              var body = null;
+              try { body = txt ? JSON.parse(txt) : null; } catch (_pe) { body = null; }
+              return { status: r.status, body: body };
+            },
+            function () { return { status: r.status, body: null }; }
+          );
+        },
         function () { return null; }
       );
     }
@@ -555,8 +519,16 @@
       // A 4xx/5xx (or the client-side oversize refusal, status 0) is a
       // REJECTION, not reachability — the old `!res ? unreachable : reachable`
       // marked 414/413/429 green. Only a real 2xx/3xx means the write landed.
-      if (!res || !res.status || res.status >= 400) markUnreachable('write-rejected-' + (res && res.status ? res.status : 'network'));
-      else markReachable();
+      if (!res || !res.status || res.status >= 400) { markUnreachable('write-rejected-' + (res && res.status ? res.status : 'network')); return; }
+      /* WL0498: 200 {stale:true} means the server KEPT THE OLDER COPY — this
+         edit was discarded, so reporting it as synced is a false claim. Say so
+         and keep the local copy (it is still in ce_deck_edits) so the next
+         write can win once the server copy advances. */
+      if (res.body && res.body.stale === true) {
+        markUnreachable('edit-superseded-by-newer-remote-copy');
+        return;
+      }
+      markReachable();
     }).catch(function () { markUnreachable('write-failed'); });
   };
 
@@ -586,27 +558,6 @@
   }
   applyLocalEdits();
 
-  /* m05-02: the phone never runs the native boot payload, so
-     __NATIVE_POEM_DESIGNS__ was never seeded and every poem edit saved to
-     ce_poem_designs was a dead letter (openStudio's saved-design branch reads
-     this map). Seed it from localStorage here — the same overlay contract
-     applyLocalEdits gives decks — and apply the text onto catalog rows so
-     library cards / Studio read the saved design after reload. */
-  (function seedPoemDesigns() {
-    try {
-      var designs = null;
-      try { designs = JSON.parse(localStorage.getItem('ce_poem_designs') || 'null'); } catch (_) { designs = null; }
-      if (!designs || typeof designs !== 'object' || Array.isArray(designs)) return;
-      var existing = window.__NATIVE_POEM_DESIGNS__;
-      /* Native boot wins when it already seeded a richer map (Mac app). */
-      if (existing && typeof existing === 'object' && Object.keys(existing).length >= Object.keys(designs).length) return;
-      window.__NATIVE_POEM_DESIGNS__ = Object.assign({}, designs, existing || {});
-      if (typeof window.__CE_APPLY_POEM_DESIGN_OVERLAYS__ === 'function') window.__CE_APPLY_POEM_DESIGN_OVERLAYS__();
-    } catch (err) {
-      console.warn('[ce-touch] poem-designs seed failed:', err);
-    }
-  })();
-
   // Pull remote edits (from the Mac app) so the phone shows the app's version.
   // Runs on boot and every 60s while the page is visible. Three consecutive
   // failed pulls (P0-3) clear the cached endpoint and re-run discovery — a
@@ -634,36 +585,23 @@
         markReachable();
         var local = {};
         try { local = JSON.parse(localStorage.getItem('ce_deck_edits') || '{}'); } catch (_) {}
-        var __clobberToasts = 0;
         Object.keys(data.decks).forEach(function (id) {
           var remote = data.decks[id];
           var mine = local[id];
           if (remote && Array.isArray(remote.slides)) {
             if (!mine || (remote.updatedAt || 0) > (mine.updatedAt || 0)) {
               local[id] = remote;
-              // m05-05: never swap the model the canvas is bound to while the
-              // open deck is dirty — the remote version wins on close/reopen
-              // honestly (local[] still records it: the store is the truth).
-              var st = null;
-              try { st = window.state; } catch (_st) {}
-              var openId = st && st.currentItem && String(st.currentItem.id || '');
-              var openDirty = !!(openId && openId === id && st.studioDirty);
-              if (!openDirty) {
-                window.__CE_DECKS_FULL__ = window.__CE_DECKS_FULL__ || {};
-                window.__CE_DECKS_FULL__[id] = Object.assign({}, window.__CE_DECKS_FULL__[id] || {}, remote, { id: id });
-              }
-              // m05-05: signal EVERY overwrite, not only the open-deck case.
-              // Rate-limit to one toast per pull batch.
+              window.__CE_DECKS_FULL__ = window.__CE_DECKS_FULL__ || {};
+              window.__CE_DECKS_FULL__[id] = Object.assign({}, window.__CE_DECKS_FULL__[id] || {}, remote, { id: id });
+              // P1: tell the owner when the OPEN deck just changed underneath
+              // him (one version everywhere). Reopening the deck serves the
+              // fresh version; a dirty canvas is never touched mid-edit.
               try {
-                if (typeof window.showAppToast === 'function' && __clobberToasts < 1) {
-                  if (openId && openId === id) {
-                    __clobberToasts++;
-                    if (!st.studioDirty) window.showAppToast('Updated from your Mac/phone');
-                    else window.showAppToast('Your Mac updated this deck — reopen to see it (your open edits are still on screen).');
-                  } else if (mine && Array.isArray(mine.slides)) {
-                    __clobberToasts++;
-                    window.showAppToast('A deck was updated from your Mac.');
-                  }
+                var st = window.state;
+                var openId = st && st.currentItem && String(st.currentItem.id || '');
+                if (openId && openId === id && !st.studioDirty &&
+                    typeof window.showAppToast === 'function') {
+                  window.showAppToast('Updated from your Mac/phone');
                 }
               } catch (_) {}
             }
@@ -1579,25 +1517,6 @@
         pinned.style.setProperty('width', '100vw', 'important');
         pinned.style.setProperty('height', '96px', 'important');
         pinned.style.setProperty('overflow-y', 'auto', 'important');
-        pinned.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
-        /* m01 FIX-6: the caption block inside needs 155px but the pinned band
-           is 96px; the input's min-height 120px (native-studio) is the driver.
-           With the band scrollable + bottom padding, the input and counter are
-           reachable by a small scroll instead of dead below the fold. */
-        pinned.style.setProperty('padding-bottom', 'calc(10px + env(safe-area-inset-bottom, 0px))', 'important');
-      }
-      var pinnedInput = dock.querySelector('.ce-inspector-pinned .ce-deck-caption-input');
-      if (pinnedInput) {
-        pinnedInput.style.setProperty('min-height', '44px', 'important');
-        pinnedInput.style.setProperty('flex', '0 0 auto', 'important');
-      }
-      /* m04-10: pinned caption strip measured scrollHeight 132 > clientHeight 95
-         with no visual affordance — the last line looked truncated. A bottom
-         fade on the scroll viewport signals "more below" without changing the
-         owner-locked sheet height law. */
-      if (scroll) {
-        scroll.style.setProperty('mask-image', 'linear-gradient(180deg,#000 calc(100% - 28px), rgba(0,0,0,.45))', 'important');
-        scroll.style.setProperty('-webkit-mask-image', 'linear-gradient(180deg,#000 calc(100% - 28px), rgba(0,0,0,.45))', 'important');
       }
     }
     function toggle(event) {
@@ -1616,17 +1535,6 @@
       try { if (window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__) requestAnimationFrame(window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__); } catch (_fitErr) {}
     }
     t.addEventListener('click', toggle, true);
-    /* m05-08: pointerup fallback — a tap that delivers pointer/touch but no
-       click (node swapped mid-gesture) used to strand the sheet. Dedupe with
-       a 400ms latch against the click path above. */
-    t.addEventListener('pointerup', function (e) {
-      if (e.pointerType !== 'touch') return;
-      e.preventDefault();
-      var now = Date.now();
-      if (t.__ceToggleLatch && now - t.__ceToggleLatch < 400) return;
-      t.__ceToggleLatch = now;
-      toggle(e);
-    }, true);
     t.__ceToolsEditor = editor;
     t.__ceToolsRestore = restore;
     t.__ceToolsOpen = openSheet;

@@ -153,8 +153,19 @@
     if (filter === 'philosophy' && categoryOf(item) !== 'philosophy') return false;
     if (languageOf(item) !== language) return false;
     if (structuredOnly && !pointsOf(item).length && !bodyOf(item)) return false;
-    var query = String(context.query || '').trim().toLowerCase();
-    return !query || searchableText(item).indexOf(query) >= 0;
+    /* WL5067/WL2344/WL2287 (2026-09-19): this file is a SEPARATE script from
+       index.html's IIFE, so it could not see ceSearchFold and compared raw
+       substrings — an NFC-typed query could never reach an NFD corpus word.
+       Use the shared fold when the host page exposes it; the raw compare
+       stays as the standalone fallback so this file is still self-sufficient. */
+    var __raw = String(context.query || '').trim();
+    var query = (typeof window.ceSearchFold === 'function')
+      ? window.ceSearchFold(__raw)
+      : __raw.toLowerCase();
+    if (!query) return true;
+    var __hay = searchableText(item);
+    if (typeof window.ceSearchHit === 'function') return window.ceSearchHit(__hay, query);
+    return __hay.toLowerCase().indexOf(query) >= 0;
   }
 
   function priority(topic) {

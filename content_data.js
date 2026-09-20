@@ -4256,7 +4256,7 @@ window.ALL_CONTENT_DATA = [
   "id": "poem:poem-17869944274159628",
   "kind": "poem",
   "title": "poem-17869944274159628",
-  "body": "आखिर किस-किस के लिए लिखें नग़्मे अब\nकितने छोड़ गए तन््हा अब याद भी नहीं",
+  "body": "आखिर किस-किस के लिए लिखें नग़्मे अब\nकितने छोड़ गए तन्हा अब याद भी नहीं",
   "pillar": "Poetry",
   "status": "posted",
   "metadata": {
@@ -5856,7 +5856,7 @@ window.ALL_CONTENT_DATA = [
   "id": "poem:poem-17885763244160704",
   "kind": "poem",
   "title": "poem-17885763244160704",
-  "body": "फ़िर तन््हा, फिर लाचार नहीं होगा\nअब शायद मुझे फ़िर प्यार नहीं होगा",
+  "body": "फ़िर तन्हा, फिर लाचार नहीं होगा\nअब शायद मुझे फ़िर प्यार नहीं होगा",
   "pillar": "Poetry",
   "status": "posted",
   "metadata": {
@@ -7570,7 +7570,7 @@ window.ALL_CONTENT_DATA = [
   "id": "poem:poem-17929668568026719",
   "kind": "poem",
   "title": "poem-17929668568026719",
-  "body": "फिर तन््हा, फिर लाचार नहीं होगा\nअब शायद मुझे फिर प्यार नहीं होगा।",
+  "body": "फिर तन्हा, फिर लाचार नहीं होगा\nअब शायद मुझे फिर प्यार नहीं होगा।",
   "pillar": "Poetry",
   "status": "posted",
   "metadata": {
@@ -26487,7 +26487,7 @@ window.ALL_CONTENT_DATA = [
   "id": "poem:poem-17883876805703314",
   "kind": "poem",
   "title": ") ०१: रा",
-  "body": "इंसान को इतना बुरा तो बन ही जाना चाहिए\nकि उसमें बुराई ढूंढ़ने वालों को\nज़्यादा मशक््क़त ना करनी पड़े।",
+  "body": "इंसान को इतना बुरा तो बन ही जाना चाहिए\nकि उसमें बुराई ढूंढ़ने वालों को\nज़्यादा मशक्क़त ना करनी पड़े।",
   "pillar": "Poetry",
   "status": "posted",
   "metadata": {
@@ -44644,7 +44644,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:masterpost:marketing:AD-3:1",
   "kind": "post",
   "title": "Tum Psychology Jaante Ho — Phir Bhi Wahi Loop",
-  "body": "Tum psychology jaante ho. Patterns samajhte ho. Books padhi hain, reels save ki hain, therapy ki hai. Attachment style tak pata hai.\n\nAur phir bhi —\n\nWoh ek message aata hai — chest tight.\nWoh ek criticism — body defensive.\nWoh ek closeness ka moment — kuch andar band ho jaata hai.\nWoh ek stress — wahi purana avoidance wapas.\n\nYeh knowledge ki problem nahi rahi.\n\nKyunki jo chal raha hai woh nervous system ka default hai. Jab amygdala threat detect karta hai, prefrontal cortex — jo reasons jaanta hai — kuch milliseconds ke liye offline ho jaata hai. Literally. Knowledge baad mein aati hai, jab reaction ho chuka hota hai.\n\nIsiliye jaan-ne aur kar-ne mein itni door hai.\n\nAB 2.0 unke liye hai jo bahut kuch jaante hain — aur phir bhi loop mein ghoom rahe hain.\n\nFounding batch ₹999.\n\nTab join karo jab genuinely ready ho — information se aage jaake kaam karne ke liye.",
+  "body": "Tum psychology jaante ho. Patterns samajhte ho. Books padhi hain, reels save ki hain, therapy ki hai. Attachment style tak pata hai.\n\nAur phir bhi —\n\nWoh ek message aata hai — chest tight.\nWoh ek criticism — body defensive.\nWoh ek closeness ka moment — kuch andar band ho jaata hai.\nWoh ek stress — wahi purana avoidance wapas.\n\nYeh knowledge ki problem nahi rahi.\n\nKyunki jo chal raha hai woh nervous system ka default hai. Jab amygdala threat detect karta hai, prefrontal cortex — jo reasons jaanta hai — kuch milliseconds ke liye offline ho jaata hai. Literally. Knowledge baad mein aati hai, jab reaction ho chuka hota hai.\n\nIsiliye jaan-ne aur kar-ne mein itni door hai.\n\nAB 2.0 unke liye hai jo bahut kuch jaante hain — aur phir bhi loop mein ghoom rahe hain.\n\nFounding batch ₹1,999.\n\nTab join karo jab genuinely ready ho — information se aage jaake kaam karne ke liye.",
   "pillar": "Sales / Course Bridge",
   "status": "draft",
   "metadata": {
@@ -44751,7 +44751,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:masterpost:sales:DM-4:0",
   "kind": "post",
   "title": "Seriously Soch Rahe Ho — Toh Yeh Padho Pehle",
-  "body": "'Main sochta hoon AB ke baare mein' — yeh message mujhe kaafi logon ne bheja hai.\n\nAgar seriously consider kar rahe ho, toh andar kya hai:\n\nRaga-Dvesha aur desire cycles — woh loop kaise banta hai jahan ek cheez mile toh doosri chahiye. Loop samajhna zaroori hai loop todne se pehle.\n\nEgo identification — jab ego virtue ke roop mein chhupta hai. Jab 'main bahut caring hoon' actually ek defense ban jaata hai. Yeh uncomfortable hota hai — aur yahin dikhaaya jaata hai.\n\nNervous system + Vedanta ek saath — kyunki sirf Vedanta samajhna aur body ka response badalna, dono alag cheezein hain.\n\nWeekly live sessions, recorded bhi. Practical frameworks jo concept pe rukein nahi, use tak jaayein.\n\nPehle sirf knowledge thi. Ab ek specific sequence hai jo ek-ek layer kholta hai.\n\n₹999, founding batch. Agar baat karni ho — reply karo, main khud sun'ta hoon.",
+  "body": "'Main sochta hoon AB ke baare mein' — yeh message mujhe kaafi logon ne bheja hai.\n\nAgar seriously consider kar rahe ho, toh andar kya hai:\n\nRaga-Dvesha aur desire cycles — woh loop kaise banta hai jahan ek cheez mile toh doosri chahiye. Loop samajhna zaroori hai loop todne se pehle.\n\nEgo identification — jab ego virtue ke roop mein chhupta hai. Jab 'main bahut caring hoon' actually ek defense ban jaata hai. Yeh uncomfortable hota hai — aur yahin dikhaaya jaata hai.\n\nNervous system + Vedanta ek saath — kyunki sirf Vedanta samajhna aur body ka response badalna, dono alag cheezein hain.\n\nWeekly live sessions, recorded bhi. Practical frameworks jo concept pe rukein nahi, use tak jaayein.\n\nPehle sirf knowledge thi. Ab ek specific sequence hai jo ek-ek layer kholta hai.\n\n₹1,999, founding batch. Agar baat karni ho — reply karo, main khud sun'ta hoon.",
   "pillar": "Sales / Course Bridge",
   "status": "draft",
   "metadata": {
@@ -44822,7 +44822,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:masterpost:marketing:AD-9:0",
   "kind": "post",
   "title": "AB 2.0 Mein Week By Week Kya Hota Hai",
-  "body": "Yeh mujhse bahut logon ne poochha — AB 2.0 mein week by week actually hota kya hai. Seedha bata deta hoon:\n\nWeek 1 — Identity Architecture. Tum kaun ho, aur tum kaun ban gaye survival ke liye — dono ko alag karna. Kyunki jo self tum abhi carry karte ho, usmein kuch learned hai, kuch conditioned.\n\nWeek 2 — Nervous System + Vedanta. Ek hi sach, do bhashayein. Body ki safety aur self-awareness saath — kyunki ek bina doosre ke kaam nahi karta.\n\nWeek 3 — Pattern Interruption. Trigger ke baad analysis nahi — trigger ke beech noticing. Woh gap jo pehle nahi tha.\n\nWeek 4 — Relationships aur Boundaries. Clarity se choose karna, fear ya guilt ya fawn se nahi.\n\nHar week ek naya layer kholta hai. Goal yeh nahi ki tum aur concepts yaad karo — goal yeh hai ki jab life off feel ho, tumhare paas ek map ho: body ka, ego ka, identity ka.\n\n₹999. Link bio mein.",
+  "body": "Yeh mujhse bahut logon ne poochha — AB 2.0 mein week by week actually hota kya hai. Seedha bata deta hoon:\n\nWeek 1 — Identity Architecture. Tum kaun ho, aur tum kaun ban gaye survival ke liye — dono ko alag karna. Kyunki jo self tum abhi carry karte ho, usmein kuch learned hai, kuch conditioned.\n\nWeek 2 — Nervous System + Vedanta. Ek hi sach, do bhashayein. Body ki safety aur self-awareness saath — kyunki ek bina doosre ke kaam nahi karta.\n\nWeek 3 — Pattern Interruption. Trigger ke baad analysis nahi — trigger ke beech noticing. Woh gap jo pehle nahi tha.\n\nWeek 4 — Relationships aur Boundaries. Clarity se choose karna, fear ya guilt ya fawn se nahi.\n\nHar week ek naya layer kholta hai. Goal yeh nahi ki tum aur concepts yaad karo — goal yeh hai ki jab life off feel ho, tumhare paas ek map ho: body ka, ego ka, identity ka.\n\n₹1,999. Link bio mein.",
   "pillar": "Marketing Posts",
   "status": "draft",
   "metadata": {
@@ -46693,7 +46693,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:claude:dm_flow:DM_4_Pitch_Flow",
   "kind": "post",
   "title": "AB Ka Pitch — Un Logon Ke Liye Jo Samajh Ke Bhi Ruke Hain",
-  "body": "Yeh un logon ke liye hai jo pattern pehchaan lete hain — par usse tod nahi paate.\n\nPhilosophy samajhte ho. Phir bhi wahi trigger pe wahi reaction. Baar baar. Wahi situation, wahi guilt, wahi 'ab nahi karunga', wahi repeat.\n\nMaine 3 saal yahi samjha: yeh loop information se nahi tutega. Aur zyada padhne se nahi. Structure se tutega.\n\nAB ke andar: desire cycles, ego kaise virtue ke roop mein chhupta hai, nervous system + Vedanta ka frame, attachment mapping, sakshi practice, aur daily pattern-interrupt.\n\n4 modules. Self-paced. Lifetime. Founding batch: 999.\n\nPhilosophy without psychology sirf theory hai — root nahi. Psychology without philosophy sirf technique hai — ground nahi. AB dono jodta hai.\n\nFounding price hamesha nahi rahegi. Pehle batch mein community choti hoti hai — main zyada available hota hoon.\n\nBaaki, marzi tumhari — main sirf darwaza dikha raha hoon.",
+  "body": "Yeh un logon ke liye hai jo pattern pehchaan lete hain — par usse tod nahi paate.\n\nPhilosophy samajhte ho. Phir bhi wahi trigger pe wahi reaction. Baar baar. Wahi situation, wahi guilt, wahi 'ab nahi karunga', wahi repeat.\n\nMaine 3 saal yahi samjha: yeh loop information se nahi tutega. Aur zyada padhne se nahi. Structure se tutega.\n\nAB ke andar: desire cycles, ego kaise virtue ke roop mein chhupta hai, nervous system + Vedanta ka frame, attachment mapping, sakshi practice, aur daily pattern-interrupt.\n\n4 modules. Self-paced. Lifetime. Founding batch: ₹1,999.\n\nPhilosophy without psychology sirf theory hai — root nahi. Psychology without philosophy sirf technique hai — ground nahi. AB dono jodta hai.\n\nFounding price hamesha nahi rahegi. Pehle batch mein community choti hoti hai — main zyada available hota hoon.\n\nBaaki, marzi tumhari — main sirf darwaza dikha raha hoon.",
   "pillar": "Placeholder / Variable",
   "status": "draft",
   "metadata": {
@@ -47433,7 +47433,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:exp15:dm:launch-day-whatsapp-broadcast",
   "kind": "post",
   "title": "Launch Day WhatsApp — AB Khul Gaya",
-  "body": "WHATSAPP BROADCAST — Launch Day\n\nAaj AB khul gaya. Jinhone wait kiya — sach mein, shukriya.\n\nEk baat seedhi keh deta hoon: yeh course un logon ke liye nahi hai jo ek weekend mein sab badal dena chahte hain. Yeh un ke liye hai jo andar se jaante hain ki kuch pattern chal raha hai — aur usse samajhna chahte hain. Body ke level pe. Psychology ke frame se. Vedanta ke angle se.\n\nMilega kya — ek structured system jo emotional pattern ko body se shuru karke identity tak le jaata hai. Apni speed se. Lifetime access. Founding batch: 999.\n\nAgar andar kuch 'haan' bola — link bio mein hai.\nSawaal hai — reply karo. Main khud padhta hoon har message.\n\nKoi pressure nahi. Bas bata raha hoon ki darwaza khula hai.",
+  "body": "WHATSAPP BROADCAST — Launch Day\n\nAaj AB khul gaya. Jinhone wait kiya — sach mein, shukriya.\n\nEk baat seedhi keh deta hoon: yeh course un logon ke liye nahi hai jo ek weekend mein sab badal dena chahte hain. Yeh un ke liye hai jo andar se jaante hain ki kuch pattern chal raha hai — aur usse samajhna chahte hain. Body ke level pe. Psychology ke frame se. Vedanta ke angle se.\n\nMilega kya — ek structured system jo emotional pattern ko body se shuru karke identity tak le jaata hai. Apni speed se. Lifetime access. Founding batch: ₹1,999.\n\nAgar andar kuch 'haan' bola — link bio mein hai.\nSawaal hai — reply karo. Main khud padhta hoon har message.\n\nKoi pressure nahi. Bas bata raha hoon ki darwaza khula hai.",
   "pillar": "Engagement / DM / Interaction Prompt",
   "status": "draft",
   "metadata": {
@@ -49057,7 +49057,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:b9_10",
   "kind": "post",
   "title": "Seedha Bolunga — AB 2.0 Kya Hai, Kya Nahi, Kitna Hai",
-  "body": "Yeh woh post hai. Seedha bolunga.\n\nAB 2.0 — 6th batch. Enrollment open hai.\n\nYeh kya hai: 8 weeks, live sessions, ek integrated framework — modern psychology (nervous system, attachment, trauma) + Vedanta (Sakshi Bhav, Samskaras, Ahankara). Samajhne ka structure, aur ek practice jo body ke level pe kaam kare — sirf mind ke level pe nahi.\n\nGalat assumption yeh hai ki identity-level kaam sirf self-reflection se hota hai. Woh tab hota hai jab framework ho, community ho, aur koi live poochh sake — 'main sahi direction mein hoon?'\n\nWeek 1: dominant pattern ki identification — kahan se aaya, body mein kaise run karta hai.\nMid: Sakshi Bhav ko concept se experience banana.\nEnd of 8 weeks: ek vocabulary, ek practice, ek system — jo agle trigger pe zero se start nahi karta.\n\nFees: 999 rupaye. Main chahta hoon cost reason na bane. Refund available hai.\n\nSeats limited hain — kyunki main bulk mein genuinely engage nahi kar sakta.\n\nPehli baar ho ya 5 batches se track kar rahe ho — dono fit ho, agar mechanism resonate kare.\n\n'AB2' comment karo ya DM.",
+  "body": "Yeh woh post hai. Seedha bolunga.\n\nAB 2.0 — 6th batch. Enrollment open hai.\n\nYeh kya hai: 8 weeks, live sessions, ek integrated framework — modern psychology (nervous system, attachment, trauma) + Vedanta (Sakshi Bhav, Samskaras, Ahankara). Samajhne ka structure, aur ek practice jo body ke level pe kaam kare — sirf mind ke level pe nahi.\n\nGalat assumption yeh hai ki identity-level kaam sirf self-reflection se hota hai. Woh tab hota hai jab framework ho, community ho, aur koi live poochh sake — 'main sahi direction mein hoon?'\n\nWeek 1: dominant pattern ki identification — kahan se aaya, body mein kaise run karta hai.\nMid: Sakshi Bhav ko concept se experience banana.\nEnd of 8 weeks: ek vocabulary, ek practice, ek system — jo agle trigger pe zero se start nahi karta.\n\nFees: ₹1,999. Main chahta hoon cost reason na bane. Refund available hai.\n\nSeats limited hain — kyunki main bulk mein genuinely engage nahi kar sakta.\n\nPehli baar ho ya 5 batches se track kar rahe ho — dono fit ho, agar mechanism resonate kare.\n\n'AB2' comment karo ya DM.",
   "pillar": "Sales / Launch",
   "status": "draft",
   "metadata": {
@@ -49409,8 +49409,8 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "post:exp12:faq:price-reframe-pattern-cost",
   "kind": "post",
-  "title": "₹999 Zyada Lagta Hai — Ek Aur Hisaab Karo",
-  "body": "Ruko. Ek cheez seriously calculate karte hain.\n\nWoh pattern jo baar baar repeat hota hai — relationship mein wahi ladai, kaam mein wahi block, apne aap ke saath wahi loop. Woh kitne saal se hai? 5? 10? Zyada?\n\nAb count karo:\nKitni energy har baar us pattern ke activate hone pe gayi.\nKitne decisions galat hue kyunki pattern tha.\nKitne mauke nahi liye kyunki familiar safe lagta tha.\nKitne rishte strain hue. Kitna peace gaya.\n\nWoh cost kabhi number mein nahi aati. Lekin real hai.\n\nAb ₹999 aur pattern continue karne ki cost — inhe saath rakh ke dekho. Yeh reverse calculation hai — zyada paisa dene ka nahi, tab ka hisaab jab investment nahi ki.\n\n₹999 payment nahi hai — pattern ko interrupt karne ki ek shuruaat hai.\n\nMain nahi keh raha yeh tumhare liye affordable hai — woh main nahi jaanta. Agar genuinely manage nahi ho raha, DM karo, kuch dekh sakte hain. Par agar ho sakta hai — comparison yahan hai. Pattern ki continuity free nahi hoti. Bas bill alag jagah aata hai.",
+  "title": "₹1,999 Zyada Lagta Hai — Ek Aur Hisaab Karo",
+  "body": "Ruko. Ek cheez seriously calculate karte hain.\n\nWoh pattern jo baar baar repeat hota hai — relationship mein wahi ladai, kaam mein wahi block, apne aap ke saath wahi loop. Woh kitne saal se hai? 5? 10? Zyada?\n\nAb count karo:\nKitni energy har baar us pattern ke activate hone pe gayi.\nKitne decisions galat hue kyunki pattern tha.\nKitne mauke nahi liye kyunki familiar safe lagta tha.\nKitne rishte strain hue. Kitna peace gaya.\n\nWoh cost kabhi number mein nahi aati. Lekin real hai.\n\nAb ₹1,999 aur pattern continue karne ki cost — inhe saath rakh ke dekho. Yeh reverse calculation hai — zyada paisa dene ka nahi, tab ka hisaab jab investment nahi ki.\n\n₹1,999 payment nahi hai — pattern ko interrupt karne ki ek shuruaat hai.\n\nMain nahi keh raha yeh tumhare liye affordable hai — woh main nahi jaanta. Agar genuinely manage nahi ho raha, DM karo, kuch dekh sakte hain. Par agar ho sakta hai — comparison yahan hai. Pattern ki continuity free nahi hoti. Bas bill alag jagah aata hai.",
   "pillar": "FAQ / Objection / Doubt Handling",
   "status": "draft",
   "metadata": {
@@ -49551,7 +49551,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:exp12:faq:what-guarantee",
   "kind": "post",
   "title": "Guarantee Kyun Nahi Deta — Yeh Respect Hai, Disrespect Nahi",
-  "body": "'Kya guarantee hai ki kaam karega?'\n\nMain guarantee nahi deta.\n\nAur mujhe pata hai yeh answer ajeeb lagta hai — jab course mein confidence ho.\n\nPar seedha bolta hoon: healing ki guarantee koi honestly de nahi sakta. Jo de raha hai woh ya toh nahi jaanta ki kaam kaise hota hai, ya tumse woh 'haan' expect karta hai jo bik jaaye. Main dono nahi hoon.\n\nJo main de sakta hoon: 1000+ logon ne AB liya hai, hazaron ne poora kiya hai. Har batch ke baad revise hota hai — jo kaam nahi kiya, hata diya; jo kaam kiya, rakha. Aur ₹999 mein risk real nahi — agar genuinely kuch nahi laga, toh woh bhi apne baare mein ek information hai.\n\nLekin guarantee — nahi.\n\nKyunki guarantee ek deal hoti hai jo tumhe ek object bana deti hai — kuch jise fix kiya ja sake.\n\nTumhara kaam aisa nahi hai. Aur main tumhe us tarah dekhta bhi nahi.",
+  "body": "'Kya guarantee hai ki kaam karega?'\n\nMain guarantee nahi deta.\n\nAur mujhe pata hai yeh answer ajeeb lagta hai — jab course mein confidence ho.\n\nPar seedha bolta hoon: healing ki guarantee koi honestly de nahi sakta. Jo de raha hai woh ya toh nahi jaanta ki kaam kaise hota hai, ya tumse woh 'haan' expect karta hai jo bik jaaye. Main dono nahi hoon.\n\nJo main de sakta hoon: 1000+ logon ne AB liya hai, hazaron ne poora kiya hai. Har batch ke baad revise hota hai — jo kaam nahi kiya, hata diya; jo kaam kiya, rakha. Aur ₹1,999 mein risk real nahi — agar genuinely kuch nahi laga, toh woh bhi apne baare mein ek information hai.\n\nLekin guarantee — nahi.\n\nKyunki guarantee ek deal hoti hai jo tumhe ek object bana deti hai — kuch jise fix kiya ja sake.\n\nTumhara kaam aisa nahi hai. Aur main tumhe us tarah dekhta bhi nahi.",
   "pillar": "FAQ / Objection / Doubt Handling",
   "status": "draft",
   "metadata": {
@@ -50290,7 +50290,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:claude:dm_flow:DM_3_Objection_Flow",
   "kind": "post",
   "title": "Teen Objections — Alag Lafz, Ek Darr",
-  "body": "Har launch mein teen objections aate hain. Alag words mein. Same darr mein.\n\nPRICE — 'Thodi zyada lagti hai.'\nResponse: '₹999 ek number hai, main force nahi karta. Bas ek cheez poochhta hoon — in patterns ko carry karne ki cost kya hai? Time, energy, relationships? AB ek baar. Woh cost roz. Genuinely tight hai toh wait karo, free content rahega. Fence par ho toh refund policy hai — risk tumhara nahi.'\nMechanism: price objection often cost-vs-cost ki comparison nahi hoti — yeh unfamiliarity hoti hai.\n\nREADINESS — 'Pehle khud theek ho jaana chahiye.'\nResponse: 'Yeh woh belief hai jo AB pehle address karta hai. Readiness ka wait — woh readiness nahi, familiar delay ka roop hai. Batao specifically kya rok raha hai.'\nMechanism: 'pehle theek hona' ek moving target hai.\n\nSPIRITUALITY — 'Yeh spirituality ke liye hai na?'\nResponse: 'Samajhta hoon impression kyun hai. AB philosophy + psychology hai, ritual nahi. Gita se modern patterns explain karta hoon — kyunki woh 2500 saal pehle wahi cheez dekh chuke the.'\n\nHar objection darr ka ek roop hai. Fact se nahi — pehle acknowledge, phir specific redirect.",
+  "body": "Har launch mein teen objections aate hain. Alag words mein. Same darr mein.\n\nPRICE — 'Thodi zyada lagti hai.'\nResponse: '₹1,999 ek number hai, main force nahi karta. Bas ek cheez poochhta hoon — in patterns ko carry karne ki cost kya hai? Time, energy, relationships? AB ek baar. Woh cost roz. Genuinely tight hai toh wait karo, free content rahega. Fence par ho toh refund policy hai — risk tumhara nahi.'\nMechanism: price objection often cost-vs-cost ki comparison nahi hoti — yeh unfamiliarity hoti hai.\n\nREADINESS — 'Pehle khud theek ho jaana chahiye.'\nResponse: 'Yeh woh belief hai jo AB pehle address karta hai. Readiness ka wait — woh readiness nahi, familiar delay ka roop hai. Batao specifically kya rok raha hai.'\nMechanism: 'pehle theek hona' ek moving target hai.\n\nSPIRITUALITY — 'Yeh spirituality ke liye hai na?'\nResponse: 'Samajhta hoon impression kyun hai. AB philosophy + psychology hai, ritual nahi. Gita se modern patterns explain karta hoon — kyunki woh 2500 saal pehle wahi cheez dekh chuke the.'\n\nHar objection darr ka ek roop hai. Fact se nahi — pehle acknowledge, phir specific redirect.",
   "pillar": "Placeholder / Variable",
   "status": "draft",
   "metadata": {
@@ -50572,7 +50572,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:obj:price_guarantee",
   "kind": "post",
   "title": "'Kya Guarantee Hai?' — Honest Jawab",
-  "body": "'Itne paison mein kya guarantee hai?'\n\nValid sawaal. Seedha jawab.\n\nMain guarantee nahi de sakta ki tum badloge. Koi nahi de sakta. Change tumhara kaam hai — mera nahi. Main framework de sakta hoon, clarity de sakta hoon, mechanism samjha sakta hoon. Kaam tumhara hai.\n\nJo main guarantee de sakta hoon: Vedanta aur Psychology ka woh intersection jo nervous system level pe kaam karta hai — woh real hai, tested hai, mera apna jeeka hua hai. 5 live batches. 1000+ log. Main woh nahi sikhata jo sirf kitaabon mein padha — woh sikhata hoon jo mujh par actually chala.\n\nPar ek aur cheez: woh ₹999 jo is mahine Netflix par gaye — koi guarantee nahi thi. Shopping mein gaye — koi guarantee nahi. Woh course jo tumne kabhi open hi nahi kiya — koi guarantee nahi.\n\nHar kharcha ek bet hai. Kuch bhi guaranteed nahi hota.\n\nFark sirf itna — yeh us gap ke liye hai jo tum jaante ho exist karta hai. Jo baar baar wahi jagah, wahi reaction, wahi ending laata hai.\n\nWoh gap guarantee se badi cheez hai.",
+  "body": "'Itne paison mein kya guarantee hai?'\n\nValid sawaal. Seedha jawab.\n\nMain guarantee nahi de sakta ki tum badloge. Koi nahi de sakta. Change tumhara kaam hai — mera nahi. Main framework de sakta hoon, clarity de sakta hoon, mechanism samjha sakta hoon. Kaam tumhara hai.\n\nJo main guarantee de sakta hoon: Vedanta aur Psychology ka woh intersection jo nervous system level pe kaam karta hai — woh real hai, tested hai, mera apna jeeka hua hai. 5 live batches. 1000+ log. Main woh nahi sikhata jo sirf kitaabon mein padha — woh sikhata hoon jo mujh par actually chala.\n\nPar ek aur cheez: woh ₹1,999 jo is mahine Netflix par gaye — koi guarantee nahi thi. Shopping mein gaye — koi guarantee nahi. Woh course jo tumne kabhi open hi nahi kiya — koi guarantee nahi.\n\nHar kharcha ek bet hai. Kuch bhi guaranteed nahi hota.\n\nFark sirf itna — yeh us gap ke liye hai jo tum jaante ho exist karta hai. Jo baar baar wahi jagah, wahi reaction, wahi ending laata hai.\n\nWoh gap guarantee se badi cheez hai.",
   "pillar": "FAQ / Objection / Doubt Handling",
   "status": "draft",
   "metadata": {
@@ -50607,8 +50607,8 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "post:obj:price_anchor",
   "kind": "post",
-  "title": "₹999 — Aur Woh Cost Jo Roz Ho Rahi Hai",
-  "body": "₹999 bahut lag sakta hai. Jaanta hoon. Seedhi baat karta hoon.\n\nJo energy tum in patterns ko manage karne mein lagate ho — roz. Woh 3AM waali anxiety. Woh relationship ka loop jo baar baar aata hai. Woh decision jo chhe mahine se pending pada hai. Woh opportunities jo tab miss hui jab nervous system ne decide kiya 'safe nahi hai.'\n\nWoh cost count karo — monthly.\n\n₹999 ek baar hai. Woh daily cost ongoing hai.\n\nAur agar sach mein kuch na laga — toh woh bhi information hai. Tum ne jaana yeh approach tumhare liye nahi thi. Woh clarity bhi normally kuch cost karti hai.\n\nPar agar kaam kiya — aur hazaron ke liye kiya hai — toh woh daily cost permanently kam hoti hai.\n\nMath tum karo. Main sirf itna keh raha hoon — ₹999 ka sawaal sirf ₹999 ka sawaal nahi hai.",
+  "title": "₹1,999 — Aur Woh Cost Jo Roz Ho Rahi Hai",
+  "body": "₹1,999 bahut lag sakta hai. Jaanta hoon. Seedhi baat karta hoon.\n\nJo energy tum in patterns ko manage karne mein lagate ho — roz. Woh 3AM waali anxiety. Woh relationship ka loop jo baar baar aata hai. Woh decision jo chhe mahine se pending pada hai. Woh opportunities jo tab miss hui jab nervous system ne decide kiya 'safe nahi hai.'\n\nWoh cost count karo — monthly.\n\n₹1,999 ek baar hai. Woh daily cost ongoing hai.\n\nAur agar sach mein kuch na laga — toh woh bhi information hai. Tum ne jaana yeh approach tumhare liye nahi thi. Woh clarity bhi normally kuch cost karti hai.\n\nPar agar kaam kiya — aur hazaron ke liye kiya hai — toh woh daily cost permanently kam hoti hai.\n\nMath tum karo. Main sirf itna keh raha hoon — ₹1,999 ka sawaal sirf ₹1,999 ka sawaal nahi hai.",
   "pillar": "FAQ / Objection / Doubt Handling",
   "status": "draft",
   "metadata": {
@@ -50748,7 +50748,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:masterpost:sales:DM-3:0",
   "kind": "post",
   "title": "Price Objection — Iska Jawab Ek Number Nahi",
-  "body": "UNKA: 'Price thodi zyada lagti hai.'\n\nSamajhta hoon. Aur force nahi karta.\n\nMain khud ek waqt scarcity mein jeeya hoon — ₹999 chhota number nahi hota, yeh main jaanta hoon. Par ek cheez poochhna chahta hoon — genuinely.\n\nJo pattern tum abhi carry kar rahe ho — relationships mein wear, kaam mein constant friction, woh ek decision jo mahino se pending hai — uski cost kya hai? Har mahine. Har baar jab wahi situation repeat hoti hai.\n\n₹999 ek fixed number hai. Ruka hua.\n\nPattern ki cost accumulate hoti hai. Chupchaap. Aur uska koi invoice nahi aata.\n\nAur jiski raseed nahi aati — woh cost aksar sabse mehngi hoti hai.\n\nDecision tumhara hai. Pressure nahi. Bas yeh saaf dikhana zaroori tha.",
+  "body": "UNKA: 'Price thodi zyada lagti hai.'\n\nSamajhta hoon. Aur force nahi karta.\n\nMain khud ek waqt scarcity mein jeeya hoon — ₹1,999 chhota number nahi hota, yeh main jaanta hoon. Par ek cheez poochhna chahta hoon — genuinely.\n\nJo pattern tum abhi carry kar rahe ho — relationships mein wear, kaam mein constant friction, woh ek decision jo mahino se pending hai — uski cost kya hai? Har mahine. Har baar jab wahi situation repeat hoti hai.\n\n₹1,999 ek fixed number hai. Ruka hua.\n\nPattern ki cost accumulate hoti hai. Chupchaap. Aur uska koi invoice nahi aata.\n\nAur jiski raseed nahi aati — woh cost aksar sabse mehngi hoti hai.\n\nDecision tumhara hai. Pressure nahi. Bas yeh saaf dikhana zaroori tha.",
   "pillar": "Placeholder / Variable",
   "status": "draft",
   "metadata": {
@@ -54673,7 +54673,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:newgold:batch32:cal:launch:d0-cfl",
   "kind": "post",
   "title": "Close friends — pehle tumhe bata raha hoon",
-  "body": "Close friends. Pehle tumhe.\n\nAB 2.0 abhi open hua hai.\n\nMain honestly jaanta hoon kuch log kaafi waqt se wait kar rahe the. Kisi ne pichhle mahine poochha tha. Kisi ne ek story ka screenshot le liya tha aur rakh liya tha. Yeh un logon ke liye pehle khul raha hai — isliye nahi ki exclusivity bechni hai, balki isliye ki tumne pehle interest dikhaya tha aur woh yaad hai.\n\nEk cheez saaf: founding batch price sirf is hafte hai — Rs 999. Baad mein yeh price nahi rahega. Yeh urgency-trick nahi hai, yeh literal roll-out hai.\n\nKya hai AB 2.0: psychology jo pattern ko naam deti hai. Nervous system ka kaam jo samjhaata hai woh pattern kahaan se aata hai. Vedanta jo 'main kaun hoon' ke root sawaal pe le jaati hai. Teeno saath — kyunki teeno ek hi cheez ke alag darwaze hain.\n\nLink: [LINK]\nYa DM karo. Aaj main personally, fast jawab dunga.",
+  "body": "Close friends. Pehle tumhe.\n\nAB 2.0 abhi open hua hai.\n\nMain honestly jaanta hoon kuch log kaafi waqt se wait kar rahe the. Kisi ne pichhle mahine poochha tha. Kisi ne ek story ka screenshot le liya tha aur rakh liya tha. Yeh un logon ke liye pehle khul raha hai — isliye nahi ki exclusivity bechni hai, balki isliye ki tumne pehle interest dikhaya tha aur woh yaad hai.\n\nEk cheez saaf: founding batch price sirf is hafte hai — ₹1,999. Baad mein yeh price nahi rahega. Yeh urgency-trick nahi hai, yeh literal roll-out hai.\n\nKya hai AB 2.0: psychology jo pattern ko naam deti hai. Nervous system ka kaam jo samjhaata hai woh pattern kahaan se aata hai. Vedanta jo 'main kaun hoon' ke root sawaal pe le jaati hai. Teeno saath — kyunki teeno ek hi cheez ke alag darwaze hain.\n\nLink: [LINK]\nYa DM karo. Aaj main personally, fast jawab dunga.",
   "pillar": "Content Calendar",
   "status": "draft",
   "metadata": {
@@ -55553,7 +55553,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:newgold:batch32:cal:urgency:d7-am",
   "kind": "post",
   "title": "Jis pattern ne roka — wahi yeh decision le raha hai",
-  "body": "Aaj cart band ho raha hai. Main zyada words nahi lagaunga. Ek baat seedha:\n\nJis pattern ne tumhe abhi tak rokaa hua hai — 'baad mein karunga', 'sahi time aayega', 'pehle yeh sort ho jaye' — wahi pattern yeh decision bhi le raha hai.\n\nAur yahin baat hai: pattern ko change karne ka decision khud ek pattern-interrupt maangta hai. Founding batch ka closing window woh interrupt ho sakta tha — agar tum use hone dete.\n\nEk cheez seedhi: tum discount ke liye nahi ruke. Tum ruk rahe ho kyunki andar kuch genuinely resist karta hai change ko. Aur woh resistance — woh exact cheez hai jo course address karta hai.\n\nRs. 999. Founding price. Aaj band ho raha hai.",
+  "body": "Aaj cart band ho raha hai. Main zyada words nahi lagaunga. Ek baat seedha:\n\nJis pattern ne tumhe abhi tak rokaa hua hai — 'baad mein karunga', 'sahi time aayega', 'pehle yeh sort ho jaye' — wahi pattern yeh decision bhi le raha hai.\n\nAur yahin baat hai: pattern ko change karne ka decision khud ek pattern-interrupt maangta hai. Founding batch ka closing window woh interrupt ho sakta tha — agar tum use hone dete.\n\nEk cheez seedhi: tum discount ke liye nahi ruke. Tum ruk rahe ho kyunki andar kuch genuinely resist karta hai change ko. Aur woh resistance — woh exact cheez hai jo course address karta hai.\n\n₹1,999. Founding price. Aaj band ho raha hai.",
   "pillar": "Content Calendar",
   "status": "draft",
   "metadata": {
@@ -75551,7 +75551,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:b10_07",
   "kind": "post",
   "title": "Refund Sirf Sales Trick Nahi — Yeh Principle Ka Extension Hai",
-  "body": "AB 2.0 mein refund available hai. Kuch log poochte hain — 'yeh sirf feel-good ke liye hai na?'\n\nSeedha bolunga — aur pehle apni baat.\n\nJab pehli baar maine kisi cheez pe 999 rupaye lagaye the jo mujhe theek karne ka wada kar rahi thi, mujhe paise ka darr nahi tha. Darr yeh tha — 'phir wahi hoga.' Woh jaani-pehchaani feeling. Seene mein woh kasaav jab commitment ka sawaal aata hai.\n\nNervous system ko surakshit feel hona zaroori hai isse pehle ki woh kuch seekh sake. Jab body khatre wale mode mein ho, andar kuch baithta hi nahi. Surakshit hona seekhne ki pehli shart hai.\n\nRefund usi baat ka vistaar hai. Woh ek signal hai — agar sach mein fit nahi tha, tum phase nahi ho.\n\nAndar ka jo hissa hichkichaata hai — woh galat nahi hai. Refund uss hichkichahat ko aur wajah dene ke bajaye, usse surakshit kar deta hai.\n\nKoi trick nahi. Genuine reason hai to refund milega.",
+  "body": "AB 2.0 mein refund available hai. Kuch log poochte hain — 'yeh sirf feel-good ke liye hai na?'\n\nSeedha bolunga — aur pehle apni baat.\n\nJab pehli baar maine kisi cheez pe ₹1,999 lagaye the jo mujhe theek karne ka wada kar rahi thi, mujhe paise ka darr nahi tha. Darr yeh tha — 'phir wahi hoga.' Woh jaani-pehchaani feeling. Seene mein woh kasaav jab commitment ka sawaal aata hai.\n\nNervous system ko surakshit feel hona zaroori hai isse pehle ki woh kuch seekh sake. Jab body khatre wale mode mein ho, andar kuch baithta hi nahi. Surakshit hona seekhne ki pehli shart hai.\n\nRefund usi baat ka vistaar hai. Woh ek signal hai — agar sach mein fit nahi tha, tum phase nahi ho.\n\nAndar ka jo hissa hichkichaata hai — woh galat nahi hai. Refund uss hichkichahat ko aur wajah dene ke bajaye, usse surakshit kar deta hai.\n\nKoi trick nahi. Genuine reason hai to refund milega.",
   "pillar": "Proof / Case Decode",
   "status": "draft",
   "metadata": {
@@ -79732,8 +79732,8 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "post:exp9:launch:phase4:what-999-gives-you",
   "kind": "post",
-  "title": "999 Mein Kya Milta Hai — Aur Kya Number Mein Nahi Aata",
-  "body": "Yeh woh post hai jo main avoid karna chahta tha — 'kya milega' wali list — kyunki yeh sab marketing jaisa lagta hai.\n\nPar agar tum seriously soch rahe ho, toh list chahiye hoti hai. Toh yeh rahi:\n\nEk structured module system jo emotional patterns ko nervous system level pe address karta hai — sirf naam dene ke liye nahi.\n\nPsychology aur Vedanta — alag boxes mein nahi, woven together. Kyunki dono ek doosre ko explain karte hain.\n\nSelf-paced. Koi deadline nahi. Koi binge pressure nahi.\n\nIntegration exercises — samajhne ke baad woh actually kahan utre.\n\nLifetime access — jitni baar dekhna ho.\n\nAur jo number mein nahi aata: 1000+ logon ne liya hai. Har batch ke baad revise hua hai. Yeh theory pe nahi bana — live feedback pe bana.\n\n999 ki list impressive nahi lagti. Par agar woh ek cheez clear kar de jo saalon se loop mein hai — number ka matlab badal jaata hai.\n\nAgar yeh tumhara kaam lagta hai — link bio mein.",
+  "title": "₹1,999 Mein Kya Milta Hai — Aur Kya Number Mein Nahi Aata",
+  "body": "Yeh woh post hai jo main avoid karna chahta tha — 'kya milega' wali list — kyunki yeh sab marketing jaisa lagta hai.\n\nPar agar tum seriously soch rahe ho, toh list chahiye hoti hai. Toh yeh rahi:\n\nEk structured module system jo emotional patterns ko nervous system level pe address karta hai — sirf naam dene ke liye nahi.\n\nPsychology aur Vedanta — alag boxes mein nahi, woven together. Kyunki dono ek doosre ko explain karte hain.\n\nSelf-paced. Koi deadline nahi. Koi binge pressure nahi.\n\nIntegration exercises — samajhne ke baad woh actually kahan utre.\n\nLifetime access — jitni baar dekhna ho.\n\nAur jo number mein nahi aata: 1000+ logon ne liya hai. Har batch ke baad revise hua hai. Yeh theory pe nahi bana — live feedback pe bana.\n\n₹1,999 ki list impressive nahi lagti. Par agar woh ek cheez clear kar de jo saalon se loop mein hai — number ka matlab badal jaata hai.\n\nAgar yeh tumhara kaam lagta hai — link bio mein.",
   "pillar": "Sales / CTA / Launch Conversion",
   "status": "draft",
   "metadata": {
@@ -79804,7 +79804,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:exp9:launch:phase4:cart-open-offer-reveal",
   "kind": "post",
   "title": "AB 2.0 Ab Open Hai — Naam Se Loop Nahi Toot-ta",
-  "body": "AB 2.0 ab open hai.\n\nAndar kya hai — seedha:\n\nEk structured course jo emotional patterns ko sirf naam nahi deta — nervous system level pe address karta hai. Kyunki naam dene se loop nahi toot-ta.\n\nPsychology aur Vedanta — alag boxes mein nahi. Saath honge tabhi ek doosre ko explain karte hain.\n\nSelf-paced. Koi deadline, koi binge pressure nahi.\n\n999.\n\nYeh price maine isliye rakha kyunki jinhe genuinely zaroorat hai, woh sirf paison pe ruk na jaayein. Koi upsell nahi. Koi hidden cost nahi.\n\nPar agar tum yeh expect kar rahe ho ki 999 mein bina kuch kiye life change ho jaayegi — woh main nahi keh sakta. Jo genuinely engage karte hain, unmein kuch shift hota hai. Woh shift tum pe depend karta hai.\n\nShuruat mein aisi koi jagah thi hi nahi — jahan Psychology aur Vedanta saath baith saken.\n\nAb hai. Ready ho toh link bio mein.",
+  "body": "AB 2.0 ab open hai.\n\nAndar kya hai — seedha:\n\nEk structured course jo emotional patterns ko sirf naam nahi deta — nervous system level pe address karta hai. Kyunki naam dene se loop nahi toot-ta.\n\nPsychology aur Vedanta — alag boxes mein nahi. Saath honge tabhi ek doosre ko explain karte hain.\n\nSelf-paced. Koi deadline, koi binge pressure nahi.\n\n₹1,999.\n\nYeh price maine isliye rakha kyunki jinhe genuinely zaroorat hai, woh sirf paison pe ruk na jaayein. Koi upsell nahi. Koi hidden cost nahi.\n\nPar agar tum yeh expect kar rahe ho ki ₹1,999 mein bina kuch kiye life change ho jaayegi — woh main nahi keh sakta. Jo genuinely engage karte hain, unmein kuch shift hota hai. Woh shift tum pe depend karta hai.\n\nShuruat mein aisi koi jagah thi hi nahi — jahan Psychology aur Vedanta saath baith saken.\n\nAb hai. Ready ho toh link bio mein.",
   "pillar": "Sales / CTA / Launch Conversion",
   "status": "draft",
   "metadata": {
@@ -80017,7 +80017,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:claude:launch_sequence:phase_3_post_3",
   "kind": "post",
   "title": "'Sab Samajh Leta Hoon, Par Ruk Nahi Paata' — Yeh Tumhare Liye Hai",
-  "body": "Seedha bolta hoon.\n\nAB 2.0 aaj se open hai.\n\nAndar kya hai:\n\nVedanta aur Psychology ek hi system mein — alag boxes mein nahi.\n\nNervous system level pe kaam karta hai — sirf concepts nahi deta.\n\nInsight nahi, integration — jaanne aur karne ke beech ka gap.\n\nYeh kiske liye hai:\n\nUn logon ke liye jo pehle se jaante hain — pattern, theory, therapy — aur phir bhi loop mein hain. Jinhe woh feeling pata hai: 'main sab samajh leta hoon, par ruk nahi paata.'\n\nYeh kiske liye nahi:\n\nBilkul naye logon ke liye jo abhi introduce ho rahe hain. Yeh beginner content nahi hai. Depth wala kaam hai.\n\n999. Link bio mein.\n\nKoi sawaal ho — 'AB' DM karo. Main khud padhta hoon.\n\nYeh shallow promise nahi hai. Yeh ek specific kaam ka invitation hai.",
+  "body": "Seedha bolta hoon.\n\nAB 2.0 aaj se open hai.\n\nAndar kya hai:\n\nVedanta aur Psychology ek hi system mein — alag boxes mein nahi.\n\nNervous system level pe kaam karta hai — sirf concepts nahi deta.\n\nInsight nahi, integration — jaanne aur karne ke beech ka gap.\n\nYeh kiske liye hai:\n\nUn logon ke liye jo pehle se jaante hain — pattern, theory, therapy — aur phir bhi loop mein hain. Jinhe woh feeling pata hai: 'main sab samajh leta hoon, par ruk nahi paata.'\n\nYeh kiske liye nahi:\n\nBilkul naye logon ke liye jo abhi introduce ho rahe hain. Yeh beginner content nahi hai. Depth wala kaam hai.\n\n₹1,999. Link bio mein.\n\nKoi sawaal ho — 'AB' DM karo. Main khud padhta hoon.\n\nYeh shallow promise nahi hai. Yeh ek specific kaam ka invitation hai.",
   "pillar": "Launch Assets",
   "status": "draft",
   "metadata": {
@@ -80053,7 +80053,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:claude:launch_sequence:phase_4_post_2",
   "kind": "post",
   "title": "'Main Meditation Karta Hoon' — Achha, Kaam Aa Raha Hai?",
-  "body": "'Main pehle se meditation karta hoon.'\n\nAchha. Kaam aa raha hai?\n\nMain dismiss nahi kar raha — genuinely poochh raha hoon.\n\nKyunki bahut log meditation karte hain — aur nervous system abhi bhi hyperactivated hai. Trigger aata hai — wahi reaction. Relationship mein wahi dynamic. Wahi loop.\n\nMeditation presence deta hai — us moment mein jo ho raha hai usse observe karne ki ability. Woh zaroori hai. Lekin framework batata hai — presence mein jo dikha, usse karna kya hai. Pattern pehchaanna, nervous system response samajhna, identity ko sawaal karna — yeh alag skills hain.\n\nDono saath kaam karte hain — ek doosre ki jagah nahi lete. Meditation ek foundation hai. Framework ek naksha hai. Naksha ke bina foundation powerful hai, par directionless.\n\nAgar meditation se presence mili hai — yeh kaam aur gehra jaayega.\n\n999. Link bio mein.",
+  "body": "'Main pehle se meditation karta hoon.'\n\nAchha. Kaam aa raha hai?\n\nMain dismiss nahi kar raha — genuinely poochh raha hoon.\n\nKyunki bahut log meditation karte hain — aur nervous system abhi bhi hyperactivated hai. Trigger aata hai — wahi reaction. Relationship mein wahi dynamic. Wahi loop.\n\nMeditation presence deta hai — us moment mein jo ho raha hai usse observe karne ki ability. Woh zaroori hai. Lekin framework batata hai — presence mein jo dikha, usse karna kya hai. Pattern pehchaanna, nervous system response samajhna, identity ko sawaal karna — yeh alag skills hain.\n\nDono saath kaam karte hain — ek doosre ki jagah nahi lete. Meditation ek foundation hai. Framework ek naksha hai. Naksha ke bina foundation powerful hai, par directionless.\n\nAgar meditation se presence mili hai — yeh kaam aur gehra jaayega.\n\n₹1,999. Link bio mein.",
   "pillar": "Launch Assets",
   "status": "draft",
   "metadata": {
@@ -80088,7 +80088,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:claude:launch_sequence:phase_4_post_3",
   "kind": "post",
   "title": "Sabse Badi Shift: Pattern Khatam Nahi Hota — Ek Pause Aata Hai",
-  "body": "AB ke andar sabse badi shift jo hoti hai —\n\nWoh yeh nahi ki tum patterns band kar dete ho.\n\nWoh yeh hoti hai: trigger aur reaction ke beech ek pause aata hai.\n\nSirf ek second. Lekin woh ek second — woh choice hai.\n\nPehle woh choice thi hi nahi. Reaction automatic tha. Body already wahan pahunch chuki hoti thi, mujhse poochhe bina.\n\nAB ke baad jo sabse common feedback aata hai:\n\n'Main pehle bhi wahi sochta tha — ab main dekh sakta hoon ki main soch raha hoon.'\n\nWoh meta-awareness — apne thought ko observe karna, uss mein doob jaane ki jagah — wahi poora kaam hai.\n\nGoal patterns khatam karna nahi hai.\n\nGoal woh pause banana hai — jo pehle tha hi nahi.\n\nEk second ka pause. Ek second ki choice.\n\nAur choice — wahi azaadi hai.\n\n999. Link bio mein.",
+  "body": "AB ke andar sabse badi shift jo hoti hai —\n\nWoh yeh nahi ki tum patterns band kar dete ho.\n\nWoh yeh hoti hai: trigger aur reaction ke beech ek pause aata hai.\n\nSirf ek second. Lekin woh ek second — woh choice hai.\n\nPehle woh choice thi hi nahi. Reaction automatic tha. Body already wahan pahunch chuki hoti thi, mujhse poochhe bina.\n\nAB ke baad jo sabse common feedback aata hai:\n\n'Main pehle bhi wahi sochta tha — ab main dekh sakta hoon ki main soch raha hoon.'\n\nWoh meta-awareness — apne thought ko observe karna, uss mein doob jaane ki jagah — wahi poora kaam hai.\n\nGoal patterns khatam karna nahi hai.\n\nGoal woh pause banana hai — jo pehle tha hi nahi.\n\nEk second ka pause. Ek second ki choice.\n\nAur choice — wahi azaadi hai.\n\n₹1,999. Link bio mein.",
   "pillar": "Launch Assets",
   "status": "draft",
   "metadata": {
@@ -80158,7 +80158,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:claude:launch_sequence:phase_4_post_1",
   "kind": "post",
   "title": "Teen Baar Resolve Kiya, Teen Baar Toota — Willpower Nahi, Loop Hai",
-  "body": "Aaj subah uthke socha: 'aaj nahi karunga.'\n\nDopahar mein kiya.\n\nRaat ko phir resolve: 'kal se pakka.'\n\nYeh weakness nahi hai. Yeh nervous system hai jo ek familiar loop mein chal raha hai — tumse poochhe bina.\n\nWillpower ko hum ek resource maante hain jo bas 'zyada' hona chahiye. Actually willpower tabhi kaam karta hai jab nervous system regulated ho. Jab tum already stress mein, shame mein, ya purana pattern activate hone ke edge pe ho — woh resource available hi nahi hota.\n\nToh wahan se resolve karna kaam nahi karta. Wahan se loop ki mechanics samajhna kaam karta hai.\n\nDo alag kaam hain:\n\nLoop ko dekhna — pattern ko precisely naam dena. Trigger kya hai. Kahan se aata hai. Kab.\n\nLoop se bahar nikalna — body level ka kaam. Naam dene ke baad nervous system ko actually alag response dena.\n\nAB 2.0 dono karta hai — sequence mein.\n\n999. Link bio mein. Kuch din ke liye open.\n\nSubah ka resolve raat tak kyun nahi chal paata — woh character problem nahi hai. Woh loop ki wiring hai. Aur wiring badal sakti hai — willpower se nahi, samajhne aur practice se.",
+  "body": "Aaj subah uthke socha: 'aaj nahi karunga.'\n\nDopahar mein kiya.\n\nRaat ko phir resolve: 'kal se pakka.'\n\nYeh weakness nahi hai. Yeh nervous system hai jo ek familiar loop mein chal raha hai — tumse poochhe bina.\n\nWillpower ko hum ek resource maante hain jo bas 'zyada' hona chahiye. Actually willpower tabhi kaam karta hai jab nervous system regulated ho. Jab tum already stress mein, shame mein, ya purana pattern activate hone ke edge pe ho — woh resource available hi nahi hota.\n\nToh wahan se resolve karna kaam nahi karta. Wahan se loop ki mechanics samajhna kaam karta hai.\n\nDo alag kaam hain:\n\nLoop ko dekhna — pattern ko precisely naam dena. Trigger kya hai. Kahan se aata hai. Kab.\n\nLoop se bahar nikalna — body level ka kaam. Naam dene ke baad nervous system ko actually alag response dena.\n\nAB 2.0 dono karta hai — sequence mein.\n\n₹1,999. Link bio mein. Kuch din ke liye open.\n\nSubah ka resolve raat tak kyun nahi chal paata — woh character problem nahi hai. Woh loop ki wiring hai. Aur wiring badal sakti hai — willpower se nahi, samajhne aur practice se.",
   "pillar": "Launch Assets",
   "status": "draft",
   "metadata": {
@@ -80406,7 +80406,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:masterpost:sales:OBJ-3:1",
   "kind": "post",
   "title": "Price Dekha Aur Band Kar Diya?",
-  "body": "Price dekha — aur seedha band kar diya.\n\nSamajh sakta hoon.\nMain bhi yeh karta tha.\n\nLekin ek sawaal poochho khud se — honestly:\n\nJo pattern tum carry kar rahe ho — kitne saalon se hai?\n\nUsne kitne decisions quietly influence kiye?\nKitne relationships pe shadow dala?\nKitni baar tumne khud ko rokaa — bina poora soch ke ki kyun rok rahe ho?\n\nAur kyun pattern change nahi hota —\nbhale awareness aa gayi ho?\n\nPatterns nervous system mein stored hote hain.\nInformation se nahi badlte — repetition aur safety se badlte hain.\nIsliye sirf jaanna kaafi nahi hota.\n\nAgar ek saal baad bhi yeh cheez waisi hi rahe —\nkya woh cost ₹999 se kam hai?\n\nInvestment ka matlab yeh nahi ki tumhare paas bahut paise hain.\nInvestment ka matlab yeh hai ki tum jaante ho —\nkuch cheezein wait nahi kar sakti.",
+  "body": "Price dekha — aur seedha band kar diya.\n\nSamajh sakta hoon.\nMain bhi yeh karta tha.\n\nLekin ek sawaal poochho khud se — honestly:\n\nJo pattern tum carry kar rahe ho — kitne saalon se hai?\n\nUsne kitne decisions quietly influence kiye?\nKitne relationships pe shadow dala?\nKitni baar tumne khud ko rokaa — bina poora soch ke ki kyun rok rahe ho?\n\nAur kyun pattern change nahi hota —\nbhale awareness aa gayi ho?\n\nPatterns nervous system mein stored hote hain.\nInformation se nahi badlte — repetition aur safety se badlte hain.\nIsliye sirf jaanna kaafi nahi hota.\n\nAgar ek saal baad bhi yeh cheez waisi hi rahe —\nkya woh cost ₹1,999 se kam hai?\n\nInvestment ka matlab yeh nahi ki tumhare paas bahut paise hain.\nInvestment ka matlab yeh hai ki tum jaante ho —\nkuch cheezein wait nahi kar sakti.",
   "pillar": "Sales Posts",
   "status": "draft",
   "metadata": {
@@ -80546,7 +80546,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:masterpost:sales:SP-8:1",
   "kind": "post",
   "title": "Raga-Dvesha — Approval ki Craving ka Naam",
-  "body": "Kai saal tak mujhe pata nahi tha iske liye koi word tha.\n\nMain approval chahta tha — hamesha. Koi kuch achha bolta, ek relief milti — genuinely physical, chest mein kuch loosen hota tha. Koi criticize karta, ya sirf respond na karta ek post pe — aur ek anxiety aati jo disproportionate lagti thi.\n\nIsliye main carefully post karta tha. Jo judge na ho sake. Jo safe ho. Jo bachaata ho uss criticism ke darr se.\n\nYeh Raga tha — approval ka craving. Aur Dvesha? Criticism se woh automatic avoidance — woh situations chhod dena jahan judge ho sakta tha.\n\nVedanta ne yeh map bahut pehle kar rakha tha: raga aur dvesha — dono milke decide karte hain ki tum kya karoge, kahan jaoge, kya avoid karoge. Unconsciously.\n\nyeh forces tumhari choices ke peeche chal rahi hoti hain. Tum sochte ho tum decide kar rahe ho — actually yeh automatic pull kar rahi hoti hain.\n\nJab yeh naam mila — approval ki craving ko raga bola, criticism ke darr ko dvesha bola — woh automatic force thodi kam ho gayi. Pattern visible hua. Aur visible pattern slightly less powerful hota hai.\n\nYahi AB mein hota hai. ₹999. Link bio mein.",
+  "body": "Kai saal tak mujhe pata nahi tha iske liye koi word tha.\n\nMain approval chahta tha — hamesha. Koi kuch achha bolta, ek relief milti — genuinely physical, chest mein kuch loosen hota tha. Koi criticize karta, ya sirf respond na karta ek post pe — aur ek anxiety aati jo disproportionate lagti thi.\n\nIsliye main carefully post karta tha. Jo judge na ho sake. Jo safe ho. Jo bachaata ho uss criticism ke darr se.\n\nYeh Raga tha — approval ka craving. Aur Dvesha? Criticism se woh automatic avoidance — woh situations chhod dena jahan judge ho sakta tha.\n\nVedanta ne yeh map bahut pehle kar rakha tha: raga aur dvesha — dono milke decide karte hain ki tum kya karoge, kahan jaoge, kya avoid karoge. Unconsciously.\n\nyeh forces tumhari choices ke peeche chal rahi hoti hain. Tum sochte ho tum decide kar rahe ho — actually yeh automatic pull kar rahi hoti hain.\n\nJab yeh naam mila — approval ki craving ko raga bola, criticism ke darr ko dvesha bola — woh automatic force thodi kam ho gayi. Pattern visible hua. Aur visible pattern slightly less powerful hota hai.\n\nYahi AB mein hota hai. ₹1,999. Link bio mein.",
   "pillar": "Sales Posts",
   "status": "draft",
   "metadata": {
@@ -81001,7 +81001,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:claude:launch_sequence:phase_5_post_2",
   "kind": "post",
   "title": "Avoidance Hamesha Zimmedari Ka Chehra Pehen Ke Aati Hai",
-  "body": "Yeh un logon ke liye jo teen baar link open kar chuke hain. Jo har baar sochte hain 'haan, yeh meri baat hai' — aur phir kuch aur kar lete hain.\n\nEk honest sawaal: jo cheez rok rahi hai — deadline, paise, time — kya woh actual barrier hai? Ya woh wahi pattern hai jiske baare mein yeh saara content hai?\n\nAvoidance bahut intelligent hoti hai. Woh kabhi avoidance ke bhes mein nahi aati. Hamesha ek logical costume pehen ke aati hai.\n\n'Abhi sahi time nahi.' 'Thoda aur research kar loon.' 'Kal dekhta hoon.'\n\nWoh sentences avoidance jaise feel nahi hote. Woh responsible planning jaise feel hote hain.\n\nReframe: agar sochna comfortable hai aur aana uncomfortable — to 'sochna' hi avoidance hai. Growth ka sabse common costume yahi hai.\n\nAndar se koi cheez boli thi — 'yeh toh meri baat hai.' Woh signal sahi tha. Signal aur action ke beech ka gap — wahi pattern hai.\n\n₹999. Link bio mein.",
+  "body": "Yeh un logon ke liye jo teen baar link open kar chuke hain. Jo har baar sochte hain 'haan, yeh meri baat hai' — aur phir kuch aur kar lete hain.\n\nEk honest sawaal: jo cheez rok rahi hai — deadline, paise, time — kya woh actual barrier hai? Ya woh wahi pattern hai jiske baare mein yeh saara content hai?\n\nAvoidance bahut intelligent hoti hai. Woh kabhi avoidance ke bhes mein nahi aati. Hamesha ek logical costume pehen ke aati hai.\n\n'Abhi sahi time nahi.' 'Thoda aur research kar loon.' 'Kal dekhta hoon.'\n\nWoh sentences avoidance jaise feel nahi hote. Woh responsible planning jaise feel hote hain.\n\nReframe: agar sochna comfortable hai aur aana uncomfortable — to 'sochna' hi avoidance hai. Growth ka sabse common costume yahi hai.\n\nAndar se koi cheez boli thi — 'yeh toh meri baat hai.' Woh signal sahi tha. Signal aur action ke beech ka gap — wahi pattern hai.\n\n₹1,999. Link bio mein.",
   "pillar": "Launch Assets",
   "status": "draft",
   "metadata": {
@@ -81036,7 +81036,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:claude:launch_sequence:phase_5_post_1",
   "kind": "post",
   "title": "'Yeh Pehle Kar Chuka Hoon' — Fair. Phir Bhi Yahan Kyun Ho?",
-  "body": "'Main yeh sab pehle kar chuka hoon.'\n\nMain believe karta hoon. Aur phir bhi yahan ho — matlab kuch complete nahi hua.\n\nEk honest sawaal: jo tumne try kiya — books, podcasts, shayad therapy bhi — woh kahan kaam karta tha? Dimaag level pe. Samajhne ke level pe.\n\nLekin nervous system abhi bhi puraane data pe chal raha hai. Woh data sirf isliye update nahi hua ki tumne kuch samajh liya.\n\nUnderstanding aur integration do alag cheezein hain. Understanding mein tumhara mind agree karta hai. Integration mein tumhara body alag respond karta hai — trigger pe, stress pe, us real moment pe.\n\nZyaadatar self-help understanding pe ruk jaata hai. Integration alag kaam maangti hai — body level ka, repeated, structured.\n\nShuru mein tumne kaha 'pehle kar chuka hoon.' Sahi baat — par agar integration ho gayi hoti, pattern ab bhi wahi nahi hota. Wahi gap AB address karta hai.\n\n₹999. Link bio mein.",
+  "body": "'Main yeh sab pehle kar chuka hoon.'\n\nMain believe karta hoon. Aur phir bhi yahan ho — matlab kuch complete nahi hua.\n\nEk honest sawaal: jo tumne try kiya — books, podcasts, shayad therapy bhi — woh kahan kaam karta tha? Dimaag level pe. Samajhne ke level pe.\n\nLekin nervous system abhi bhi puraane data pe chal raha hai. Woh data sirf isliye update nahi hua ki tumne kuch samajh liya.\n\nUnderstanding aur integration do alag cheezein hain. Understanding mein tumhara mind agree karta hai. Integration mein tumhara body alag respond karta hai — trigger pe, stress pe, us real moment pe.\n\nZyaadatar self-help understanding pe ruk jaata hai. Integration alag kaam maangti hai — body level ka, repeated, structured.\n\nShuru mein tumne kaha 'pehle kar chuka hoon.' Sahi baat — par agar integration ho gayi hoti, pattern ab bhi wahi nahi hota. Wahi gap AB address karta hai.\n\n₹1,999. Link bio mein.",
   "pillar": "Launch Assets",
   "status": "draft",
   "metadata": {
@@ -82471,7 +82471,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:masterpost:sales:WA-1:3",
   "kind": "post",
   "title": "Understanding Aur Shift Ke Beech — Woh Knowledge Ka Gap Nahi Hai",
-  "body": "Kal cart band ho raha hai. Ek cheez seedhi kehni thi.\n\nAB un logon ke liye bana hai jo bahut kuch jaante hain — aur phir bhi wahi jagah pe khade hain. Jo insight ke baad bhi wahi pattern chalate hain. Jo samajhte hain ki ho kya raha hai — aur phir bhi same trigger pe same react karte hain.\n\nUnderstanding aur actual shift ke beech jo gap hai — woh knowledge ka gap nahi hai. Woh integration ka gap hai.\n\nAur integration sirf content se nahi hota. Uske liye structure chahiye, nervous system ki safety chahiye, repetition chahiye. Wahi gap AB pe kaam karta hai.\n\n₹999. Founding batch. Kal last day.\n\nSawaal ho toh reply karo — main khud hoon.",
+  "body": "Kal cart band ho raha hai. Ek cheez seedhi kehni thi.\n\nAB un logon ke liye bana hai jo bahut kuch jaante hain — aur phir bhi wahi jagah pe khade hain. Jo insight ke baad bhi wahi pattern chalate hain. Jo samajhte hain ki ho kya raha hai — aur phir bhi same trigger pe same react karte hain.\n\nUnderstanding aur actual shift ke beech jo gap hai — woh knowledge ka gap nahi hai. Woh integration ka gap hai.\n\nAur integration sirf content se nahi hota. Uske liye structure chahiye, nervous system ki safety chahiye, repetition chahiye. Wahi gap AB pe kaam karta hai.\n\n₹1,999. Founding batch. Kal last day.\n\nSawaal ho toh reply karo — main khud hoon.",
   "pillar": "Sales / Course Bridge",
   "status": "draft",
   "metadata": {
@@ -82506,7 +82506,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:exp9:launch:phase6:ethical-urgency-48hr",
   "kind": "post",
   "title": "'Kya Wajah Hai?' — Yeh Sawaal Bhi Ek Practice Hai",
-  "body": "48 ghante baaki hain is batch ke liye. Koi pressure nahi. Ek honest sawaal.\n\nAgar abhi tak decide nahi kiya — kya wajah hai?\n\nTime? Self-paced hai, apne schedule pe. Paise? ₹999 hai — DM karo agar issue hai. Kya milega pata nahi? Link bio mein poori detail hai. Kisi aur cheez se compare kar rahe ho? Fair hai — woh tab tak band nahi hoga. Bas 'kal se'? Yeh feeling main khud jaanta hoon — mere andar bhi 3 saal wahi 'kal se' chala tha — par kal wahi rahega jab tak kuch badle na.\n\nAgar genuinely fit nahi lagta — mat lo.\n\nPar agar fit lagta hai aur koi cheez rok rahi hai — woh cheez bhi dekhne layak hai. Kyunki aksar woh usi pattern ka hissa hoti hai.\n\nWoh pehla sawaal — 'kya wajah hai?' — woh apne aap mein ek practice hai. Apni resistance ko curious hoke dekhna, bina judge kiye. Yahi maine khud pe seekha.\n\n48 ghante. Link bio mein.",
+  "body": "48 ghante baaki hain is batch ke liye. Koi pressure nahi. Ek honest sawaal.\n\nAgar abhi tak decide nahi kiya — kya wajah hai?\n\nTime? Self-paced hai, apne schedule pe. Paise? ₹1,999 hai — DM karo agar issue hai. Kya milega pata nahi? Link bio mein poori detail hai. Kisi aur cheez se compare kar rahe ho? Fair hai — woh tab tak band nahi hoga. Bas 'kal se'? Yeh feeling main khud jaanta hoon — mere andar bhi 3 saal wahi 'kal se' chala tha — par kal wahi rahega jab tak kuch badle na.\n\nAgar genuinely fit nahi lagta — mat lo.\n\nPar agar fit lagta hai aur koi cheez rok rahi hai — woh cheez bhi dekhne layak hai. Kyunki aksar woh usi pattern ka hissa hoti hai.\n\nWoh pehla sawaal — 'kya wajah hai?' — woh apne aap mein ek practice hai. Apni resistance ko curious hoke dekhna, bina judge kiye. Yahi maine khud pe seekha.\n\n48 ghante. Link bio mein.",
   "pillar": "Sales / CTA / Launch Conversion",
   "status": "draft",
   "metadata": {
@@ -82822,7 +82822,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:masterpost:sales:SP-6:1",
   "kind": "post",
   "title": "Seedhi Baat",
-  "body": "Agar mere content mein kabhi ek baar bhi ek cheez lagi —\n'yeh toh main hoon' —\n\nagar tum jaante ho ki kya ho raha hai\npar rok nahi paate —\n\nagar saalon se samajh rahe ho\naur phir bhi wahi patterns hain —\n\ntoh Aham Brahmasmi 2.0 usi gap ke liye bana hai.\n\nWoh gap — jaanna aur kar paana ke beech —\nwoh information ka gap nahi hai.\nWoh body ka gap hai.\n\nVedanta aur Psychology ka intersection.\nKoi theory nahi —\nek structured path jo nervous system level pe kaam karta hai.\n\nKyunki sirf samajhna enough nahi hota.\nYeh main personally jaanta hoon.\nSaalon tak main bhi wohi karta raha.\n\n₹999. Link bio mein.\nDM karo 'AB' agar koi sawaal pehle poochhna hai.\n\nYeh gap tum kitne aur saal carry karoge?",
+  "body": "Agar mere content mein kabhi ek baar bhi ek cheez lagi —\n'yeh toh main hoon' —\n\nagar tum jaante ho ki kya ho raha hai\npar rok nahi paate —\n\nagar saalon se samajh rahe ho\naur phir bhi wahi patterns hain —\n\ntoh Aham Brahmasmi 2.0 usi gap ke liye bana hai.\n\nWoh gap — jaanna aur kar paana ke beech —\nwoh information ka gap nahi hai.\nWoh body ka gap hai.\n\nVedanta aur Psychology ka intersection.\nKoi theory nahi —\nek structured path jo nervous system level pe kaam karta hai.\n\nKyunki sirf samajhna enough nahi hota.\nYeh main personally jaanta hoon.\nSaalon tak main bhi wohi karta raha.\n\n₹1,999. Link bio mein.\nDM karo 'AB' agar koi sawaal pehle poochhna hai.\n\nYeh gap tum kitne aur saal carry karoge?",
   "pillar": "Sales Posts",
   "status": "draft",
   "metadata": {
@@ -82962,7 +82962,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:claude:launch_sequence:phase_6_post_1",
   "kind": "post",
   "title": "Aaj Raat Cart Band — Seedha Bolunga",
-  "body": "Roz jo message mujhe sabse zyada aata hai, woh ek hi hai:\n\n'Pata hai kya karna chahiye. Rok nahi paata.'\n\nYeh willpower ki kami nahi. Yeh ek gap hai — insight aur integration ke beech. Dimaag ko khabar mil gayi. Body tak signal abhi pahuncha hi nahi.\n\nAham Brahmasmi usi gap ke liye bana hai — psychology jo pattern ko naam deti hai, nervous system jo use explain karta hai, Vedanta jo jad tak jaata hai. Sirf batata nahi — actually wire karta hai.\n\nMaine yeh khud jhela hai: samajh aa jaati thi, phir bhi wahi loop chalta rehta tha. Agar mere content mein kabhi ek cheez lagi ho 'yeh toh main hoon' — aur loop phir bhi wahi raha — toh aaj decide karo.\n\nRaat tak cart band. 999 rupaye. Link bio mein.\n\nDM karo 'AB' agar koi aakhri sawaal hai — aaj personally sabse milta hoon.",
+  "body": "Roz jo message mujhe sabse zyada aata hai, woh ek hi hai:\n\n'Pata hai kya karna chahiye. Rok nahi paata.'\n\nYeh willpower ki kami nahi. Yeh ek gap hai — insight aur integration ke beech. Dimaag ko khabar mil gayi. Body tak signal abhi pahuncha hi nahi.\n\nAham Brahmasmi usi gap ke liye bana hai — psychology jo pattern ko naam deti hai, nervous system jo use explain karta hai, Vedanta jo jad tak jaata hai. Sirf batata nahi — actually wire karta hai.\n\nMaine yeh khud jhela hai: samajh aa jaati thi, phir bhi wahi loop chalta rehta tha. Agar mere content mein kabhi ek cheez lagi ho 'yeh toh main hoon' — aur loop phir bhi wahi raha — toh aaj decide karo.\n\nRaat tak cart band. ₹1,999. Link bio mein.\n\nDM karo 'AB' agar koi aakhri sawaal hai — aaj personally sabse milta hoon.",
   "pillar": "Launch Assets",
   "status": "draft",
   "metadata": {
@@ -83032,7 +83032,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:claude:whatsapp_flow:WA_Launch_Sequence",
   "kind": "post",
   "title": "Launch WhatsApp — 5-Message Arc (Personal)",
-  "body": "Cadence: Day 1, 3, 5, 7, 8. Har message ek insaan se aaya lage, agency se nahi.\n\nMessage 1 — Launch Day:\nAB 2.0 ab open hai. Tum mere content se juda ho, isiliye tumhe personally batana tha. Yeh course mere liye wahi hai jo main chahta tha jab mere apne pattern samajh nahi aate the — psychology jo naam deti hai, nervous system jo explain karta hai, Vedanta jo jad tak jaata hai. Self-paced, lifetime access, founding batch 999 rupaye. Link: [LINK]. Koi sawaal ho toh reply karo — main khud padh ke jawab dunga.\n\nMessage 2 — Day 3:\nPichle batch ke ek student ne likha: 'Partner ne wahi bola jo hamesha bolte hain — aur main ruk gaya. Chest tight nahi hui. Woh 10 second pehle kabhi nahi the.' Das second. Bahar se chhota. Par usi gap mein react ya respond ki choice hoti hai — aur wahi gap regulation hai. Link: [LINK]\n\nMessage 3 — Day 5:\nCart abhi khula hai. Ek cheez clear: AB mein generic affirmations nahi hain. Har module mein tumhare specific pattern ke liye mapped exercises hain — passive sunna nahi, active kaam. Jo info ki tarah store karte hain, unke liye kuch nahi badalta. Jo use karte hain — unke liye badalta hai. Link: [LINK]\n\nMessage 4 — Day 7:\nKal cart band. Decide kar liya ho toh link: [LINK]. Sawaal ho toh aaj reply karo, jaldi jawab dunga.\n\nMessage 5 — Day 8:\nAaj raat band. Jo log abhi andar aaye — unka asli kaam ab shuru hota hai. Woh wahi log hain jinhe pehle se pata tha yeh unke liye hai. Agar tum woh ho — link abhi: [LINK]. Is price pe baad mein nahi milega.",
+  "body": "Cadence: Day 1, 3, 5, 7, 8. Har message ek insaan se aaya lage, agency se nahi.\n\nMessage 1 — Launch Day:\nAB 2.0 ab open hai. Tum mere content se juda ho, isiliye tumhe personally batana tha. Yeh course mere liye wahi hai jo main chahta tha jab mere apne pattern samajh nahi aate the — psychology jo naam deti hai, nervous system jo explain karta hai, Vedanta jo jad tak jaata hai. Self-paced, lifetime access, founding batch ₹1,999. Link: [LINK]. Koi sawaal ho toh reply karo — main khud padh ke jawab dunga.\n\nMessage 2 — Day 3:\nPichle batch ke ek student ne likha: 'Partner ne wahi bola jo hamesha bolte hain — aur main ruk gaya. Chest tight nahi hui. Woh 10 second pehle kabhi nahi the.' Das second. Bahar se chhota. Par usi gap mein react ya respond ki choice hoti hai — aur wahi gap regulation hai. Link: [LINK]\n\nMessage 3 — Day 5:\nCart abhi khula hai. Ek cheez clear: AB mein generic affirmations nahi hain. Har module mein tumhare specific pattern ke liye mapped exercises hain — passive sunna nahi, active kaam. Jo info ki tarah store karte hain, unke liye kuch nahi badalta. Jo use karte hain — unke liye badalta hai. Link: [LINK]\n\nMessage 4 — Day 7:\nKal cart band. Decide kar liya ho toh link: [LINK]. Sawaal ho toh aaj reply karo, jaldi jawab dunga.\n\nMessage 5 — Day 8:\nAaj raat band. Jo log abhi andar aaye — unka asli kaam ab shuru hota hai. Woh wahi log hain jinhe pehle se pata tha yeh unke liye hai. Agar tum woh ho — link abhi: [LINK]. Is price pe baad mein nahi milega.",
   "pillar": "Placeholder / Variable",
   "status": "draft",
   "metadata": {
@@ -88438,8 +88438,8 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "post:exp10:story:founder:pricing-guilt",
   "kind": "post",
-  "title": "₹999 Rakha — Aur Seedha Guilt Aaya",
-  "body": "Course ka price decide kiya — ₹999.\n\nAur seedha ek thought aaya: 'Kya main is cheez ke liye charge kar sakta hoon?'\n\nYeh thought sirf ek baar nahi aaya. Har batch se pehle thoda wapas aata hai.\n\nMain jaanta hoon yeh kahaan se aata hai. Woh conditioning jo kehti hai — knowledge share karna clear hona chahiye tha, free hona chahiye tha. Charge karna matlab selfish hona.\n\nLekin ek cheez clear hai:\n\nAgar main apne kaam ki value acknowledge nahi kar sakta, toh mujhe boundaries ke baare mein, worth ke baare mein kya sikhaana hai?\n\n₹999 isliye hai ki yeh accessible ho. Yeh isliye nahi ki mujhe apni value mein confidence nahi.\n\nDono alag hain. Accessibility ek intentional choice hai. Guilt pe rakha hua price nahi.\n\nAur yeh distinction — yeh bhi wahi kaam hai jo AB mein hota hai. Apni zaroorat ko justify karna band karna. Sirf rakhna. Seedha.",
+  "title": "₹1,999 Rakha — Aur Seedha Guilt Aaya",
+  "body": "Course ka price decide kiya — ₹1,999.\n\nAur seedha ek thought aaya: 'Kya main is cheez ke liye charge kar sakta hoon?'\n\nYeh thought sirf ek baar nahi aaya. Har batch se pehle thoda wapas aata hai.\n\nMain jaanta hoon yeh kahaan se aata hai. Woh conditioning jo kehti hai — knowledge share karna clear hona chahiye tha, free hona chahiye tha. Charge karna matlab selfish hona.\n\nLekin ek cheez clear hai:\n\nAgar main apne kaam ki value acknowledge nahi kar sakta, toh mujhe boundaries ke baare mein, worth ke baare mein kya sikhaana hai?\n\n₹1,999 isliye hai ki yeh accessible ho. Yeh isliye nahi ki mujhe apni value mein confidence nahi.\n\nDono alag hain. Accessibility ek intentional choice hai. Guilt pe rakha hua price nahi.\n\nAur yeh distinction — yeh bhi wahi kaam hai jo AB mein hota hai. Apni zaroorat ko justify karna band karna. Sirf rakhna. Seedha.",
   "pillar": "Story / Founder / Personal Arc",
   "status": "draft",
   "metadata": {
@@ -89596,7 +89596,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:b11_07",
   "kind": "post",
   "title": "Care Aur Commerce Alag Nahi Hote — Guilt Kahan Se Aati Thi",
-  "body": "Jab maine AB ka pehla batch launch kiya, har invoice pe ek specific guilt feel hoti thi.\n\nGuilt kuch clear bol rahi thi: 'agar yeh sach mein logon ki help karta hai, toh free hona chahiye. Charge karna matlab tum actually care nahi karte.'\n\nMain jaanta tha yeh irrational hai. Phir bhi body mein woh tightness har baar aa jaati thi.\n\nKaafi waqt laga samajhne mein yeh kahan se aa rahi thi.\n\nDecode karo toh do parte hain —\n\nEk belief andar baithi thi: care aur commerce mutually exclusive hain. Ki genuinely help karni ho toh paisa lena selfish hai. Yeh belief usually unhi ke paas hoti hai jo apni har cheez consistently undervalue karte hain — rishton mein, kaam mein, har jagah. Nervous system ne yeh tab seekha jab 'kuch chahna' unsafe tha, jab exchange transactional feel hoti thi, jab pyaar conditional tha.\n\nPractically bhi belief adhoori thi: 999 per person, 100 log — woh basic sustainability threshold hai, luxury nahi. Iske bina consistent presence possible hi nahi.\n\nAsli reframe yeh hai: care aur commerce conflict mein nahi hote. Conflict tab hota hai jab tum apni worth kisi aur ki validation pe depend karwa dete ho.\n\nPricing woh moment tha jab woh belief surface pe aayi. Aur woh pricing ka nahi — self-worth ka sawaal tha.",
+  "body": "Jab maine AB ka pehla batch launch kiya, har invoice pe ek specific guilt feel hoti thi.\n\nGuilt kuch clear bol rahi thi: 'agar yeh sach mein logon ki help karta hai, toh free hona chahiye. Charge karna matlab tum actually care nahi karte.'\n\nMain jaanta tha yeh irrational hai. Phir bhi body mein woh tightness har baar aa jaati thi.\n\nKaafi waqt laga samajhne mein yeh kahan se aa rahi thi.\n\nDecode karo toh do parte hain —\n\nEk belief andar baithi thi: care aur commerce mutually exclusive hain. Ki genuinely help karni ho toh paisa lena selfish hai. Yeh belief usually unhi ke paas hoti hai jo apni har cheez consistently undervalue karte hain — rishton mein, kaam mein, har jagah. Nervous system ne yeh tab seekha jab 'kuch chahna' unsafe tha, jab exchange transactional feel hoti thi, jab pyaar conditional tha.\n\nPractically bhi belief adhoori thi: ₹1,999 per person, 100 log — woh basic sustainability threshold hai, luxury nahi. Iske bina consistent presence possible hi nahi.\n\nAsli reframe yeh hai: care aur commerce conflict mein nahi hote. Conflict tab hota hai jab tum apni worth kisi aur ki validation pe depend karwa dete ho.\n\nPricing woh moment tha jab woh belief surface pe aayi. Aur woh pricing ka nahi — self-worth ka sawaal tha.",
   "pillar": "Story Bank",
   "status": "draft",
   "metadata": {
@@ -89736,7 +89736,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:b11_03",
   "kind": "post",
   "title": "Launch Se Ek Raat Pehle — Jab Self-Worth Business Decision Le Raha Tha",
-  "body": "Launch se ek raat pehle, gyaarah baje, main ek number ke saath loop mein atka tha.\n\n999.\n\nDo ghante. Calculator. Aage-peeche. 'Shayad 499 theek hai. Accessible lagega. Zyada log aayenge.'\n\nBaad mein jo samjha woh interesting hai — yeh accessibility ki fikr thi hi nahi. Yeh apni worth ka pattern tha.\n\nAsli soch jo andar chal rahi thi: 'kya main itne ka hoon?'\n\n999 waise badi raqam nahi hai. Par us raat woh number ek dawa ban gaya tha — ki jo main de raha hoon woh itne ka hai. Aur yeh dawa karna physically uncomfortable tha. Chest mein kuch tight ho raha tha. Paani piya. Phir wapas calculator ki taraf.\n\nPaanch saal ka kaam. Paanch batch. Hazaar se zyada log. Aur phir bhi woh loop.\n\nJisne mujhe roka woh bahaduri nahi thi. Ek seedhi si baat thi: agar main price aadhi isliye kar raha hoon kyunki mujhe nahi lagta main itne ka hoon — toh woh decision mere students ke liye nahi hai, meri anxiety ke liye hai. Aur anxiety ek bekaar business advisor hai.\n\n999 wahi raha.\n\nYeh isliye bol raha hoon kyunki woh loop tumne bhi feel kiya hai — jab apni kisi cheez ki keemat tay karni thi. Woh jaana-pehchaana hai.",
+  "body": "Launch se ek raat pehle, gyaarah baje, main ek number ke saath loop mein atka tha.\n\n₹1,999.\n\nDo ghante. Calculator. Aage-peeche. 'Shayad 499 theek hai. Accessible lagega. Zyada log aayenge.'\n\nBaad mein jo samjha woh interesting hai — yeh accessibility ki fikr thi hi nahi. Yeh apni worth ka pattern tha.\n\nAsli soch jo andar chal rahi thi: 'kya main itne ka hoon?'\n\n₹1,999 waise badi raqam nahi hai. Par us raat woh number ek dawa ban gaya tha — ki jo main de raha hoon woh itne ka hai. Aur yeh dawa karna physically uncomfortable tha. Chest mein kuch tight ho raha tha. Paani piya. Phir wapas calculator ki taraf.\n\nPaanch saal ka kaam. Paanch batch. Hazaar se zyada log. Aur phir bhi woh loop.\n\nJisne mujhe roka woh bahaduri nahi thi. Ek seedhi si baat thi: agar main price aadhi isliye kar raha hoon kyunki mujhe nahi lagta main itne ka hoon — toh woh decision mere students ke liye nahi hai, meri anxiety ke liye hai. Aur anxiety ek bekaar business advisor hai.\n\n₹1,999 wahi raha.\n\nYeh isliye bol raha hoon kyunki woh loop tumne bhi feel kiya hai — jab apni kisi cheez ki keemat tay karni thi. Woh jaana-pehchaana hai.",
   "pillar": "Story Bank",
   "status": "draft",
   "metadata": {
@@ -98675,8 +98675,8 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "post:salpost_0996",
   "kind": "post",
-  "title": "1999 Zyada Hai — Seedhi Baat",
-  "body": "Agar sach mein budget constraint hai — koi judgment nahi. Koi pressure nahi. Seriously.\n\nPar agar yeh hesitation hai, actual constraint nahi — toh ek honest sawaal.\n\nMmain khud se poochhta hoon: pichhle saal kitna gaya books pe? Courses pe? Un subscriptions pe jo maine kabhi khole hi nahi? Koi exact number mat socho, bas ballpark.\n\nWoh paisa gaya — par woh material consistently khula nahi. Ya khula par kuch shift nahi hua. Ya helpful tha, par tangentially.\n\n1999 ka faisla asal mein paise ka nahi hai. Woh commitment ka hai. Jab cheez ek serious investment ho, dimaag apne aap zyada engaged ho jaata hai. Woh 'baad mein dekh lunga' mode mein nahi hota. Aur engagement — wahi actually kaam karta hai, content nahi.\n\nValue price pe depend nahi karti. Value use pe karti hai. Jo actually use karte hain, unke liye value clear hoti hai. Jo nahi karte, kisi bhi price pe value nahi.\n\nDecide karo us basis pe — number pe nahi. Link bio mein.",
+  "title": "₹1,999 Zyada Hai — Seedhi Baat",
+  "body": "Agar sach mein budget constraint hai — koi judgment nahi. Koi pressure nahi. Seriously.\n\nPar agar yeh hesitation hai, actual constraint nahi — toh ek honest sawaal.\n\nMmain khud se poochhta hoon: pichhle saal kitna gaya books pe? Courses pe? Un subscriptions pe jo maine kabhi khole hi nahi? Koi exact number mat socho, bas ballpark.\n\nWoh paisa gaya — par woh material consistently khula nahi. Ya khula par kuch shift nahi hua. Ya helpful tha, par tangentially.\n\n₹1,999 ka faisla asal mein paise ka nahi hai. Woh commitment ka hai. Jab cheez ek serious investment ho, dimaag apne aap zyada engaged ho jaata hai. Woh 'baad mein dekh lunga' mode mein nahi hota. Aur engagement — wahi actually kaam karta hai, content nahi.\n\nValue price pe depend nahi karti. Value use pe karti hai. Jo actually use karte hain, unke liye value clear hoti hai. Jo nahi karte, kisi bhi price pe value nahi.\n\nDecide karo us basis pe — number pe nahi. Link bio mein.",
   "pillar": "OBJECTION: Price Objection",
   "status": "draft",
   "metadata": {
@@ -99026,7 +99026,7 @@ window.ALL_CONTENT_DATA = [
   "id": "post:claude:dm_flow:DM_2_Welcome_Flow",
   "kind": "post",
   "title": "Welcome DM — New Follower Flow",
-  "body": "Pehla message, jab woh follow karein:\nTumne follow kiya — yeh nahi poochhunga kyun. Seedha itna: main Vedanta aur psychology ke beech kaam karta hoon — purane frameworks jo aaj ke patterns ko aise samjhaate hain jo kabhi therapy bhi miss kar jaati hai. Koi ek cheez hai jo sach mein samajhna chahte ho? Ya abhi bas dekh rahe ho — dono theek hain.\n\nAgar woh jawab dein:\nJo tumne share kiya, usmein se ek baat seedha poochhunga. Jo cheez baar baar laut ke aati hai, woh aksar situation ki wajah se nahi — ek andar baithi belief ki wajah se hoti hai. Situation badal lo, belief wahi rahegi, pattern phir laut aayega. Ismein aur aage jaana chahoge?\n\nAgar woh chup rahein (48 ghante baad):\nShayad message reh gaya, ya jawab nahi mila. Koi agenda nahi tha — bas ek darwaza khula tha. Jab poochhna ho, yahin hoon.\n\nJab woh apni baat khud kahein:\nJo tum bata rahe ho, woh theek AB 2.0 ka apna ilaaqa hai. Ek 6-week structured process hai. 999. Link bhej sakta hoon. Zor nahi — sirf agar kaam ka lage toh dekh lena.\n\nPehle do baat mein zero pitch. Bridge sirf tab, jab woh apni problem khud rakhein.",
+  "body": "Pehla message, jab woh follow karein:\nTumne follow kiya — yeh nahi poochhunga kyun. Seedha itna: main Vedanta aur psychology ke beech kaam karta hoon — purane frameworks jo aaj ke patterns ko aise samjhaate hain jo kabhi therapy bhi miss kar jaati hai. Koi ek cheez hai jo sach mein samajhna chahte ho? Ya abhi bas dekh rahe ho — dono theek hain.\n\nAgar woh jawab dein:\nJo tumne share kiya, usmein se ek baat seedha poochhunga. Jo cheez baar baar laut ke aati hai, woh aksar situation ki wajah se nahi — ek andar baithi belief ki wajah se hoti hai. Situation badal lo, belief wahi rahegi, pattern phir laut aayega. Ismein aur aage jaana chahoge?\n\nAgar woh chup rahein (48 ghante baad):\nShayad message reh gaya, ya jawab nahi mila. Koi agenda nahi tha — bas ek darwaza khula tha. Jab poochhna ho, yahin hoon.\n\nJab woh apni baat khud kahein:\nJo tum bata rahe ho, woh theek AB 2.0 ka apna ilaaqa hai. Ek 6-week structured process hai. ₹1,999. Link bhej sakta hoon. Zor nahi — sirf agar kaam ka lage toh dekh lena.\n\nPehle do baat mein zero pitch. Bridge sirf tab, jab woh apni problem khud rakhein.",
   "pillar": "Placeholder / Variable",
   "status": "draft",
   "metadata": {
@@ -99060,8 +99060,8 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "post:secondbrain:objections:3",
   "kind": "post",
-  "title": "999 Zyada Lagti Hai — Main Samajhta Hoon. Ek Honest Sawaal.",
-  "body": "999 zyada lagti hai. Force nahi karna. Genuinely.\n\nPar ek honest sawaal: jo pattern tum carry kar rahe ho — woh already kitna cost kar chuka hai?\n\nWoh relationship jisme wahi argument baar baar. Woh decision jo tumne baar baar differently lene ki koshish ki — aur wahi jagah pahunche. Woh raat jab sab theek tha — phir bhi kuch off tha, aur pata nahi kyun.\n\nWoh cost gino — energy mein, time mein, emotional bandwidth mein.\n\n999 ko main bhi pehle expense ki tarah dekhta tha. Actually yeh ek structured map hai — Vedanta aur psychology dono se. Jo samjhaata hai ki pattern kahaan se aaya, kaise chhupa rehta hai, aur kab actually shift hota hai.\n\nPehle: pattern ka accurate naam nahi hota. Body use ek vague threat ki tarah hold karti hai. Same loop.\nBaad mein: precise naam hota hai. Mechanism pata hota hai. Body release karti hai. Alag choice possible hoti hai.\n\nTum khud decide karo. Pressure nahi. Link bio mein — 999, kuch din ke liye open hai.",
+  "title": "₹1,999 Zyada Lagti Hai — Main Samajhta Hoon. Ek Honest Sawaal.",
+  "body": "₹1,999 zyada lagti hai. Force nahi karna. Genuinely.\n\nPar ek honest sawaal: jo pattern tum carry kar rahe ho — woh already kitna cost kar chuka hai?\n\nWoh relationship jisme wahi argument baar baar. Woh decision jo tumne baar baar differently lene ki koshish ki — aur wahi jagah pahunche. Woh raat jab sab theek tha — phir bhi kuch off tha, aur pata nahi kyun.\n\nWoh cost gino — energy mein, time mein, emotional bandwidth mein.\n\n₹1,999 ko main bhi pehle expense ki tarah dekhta tha. Actually yeh ek structured map hai — Vedanta aur psychology dono se. Jo samjhaata hai ki pattern kahaan se aaya, kaise chhupa rehta hai, aur kab actually shift hota hai.\n\nPehle: pattern ka accurate naam nahi hota. Body use ek vague threat ki tarah hold karti hai. Same loop.\nBaad mein: precise naam hota hai. Mechanism pata hota hai. Body release karti hai. Alag choice possible hoti hai.\n\nTum khud decide karo. Pressure nahi. Link bio mein — ₹1,999, kuch din ke liye open hai.",
   "pillar": "Sales / Course Bridge",
   "status": "draft",
   "metadata": {
@@ -185140,7 +185140,7 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:B-hP17SjZno",
   "kind": "poem",
-  "title": "मुझसे अब कोई उम्मीद भी क्यूँ रक््खे",
+  "title": "मुझसे अब कोई उम्मीद भी क्यूँ रख्खे",
   "body": "मुझसे अब कोई उम्मीद भी क्यूँ रखे\nमैं आख़िर किसी का ठुकराया हुआ हूँ।",
   "status": "posted",
   "pillar": "Poetry",
@@ -187980,7 +187980,7 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:CAcOd8TnN7X",
   "kind": "poem",
-  "title": "वो बच्चे जिनके नाम रक््खे गए",
+  "title": "वो बच्चे जिनके नाम रख्खे गए",
   "body": "वो बच्चे जिनके नाम रखे गए\nरिश्ते जुड़े और उनके पैदा होने से पहले\nकहीं दूर किसी दुनिया में हँसते होंगे\nअपने माँ-बाप की नाकामयाबी पर।",
   "status": "posted",
   "pillar": "Poetry",
@@ -188495,7 +188495,7 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:CKHXhQEHIqL",
   "kind": "poem",
-  "title": "फिर हुई कल तन््हाई से बातें हमारी",
+  "title": "फिर हुई कल तन्हाई से बातें हमारी",
   "body": "फिर हुई कल तन्हाई से बातें हमारी\nफिर वही किस्से, फिर वही यादें तुम्हारी",
   "status": "posted",
   "pillar": "Poetry",
@@ -188990,7 +188990,7 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:CMPkrRFHKXr",
   "kind": "poem",
-  "title": "है हेकु . ५ ह रू ल््फ",
+  "title": "है हेकु . ५ ह रू ल्फ",
   "body": "जान पर बन सकती है।\nयूँ करो, धीरे धीरे\nहाथ छुड़ाकर जाओ यहाँ से!",
   "status": "posted",
   "pillar": "Poetry",
@@ -189188,7 +189188,7 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:CNRTvQ-HHex",
   "kind": "poem",
-  "title": "मैं ख़ामख़ाँ ही उसमें ड्बता गया",
+  "title": "मैं ख़ामख़ाँ ही उसमें डूबता गया",
   "body": "मैं ख़ामख़ा ही उसमें डूबता गया\nवो इतना गहरा था भी नहीं!",
   "status": "posted",
   "pillar": "Poetry",
@@ -190179,7 +190179,7 @@ window.ALL_CONTENT_DATA = [
   "id": "poem:CQ8r9azDygH",
   "kind": "poem",
   "title": "तेरे साथ संजोए ख़्वाबों को",
-  "body": "तेरे साथ संजोए ख़्वाबों को\nआज तंग आकर जलाया है, ज््\nतेरी यादों से उलञकर जे सा\nआज फिर तुझे भुलाया है! (. जा",
+  "body": "तेरे साथ संजोए ख़्वाबों को\nआज तंग आकर जलाया है, ज्\nतेरी यादों से उलञकर जे सा\nआज फिर तुझे भुलाया है! (. जा",
   "status": "posted",
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
@@ -190596,8 +190596,8 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:CRHHN30Dwsm",
   "kind": "poem",
-  "title": "उसे गुमान हैकि चाप. ्ज",
-  "body": "उसे गुमान हैकि चाप. ्ज\nमुझसे आगे बढ़ चुका है\nमगर आज भी\nमेरी बात पर बात बदलता है",
+  "title": "उसे गुमान हैकि चाप.्ज",
+  "body": "उसे गुमान हैकि चाप.्ज\nमुझसे आगे बढ़ चुका है\nमगर आज भी\nमेरी बात पर बात बदलता है",
   "status": "posted",
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
@@ -190696,7 +190696,7 @@ window.ALL_CONTENT_DATA = [
   "id": "poem:CRY4rqSj4uM",
   "kind": "poem",
   "title": "कोई तो आख़िर",
-  "body": "कोई तो आख़िर\nहमारा भी करे इंतेज़ार,\nहम भी किसी के च्््\nसब्र का इम्तिहान बनें",
+  "body": "कोई तो आख़िर\nहमारा भी करे इंतेज़ार,\nहम भी किसी के च्\nसब्र का इम्तिहान बनें",
   "status": "posted",
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
@@ -191873,7 +191873,7 @@ window.ALL_CONTENT_DATA = [
   "id": "poem:CUw7dkbobJB",
   "kind": "poem",
   "title": "तो हमसे आकर मिलना,",
-  "body": "तो हमसे आकर मिलना\nहमारे पास फ़ुर्सत के सिवा\nक््यारह गया है\nइरफ़ान सत्तार",
+  "body": "तो हमसे आकर मिलना\nहमारे पास फ़ुर्सत के सिवा\nक्यारह गया है\nइरफ़ान सत्तार",
   "status": "posted",
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
@@ -192896,7 +192896,7 @@ window.ALL_CONTENT_DATA = [
   "id": "poem:CZ7fsoVhaeu",
   "kind": "poem",
   "title": "2चवा",
-  "body": "अपना कर्म कर लूँ\nफिर तो मरने की आज़ादी दोगे ना मुझे\nमुझे नहीं है शौक़\nतुम्हारे रस््मों रिवाजों से बंधने का इसीलिए\nतुम्हें बचाने के बाद ही मैं ख़ुद को\nज़माने की क़ैद से रिहा करूँगा\nमेरी मौत तुम्हारी ज़िंदगी की मोहताज रहेगी।",
+  "body": "अपना कर्म कर लूँ\nफिर तो मरने की आज़ादी दोगे ना मुझे\nमुझे नहीं है शौक़\nतुम्हारे रस्मों रिवाजों से बंधने का इसीलिए\nतुम्हें बचाने के बाद ही मैं ख़ुद को\nज़माने की क़ैद से रिहा करूँगा\nमेरी मौत तुम्हारी ज़िंदगी की मोहताज रहेगी।",
   "status": "posted",
   "pillar": "Poetry",
   "updatedAt": "2026-08-31 06:49:28",
@@ -195568,7 +195568,7 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:Ckf_U0LoAuI",
   "kind": "poem",
-  "title": "जिनके नाम रक््खे गए",
+  "title": "जिनके नाम रख्खे गए",
   "body": "वो बच्चे\nजिनके नाम रक्खे गए\nरिश्ते जुड़ने और\nउनके पैदा होने से पहले,\nकहीं दूर किसी दुनिया में\nहँसते होंगे अपने माँ बाप की\nनाकामयाबी पर!",
   "status": "posted",
   "pillar": "Poetry",
@@ -197383,7 +197383,7 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:CpVSwDuPM-b",
   "kind": "poem",
-  "title": "तुझे जीने की तमन्ना करूँ,                  ् के",
+  "title": "तुझे जीने की तमन्ना करूँ,  के",
   "body": "तुझे जीने की तमन्ना करूँ\nए ज़िंदगी ऐसी वजह तो दे",
   "status": "posted",
   "pillar": "Poetry",
@@ -197900,7 +197900,7 @@ window.ALL_CONTENT_DATA = [
  {
   "id": "poem:CqZph1IrCQf",
   "kind": "poem",
-  "title": "मैं ख़ामख़ाँ ही उसमें ड्बता गया, … ्हर",
+  "title": "मैं ख़ामख़ाँ ही उसमें डूबता गया, …्हर",
   "body": "मैं ख़ामख़ाँ ही उसमें डूबता गया,\nवो इतना गहरा था भी नहीं!",
   "status": "posted",
   "pillar": "Poetry",
@@ -201535,17 +201535,6 @@ window.ALL_CONTENT_DATA = [
   "look_id": ""
  },
  {
-  "id": "post:claude:dm_flow:DM_3_Objection_Flow:alt-4baffdbd",
-  "kind": "post",
-  "title": "Objection Price: their Message:\nPrice Thodi Zyada Lagti hai",
-  "body": "**Objection Price:** their Message:\nPrice Thodi Zyada Lagti hai\n\nyour Response:\nDekho — ₹999 ek Number hai. Aur main Force nahi karna Chahta. Bas ek Cheez Poochhna Chahta hoon: jo Cheez in Patterns ko Carry Karne mein Cost Aa Rahi hai — Time, Energy, Relationships — woh kya hai? AB ek Baar. Woh Cost Roz.\n\nIf they Push back:\nFair enough. Agar Genuinely Tight hai Abhi — Wait karo. Free Content Hamesha Rahega. Agar Fence par ho — Refund Policy hai: [X] Din. Risk Tumhara nahi.\n\nObjection Readiness:\ntheir Message:\nMujhe Pehle Khud Theek ho Jaana Chahiye\n\nyour Response:\nyeh Exactly woh Belief hai jo ab Pehle Address karta hai. Readiness ka Wait karna — yeh Readiness nahi hai. Yeh ek Familiar Delay Form hai. Bataao Specifically kya Rok Raha hai — Usse Explore karte hain.\n\nIf they Explain:\n[Acknowledge their specific Reason. Then:] is specific Cheez ke Liye — ab mein [Relevant Module] hai. Woh Exactly Iska Map karta hai.\n\nObjection Spirituality:\ntheir Message:\nyeh Spirituality ke Liye hai Na?\n\nYour Response:\nmain Samjhta hoon yeh Impression Kyun hai. AB Philosophy + Psychology hai. Ritual nahi. Devotion nahi. Gita Use karte hain Modern Psychology Explain Karne ke Liye. Different Lagta hai Expectation se?\n\nIf still Unsure:\nek Example: Raga-Dvesha — Vedanta ka Concept — Directly Maps to Attachment Theory aur Dopamine Research. Same Mechanism, Different Vocabulary. Yeh woh Angle hai jo ab Use karta hai.\n\nObjection Time:\ntheir Message:\nTime nahi hai Abhi\n\nyour Response:\nSamjha. Self-paced hai ab — Lifetime access. Ek Module 30-40 Min. Koi Live Deadlines nahi. Agar Genuinely Time nahi Abhi — Wait karo. Agar 'Time nahi' Actually 'Sure nahi hoon' hai — woh Alag Conversation hai. Kaunsa hai?\n\nIf they Clarify:\n[Respond to their Actual Reason Specifically.]",
-  "status": "saved",
-  "pillar": "",
-  "updatedAt": "2026-07-20T15:44:52.762Z",
-  "rank": "0.0",
-  "look_id": ""
- },
- {
   "id": "post:exp2:story:overfunctioning-stop:alt-5aae8bd7",
   "kind": "post",
   "title": "Dost ne phone kiya — relationship mein kuch hua tha",
@@ -201737,6 +201726,17 @@ window.ALL_CONTENT_DATA = [
   "kind": "post",
   "title": "Saalon main sirf ye sochta raha ki main kya banna chahta hoon",
   "body": "Saalon main sirf ye sochta raha ki main kya banna chahta hoon. Kabhi ye nahi socha ki main kya bilkul nahi banna chahta. Aur wahi cheezein chupke se meri zindagi mein ghusti gayi. Ek ulta tarika:\n\n1. Pehle likho — meri zindagi kaisi bilkul nahi honi chahiye.\n\n–2. Kaunsa insaan, kaunsi aadat, kaunsi jagah se main door rehna chahta hoon.\n\n–3. Ab har faisla us list ke against check karo.\n\nMaine Deloitte tab chhoda jab maine likh liya ki main kaisa nahi jeena chahta. Kabhi kabhi raasta 'kya chahiye' se nahi, 'kya nahi chahiye' se saaf hota hai.\n\n**CTA / Ending** Tumhari zindagi kaisi bilkul nahi honi chahiye — likha hai kabhi?",
+  "status": "saved",
+  "pillar": "",
+  "updatedAt": "2026-07-20T15:44:52.762Z",
+  "rank": "0.0",
+  "look_id": ""
+ },
+ {
+  "id": "post:claude:dm_flow:DM_3_Objection_Flow:alt-f70390f4",
+  "kind": "post",
+  "title": "Objection Price: their Message:\nPrice Thodi Zyada Lagti hai",
+  "body": "**Objection Price:** their Message:\nPrice Thodi Zyada Lagti hai\n\nyour Response:\nDekho — ₹1,999 ek Number hai. Aur main Force nahi karna Chahta. Bas ek Cheez Poochhna Chahta hoon: jo Cheez in Patterns ko Carry Karne mein Cost Aa Rahi hai — Time, Energy, Relationships — woh kya hai? AB ek Baar. Woh Cost Roz.\n\nIf they Push back:\nFair enough. Agar Genuinely Tight hai Abhi — Wait karo. Free Content Hamesha Rahega. Agar Fence par ho — Refund Policy hai: [X] Din. Risk Tumhara nahi.\n\nObjection Readiness:\ntheir Message:\nMujhe Pehle Khud Theek ho Jaana Chahiye\n\nyour Response:\nyeh Exactly woh Belief hai jo ab Pehle Address karta hai. Readiness ka Wait karna — yeh Readiness nahi hai. Yeh ek Familiar Delay Form hai. Bataao Specifically kya Rok Raha hai — Usse Explore karte hain.\n\nIf they Explain:\n[Acknowledge their specific Reason. Then:] is specific Cheez ke Liye — ab mein [Relevant Module] hai. Woh Exactly Iska Map karta hai.\n\nObjection Spirituality:\ntheir Message:\nyeh Spirituality ke Liye hai Na?\n\nYour Response:\nmain Samjhta hoon yeh Impression Kyun hai. AB Philosophy + Psychology hai. Ritual nahi. Devotion nahi. Gita Use karte hain Modern Psychology Explain Karne ke Liye. Different Lagta hai Expectation se?\n\nIf still Unsure:\nek Example: Raga-Dvesha — Vedanta ka Concept — Directly Maps to Attachment Theory aur Dopamine Research. Same Mechanism, Different Vocabulary. Yeh woh Angle hai jo ab Use karta hai.\n\nObjection Time:\ntheir Message:\nTime nahi hai Abhi\n\nyour Response:\nSamjha. Self-paced hai ab — Lifetime access. Ek Module 30-40 Min. Koi Live Deadlines nahi. Agar Genuinely Time nahi Abhi — Wait karo. Agar 'Time nahi' Actually 'Sure nahi hoon' hai — woh Alag Conversation hai. Kaunsa hai?\n\nIf they Clarify:\n[Respond to their Actual Reason Specifically.]",
   "status": "saved",
   "pillar": "",
   "updatedAt": "2026-07-20T15:44:52.762Z",
