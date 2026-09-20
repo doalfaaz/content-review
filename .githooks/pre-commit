@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Optional opt-in: `git config core.hooksPath .githooks`
+# Refuses a commit while the served bundle would drift from origin/main
+# (dirty served artifacts, main ahead of origin, mirror drift).
+exec bash "$(git rev-parse --show-toplevel)/tools/parity_guard.sh"

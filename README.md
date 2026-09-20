@@ -22,3 +22,16 @@ hand-edit index.html here — edit the app source and re-run the merge script.
 Topbar button renders every slide at 1080x1350 and hands them to the iOS
 share sheet (or downloads), plus copies the caption — the manual route for
 IG carousels over 10 slides (Meta API cap).
+
+## Parity guard (F-S11)
+
+The live site is `origin/main` — nothing else. `tools/parity_guard.sh` fails
+when the bundle drifts: uncommitted changes to served files, local `main`
+ahead of `origin/main`, or a stale phone mirror (`~/.local/share/ce-phone`).
+CI runs the bundle-completeness half on every push/PR to `main`;
+local-only halves (mirror, unpushed work) skip honestly there.
+
+```bash
+bash tools/parity_guard.sh                          # run it any time
+git config core.hooksPath .githooks                 # opt-in: guard on every commit
+```
