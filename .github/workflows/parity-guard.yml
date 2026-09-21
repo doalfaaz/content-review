@@ -1,0 +1,22 @@
+# Parity guard — CI face of tools/parity_guard.sh (F-S11).
+#
+# What CI can honestly assert: the pushed tree carries a complete, coherent
+# served bundle (every core file present, non-empty, referenced by the
+# served index). What it CANNOT see — the phone LAN mirror and local
+# unpushed commits — is asserted locally by the same script (pre-commit
+# opt-in via .githooks/) and skips honestly here.
+name: parity-guard
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: served-bundle parity
+        run: CI=1 bash tools/parity_guard.sh
