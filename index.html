@@ -3124,7 +3124,7 @@
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<script src="./ce-touch-edit.js?v=c317c56a8f"></script>
+<script src="./ce-touch-edit.js?v=60a8815ddf"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -3275,6 +3275,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // shipbar, which retires the dock's own 45px closed-state row. The carousel
       // keeps its inspector toggle, so this is poem/post only.
       var isCarousel = ws.classList.contains('is-carousel-mode');
+      /* F-DOCK-01 (cloud/ce-dock, 2026-09-21): a carousel has no dock Tools row
+         (its inspector owns #ce-tools-toggle), so the poem/post toggle returns to
+         its authored home in #studio-dock — which the carousel layout hides —
+         instead of staying painted in the band. Left in the band it kept its 96px
+         and pushed Send-to-Plan off the right edge; a later poem open then added
+         a second one on top of it. Parking it keeps ONE owner for the node: the
+         dock on carousel, the band on poem/post. */
+      if (toggle && isCarousel && dock && toggle.parentElement !== dock) dock.insertBefore(toggle, dock.firstChild);
       if (toggle && !isCarousel && toggle.parentElement !== bar) bar.insertBefore(toggle, bar.firstChild);
       // History is the TERTIARY tier and stays in the topbar (where it is
       // authored): it is a rare, often-disabled surface, and giving it a row in
@@ -3349,7 +3357,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   } catch (_) {}
 })();
 </script>
-<link rel="stylesheet" href="./ce-mobile.css?v=69488d7030" />
+<link rel="stylesheet" href="./ce-mobile.css?v=4f84fcc329" />
 <!-- Ideas surface density + crimson rebind (2026-09-17). The parity renderer
      ships tall outline cards and the catalog is ~600 ideas, so the tab read
      as pink-tinted text walls. Cards now render as compact rows that expand
@@ -6109,9 +6117,24 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           try { if (state.activeTab === 'saved' && typeof renderMain === 'function') renderMain(); } catch (_e) {}
           try { if (typeof updateTopbarSavedBadge === 'function') updateTopbarSavedBadge(); } catch (_e) {}
         }
+        /* BANK-TRUTH (saved-bank lane, 2026-09-21): a pull that SUCCEEDED clears
+           the failure flag, so a recovered link stops showing the offline copy. */
+        window.__CE_BANK_PULL_FAILED__ = false;
         return changed;
       })
-      .catch(function () { return false; });
+      .catch(function () {
+        /* BANK-TRUTH (saved-bank lane, 2026-09-21): this catch used to swallow the
+           rejection and return false, so `ceSavedBankPull(true).then(...)` in the
+           boot arm ALWAYS resolved — the arm then set `__CE_BANK_PULLED_ONCE__ =
+           true` over a pull that never landed, and its own `.catch` (the only
+           writer of `__CE_BANK_PULL_FAILED__`) was unreachable. Net effect: the
+           bank could be unreadable for a whole session while every flag said it
+           was read, and the Saved Bank painted "No saved pieces" over a Mac store
+           holding 148 rows. The flag now has a live writer: the failure is
+           recorded here, at the point the failure is actually known. */
+        window.__CE_BANK_PULL_FAILED__ = true;
+        return false;
+      });
   }
   /* Explicit deletion event → tombstone. Called ONLY from the real delete UI path. */
   function ceSavedBankDeleted(keys) {
@@ -6160,6 +6183,25 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var csp = (document.querySelector('meta[http-equiv="Content-Security-Policy"]') || {}).content || '';
       __ceBankChannel = /connect-src[^;]*4145/.test(csp);
     } catch (_e) {}
+  }
+  /* BANK-TRUTH (saved-bank lane, 2026-09-21): a channel that EXISTS but cannot
+     READ is the owner's "it is not showing even the poems" symptom. Measured on
+     the real phone path (LAN rail seed = endpoint + capability, no write key):
+     the bank client stayed dark, the pull never ran, and the Saved Bank painted
+     the onboarding empty state — "No saved pieces / Save a piece from Library to
+     keep it here." — while the Mac's shared store held 148 rows (121 kept). A
+     fabricated empty state over real data is exactly the AGENTS.md law-2 lie.
+     The local store is genuinely empty here, but the REMOTE store is not, and
+     this surface cannot tell yet. Record that honestly so the empty state can
+     name the cause and offer the one action that fixes it (the pairing prompt
+     the write paths already own in ce-touch-edit.js ensureWriteKey). */
+  window.__CE_BANK_NEEDS_KEY__ = false;
+  if (__ceBankChannel && !ceBankBridge()) {
+    try {
+      var __epForKey = null;
+      try { __epForKey = localStorage.getItem('ce_sync_endpoint'); } catch (_e2) {}
+      if (__epForKey && !ceBankKey()) window.__CE_BANK_NEEDS_KEY__ = true;
+    } catch (_e3) {}
   }
   if (__ceBankChannel) {
     try {
@@ -16276,7 +16318,20 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var phoneStudio = (((typeof window !== 'undefined' && window.innerWidth) || 1440) <= 700)
         || document.documentElement.classList.contains('ce-phone');
       if (dockEl0 && type !== 'carousel' && phoneStudio) {
-        var dockToggle = dockEl0.querySelector('#ce-dock-tools-toggle');
+        /* F-DOCK-01 (cloud/ce-dock, 2026-09-21): the toggle is a SINGLETON by id
+           (aria-controls / getElementById contract), but this render used to look
+           for it INSIDE #studio-dock only — and placeShipBar parks the live node
+           in .studio-shipbar, so every open found none and created ANOTHER, each
+           one landing in the band. Measured on the phone bundle at 402x874: 1
+           toggle after open 1, 2 after open 2, 3 after open 3, and `Send to Plan`
+           pushed 33→135px past the right edge (the owner's "panels and buttons
+           are messed up"). Resolve the node from the DOCUMENT (one live node
+           wherever it currently lives), create it only when the document has
+           none, and if more than one already exists (a page that booted a legacy
+           build in the same session) keep the FIRST — the one getElementById
+           returns — and drop the rest, so the painted control is the one the
+           handlers and aria-expanded actually belong to. */
+        var dockToggle = document.getElementById('ce-dock-tools-toggle');
         if (!dockToggle) {
           dockToggle = document.createElement('button');
           dockToggle.type = 'button';
@@ -16299,6 +16354,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             }, 80);
           };
           dockEl0.insertBefore(dockToggle, dockEl0.firstChild);
+        } else {
+          var dupDockToggles = document.querySelectorAll('#ce-dock-tools-toggle');
+          for (var dt = 1; dt < dupDockToggles.length; dt++) dupDockToggles[dt].remove();
         }
         var hintEl = dockToggle.querySelector('.ce-tools-toggle-hint');
         if (hintEl) {
@@ -16316,7 +16374,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var lbl0 = dockToggle.querySelector('.ce-tools-toggle-label');
         if (lbl0) lbl0.textContent = 'Tools';
       } else if (dockEl0 && !phoneStudio) {
-        var staleToggle = dockEl0.querySelector('#ce-dock-tools-toggle');
+        /* F-DOCK-01: the desktop layer has no Tools row at all — reap the toggle
+           wherever it lives (the dock on desktop, the band if the phone layer was
+           on a moment ago), not just inside the dock. */
+        var staleToggle = document.getElementById('ce-dock-tools-toggle');
         if (staleToggle) staleToggle.remove();
         if (workspaceEl) workspaceEl.classList.remove('ce-tools-open');
       }
@@ -18024,12 +18085,27 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
     var filteredItems = allSaved.filter(function (s) { return savedRowPasses(s, activeType); });
 
-    /* Per-type counts over the list WITHOUT the type filter: a pill is dead
-       only when its own list is empty. 'all' is never counted to zero out —
-       it stays clickable as the escape hatch back to a non-empty list. */
+    /* Per-type counts over the list WITHOUT the type filter. BANK-TRUTH
+       (saved-bank lane, 2026-09-21): this tally used to decide a pill's
+       DISABLED state, which was the bug — it is narrowed by the active tab and
+       search, so a zero-hit search killed all three pills (measured: Poems
+       disabled, 121 rows still in the bank). A disabled pill cannot be tapped,
+       so the Poems filter became unreachable and the owner's poems read as
+       missing. Pill liveness now reads `savedTypeTotals` (the whole bank);
+       this tally is kept because the W8-F3 contract below still states what a
+       pill WOULD show in the current tab, and it is the number a future
+       per-pill badge must print. */
     var savedTypeCounts = { post: 0, carousel: 0, poem: 0 };
     allSaved.forEach(function (s) {
-      if (savedRowPasses(s, 'all') && s && Object.prototype.hasOwnProperty.call(savedTypeCounts, s.type)) savedTypeCounts[s.type]++;
+      if (savedRowPasses(s, 'all', false, activeFilter) && s && Object.prototype.hasOwnProperty.call(savedTypeCounts, s.type)) savedTypeCounts[s.type]++;
+    });
+    /* Rows of each type ANYWHERE in the bank, ignoring the tab + search. A
+       pill is dead only when the BANK has none of that type — never because
+       the current tab/search happens to exclude them. This is what keeps the
+       Poems chip tappable while the owner is looking at an empty Shortlist. */
+    var savedTypeTotals = { post: 0, carousel: 0, poem: 0 };
+    allSaved.forEach(function (s) {
+      if (s && Object.prototype.hasOwnProperty.call(savedTypeTotals, s.type)) savedTypeTotals[s.type]++;
     });
 
     /* W8-F3 (F3-sorts-bank, 2026-09-21) — W4-LIB-06: two count semantics in one
@@ -18197,11 +18273,20 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
     container.querySelectorAll('.ce-type-pill').forEach(function (btn) {
       /* 2026-09-06 audit fix: filters active on an empty list = dead controls.
-         Per-type truth now: a pill dies only when ITS list is empty, and the
-         'all' pill never disables — it is the escape hatch out of an empty
-         type filter. */
+         Per-type truth now: a pill dies only when the BANK has no row of that
+         type at all, and the 'all' pill never disables — it is the escape
+         hatch out of an empty type filter.
+         BANK-TRUTH (saved-bank lane, 2026-09-21): this used to disable on
+         `savedTypeCounts` (tab + search narrowed), so a zero-hit search killed
+         all three pills while the bank held 121 rows — and a DISABLED pill
+         cannot be tapped, so the Poems filter became unreachable and the
+         owner's poems read as missing (measured: pills post/poem disabled,
+         rows 0, bank 121). Dead means "the bank has none"; a tab that merely
+         excludes them keeps the pill live and lets the empty state name why
+         (it already prints "N other pieces here — the Poems filter is hiding
+         it" / the tab-level cause). */
       var pillType = btn.getAttribute('data-type-filter');
-      var pillEmpty = pillType !== 'all' && !(savedTypeCounts[pillType] > 0);
+      var pillEmpty = pillType !== 'all' && !(savedTypeTotals[pillType] > 0);
       btn.disabled = pillEmpty;
       btn.style.opacity = pillEmpty ? '.4' : '';
       btn.style.cursor = pillEmpty ? 'not-allowed' : '';
@@ -18424,22 +18509,47 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         emptyCtaHtml = '<button type="button" class="ce-saved-empty-cta" id="ce-saved-empty-clear-type">Show all types</button>'
           + '<button type="button" class="ce-saved-empty-cta" id="ce-saved-empty-open-library" style="background:transparent;border-color:var(--border);color:var(--muted);">Open Library</button>';
       } else {
+        /* BANK-TRUTH (saved-bank lane, 2026-09-21): the LAST cause this branch
+           must name is the one the owner actually hit — a bank that could not be
+           READ. Measured on the real phone path: the LAN rail seeds an endpoint
+           and capability but no write key, the bank client stayed dark, and this
+           branch printed "No saved pieces / Save a piece from Library to keep it
+           here." while the Mac's shared store held 148 rows (121 kept). Both
+           sentences were false and the owner's bank looked gone. Two distinct
+           unreadable states, each with its own honest copy and its own fix:
+             - needs key: a channel exists, the device is not paired yet
+             - pull failed: paired, but the Mac could not be read this session
+           Only when BOTH are false is the local store the whole truth. */
+        var bankNeedsKey = !!window.__CE_BANK_NEEDS_KEY__;
+        var bankPullFailed = !!window.__CE_BANK_PULL_FAILED__;
         emptyMsg = activeFilter === 'rejected'
           ? 'Nothing archived.'
           : 'Save a piece from Library to keep it here.';
         emptyTitle = activeFilter === 'rejected' ? 'No archived pieces' : 'No saved pieces';
-        // If this subtab is empty but others hold pieces, say where they are —
-        // the owner just saved from Studio and landed here on the default tab.
-        // `shortlist` now means everything kept, so its only "elsewhere" is the
-        // archive; counting in_progress here would double-report the same piece.
-        var elsewhere = 0;
-        if (activeFilter === 'shortlist') elsewhere = countRejected;
-        else if (activeFilter === 'in_progress') elsewhere = countShortlist - countInProgress + countRejected;
-        else elsewhere = countShortlist + countInProgress;
-        elsewhereLine = elsewhere > 0
-          ? '<div class="ce-saved-empty-sub">' + elsewhere + ' piece' + (elsewhere === 1 ? ' is' : 's are') + ' in the other lists above.</div>'
-          : '';
-        emptyCtaHtml = '<button type="button" class="ce-saved-empty-cta" id="ce-saved-empty-open-library">Open Library</button>';
+        if (bankNeedsKey) {
+          emptyTitle = 'Saved Bank not paired yet';
+          emptyMsg = 'This device has not been given the write key, so the bank on your Mac cannot be read from here.';
+          emptyCtaHtml = '<button type="button" class="ce-saved-empty-cta" id="ce-saved-empty-pair">Pair this device</button>'
+            + '<button type="button" class="ce-saved-empty-cta" id="ce-saved-empty-open-library" style="background:transparent;border-color:var(--border);color:var(--muted);">Open Library</button>';
+        } else if (bankPullFailed) {
+          emptyTitle = 'Saved Bank could not be read';
+          emptyMsg = 'Your Mac could not be reached, so this list may be incomplete. Nothing was deleted.';
+          emptyCtaHtml = '<button type="button" class="ce-saved-empty-cta" id="ce-saved-empty-retry">Retry</button>'
+            + '<button type="button" class="ce-saved-empty-cta" id="ce-saved-empty-open-library" style="background:transparent;border-color:var(--border);color:var(--muted);">Open Library</button>';
+        } else {
+          // If this subtab is empty but others hold pieces, say where they are —
+          // the owner just saved from Studio and landed here on the default tab.
+          // `shortlist` now means everything kept, so its only "elsewhere" is the
+          // archive; counting in_progress here would double-report the same piece.
+          var elsewhere = 0;
+          if (activeFilter === 'shortlist') elsewhere = countRejected;
+          else if (activeFilter === 'in_progress') elsewhere = countShortlist - countInProgress + countRejected;
+          else elsewhere = countShortlist + countInProgress;
+          elsewhereLine = elsewhere > 0
+            ? '<div class="ce-saved-empty-sub">' + elsewhere + ' piece' + (elsewhere === 1 ? ' is' : 's are') + ' in the other lists above.</div>'
+            : '';
+          emptyCtaHtml = '<button type="button" class="ce-saved-empty-cta" id="ce-saved-empty-open-library">Open Library</button>';
+        }
       }
       mainArea.innerHTML = '<div class="ce-saved-empty">'
         + '<div class="ce-saved-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="32" height="32"><path d="M12 3.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8-4.2-4.1 5.9-.9z"/></svg></div>'
@@ -18465,6 +18575,33 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var __clearType = mainArea.querySelector('#ce-saved-empty-clear-type');
       if (__clearType) __clearType.onclick = function () {
         state.savedTypeFilter = 'all';
+        renderMain();
+      };
+      /* BANK-TRUTH (saved-bank lane, 2026-09-21): the pairing escape. The phone's
+         write paths already own the one-time key prompt (ce-touch-edit.js
+         ensureWriteKey) — this button invokes the same prompt instead of
+         inventing a second pairing flow, then retries the pull so the list
+         fills in place without a reload. */
+      var __pairBtn = mainArea.querySelector('#ce-saved-empty-pair');
+      if (__pairBtn) __pairBtn.onclick = function () {
+        var run = (typeof window.__CE_ENSURE_WRITE_KEY__ === 'function')
+          ? window.__CE_ENSURE_WRITE_KEY__
+          : function (cb) {
+              var entered = '';
+              try { entered = window.prompt('Paste your CE sync write key (one time):', '') || ''; } catch (_p) {}
+              if (entered) { try { localStorage.setItem('ce_sync_key', entered.trim()); } catch (_s) {} }
+              cb(entered.trim());
+            };
+        run(function (key) {
+          if (!key) return;
+          window.__CE_BANK_NEEDS_KEY__ = false;
+          try { if (window.__CE_SAVED_BANK_PULL__) window.__CE_SAVED_BANK_PULL__(true); } catch (_pp) {}
+          renderMain();
+        });
+      };
+      var __retryBtn = mainArea.querySelector('#ce-saved-empty-retry');
+      if (__retryBtn) __retryBtn.onclick = function () {
+        try { if (window.__CE_SAVED_BANK_PULL__) window.__CE_SAVED_BANK_PULL__(true); } catch (_rr) {}
         renderMain();
       };
       var __cta = mainArea.querySelector('#ce-saved-empty-open-library');

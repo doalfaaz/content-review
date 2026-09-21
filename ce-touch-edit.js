@@ -429,6 +429,10 @@
     try { localStorage.setItem('ce_sync_key', entered.trim()); } catch (_) {}
     cb(entered.trim());
   }
+  /* BANK-TRUTH (saved-bank lane, 2026-09-21): the Saved Bank's unpaired empty
+     state offers "Pair this device" — it must run THIS prompt, not a second
+     copy of the pairing flow. One pairing path, one place to fix it. */
+  window.__CE_ENSURE_WRITE_KEY__ = ensureWriteKey;
 
   window.__CE_PERSIST_DECK_EDIT__ = function (deck) {
     if (!deck || !deck.id) return;

@@ -1778,12 +1778,23 @@ html.ce-phone .ce-saved-empty-cta { min-height: 40px !important; }
    tabs need 359px, so the third label ran past the edge. Measure-then-fit: give the strip
    its own full-width row (measured: 402 - padding = 370px >= 359px) so every tab sits on
    one line, fully visible and tappable — no scroll strip, no clipped label. */
+/* BANK-TRUTH (saved-bank lane, 2026-09-21): that 359px fit was measured against
+   fixture-sized labels and does not survive real bank counts. Measured live at
+   402x874 with the owner's bank: "Shortlist (121)" 116px + "Polished (5)" 104px +
+   "Rejected / Archive (27)" 168px = 388px of tabs inside a 318px strip
+   (scrollWidth 397 / clientWidth 316), so the archive label rendered cut mid-word
+   ("Rejected / Arc…") and the hidden scrollbar made the cut read as the whole
+   label. A single fixed-width row can never hold counts that grow, so the strip
+   WRAPS instead of clipping: labels stay nowrap (no mid-word breaks) and a tab
+   that no longer fits moves to the next line whole. Nothing else about the row
+   changes — when the tabs do fit, the rendered layout is identical to before. */
 html.ce-phone .ce-saved-filter-bar { gap: 8px; }
 html.ce-phone .ce-saved-subtabs {
   flex: 0 0 100%;
   width: 100%;
   box-sizing: border-box;
   display: flex;
+  flex-wrap: wrap;
   gap: 2px;
   padding: 2px;
   justify-content: space-between;
