@@ -160,7 +160,7 @@
     if (!document.getElementById('ce-boot-veil')) {
       var v = document.createElement('style');
       v.id = 'ce-boot-veil-style';
-      v.textContent = '#ce-boot-veil{position:fixed;inset:0;z-index:100000;background:#121016;transition:opacity .25s ease}';
+      v.textContent = '#ce-boot-veil{position:fixed;inset:0;z-index:var(--z-veil);background:#121016;transition:opacity .25s ease}';
       document.documentElement.appendChild(v);
       var veil = document.createElement('div');
       veil.id = 'ce-boot-veil';
@@ -440,8 +440,20 @@
       slides: deck.slides,
       updatedAt: Date.now()
     };
-    try { localStorage.setItem('ce_deck_edits', JSON.stringify(store)); } catch (_) {}
-    if (!window.__CE_SYNC_ENDPOINT__) return;
+    try { localStorage.setItem('ce_deck_edits', JSON.stringify(store)); } catch (_) {
+      /* BO: a failed localStorage write meant the edit lived only in memory —
+         a reload silently lost it while the UI read as if it were kept. Record
+         the state so a surface can warn. */
+      window.__CE_PERSIST_LAST_ERROR__ = 'localstorage-write-failed @ ' + new Date().toISOString();
+      try { console.warn('[ce-sync] deck edit persisted in memory only — localStorage write failed'); } catch (_w) {}
+    }
+    if (!window.__CE_SYNC_ENDPOINT__) {
+      /* BO: no endpoint meant the edit stayed local with no signal at all —
+         expose the count of pushed-but-unsynced edits so the shelf surface can
+         say "N edits waiting for your Mac". */
+      window.__CE_UNSYNCED_EDITS__ = (window.__CE_UNSYNCED_EDITS__ || 0) + 1;
+      return;
+    }
     var payload = { deckId: deck.id, deck: store[deck.id] };
     var base = window.__CE_SYNC_ENDPOINT__;
     function send(key, viaGet) {
@@ -529,6 +541,7 @@
         return;
       }
       markReachable();
+      window.__CE_UNSYNCED_EDITS__ = 0;
     }).catch(function () { markUnreachable('write-failed'); });
   };
 
@@ -568,6 +581,9 @@
     try { localStorage.removeItem('ce_sync_endpoint'); } catch (_) {}
     window.__CE_SYNC_ENDPOINT__ = null;
     pullFailures = 0;
+    /* BO-P8: the silent re-discovery could leave the owner staring at a stale
+       deck with no error state — name it once per heal. */
+    if (window.showAppToast) window.showAppToast('Mac still unreachable — showing your last synced copy');
     findSyncEndpoint(function (b) { if (b) window.__CE_SYNC_ENDPOINT__ = b; });
   }
   function pullRemoteEdits() {
@@ -661,7 +677,12 @@
           if (window.showAppToast) window.showAppToast(verifyCount === 1 ? 'A schedule needs verification on Meta’s clock' : verifyCount + ' schedules need verification on Meta’s clock');
         } else if (window.showAppToast) window.showAppToast(n === 1 ? 'A schedule failed on your Mac — open Schedule to retry' : n + ' schedules failed on your Mac — open Schedule to retry');
       })
-      .catch(function () {});
+      .catch(function () {
+        /* BO: a failed schedule-row probe used to vanish — the Mac-side failure
+           stayed invisible on this surface. Record it; do not claim a state. */
+        window.__CE_SCHED_PROBE_FAILED__ = Date.now();
+        try { console.warn('[ce-sync] schedule failed-row probe failed'); } catch (_w) {}
+      });
   }
   function ceScheduleRow(key, id) {
     var ep = window.__CE_SYNC_ENDPOINT__;
@@ -763,26 +784,26 @@
     if (old) old.remove();
     var sheet = document.createElement('div');
     sheet.id = 'ce-sched-sheet';
-    sheet.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;';
+    sheet.style.cssText = 'position:fixed;inset:0;z-index:var(--z-toast-hi);background:rgba(0,0,0,.55);display:flex;align-items:flex-end;';
     var slides = deck.slides.length;
     sheet.innerHTML =
       '<div style="width:100%;background:#1c1a24;color:#fff;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));font-family:-apple-system,system-ui,sans-serif;">' +
-      '<div style="font-weight:800;font-size:15px;margin-bottom:10px">Schedule \u201C' + String(deck.title || deck.id).slice(0, 40) + '\u201D on Meta\u2019s clock</div>' +
-      '<label style="font-size:12px;opacity:.75">Platform</label>' +
+      '<div style="font-weight:700;font-size:var(--fs-body);margin-bottom:10px">Schedule \u201C' + String(deck.title || deck.id).slice(0, 40) + '\u201D on Meta\u2019s clock</div>' +
+      '<label style="font-size:var(--fs-overline);opacity:.75" for="ce-sched-platform">Platform</label>' +
       '<select id="ce-sched-platform" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
       '<option value="facebook">Facebook — fully automatic, holds on Meta\u2019s clock</option>' +
       '<option value="instagram">Instagram — fires from the Mac at its minute (\u226410 slides)</option></select>' +
-      '<label style="font-size:12px;opacity:.75" id="ce-sched-datelabel">Date (a week+ out — owner law)</label>' +
+      '<label style="font-size:var(--fs-overline);opacity:.75" id="ce-sched-datelabel" for="ce-sched-date">Date (a week+ out — owner law)</label>' +
       '<input id="ce-sched-date" type="date" min="' + istFloorPlus7DateStr() + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
-      '<label style="font-size:12px;opacity:.75">Time (IST)</label>' +
-      '<input id="ce-sched-time" type="time" value="11:30" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
-      '<label style="font-size:12px;opacity:.75">Caption</label>' +
+      '<label style="font-size:var(--fs-overline);opacity:.75" for="ce-sched-time">Time (IST)</label>' +
+      '<input id="ce-sched-time" type="time" value="' + ((window.CE_SCHEDULE_DEFAULTS||{}).timeValue || '11:30') + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
+      '<label style="font-size:var(--fs-overline);opacity:.75" for="ce-sched-caption">Caption</label>' +
       '<textarea id="ce-sched-caption" rows="3" style="width:100%;padding:10px;margin:4px 0 12px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444;box-sizing:border-box"></textarea>' +
       '<div style="display:flex;gap:8px">' +
-      '<button id="ce-sched-go" style="flex:1;padding:12px;border:0;border-radius:10px;font-weight:800;background:#d4576b;color:#fff;font-size:14px">Schedule (week+ out)</button>' +
+      '<button id="ce-sched-go" style="flex:1;padding:12px;border:0;border-radius:10px;font-weight:700;background:var(--accent);color:#fff;font-size:var(--fs-body)">Schedule (week+ out)</button>' +
       '<button id="ce-sched-cancel" style="padding:12px 18px;border:1px solid #555;border-radius:10px;background:transparent;color:#fff;font-weight:700">Cancel</button></div>' +
-      '<div id="ce-sched-status" style="font-size:12px;opacity:.8;margin-top:8px;min-height:16px"></div>' +
-      '<button id="ce-sched-retry" type="button" style="display:none;width:100%;margin-top:8px;padding:11px;border:1px solid #d4576b;border-radius:10px;background:transparent;color:#ff9db0;font-weight:800;font-size:13px">Retry this schedule</button></div>';
+      '<div id="ce-sched-status" style="font-size:var(--fs-overline);opacity:.8;margin-top:8px;min-height:16px"></div>' +
+      '<button id="ce-sched-retry" type="button" style="display:none;width:100%;margin-top:8px;padding:11px;border:1px solid var(--accent);border-radius:10px;background:transparent;color:var(--accent-text);font-weight:700;font-size:var(--fs-secondary)">Retry this schedule</button></div>';
     document.body.appendChild(sheet);
     /* Production consent (owner 2026-09-10): the SERVER is the floor's single
        truth — when its ce_allow_soon marker is on, near dates are legitimate
@@ -814,7 +835,7 @@
     sheet.querySelector('#ce-sched-go').onclick = function () {
       var platform = sheet.querySelector('#ce-sched-platform').value;
       var date = sheet.querySelector('#ce-sched-date').value;
-      var time = sheet.querySelector('#ce-sched-time').value || '11:30';
+      var time = sheet.querySelector('#ce-sched-time').value || (window.CE_SCHEDULE_DEFAULTS||{}).poemMorningValue || '11:30';
       var caption = sheet.querySelector('#ce-sched-caption').value.trim();
       var status = sheet.querySelector('#ce-sched-status');
       if (!date) { status.textContent = 'Pick a date first.'; return; }
@@ -999,7 +1020,7 @@
       btn.id = 'ce-web-schedule-btn';
       btn.textContent = 'Schedule';
       btn.title = 'Queue this piece on Meta\u2019s clock (a week+ out)';
-      btn.style.cssText = 'display:inline-flex; align-items:center; min-height:40px; padding:8px 14px; font-weight:800; border-radius:10px; color:#fff; background:#2e6f5e; border:1px solid rgba(255,255,255,0.14); cursor:pointer;';
+      btn.style.cssText = 'display:inline-flex; align-items:center; min-height:40px; padding:8px 14px; font-weight:700; border-radius:10px; color:#fff; background:#2e6f5e; border:1px solid rgba(255,255,255,0.14); cursor:pointer;';
       // H01-7 FIX (2026-09-15, lane H01_DEEP_PANEL_AUDIT): this control was a COMPLETELY silent
       // no-op on the phone web bundle - measured "threw: null, and no toast, no status text, no
       // error". The phone surface is a REVIEW surface served publicly, so a control that looks
@@ -1030,6 +1051,28 @@
     }
   }
   window.__CE_SCHEDULE_BUTTON__ = armScheduleButton;
+
+  /* P1-phone-download (2026-09-20): the pack button must SAY what the sheet
+     does before the owner taps it. The label is resolved by the pack layer
+     (window.__CE_PACK_LABEL__, one owner for the promise) and applied here, on
+     the same sweep that already runs on every studio render — a relabel that
+     only happened at click time would still be a surprise on the first run.
+     Never touches the label while a render is in flight (aria-busy) so the
+     live "Rendering slide 3 of 8…" progress is not overwritten. */
+  function armPackLabel() {
+    var btn = document.getElementById('studio-download-pack-btn');
+    if (!btn) return;
+    if (btn.getAttribute('aria-busy') === 'true') return;
+    if (typeof window.__CE_PACK_LABEL__ !== 'function') return;
+    var want = window.__CE_PACK_LABEL__();
+    if (!want || !want.label) return;
+    var label = btn.querySelector('.ce-pack-label');
+    var current = label ? label.textContent : btn.textContent;
+    if (String(current || '').trim() === want.label) return;
+    if (label) { label.textContent = want.label; } else { btn.textContent = want.label; }
+    btn.setAttribute('title', want.title || want.label);
+  }
+  window.__CE_ARM_PACK_LABEL__ = armPackLabel;
   var origOpen = window.openStudio;
   if (typeof origOpen === 'function') {
     window.openStudio = function () {
@@ -1053,6 +1096,7 @@
     if (!studio) return;
     armTouchEditing(studio);
     armScheduleButton();
+    armPackLabel();
   }
   var armTimer = 0;
   var scheduleArmSweep = function () {
@@ -1136,6 +1180,116 @@
 
   var ABS = function (u) { try { return new URL(u, document.baseURI).href; } catch (_e) { return u; } };
 
+  /* ASCII, ordered, bounded phone filenames: doalfaaz-YYYY-MM-DD-NN.png.
+     Never Devanagari: the final class admits only a-z0-9 and '-'.
+     doalfaaz-  11 + date 10 + '-' + NN 2 + '.png' 4 = 27 chars without a slug. */
+  function asciiSlug(text, max) {
+    var s = String(text == null ? '' : text)
+      .replace(/<[^>]+>/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    if (!s) return '';
+    if (max && s.length > max) s = s.slice(0, max).replace(/-+$/g, '');
+    return s;
+  }
+  function localDateStamp() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function downloadName(stamp, index, slug) {
+    var base = 'doalfaaz-' + stamp + '-' + String(index).padStart(2, '0');
+    // 48-char ceiling: 18 are fixed (doalfaaz-DATE-NN), 4 the extension.
+    var room = 48 - base.length - 4;
+    if (slug && room > 2) base += '-' + slug.slice(0, room);
+    return base.slice(0, 44) + '.png';
+  }
+  function dataUrlToFile(dataUrl, name) {
+    var b64 = dataUrl.split(',')[1];
+    var bin = atob(b64);
+    var arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new File([arr], name, { type: 'image/png' });
+  }
+  /* Files that were rendered but whose sheet iOS refused, almost always because
+     the render outlived the transient activation the tap granted (WebKit allows
+     "a few seconds"; a 14-slide render does not fit). Holding the FILES — not
+     the dataUrls — is the point: the retry tap reaches share() with no work
+     between the gesture and the call, which is the one thing iOS requires. */
+  var pendingSheet = null;
+
+  /* One share sheet for the whole pack (owner 2026-09-20): sharing the images
+     one at a time forced a re-tap and a second "Save Image" per file.
+     `names` (optional) overrides the per-image filename; otherwise the
+     ordered doalfaaz-DATE-NN pattern is used.
+     `opts.onProgress(done, total)` fires immediately before a sheet opens, so
+     the caller can promise what the sheet is about to do.
+     Returns:
+       { outcome: 'shared'|'download'|'aborted'|'needs-tap', saved, total, sharedIndex }
+       — counts, not a boolean, so a caller can say WHICH files the sheet
+       carried when iOS refuses the set and only the first file goes out. */
+  async function saveImages(dataUrls, slug, names, opts) {
+    var o = opts || {};
+    var stamp = localDateStamp();
+    var nameFor = function (i) { return (names && names[i]) || downloadName(stamp, i + 1, slug); };
+    var total = dataUrls.length;
+    var progress = typeof o.onProgress === 'function' ? o.onProgress : function () {};
+    var files = dataUrls.map(function (u, i) { return dataUrlToFile(u, nameFor(i)); });
+    var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+    var anchorAll = function () {
+      dataUrls.forEach(function (u, i) {
+        var a = document.createElement('a');
+        a.href = u;
+        a.download = nameFor(i);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+    };
+    if (isIOS && navigator.share && files.length) {
+      var canAll = !navigator.canShare || navigator.canShare({ files: files });
+      var canOne = total > 1 && (!navigator.canShare || navigator.canShare({ files: [files[0]] }));
+      if (canAll || canOne) {
+        /* Exactly ONE share() call per attempt, always: the whole set when iOS
+           accepts it, otherwise the first file — never a sheet per file. */
+        var set = canAll ? files : [files[0]];
+        progress(total, total);
+        try {
+          await navigator.share({ files: set });
+          pendingSheet = null;
+          return { outcome: 'shared', saved: set.length, total: total, sharedIndex: canAll ? -1 : 0 };
+        } catch (err) {
+          // Dismissing the sheet is a deliberate stop, not a licence to
+          // silently fire a download behind the user's back.
+          if (err && err.name === 'AbortError') { pendingSheet = null; return { outcome: 'aborted', saved: 0, total: total }; }
+          /* NotAllowedError (or anything else): keep every rendered file and
+             tell the caller a second tap will open the sheet instantly. Never
+             silently reroute an iOS save to the Files download path. */
+          pendingSheet = { files: files, count: total };
+          return { outcome: 'needs-tap', saved: 0, total: total };
+        }
+      }
+    }
+    anchorAll();
+    return { outcome: 'download', saved: total, total: total };
+  }
+
+  window.__CE_PENDING_SHEET_COUNT__ = function () { return pendingSheet ? pendingSheet.count : 0; };
+  /* Called from the button the owner taps next: share() is the FIRST await, so
+     the tap's activation is still live when the sheet is asked for. */
+  window.__CE_FLUSH_PENDING_SHEET__ = async function () {
+    var p = pendingSheet;
+    if (!p) return null;
+    try {
+      await navigator.share({ files: p.files });
+      pendingSheet = null;
+      return { outcome: 'shared', saved: p.count, total: p.count };
+    } catch (e) {
+      if (e && e.name === 'AbortError') { pendingSheet = null; return { outcome: 'aborted', saved: 0, total: p.count }; }
+      return { outcome: 'needs-tap', saved: 0, total: p.count };
+    }
+  };
+
   /* Page CSS with @font-face src: url(...) rewritten to data: URLs, so the SVG
      renders in the shipped Laila / Poppins faces instead of a fallback. */
   function collectCss() {
@@ -1198,7 +1352,11 @@
     return Promise.all(jobs);
   }
 
-  window.__CE_POEM_PACK__ = async function () {
+  window.__CE_SAVE_IMAGES__ = saveImages;
+  window.__CE_DOWNLOAD_NAME__ = downloadName;
+  window.__CE_ASCII_SLUG__ = asciiSlug;
+
+  window.__CE_POEM_PACK__ = async function (extraDataUrls) {
     var poem = openPoem();
     var canvas = document.getElementById('active-studio-canvas');
     if (!poem || !canvas) return false;
@@ -1211,7 +1369,7 @@
 
     var holder = document.createElement('div');
     holder.style.cssText = 'position:fixed;left:-99999px;top:0;width:' + W + 'px;height:' + H +
-      'px;overflow:hidden;z-index:-1;';
+      'px;overflow:hidden;z-index:var(--z-under);';
     var inner = document.createElement('div');
     inner.style.cssText = 'width:' + box.w + 'px;height:' + box.h + 'px;transform:scale(' + scale +
       ');transform-origin:top left;';
@@ -1346,44 +1504,36 @@
       cx.drawImage(img, 0, 0, W, H);
       var dataUrl = out.toDataURL('image/png');
 
-      var slug = String(poem.title || poem.text || 'poem')
-        .replace(/<[^>]+>/g, '')
-        .replace(/[^A-Za-z0-9\u0900-\u097F-]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .slice(0, 48) || 'poem';
-      var name = slug + '.png';
-      var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
-      var shared = false;
-      if (isIOS && navigator.share) {
-        try {
-          var b64 = dataUrl.split(',')[1];
-          var bin = atob(b64);
-          var arr = new Uint8Array(bin.length);
-          for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-          var file = new File([arr], name, { type: 'image/png' });
-          if (!navigator.canShare || navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file] });
-            shared = true;
-          }
-        } catch (shareErr) {
-          if (shareErr && shareErr.name === 'AbortError') return true;
-        }
-      }
-      if (!shared) {
-        var a = document.createElement('a');
-        a.href = dataUrl;
-        a.download = name;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }
+      /* A caller that loops slides hands its already-rendered PNGs down here
+         so the whole pack leaves in ONE share sheet (extraDataUrls). */
+      var dataUrls = [dataUrl].concat(Array.isArray(extraDataUrls) ? extraDataUrls.filter(Boolean) : []);
+      var slug = asciiSlug(poem.title || '', 18);
+      var res = await saveImages(dataUrls, slug, null, {
+        onProgress: function () { say('Poem rendered at ' + W + '\u00d7' + H + ' \u2014 opening the share sheet\u2026'); },
+      });
+      if (res.outcome === 'aborted') return true;
+      var first = downloadName(localDateStamp(), 1, slug);
       var copied = false;
       try {
         var edit = document.getElementById('studio-editable-text');
         var text = (edit ? edit.innerText : (poem.text || '')).trim();
         if (text) { await navigator.clipboard.writeText(text); copied = true; }
       } catch (_c) { copied = false; }
-      say('Saved ' + name + ' (' + W + '×' + H + ')' + (copied ? ' — poem text copied.' : '.'));
+      var label = dataUrls.length === 1
+        ? first
+        : (dataUrls.length + ' images (' + first + ' \u2026)');
+      /* P1-phone-download: the end state names the step that is left instead of
+         claiming a save the sheet has not performed, and a refused sheet keeps
+         the rendered file so the next tap costs nothing. */
+      if (res.outcome === 'needs-tap') {
+        say('Rendered ' + label + ' \u2014 tap Save to Photos once more and it lands in Photos' +
+          (copied ? ' (poem text copied).' : '.'));
+      } else if (res.outcome === 'shared') {
+        say('Poem rendered \u2014 tap Save Image once and ' + label + ' lands in Photos (' + W + '\u00d7' + H + ')' +
+          (copied ? ' \u2014 poem text copied.' : '.'));
+      } else {
+        say('Saved ' + label + ' (' + W + '\u00d7' + H + ')' + (copied ? ' \u2014 poem text copied.' : '.'));
+      }
       return true;
     } catch (err) {
       say('Poem download failed: ' + (err && err.message ? err.message : err));
@@ -1402,9 +1552,41 @@
 // portals the whole inspector to body for the open state and restores it.
 (function () {
   function ensureDockTools() {
+    /* P0 W3-P2 (2026-09-19): any in-sheet action that re-renders the studio
+       canvas (design pick, font tool, move/duplicate/delete slide, typo slider,
+       add slide) swaps #studio-canvas.innerHTML. That swap builds a FRESH
+       `.ce-studio-inspector` inside the editor, while the OLD inspector is still
+       portaled to <body> with openSheet()'s inline fixed styles. Result: two
+       inspector nodes — the live one (a 56px TOOLS rail inside the workspace)
+       and the ORPHANED 50vh sheet still covering the bottom half of the phone.
+       The toggle the user sees hit-tests into the orphan's caption textarea, so
+       Tools can never be reopened by finger: the owner's "carousel studio is
+       messing too much".
+       Reap every non-live dock BEFORE resolving the dock, and remember that a
+       sheet was open so the user's intent survives the re-render. */
+    var docks = Array.prototype.slice.call(document.querySelectorAll('.ce-studio-inspector'));
+    var staleSheet = false;
+    if (docks.length > 1) {
+      var liveDock = null;
+      docks.forEach(function (d) {
+        if (!liveDock && d.closest && (d.closest('.studio-workspace') || d.closest('.ce-carousel-editor'))) liveDock = d;
+      });
+      if (liveDock) {
+        docks.forEach(function (d) {
+          if (d === liveDock) return;
+          if (d.classList && d.classList.contains('ce-tools-sheet')) staleSheet = true;
+          try { d.remove(); } catch (_reap) {}
+        });
+      }
+    }
     var t = document.getElementById('ce-tools-toggle');
     var dock = document.querySelector('aside.ce-studio-inspector, .ce-studio-inspector');
     if (!t || !dock) return;
+    var syncToggleLabel = function (open) {
+      t.setAttribute('aria-expanded', open ? 'true' : 'false');
+      var label = t.querySelector('.ce-tools-toggle-label');
+      if (label) label.textContent = open ? 'Close tools' : 'Tools';
+    };
     if (t.parentElement !== dock || dock.firstElementChild !== t) dock.insertBefore(t, dock.firstElementChild);
     var editor = dock.closest('.ce-carousel-editor') || t.__ceToolsEditor || document.querySelector('.ce-carousel-editor');
     if (!editor) return;
@@ -1415,6 +1597,11 @@
          62vh overlay and the slide is covered with the TOOLS bar closed. */
       if (!editor.classList.contains('ce-tools-open') && t.__ceToolsRestore) t.__ceToolsRestore();
       if (t.__ceToolsCaptureHome) t.__ceToolsCaptureHome();
+      /* A canvas re-render re-emits the toggle markup with aria-expanded="false"
+         and the "Tools" label even while the sheet is up, so the control lied
+         about the state it owned. Re-sync it to the class that actually drives
+         the sheet. */
+      syncToggleLabel(editor.classList.contains('ce-tools-open'));
       t.style.setProperty('position', 'static', 'important');
       t.style.setProperty('display', 'flex', 'important');
       t.style.setProperty('width', '100%', 'important');
@@ -1474,27 +1661,85 @@
       dock.style.setProperty('position', 'fixed', 'important');
       dock.style.setProperty('left', '0', 'important');
       dock.style.setProperty('right', '0', 'important');
-      dock.style.setProperty('bottom', '0', 'important');
+      /* W12-F2 (2026-09-21) — THE SHEET RESTS ON THE SHIPBAR BAND, never on the
+         viewport bottom. The band (`.studio-shipbar`, placed by placeShipBar as
+         the last row of the studio column) carries `#studio-post-btn`, the app's
+         ONE primary ship control. With `bottom: 0` the sheet's pinned caption
+         footer (96px) and the band (57px at 402x874) occupied the SAME pixels,
+         and because this dock is portaled to <body> at z-index 500 while the
+         band lives inside `#studio` (z-index 200), the caption textarea painted
+         over the ship control — measured occluded at its own centre point, so
+         the primary action was untappable whenever the tools sheet was open.
+         No z-index inside #studio can win that race (a descendant cannot escape
+         its ancestor's stacking context), which is why raising the band's own
+         z-index changed nothing. The fix is geometric and uses the ONE published
+         source of truth for the band's height: placeShipBar already writes
+         `--ce-shipbar-h` for the disclosure chip, so the sheet anchors off the
+         same number and the two bands tile instead of overlap. Desktop leaves
+         the var unset (0px) and is byte-identical to before. */
+      dock.style.setProperty('bottom', 'var(--ce-shipbar-h, 0px)', 'important');
       dock.style.setProperty('top', 'auto', 'important');
       dock.style.setProperty('width', '100vw', 'important');
       dock.style.setProperty('min-width', '0', 'important');
       dock.style.setProperty('max-width', 'none', 'important');
       /* Sheet height law (owner 2026-09-13): the slide must stay the majority of the
          canvas while tools are open. 62vh left the hero a ~180px sliver on a 874px
-         phone; 50vh keeps ~430px of editor. The grid scrolls inside its own viewport. */
+         phone; 50vh keeps ~430px of editor. The grid scrolls inside its own viewport.
+
+         MO-SHEET (fix/mobile-overhaul, 2026-09-21): the sheet is anchored `bottom: 0`
+         and 50vh tall, so it covered the SHIPBAR — the in-flow band at the bottom of
+         the studio column that owns the primary "Send to Plan" control. MEASURED
+         402x874 with tools open: sheet y=437..874 (h=437), shipbar y=817..874,
+         #studio-post-btn y=824..868. The button's centre resolved to
+         `textarea#ce-deck-caption-editor` — the brief's
+         "`#studio-post-btn` is occluded by `TEXTAREA#ce-deck-caption-editor`",
+         and the `surface-capture-floor` gate fails on exactly this.
+         A sheet must never cover the primary ship control (the same law the layer
+         ladder states). The band's real height is already published by
+         placeShipBar() as `--ce-shipbar-h` on the documentElement, so the sheet
+         lifts by exactly that much instead of by a second hard-coded number that
+         would drift the moment the band's contents change. */
+      var shipbarH = 0;
+      try {
+        shipbarH = parseFloat(getComputedStyle(document.documentElement)
+          .getPropertyValue('--ce-shipbar-h')) || 0;
+      } catch (_eShip) { shipbarH = 0; }
+      dock.style.setProperty('bottom', shipbarH + 'px', 'important');
       dock.style.setProperty('height', 'min(50vh, 460px)', 'important');
       dock.style.setProperty('max-height', 'min(50vh, 460px)', 'important');
       dock.style.setProperty('min-height', '180px', 'important');
       dock.style.setProperty('display', 'block', 'important');
       dock.style.setProperty('overflow', 'hidden', 'important');
-      dock.style.setProperty('z-index', '500', 'important');
+      /* MO-LADDER (fix/mobile-overhaul, 2026-09-21): this was the literal 500 while the
+         ladder already defines --z-sheet: 500 for exactly this element. A second copy of
+         the number is how the two drift apart, so read the rung. */
+      dock.style.setProperty('z-index', 'var(--z-sheet)', 'important');
       dock.style.setProperty('box-sizing', 'border-box', 'important');
       dock.style.setProperty('background', 'rgba(12, 13, 18, 0.98)', 'important');
       var scroll = dock.querySelector('.ce-inspector-scroll');
       var pinned = dock.querySelector('.ce-inspector-pinned');
       if (scroll) {
         scroll.style.setProperty('position', 'absolute', 'important');
-        scroll.style.setProperty('inset', '56px 0 96px 0', 'important');
+        /* MO-SHEET2 (fix/mobile-overhaul, 2026-09-21): the bottom inset was a
+           hard-coded 96px, authored when the pinned band was 96px tall. The band's
+           real height is now MEASURED (its caption section is 73px), so a hard-coded
+           96px left the scroll region 23px short of the band and the last row of
+           design swatches sat under the sheet's own footer. Measured before:
+           .ce-look-picker spans y=508..1433 (925px) while the scroll region ends at
+           y=721, so swatches at y=742+ were painted under the band and
+           elementFromPoint at their centres returned `div.studio-shipbar`.
+           The band is measured here, in the same pass that positions it, so the two
+           can never drift apart. */
+        var pinnedH = 0;
+        try {
+          var pinnedEl = dock.querySelector('.ce-inspector-pinned');
+          if (pinnedEl) {
+            pinnedH = Math.round(pinnedEl.getBoundingClientRect().height);
+            if (!pinnedH) pinnedH = parseFloat(getComputedStyle(pinnedEl).height) || 0;
+          }
+        } catch (_ePinned) { pinnedH = 0; }
+        if (!pinnedH) pinnedH = 96;   /* pre-layout fallback: the authored value */
+        scroll.style.setProperty('inset', '56px 0 ' + pinnedH + 'px 0', 'important');
         scroll.style.setProperty('display', 'block', 'important');
         scroll.style.setProperty('overflow-y', 'auto', 'important');
         scroll.style.setProperty('overflow-x', 'hidden', 'important');

@@ -6766,6 +6766,7 @@ function suggestLooks(card){
       default_poem: "Laila, Kohinoor Devanagari, Devanagari Sangam MN, serif",
       literary_slow: "Devanagari Sangam MN, Laila, Georgia, serif",
       clean_modern: "Kohinoor Devanagari, Laila, sans-serif",
+      whisper_thin: "Mukta, Kohinoor Devanagari, sans-serif",
       poster_heavy: "Laila, Kohinoor Devanagari, serif"
     },
     display_treatments: [
@@ -6773,6 +6774,11 @@ function suggestLooks(card){
         id: "altar-laila", use_for: "sacred dark sher",
         css: "font-family:Laila,Kohinoor Devanagari,serif;font-weight:600;font-size:72px;line-height:1.68;text-align:center;color:var(--ink)",
         accent: "last line color #d8a24a; add single ॥ above at 52px opacity .65"
+      },
+      {
+        id: "mukta-whisper", use_for: "quiet thin poem on dark or moody photo",
+        css: "font-family:Mukta,Kohinoor Devanagari,sans-serif;font-weight:300;font-size:60px;line-height:1.9;text-align:left;color:#f2ede4",
+        accent: "no ornament; the thinness IS the voice"
       },
       {
         id: "sangam-literary", use_for: "soft grief or reflective poem",

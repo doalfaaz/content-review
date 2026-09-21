@@ -111,7 +111,7 @@
         "The course is called Aham Brahmasmi 2.0. Comment \"Interested\" — the details come to your DM. ₹1,999, no deadline, whenever you're ready.",
         "Fifteen hours. Fifty lessons. The book. Comment \"Interested\" and it reaches you first.",
         "This one is not for everyone. If it named you — comment \"Interested\".",
-        "The kind of post you come back to. Save this. It reads different the second time.",
+        "The kind of post you come back to. Comment \"Interested\" — the details come to your DM.",
         "Receipts over promises. Comment \"Interested\" and the details come to your DM.",
         "If this named you — comment \"Interested\". The course is the way through."
       ],
@@ -119,7 +119,7 @@
         { "ask": "interested" },
         { "ask": "interested" },
         { "ask": "interested" },
-        { "ask": "save" },
+        { "ask": "interested" },
         { "ask": "interested" },
         { "ask": "interested" }
       ]
@@ -174,7 +174,7 @@
     "The course is called Aham Brahmasmi 2.0. Comment \"Interested\" — the details come to your DM. ₹1,999, no deadline, whenever you're ready.",
     "Fifteen hours. Fifty lessons. The book. Comment \"Interested\" and it reaches you first.",
     "This one is not for everyone. If it named you — comment \"Interested\".",
-    "The kind of post you come back to. Save this. It reads different the second time.",
+    "The kind of post you come back to. Comment \"Interested\" — the details come to your DM.",
     "Receipts over promises. Comment \"Interested\" and the details come to your DM.",
     "If this named you — comment \"Interested\". The course is the way through."
   ],

@@ -169,7 +169,7 @@
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  z-index: 50;
+  z-index: var(--z-topbar);
 }
 
 .studio-back-btn {
@@ -180,7 +180,7 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.9);
-  font-size: 12px;
+  font-size: var(--fs-secondary);
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s, border-color 0.15s, background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
@@ -207,7 +207,7 @@
   border-radius: 8px;
   color: rgba(255, 255, 255, 0.6);
   background: rgba(255, 255, 255, 0.06);
-  font: 400 18px/1 system-ui, sans-serif;
+  font: 400 var(--fs-section)/1 system-ui, sans-serif;
   cursor: pointer;
   transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s, border-color 0.15s, background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -233,7 +233,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: var(--fs-body);
   letter-spacing: -.01em;
 }
 
@@ -251,7 +251,7 @@
   max-width: 170px;
   overflow: hidden;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-overline);
   text-overflow: ellipsis;
   white-space: nowrap;
   transition: transform .2s, opacity .2s, box-shadow .2s, border-color .2s, background-color .2s ease;
@@ -263,7 +263,7 @@
   background: color-mix(in srgb, var(--accent) 12%, var(--surface));
   border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border));
   color: var(--ink);
-  font-weight: 550;
+  font-weight: 500;
 }
 
 #meta {
@@ -272,7 +272,7 @@
   background: color-mix(in srgb, var(--surface) 92%, var(--ink) 8%);
   border: 1px solid var(--border);
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-overline);
   font-weight: 600;
 }
 
@@ -293,18 +293,50 @@
   margin-left: 0;
 }
 
+/* P2/DEFECT-B (2026-09-21) — studio panel band order, DESKTOP.
+   Owner: "it has kept the primary buttons to the lowest part and kept design and all those
+   on top ... it should be VICE VERSA". The desktop bar has room for one row, so the hierarchy
+   there is expressed as reading order: the every-poem authoring actions first
+   (download / schedule / the ••• design+asset menu), then the ship pair, then history.
+
+   #studio-download-pack-btn and #ce-web-schedule-btn are injected at RUNTIME into this row by
+   Resources/ce-touch-edit.js (armScheduleButton / reparentPack), which is out of scope for this
+   change, so their position is set here with `order` instead of markup. No element is hidden and
+   every control keeps a >=44px target (ce-mobile.css owns the phone hit-area rules).
+   The markup order inside .studio-more-menu (Save to Bank / Place in next open slot / Export PNG /
+   Copy) is already authoring -> secondary -> destructive -> utility, so it needs no order rule.
+
+   NOTE (2026-09-21): the phone does NOT use these rules. The phone layer moves the ship pair
+   into .studio-shipbar and re-orders the topbar in ce-mobile.css, where the hierarchy is a
+   THUMB-DISTANCE question rather than a reading-order one. The two `html.ce-phone` order lines
+   that used to live here were the first (unmeasured) attempt; they are removed because they
+   contradicted the measured band order and would win the cascade over ce-mobile.css on a
+   tie. */
+.studio-primary-actions > #studio-download-pack-btn { order: 10; }
+.studio-primary-actions > #ce-web-schedule-btn { order: 20; }
+.studio-primary-actions > .studio-more-actions { order: 30; }
+.studio-primary-actions > #studio-postnow { order: 40; }
+.studio-primary-actions > #studio-post-btn { order: 50; }
+
+/* History is a secondary/rare surface: it follows the ship pair on the desktop bar. */
+.studio-topbar .studio-history-controls { order: 80; margin-left: 0; }
+.studio-topbar > .studio-back-btn { order: 1; }
+.studio-topbar > .studio-title-box { order: 2; }
+.studio-topbar > #studio-status { order: 3; }
+.studio-topbar > .studio-primary-actions { order: 40; }
+
 /* One deliberate primary path: save/export stay visible. Contextual handoff
    actions remain available, but no longer compete with the working canvas. */
 .studio-more-actions { position: relative; }
 .studio-more-actions > summary {
   list-style: none; display: grid; place-items: center; width: 32px; height: 32px;
   border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
-  color: var(--ink); font-size: 13px; font-weight: 800; letter-spacing: 1px; cursor: pointer;
+  color: var(--ink); font-size: var(--fs-secondary); font-weight: 700; letter-spacing: 1px; cursor: pointer;
 }
 .studio-more-actions > summary::-webkit-details-marker { display: none; }
 .studio-more-actions[open] > summary { border-color: var(--accent-border); color: var(--accent-text); } /* wl3181 (2026-09-19): was var(--accent) = 3.49:1 on the studio surface, under AA for this 13px label. */
 .studio-more-menu {
-  position: absolute; right: 0; top: calc(100% + 8px); z-index: 100; display: grid; gap: 5px;
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: var(--z-menu); display: grid; gap: 5px;
   min-width: 150px; padding: 6px; border: 1px solid var(--border); border-radius: 10px;
   background: var(--surface); box-shadow: 0 16px 36px rgba(0,0,0,.28);
 }
@@ -321,37 +353,37 @@
 .studio-postnow > summary {
   list-style: none; display: inline-flex; align-items: center; justify-content: center;
   gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: transparent;
-  color: var(--muted); font-size: 12px; font-weight: 600; padding: 6px 10px;
+  color: var(--muted); font-size: var(--fs-secondary); font-weight: 600; padding: 6px 10px;
   cursor: pointer; white-space: nowrap;
 }
 .studio-postnow > summary::-webkit-details-marker { display: none; }
 .studio-postnow > summary:hover { color: var(--ink); background: rgba(120,120,150,0.1); }
-.studio-postnow[open] > summary { border-color: var(--accent-border); color: var(--accent); }
+.studio-postnow[open] > summary { border-color: var(--accent-border); color: var(--accent-text); } /* W4: same wl3181 AA fix as .studio-more-actions[open] — --accent was 3.73:1 on the dark studio chrome. */
 .studio-postnow-menu {
-  position: absolute; right: 0; top: calc(100% + 8px); z-index: 100; display: grid; gap: 4px;
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: var(--z-menu); display: grid; gap: 4px;
   min-width: 240px; max-width: 300px; padding: 6px; border: 1px solid var(--border);
   border-radius: 10px; background: var(--surface); box-shadow: 0 16px 36px rgba(0,0,0,.28);
 }
 .studio-postnow:not([open]) > .studio-postnow-menu { display: none; }
 .studio-postnow-menu .ce-postnow-meta {
-  font-size: 10.5px; color: var(--muted); padding: 2px 10px 4px;
+  font-size: var(--fs-overline); color: var(--muted); padding: 2px 10px 4px;
   max-height: 4.1em; overflow: hidden;
 }
 .studio-postnow-menu .ce-postnow-cap {
   display: block; width: 100%; text-align: left; border: 1px solid transparent;
-  background: transparent; color: var(--ink); font-size: 12px; font-weight: 500;
+  background: transparent; color: var(--ink); font-size: var(--fs-secondary); font-weight: 500;
   line-height: 1.35; padding: 8px 10px; border-radius: 8px; cursor: pointer;
 }
 .studio-postnow-menu .ce-postnow-cap:hover { background: rgba(120,120,150,0.1); border-color: var(--border); }
-.studio-postnow-menu .ce-postnow-cap.is-current { color: var(--accent); }
+.studio-postnow-menu .ce-postnow-cap.is-current { color: var(--accent-text); } /* W4: AA — 12px caption label at 3.49:1 on the menu surface. */
 .studio-postnow-menu .ce-postnow-sep { height: 1px; background: var(--border); margin: 3px 2px; }
 .studio-postnow-menu .ce-postnow-confirm {
   width: 100%; border: 1px solid var(--accent-border); background: var(--accent);
-  color: #fff; font-size: 12.5px; font-weight: 700; padding: 9px 12px;
+  color: #fff; font-size: var(--fs-secondary); font-weight: 700; padding: 9px 12px;
   border-radius: 8px; cursor: pointer; text-align: center;
 }
 .studio-postnow-menu .ce-postnow-back {
-  border: 0; background: transparent; color: var(--muted); font-size: 11px;
+  border: 0; background: transparent; color: var(--muted); font-size: var(--fs-overline);
   font-weight: 600; padding: 6px 10px; cursor: pointer; text-align: left;
 }
 .studio-postnow-menu .ce-postnow-back:hover { color: var(--ink); }
@@ -403,7 +435,7 @@
   border-radius: 10px;
   color: var(--ink);
   background: var(--surface);
-  font: 700 17px/1 system-ui, sans-serif;
+  font: 700 var(--fs-section)/1 system-ui, sans-serif;
   cursor: pointer;
 }
 
@@ -463,7 +495,7 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
   box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.03);
-  z-index: 10;
+  z-index: var(--z-dock);
 }
 
 /* The poem dock is a vertical scroll surface. Its sections must keep their
@@ -598,8 +630,8 @@
   gap: 8px;
   padding: 0 10px;
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 720;
+  font-size: var(--fs-overline);
+  font-weight: 700;
   cursor: pointer;
   list-style: none;
   user-select: none;
@@ -631,8 +663,8 @@
   gap: 6px;
   color: var(--faint);
   /* Type floor 10px (law: a945bd1 "zero sub-10px fonts remain"). */
-  font-size: 10px;
-  font-weight: 760;
+  font-size: var(--fs-overline);
+  font-weight: 700;
   letter-spacing: .055em;
   text-transform: uppercase;
 }
@@ -651,7 +683,7 @@
   border-radius: 8px;
   color: var(--ink);
   background: var(--card);
-  font: 620 11px/1 system-ui, sans-serif;
+  font: 600 var(--fs-overline)/1 system-ui, sans-serif;
 }
 
 .ce-poem-segments,
@@ -675,7 +707,7 @@
   background: transparent;
   /* 10px/1 collapsed innerText on WebKit (segment buttons read as unnamed) and is
      under the house dense floor; 12px fixes both (auditor D-4/M-2, 2026-09-13). */
-  font: 650 12px/1.2 system-ui, sans-serif;
+  font: 600 var(--fs-secondary)/1.2 system-ui, sans-serif;
   cursor: pointer;
 }
 
@@ -687,8 +719,8 @@
 .ce-poem-utility-actions button[aria-pressed="true"] { color: #fff; background: color-mix(in srgb, var(--accent) 62%, #25151c 38%); }
 
 .ce-poem-stepper { justify-content: space-between; }
-.ce-poem-stepper button { width: 32px; padding: 0; font-size: 15px; }
-.ce-poem-stepper output { min-width: 42px; color: var(--ink); font: 700 10px/1 system-ui, sans-serif; text-align: center; }
+.ce-poem-stepper button { width: 32px; padding: 0; font-size: var(--fs-body); }
+.ce-poem-stepper output { min-width: 42px; color: var(--ink); font: 700 var(--fs-overline)/1 system-ui, sans-serif; text-align: center; }
 
 #poem-text-color {
   width: 100%;
@@ -791,15 +823,28 @@
 .studio-canvas-wrap[data-ce-fit-below-authored]::after {
   content: "shown smaller than authored";
   position: absolute;
-  right: 12px; top: 12px; z-index: 30;
+  right: 12px; top: 12px; z-index: var(--z-shipbar);
   padding: 4px 10px;
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.62);
   border: 1px solid rgba(255, 255, 255, 0.16);
   color: rgba(255, 255, 255, 0.85);
-  font: 600 11px/1.4 system-ui, sans-serif;
+  font: 600 var(--fs-overline)/1.4 system-ui, sans-serif;
   pointer-events: none;
   white-space: nowrap;
+  /* P5/A hardening: the chip's box must never be squeezed narrower than its
+     own nowrap text. width:max-content (with min-width:0 so a flex/grid parent
+     cannot stretch it) makes the box take its text's intrinsic width, so a
+     narrow ancestor — the tools-open canvas narrows to ~249px — can no longer
+     force the label to wrap or clip into a vertical strip. writing-mode is
+     pinned to horizontal here too: a phone override that sets vertical-rl
+     turns the nowrap text on its side (a 25 x 180px strip), and the base rule
+     is the correct home for "read left to right, on one line". */
+  writing-mode: horizontal-tb;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .studio-canvas-wrap.ce-studio-canvas-wrap--post {
@@ -877,7 +922,7 @@
   border-radius: 8px;
   color: var(--ink);
   background: var(--surface);
-  font: 700 14px/1 system-ui, sans-serif;
+  font: 700 var(--fs-body)/1 system-ui, sans-serif;
   cursor: pointer;
   transition: transform 0.1s ease, background 0.15s ease;
 }
@@ -894,8 +939,8 @@
 .ce-carousel-nav span {
   min-width: 44px;
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 750;
+  font-size: var(--fs-overline);
+  font-weight: 700;
   text-align: center;
 }
 
@@ -1051,8 +1096,8 @@
 }
 
 .ce-dock-group-label {
-  font-size: 10px;
-  font-weight: 800;
+  font-size: var(--fs-overline);
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
@@ -1086,7 +1131,7 @@
   border-radius: 8px;
   color: var(--ink);
   background: transparent;
-  font: 650 11px/1 system-ui, sans-serif;
+  font: 600 var(--fs-overline)/1 system-ui, sans-serif;
 }
 
 .ce-typography-toolbar select {
@@ -1107,8 +1152,8 @@
 .ce-font-size-value {
   min-width: 26px;
   color: var(--muted);
-  font-size: 10px;
-  font-weight: 750;
+  font-size: var(--fs-overline);
+  font-weight: 700;
   text-align: center;
 }
 
@@ -1305,8 +1350,8 @@
   gap: 4px;
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 10px;
-  font-weight: 800;
+  font-size: var(--fs-overline);
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .08em;
   background: color-mix(in srgb, var(--accent) 18%, transparent);
@@ -1314,7 +1359,7 @@
 }
 
 .ce-hook-text-preview {
-  font-size: 12px;
+  font-size: var(--fs-secondary);
   line-height: 1.35;
   font-weight: 500;
   color: var(--ink);
@@ -1326,14 +1371,14 @@
 
 .ce-carousel-selection {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--fs-overline);
   font-weight: 700;
   white-space: nowrap;
 }
 
 .ce-add-block-menu {
   position: absolute;
-  z-index: 40;
+  z-index: var(--z-dock-open);
   display: none;
   min-width: 180px;
   padding: 6px;
@@ -1356,7 +1401,7 @@
   background: transparent;
   text-align: left;
   font: inherit;
-  font-size: 11px;
+  font-size: var(--fs-overline);
   cursor: pointer;
 }
 
@@ -1414,7 +1459,7 @@
   align-items: center;
   gap: 6px;
   padding: 0 10px;
-  font-weight: 650; font-size: 12px; line-height: 1; font-family: system-ui, sans-serif;
+  font-weight: 600; font-size: var(--fs-secondary); line-height: 1; font-family: system-ui, sans-serif;
 }
 .studio-history-btn[disabled] .studio-history-label {
   color: var(--faint);
@@ -1423,7 +1468,7 @@
   gap: 8px;
 }
 .studio-primary-actions #studio-save-top-btn:not(:disabled) {
-  font-weight: 800;
+  font-weight: 700;
 }
 
 /* Dock: progressive hierarchy rows */
@@ -1445,8 +1490,8 @@
 .ce-dock-group-label,
 .ce-look-rail-label {
   color: var(--faint);
-  font-size: 10px;
-  font-weight: 800;
+  font-size: var(--fs-overline);
+  font-weight: 700;
   letter-spacing: .07em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -1465,11 +1510,11 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 10%, transparent);
   color: var(--ink);
-  font-size: 12px;
+  font-size: var(--fs-secondary);
   white-space: nowrap;
 }
 .ce-selection-chip strong {
-  font-weight: 800;
+  font-weight: 700;
 }
 .ce-selection-sep {
   color: var(--muted);
@@ -1483,11 +1528,11 @@
 }
 .ce-typography-toolbar select,
 .ce-typography-toolbar button {
-  font-size: 12px;
+  font-size: var(--fs-secondary);
 }
 .ce-font-size-value {
   min-width: 34px;
-  font-size: 11px;
+  font-size: var(--fs-overline);
 }
 .ce-text-color {
   width: 30px;
@@ -1521,10 +1566,10 @@
   left: 0;
   flex: 0 0 auto;
   background: inherit;
-  z-index: 1;
+  z-index: var(--z-canvas);
 }
 .ce-look-choice {
-  font-size: 10px;
+  font-size: var(--fs-overline);
 }
 
 /* Narrow widths: progressive hiding only — Save and Export never hidden */
@@ -1618,7 +1663,7 @@
   top: 0 !important;
   width: 100% !important;
   margin: auto 0;
-  z-index: 5;
+  z-index: var(--z-chrome-lo);
 }
 .pc-witnesspost .pl {
   font-size: 80px !important;
@@ -1659,7 +1704,7 @@
   top: 0 !important;
   width: 100% !important;
   margin: auto 0;
-  z-index: 5;
+  z-index: var(--z-chrome-lo);
 }
 .pc-broadsheet .pl {
   /* WL0808 (2026-09-19): this named 'Playfair Display' first, but no @font-face
@@ -1671,7 +1716,7 @@
   font-family: 'Laila', 'Kohinoor Devanagari', 'Devanagari Sangam MN', Georgia, serif !important;
   font-size: 82px !important;
   line-height: 1.32 !important;
-  font-weight: 800 !important;
+  font-weight: 700 !important;
   color: #181512 !important;
   letter-spacing: -0.02em;
   overflow-wrap: anywhere;
@@ -1711,7 +1756,7 @@
   width: 100% !important;
   padding-left: 44px !important;
   margin: auto 0;
-  z-index: 5;
+  z-index: var(--z-chrome-lo);
 }
 .pc-softredline .pl {
   font-size: 78px !important;
@@ -1766,7 +1811,7 @@
   width: 100% !important;
   margin: auto 0;
   text-align: center !important;
-  z-index: 5;
+  z-index: var(--z-chrome-lo);
 }
 .pc-diwanpost .pl {
   font-family: 'Laila', 'Georgia', serif !important;
@@ -1802,12 +1847,12 @@
   top: 0 !important;
   width: 100% !important;
   margin: auto 0;
-  z-index: 5;
+  z-index: var(--z-chrome-lo);
 }
 .pc-whiteroom .pl {
   font-size: 82px !important;
   line-height: 1.34 !important;
-  font-weight: 800 !important;
+  font-weight: 700 !important;
   color: #11100e !important;
   letter-spacing: -0.02em;
   overflow-wrap: anywhere;
@@ -1855,10 +1900,10 @@
   top: 0 !important;
   width: 100% !important;
   margin: auto 0;
-  z-index: 5;
+  z-index: var(--z-chrome-lo);
   font-size: 82px !important;
   line-height: 1.34 !important;
-  font-weight: 800 !important;
+  font-weight: 700 !important;
   color: #ffffff !important;
   letter-spacing: -0.01em;
   overflow-wrap: anywhere;
@@ -2028,12 +2073,12 @@
   background: rgba(255, 255, 255, 0.06) !important;
   backdrop-filter: blur(12px) !important;
   color: #fff !important;
-  font-size: 24px !important;
+  font-size: var(--fs-display) !important;
   display: grid !important;
   place-items: center !important;
   cursor: pointer !important;
   transition: transform 150ms var(--ease-spring), opacity 150ms ease, background-color 150ms ease, border-color 150ms ease !important;
-  z-index: 5 !important;
+  z-index: var(--z-chrome-lo) !important;
   opacity: 0.7 !important;
 }
 
@@ -2107,7 +2152,7 @@
      min/max-width:320px — without resetting them here, width:100% clamps to
      320px. Every section now gets its own vertical scroll as a safety net. */
   position: relative !important;
-  z-index: 10 !important;
+  z-index: var(--z-dock) !important;
   flex: 0 0 248px !important;
   width: 100% !important;
   min-width: 0 !important;
@@ -2198,12 +2243,12 @@
   border-radius: 8px!important;
   display: grid !important;
   place-items: center !important;
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 700 !important;
   flex: 0 0 24px !important;
 }
 .ce-look-choice--chip .ce-look-choice-name {
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   white-space: nowrap !important;
 }
 /* Hook chips: one quiet scrollable row of compact chips — never stacked bars */
@@ -2238,7 +2283,7 @@
   border-radius: 10px!important;
   background: rgba(255,255,255,0.06) !important;
   color: #fff !important;
-  font-size: 20px !important;
+  font-size: var(--fs-title) !important;
   cursor: pointer !important;
 }
 .ce-hook-sweep-nav:disabled {
@@ -2287,7 +2332,7 @@
   outline-offset: 2px !important;
 }
 .ce-hook-card-angle {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 700 !important;
   letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
@@ -2295,7 +2340,7 @@
 }
 .ce-hook-card.is-active .ce-hook-card-angle { color: var(--accent-text) !important; }
 .ce-hook-card-preview {
-  font-size: 12px !important;
+  font-size: var(--fs-secondary) !important;
   line-height: 1.35 !important;
   color: var(--text) !important;
   display: -webkit-box !important;
@@ -2305,7 +2350,7 @@
 }
 .ce-hook-card-index {
   margin-top: auto !important;
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   color: var(--muted) !important;
 }
 
@@ -2360,8 +2405,8 @@
 }
 
 .studio-workspace.is-carousel-mode .ce-inspector-label {
-  font-size: 10px !important;
-  font-weight: 800 !important;
+  font-size: var(--fs-overline) !important;
+  font-weight: 700 !important;
   letter-spacing: 0.1em !important;
   text-transform: uppercase !important;
   color: var(--muted) !important;
@@ -2369,7 +2414,7 @@
 
 .studio-workspace.is-carousel-mode .ce-inspector-context {
   margin: 0 !important;
-  font-size: 13px !important;
+  font-size: var(--fs-secondary) !important;
   font-weight: 600 !important;
   color: var(--text) !important;
 }
@@ -2380,7 +2425,7 @@
 
 .studio-workspace.is-carousel-mode .ce-look-choice-name {
   display: inline !important;
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   text-align: left !important;
   margin-top: 0 !important;
   white-space: nowrap !important;
@@ -2411,12 +2456,12 @@
   border: 1px solid var(--border) !important;
   border-radius: 8px!important;
   padding: 8px 10px !important;
-  font-size: 12px !important;
+  font-size: var(--fs-secondary) !important;
   box-sizing: border-box !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-caption-counter {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   color: var(--muted) !important;
   text-align: right !important;
   margin-top: 4px !important;
@@ -2437,7 +2482,7 @@
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
-  z-index: 5 !important;
+  z-index: var(--z-chrome-lo) !important;
   order: 0 !important;
 }
 
@@ -2452,7 +2497,7 @@
   flex: 0 0 28px !important;
   height: 28px !important;
   padding: 0 18px !important;
-  font-size: 12px !important;
+  font-size: var(--fs-secondary) !important;
   letter-spacing: 0.06em !important;
 }
 
@@ -2481,7 +2526,7 @@
 }
 
 .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-role {
-  font-size: 12px !important;
+  font-size: var(--fs-secondary) !important;
   margin-top: 8px !important;
   text-align: center !important;
 }
@@ -2491,7 +2536,7 @@
   width: 56px !important;
   min-height: 180px !important;
   align-self: center !important;
-  font-size: 28px !important;
+  font-size: var(--fs-display) !important;
 }
 
 /* Hide leftover hero zone if any stale markup remains */
@@ -2504,7 +2549,7 @@
   flex: 0 0 22px !important;
   height: 22px !important;
   padding: 0 16px !important;
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 700 !important;
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
@@ -2584,8 +2629,8 @@
   position: absolute !important;
   top: 4px !important;
   left: 4px !important;
-  z-index: 2 !important;
-  font-size: 10px !important;
+  z-index: var(--z-content) !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 700 !important;
   background: var(--card) !important;
   color: var(--text) !important;
@@ -2603,14 +2648,14 @@
   position: absolute !important;
   top: 4px !important;
   right: 4px !important;
-  z-index: 2 !important;
+  z-index: var(--z-content) !important;
   width: 14px !important;
   height: 14px !important;
   border-radius: 50% !important;
   background: var(--accent) !important;
   color: #fff !important;
-  font-size: 10px !important;
-  font-weight: 800 !important;
+  font-size: var(--fs-overline) !important;
+  font-weight: 700 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -2621,7 +2666,7 @@
 }
 
 .studio-workspace.is-carousel-mode .ce-filmstrip-role {
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   color: var(--muted) !important;
   line-height: 1.1 !important;
   max-width: 100% !important;
@@ -2637,7 +2682,7 @@
   border: 1px dashed var(--border) !important;
   border-radius: 8px!important;
   background: transparent !important;
-  font-size: 20px !important;
+  font-size: var(--fs-title) !important;
   cursor: pointer !important;
   align-self: center !important;
 }
@@ -2663,8 +2708,8 @@
 }
 
 .ce-hook-select-wrap > span {
-  font-size: 10px;
-  font-weight: 800;
+  font-size: var(--fs-overline);
+  font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--muted);
@@ -2678,8 +2723,8 @@
   color: var(--ink);
   border-radius: 10px;
   padding: 6px 8px;
-  font-size: 12px;
-  font-weight: 650;
+  font-size: var(--fs-secondary);
+  font-weight: 600;
 }
 
 .studio-workspace:not(.is-carousel-mode) .ce-hook-select-wrap {
@@ -2746,7 +2791,7 @@
   justify-content: flex-start !important;
   gap: 8px !important;
   padding: 6px 10px !important;
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   line-height: 1.2 !important;
   color: var(--ink) !important;
   overflow: visible !important;
@@ -2772,7 +2817,7 @@
   height: 24px !important;
   flex: 0 0 24px !important;
   place-items: center !important;
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 700 !important;
 }
 
@@ -2793,7 +2838,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12px !important;
+  font-size: var(--fs-secondary) !important;
   line-height: 1.3 !important;
   font-weight: 600;
   color: var(--ink) !important;
@@ -2835,7 +2880,7 @@
 
 .ce-post-caption-content {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 12px;
+  font-size: var(--fs-secondary);
   line-height: 1.6;
   color: var(--ink);
   opacity: 0.92;
@@ -2862,7 +2907,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 9999;
+  z-index: var(--z-guide);
   overflow: hidden;
 }
 
@@ -2871,7 +2916,7 @@
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent-glow, rgba(196, 59, 78, 0.32));
   pointer-events: none;
-  z-index: 10000;
+  z-index: var(--z-guide-hi);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2896,7 +2941,7 @@
   background: var(--accent);
   color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 10px;
+  font-size: var(--fs-overline);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -2959,13 +3004,13 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 10px;
-  font-weight: 750;
+  font-size: var(--fs-overline);
+  font-weight: 700;
   color: var(--muted, #999);
   cursor: grab;
   opacity: 0;
   transition: opacity 0.15s ease, transform 0.15s ease;
-  z-index: 20;
+  z-index: var(--z-rail);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   user-select: none;
 }
@@ -2997,7 +3042,7 @@
   background: var(--card, rgba(255, 255, 255, 0.05));
   border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
-  font-size: 11px;
+  font-size: var(--fs-overline);
   font-weight: 600;
   color: var(--muted, #aaa);
   cursor: pointer;
@@ -3029,10 +3074,10 @@
   background: var(--accent-tint);
   border: 1px solid var(--accent-border);
   color: var(--ink);
-  font-weight: 650;
+  font-weight: 600;
   border-radius: 8px;
   padding: 5px 12px;
-  font-size: 12px;
+  font-size: var(--fs-secondary);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -3051,7 +3096,7 @@
 
 .ce-aspect-btn {
   padding: 4px 10px;
-  font-size: 11px;
+  font-size: var(--fs-overline);
   font-weight: 600;
   border-radius: 8px;
   border: 1px solid var(--border);
@@ -3116,8 +3161,8 @@
 }
 
 .studio-workspace:not(.is-carousel-mode) .ce-dock-group-label {
-  font-size: 10px !important;
-  font-weight: 750 !important;
+  font-size: var(--fs-overline) !important;
+  font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.08em !important;
   color: rgba(255, 255, 255, 0.45) !important;
@@ -3135,7 +3180,7 @@
   color: #f1f2f6 !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 8px!important;
-  font-size: 12px !important;
+  font-size: var(--fs-secondary) !important;
   line-height: 1.45 !important;
   font-family: inherit !important;
   outline: none !important;
@@ -3162,7 +3207,7 @@
   height: 260px !important;
   resize: vertical !important;
   padding: 14px 16px !important;
-  font-size: 13px !important;
+  font-size: var(--fs-secondary) !important;
   line-height: 1.62 !important;
   border-radius: 10px!important;
   background: rgba(0, 0, 0, 0.45) !important;
@@ -3191,8 +3236,8 @@
 }
 
 .studio-workspace.is-carousel-mode .ce-dock-group.ce-dock-caption .ce-dock-group-label {
-  font-size: 10px !important;
-  font-weight: 750 !important;
+  font-size: var(--fs-overline) !important;
+  font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.08em !important;
   color: rgba(255, 255, 255, 0.5) !important;
@@ -3209,7 +3254,7 @@
   max-height: 26px !important;
   resize: none !important;
   padding: 4px 8px !important;
-  font-size: 12px !important;
+  font-size: var(--fs-secondary) !important;
   line-height: 1.35 !important;
   border-radius: 8px!important;
   box-sizing: border-box !important;
@@ -3223,7 +3268,7 @@
   justify-content: space-between !important;
   height: 16px !important;
   min-height: 16px !important;
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   color: rgba(255, 255, 255, 0.45) !important;
   white-space: nowrap !important;
   line-height: 16px !important;
@@ -3238,8 +3283,8 @@
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 8px!important;
   padding: 3px 9px !important;
-  font-size: 11px !important;
-  font-weight: 650 !important;
+  font-size: var(--fs-overline) !important;
+  font-weight: 600 !important;
   color: rgba(255, 255, 255, 0.85) !important;
   cursor: pointer !important;
   transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s, border-color 0.15s, background-color 0.15s ease !important;
@@ -3272,8 +3317,8 @@
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 8px!important;
   color: #ffffff !important;
-  font-size: 12px !important;
-  font-weight: 550 !important;
+  font-size: var(--fs-secondary) !important;
+  font-weight: 500 !important;
   padding: 4px 8px !important;
   outline: none !important;
   cursor: pointer !important;
@@ -3284,7 +3329,7 @@
   border: 1px solid rgba(255, 255, 255, 0.09) !important;
   border-radius: 8px!important;
   color: rgba(255, 255, 255, 0.82) !important;
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 600 !important;
   padding: 4px 8px !important;
   cursor: pointer !important;
@@ -3310,8 +3355,8 @@
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 8px!important;
   padding: 4px 9px !important;
-  font-size: 11px !important;
-  font-weight: 650 !important;
+  font-size: var(--fs-overline) !important;
+  font-weight: 600 !important;
   color: #f1f2f6 !important;
 }
 
@@ -3378,15 +3423,15 @@
   border-radius: 4px!important;
   display: grid !important;
   place-items: center !important;
-  font-size: 10px !important;
-  font-weight: 750 !important;
+  font-size: var(--fs-overline) !important;
+  font-weight: 700 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
   flex-shrink: 0 !important;
 }
 
 .studio-workspace:not(.is-carousel-mode) .ce-look-choice .ce-look-choice-name,
 .ce-dock-looks .ce-look-choice .ce-look-choice-name {
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 600 !important;
   color: var(--ink, #fff) !important;
   white-space: nowrap !important;
@@ -3420,7 +3465,7 @@
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   color: #ffffff;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
-  font-size: 10px;
+  font-size: var(--fs-overline);
   line-height: 1;
   cursor: grab;
   opacity: 0;
@@ -3429,7 +3474,7 @@
   transform-origin: top right;
   transition: opacity 150ms var(--ease-spring, cubic-bezier(0.23, 1, 0.32, 1)),
               transform 150ms var(--ease-spring, cubic-bezier(0.23, 1, 0.32, 1));
-  z-index: 6;
+  z-index: var(--z-chrome);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -3450,7 +3495,7 @@
 .ce-studio-post-frame [data-ce-block].is-dragging {
   cursor: grabbing !important;
   opacity: 0.94;
-  z-index: 5;
+  z-index: var(--z-chrome-lo);
 }
 @media (prefers-reduced-motion: reduce) {
   .ce-block-drag-grip { transition: opacity 100ms ease; transform: none; }
@@ -3505,8 +3550,8 @@
   min-width: 0;
 }
 .ce-inspector-label {
-  font-size: 10px;
-  font-weight: 800;
+  font-size: var(--fs-overline);
+  font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--faint);
@@ -3557,7 +3602,7 @@
   grid-template-columns: 52px 1fr 52px;
   align-items: center;
   gap: 10px;
-  font-weight: 650; font-size: 10px; line-height: 1; font-family: system-ui, sans-serif;
+  font-weight: 600; font-size: var(--fs-overline); line-height: 1; font-family: system-ui, sans-serif;
   color: var(--muted);
 }
 .ce-typo-slider input[type="range"] { width: 100%; accent-color: var(--accent); cursor: ew-resize; }
@@ -3634,7 +3679,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   flex-direction: row !important;
   align-items: stretch !important;
   overflow: hidden !important;
-  z-index: 20 !important;
+  z-index: var(--z-rail) !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-inspector-scroll {
@@ -3675,7 +3720,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 
 .studio-workspace.is-carousel-mode .ce-inspector-label,
 .studio-workspace.is-carousel-mode .ce-dock-group-label {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 700 !important;
   letter-spacing: 0.12em !important;
   text-transform: uppercase !important;
@@ -3691,8 +3736,8 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   max-width: 160px !important;
 }
 .studio-workspace.is-carousel-mode .ce-inspector-context {
-  font-size: 13px !important;
-  font-weight: 650 !important;
+  font-size: var(--fs-secondary) !important;
+  font-weight: 600 !important;
   color: #fff !important;
   letter-spacing: -0.01em !important;
   margin: 2px 0 0 !important;
@@ -3711,7 +3756,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   gap: 8px !important;
 }
 .studio-workspace.is-carousel-mode .ce-inspector-font-row > span {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 600 !important;
   color: rgba(255, 255, 255, 0.5) !important;
 }
@@ -3723,7 +3768,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 8px!important;
   color: #fff !important;
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 500 !important;
   padding: 0 8px !important;
   outline: none !important;
@@ -3839,8 +3884,8 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 }
 
 .studio-workspace.is-carousel-mode .ce-text-tool-caption {
-  font-size: 10px !important;
-  font-weight: 550 !important;
+  font-size: var(--fs-overline) !important;
+  font-weight: 500 !important;
   color: inherit !important;
   line-height: 1 !important;
   white-space: nowrap !important;
@@ -3957,7 +4002,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   grid-template-columns: 42px 1fr 44px !important;
   align-items: center !important;
   gap: 8px !important;
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 600 !important;
   color: rgba(255, 255, 255, 0.55) !important;
 }
@@ -3986,12 +4031,12 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   box-shadow: 0 0 8px rgba(196, 59, 78, 0.6) !important;
 }
 .studio-workspace.is-carousel-mode .ce-typo-slider .ce-typo-slider-name {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   letter-spacing: 0.04em !important;
   color: rgba(255, 255, 255, 0.5) !important;
 }
 .studio-workspace.is-carousel-mode .ce-typo-slider output {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   font-variant-numeric: tabular-nums !important;
   text-align: right !important;
   color: #fff !important;
@@ -4013,7 +4058,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   margin-bottom: 10px !important;
 }
 .ce-look-scope-row > span {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 700 !important;
   color: rgba(255, 255, 255, 0.5) !important;
   padding: 0 6px !important;
@@ -4025,8 +4070,8 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   align-items: center !important;
   padding: 4px 10px !important;
   border-radius: 8px!important;
-  font-size: 11px !important;
-  font-weight: 550 !important;
+  font-size: var(--fs-overline) !important;
+  font-weight: 500 !important;
   color: rgba(255, 255, 255, 0.7) !important;
   cursor: pointer !important;
   transition: transform 150ms var(--ease-snappy), background-color 150ms ease, color 150ms ease, box-shadow 150ms ease !important;
@@ -4041,7 +4086,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 .ce-scope-pill.is-active {
   background: var(--accent, #c43b4e) !important;
   color: #fff !important;
-  font-weight: 650 !important;
+  font-weight: 600 !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35) !important;
 }
 .ce-scope-pill input[type="radio"] {
@@ -4139,7 +4184,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   align-items: center !important;
   justify-content: space-between !important;
   padding: 5px 8px !important;
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 600 !important;
   color: var(--ink, #f2f0f4) !important;
   background: var(--surface, #17161c) !important;
@@ -4186,7 +4231,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   background: rgba(255, 255, 255, 0.04) !important;
   color: rgba(255, 255, 255, 0.8) !important;
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   padding: 0 9px !important;
   white-space: nowrap !important;
   cursor: pointer !important;
@@ -4219,7 +4264,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 8px!important;
   color: #fff !important;
-  font-size: 12px !important;
+  font-size: var(--fs-secondary) !important;
   line-height: 1.4 !important;
   padding: 8px 10px !important;
   resize: none !important;
@@ -4233,7 +4278,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   box-shadow: 0 0 0 2px rgba(196, 59, 78, 0.25) !important;
 }
 .studio-workspace.is-carousel-mode .ce-caption-meta {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   color: rgba(255, 255, 255, 0.4) !important;
   text-align: right !important;
   font-variant-numeric: tabular-nums !important;
@@ -4256,7 +4301,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   border: 1px solid var(--border) !important;
   background: rgba(255,255,255,0.035) !important;
   color: rgba(255,255,255,0.8) !important;
-  font: 600 12px/1 var(--font-ui) !important;
+  font: 600 var(--fs-secondary)/1 var(--font-ui) !important;
   text-align: left !important;
 }
 .studio-workspace.is-carousel-mode .ce-add-slide-disclosure summary.ce-add-slide-btn:hover {
@@ -4271,7 +4316,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   padding-top: 6px !important;
 }
 .studio-workspace.is-carousel-mode .ce-add-slide-pills button {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 600 !important;
   min-height: 22px !important;
   padding: 3px 8px !important;
@@ -4331,7 +4376,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   box-shadow: 0 0 0 2px var(--accent, #c43b4e), 0 12px 30px rgba(0, 0, 0, 0.42) !important;
 }
 .studio-workspace .ce-filmstrip-card .ce-filmstrip-num {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   opacity: 0.55 !important;
 }
 
@@ -4528,7 +4573,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   flex: 0 0 auto !important;
 }
 .studio-workspace.is-carousel-mode .ce-dock-column-title {
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 700 !important;
   letter-spacing: .08em !important;
   text-transform: uppercase !important;
@@ -4642,16 +4687,16 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   gap: 6px !important;
 }
 .studio-workspace.is-carousel-mode .ce-dock-column-head .ce-look-scope-row > span {
-  font-size: 10px !important;
-  font-weight: 650 !important;
+  font-size: var(--fs-overline) !important;
+  font-weight: 600 !important;
   letter-spacing: .06em !important;
   text-transform: uppercase !important;
-  color: rgba(255, 255, 255, 0.42) !important;
+  color: rgba(255, 255, 255, 0.55) !important;
 }
 .studio-workspace.is-carousel-mode .ce-dock-column-head .ce-scope-pill {
   min-height: 26px !important;
   padding: 4px 10px !important;
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-hook-row-item {
@@ -4744,7 +4789,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   min-height: 150px !important;
   max-height: none !important;
   padding: 11px 12px !important;
-  font-size: 12px !important;
+  font-size: var(--fs-secondary) !important;
   line-height: 1.6 !important;
 }
 /* A1 balance (2026-09-07 deep audit): the caption column is the only column
@@ -4830,8 +4875,8 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 }
 
 .ce-filmstrip-count {
-  font-size: 10px !important;
-  font-weight: 800 !important;
+  font-size: var(--fs-overline) !important;
+  font-weight: 700 !important;
   letter-spacing: 0.06em !important;
   color: var(--muted) !important;
   background: rgba(255, 255, 255, 0.06) !important;
@@ -4853,7 +4898,16 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   height: 100% !important;
   background: var(--accent) !important;
   transform-origin: 0 50% !important;
-  transform: scaleX(0) !important;
+  /* W3-P2 SC-02 (2026-09-20): this was `transform: scaleX(0) !important`, and
+     an !important declaration beats the inline style the strip writer sets
+     (index.html bindCarouselEditor → progressEl.style.transform = 'scaleX(r)').
+     The bar was therefore DEAD at every scroll position — measured matrix(0,0,
+     0,1,0,0) at scrollLeft 0, 725 and 1450/2846 while the inline style already
+     held scaleX(1). Dropping the !important keeps scaleX(0) as the pre-JS
+     default (no first-paint flash of a full-width bar) while letting the
+     inline ratio win from the first syncStripProgress() call onward.
+     Verified on the merged bundle: 0.004 → 0.500 → 1.000 across the strip. */
+  transform: scaleX(0);
   transition: transform 120ms ease-out !important;
 }
 
@@ -4956,7 +5010,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.03);
-  z-index: 10;
+  z-index: var(--z-dock);
   box-sizing: border-box;
 }
 
@@ -5075,7 +5129,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 }
 
 .ce-hook-row-badge {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.6px !important;
@@ -5089,7 +5143,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 }
 
 .ce-hook-row-index {
-  font-size: 10px !important;
+  font-size: var(--fs-overline) !important;
   color: rgba(255, 255, 255, 0.35) !important;
   font-weight: 500 !important;
   margin-left: auto !important;
@@ -5097,7 +5151,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 }
 
 .ce-hook-row-indicator {
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
   font-weight: 700 !important;
   color: var(--accent-text) !important;
   width: 16px !important;
@@ -5114,7 +5168,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 }
 
 .ce-hook-row-text {
-  font-size: 12px !important;
+  font-size: var(--fs-secondary) !important;
   line-height: 1.45 !important;
   color: rgba(255, 255, 255, 0.88) !important;
   display: -webkit-box !important;
@@ -5193,7 +5247,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   position: absolute !important;
   top: 8px !important;
   right: 8px !important;
-  z-index: 2 !important;
+  z-index: var(--z-content) !important;
   background: rgba(196, 59, 78, 0.92) !important;
   color: #fff !important;
 }
@@ -5275,7 +5329,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 }
 
 .ce-post-template-label .ce-look-choice-name {
-  font-size: 11px;
+  font-size: var(--fs-overline);
   font-weight: 600;
   color: rgba(255, 255, 255, 0.88);
   white-space: nowrap;
@@ -5284,7 +5338,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 }
 
 .ce-post-template-active-badge {
-  font-size: 10px;
+  font-size: var(--fs-overline);
   font-weight: 700;
   text-transform: uppercase;
   color: var(--accent-text);
@@ -5356,20 +5410,20 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   position: absolute;
   top: 16px;
   left: 16px;
-  z-index: 2;
+  z-index: var(--z-content);
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(0, 0, 0, .55);
   backdrop-filter: blur(6px);
   color: #fff;
-  font-size: 10px;
+  font-size: var(--fs-overline);
   font-weight: 700;
   letter-spacing: .04em;
 }
 .studio-workspace.is-carousel-mode .ce-filmstrip-role {
   margin-top: 6px;
   opacity: .55;
-  font-size: 10px;
+  font-size: var(--fs-overline);
   letter-spacing: .08em;
   text-transform: uppercase;
 }
@@ -5437,7 +5491,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   border-radius: 4px;
 }
 .ce-look-mini-tag {
-  font-size: 10px;
+  font-size: var(--fs-overline);
   letter-spacing: .12em;
   text-transform: uppercase;
   opacity: .85;
@@ -5458,7 +5512,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
-  font-size: 11px;
+  font-size: var(--fs-overline);
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: 0;
@@ -5467,7 +5521,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 /* E-005 fix 2026-09-05: long-poem Read overlay + affordance. Spec: 560px max
    paper, 20px Devanagari type, 1.6 leading, 28px padding, Escape returns focus. */
 .ce-poem-reader-backdrop {
-  position: fixed; inset: 0; z-index: 999;
+  position: fixed; inset: 0; z-index: var(--z-reader);
   background: rgba(6,6,10,0.62);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
@@ -5482,30 +5536,30 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   position: relative;
 }
 .ce-poem-reader-title {
-  font-size: 13px; font-weight: 700; letter-spacing: .04em;
+  font-size: var(--fs-secondary); font-weight: 700; letter-spacing: .04em;
   color: var(--muted, #9a97a3); margin-bottom: 14px; text-transform: uppercase;
 }
 .ce-poem-reader-text {
   font-family: 'Kohinoor Devanagari', 'Noto Serif Devanagari', system-ui, sans-serif;
-  font-size: 20px; line-height: 1.6; white-space: normal;
+  font-size: var(--fs-title); line-height: 1.6; white-space: normal;
 }
 .ce-poem-reader-close {
   position: absolute; top: 10px; right: 12px; width: 32px; height: 32px;
   border: 0; border-radius: 8px; background: transparent; cursor: pointer;
-  color: var(--muted, #9a97a3); font-size: 20px; line-height: 1;
+  color: var(--muted, #9a97a3); font-size: var(--fs-title); line-height: 1;
 }
 .ce-poem-reader-close:hover { background: rgba(255,255,255,0.08); color: var(--ink, #f2f0f4); }
 .ce-poem-read-btn {
-  position: absolute; right: 10px; bottom: 10px; z-index: 3;
+  position: absolute; right: 10px; bottom: 10px; z-index: var(--z-content-hi);
   border: 1px solid rgba(255,255,255,0.22); border-radius: 8px;
   background: rgba(10,10,14,0.72); color: #fff;
-  font-size: 11px; font-weight: 700; padding: 5px 10px; cursor: pointer;
+  font-size: var(--fs-overline); font-weight: 700; padding: 5px 10px; cursor: pointer;
   -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
 }
 .ce-poem-read-btn:hover { background: rgba(10,10,14,0.9); }
 .ce-long-read-badge {
-  position: absolute; left: 10px; bottom: 10px; z-index: 3;
-  font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  position: absolute; left: 10px; bottom: 10px; z-index: var(--z-content-hi);
+  font-size: var(--fs-overline); font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
   color: rgba(255,255,255,0.85); background: rgba(10,10,14,0.55);
   border-radius: 8px; padding: 3px 7px; pointer-events: none;
 }
@@ -5525,10 +5579,10 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: var(--fs-overline);
   letter-spacing: .08em;
 }
-.ce-look-mini-arrow { font-size: 10px; }
+.ce-look-mini-arrow { font-size: var(--fs-overline); }
 
 /* --- Hook variations: quiet rows, accent left-bar when active ------------ */
 .ce-hook-card {
@@ -5630,7 +5684,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   border-radius: 8px;
   background: transparent;
   color: var(--muted);
-  font: 600 12px/1 var(--font-ui);
+  font: 600 var(--fs-secondary)/1 var(--font-ui);
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: background 140ms var(--ease-spring, ease), color 140ms ease;
@@ -5653,7 +5707,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   border: 1px solid var(--border);
   background: transparent;
   color: var(--muted);
-  font: 600 12px/1 var(--font-ui);
+  font: 600 var(--fs-secondary)/1 var(--font-ui);
   cursor: pointer;
   list-style: none;
   transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
@@ -5661,7 +5715,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 .ce-add-slide-btn::-webkit-details-marker { display: none; }
 .ce-add-slide-btn:hover { color: var(--ink); border-color: var(--border-strong); background: rgba(255,255,255,0.04); }
 .ce-add-slide-plus {
-  font-size: 14px;
+  font-size: var(--fs-body);
   font-weight: 700;
   line-height: 1;
   color: var(--accent);
@@ -5695,7 +5749,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   background: var(--panel, #14161c);
   box-shadow: 0 1px 0 var(--border);
   position: relative;
-  z-index: 2;
+  z-index: var(--z-content);
 }
 /* Soft top/bottom fade so a mid-scroll row dissolves instead of hard-cutting. */
 .studio-workspace.is-carousel-mode .ce-inspector-scroll {
@@ -5739,9 +5793,9 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
    the control quiet beside Style so Auto remains the default and square/story
    choices are one deliberate tap away. */
 .ce-poem-ratio-control { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; padding-top:9px; border-top:1px solid var(--border); }
-.ce-poem-ratio-label { color:var(--muted); font-size:10px; font-weight:750; letter-spacing:.08em; text-transform:uppercase; }
+.ce-poem-ratio-label { color:var(--muted); font-size:var(--fs-overline); font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
 .ce-poem-ratio-pills { display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end; }
-.ce-poem-ratio-pill { min-height:26px; padding:4px 8px; border:1px solid var(--border); border-radius:7px; background:transparent; color:var(--muted); cursor:pointer; font-size:10px; font-weight:750; }
+.ce-poem-ratio-pill { min-height:26px; padding:4px 8px; border:1px solid var(--border); border-radius:7px; background:transparent; color:var(--muted); cursor:pointer; font-size:var(--fs-overline); font-weight:700; }
 .ce-poem-ratio-pill:hover, .ce-poem-ratio-pill.is-active { border-color:var(--accent); background:var(--accent-tint); color:var(--ink); }
 @media (max-width:700px) {
   .ce-poem-ratio-control { align-items:flex-start; flex-direction:column; }
@@ -5830,7 +5884,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 }
 .ce-sort-popover {
   position: absolute;
-  z-index: 60;
+  z-index: var(--z-route-lo);
   top: calc(100% + 6px);
   left: 0;
   min-width: 274px;
@@ -5858,23 +5912,23 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 }
 .ce-sort-option:hover { background: rgba(255,255,255,.06); }
 .ce-sort-option.is-on { background: color-mix(in srgb, var(--accent) 16%, transparent); }
-.ce-sort-check { width: 14px; flex: 0 0 14px; font-size: 12px; line-height: 1.5; opacity: .9; }
+.ce-sort-check { width: 14px; flex: 0 0 14px; font-size: var(--fs-secondary); line-height: 1.5; opacity: .9; }
 .ce-sort-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.ce-sort-text strong { font-size: 12.5px; font-weight: 700; letter-spacing: .1px; }
-.ce-sort-text em { font-size: 10.5px; font-style: normal; color: var(--muted); line-height: 1.35; }
+.ce-sort-text strong { font-size: var(--fs-secondary); font-weight: 700; letter-spacing: .1px; }
+.ce-sort-text em { font-size: var(--fs-overline); font-style: normal; color: var(--muted); line-height: 1.35; }
 
 /* ── LIBRARY FILTER (inside the same sort popover - one control, not two) ────────────────────── */
 .ce-sort-sep { height: 1px; margin: 6px 4px; background: var(--card-border, rgba(255,255,255,.12)); }
-.ce-sort-heading { padding: 4px 10px 2px; font-size: 10px; font-weight: 800; letter-spacing: .8px;
+.ce-sort-heading { padding: 4px 10px 2px; font-size: var(--fs-overline); font-weight: 700; letter-spacing: .8px;
   text-transform: uppercase; color: var(--muted); }
 .ce-filter-group { padding: 4px 10px 6px; }
-.ce-filter-label { display: block; margin-bottom: 5px; font-size: 10.5px; font-weight: 700; color: var(--muted); }
+.ce-filter-label { display: block; margin-bottom: 5px; font-size: var(--fs-overline); font-weight: 700; color: var(--muted); }
 .ce-filter-chips { display: flex; flex-wrap: wrap; gap: 5px; }
 .ce-filter-chip {
   min-height: 30px; padding: 5px 10px; border-radius: 999px;
   border: 1px solid var(--card-border, rgba(255,255,255,.16));
   background: transparent; color: var(--ink);
-  font-size: 11px; font-weight: 600; cursor: pointer;
+  font-size: var(--fs-overline); font-weight: 600; cursor: pointer;
 }
 .ce-filter-chip:hover { background: rgba(255,255,255,.06); }
 .ce-filter-chip.is-on {
@@ -5885,7 +5939,7 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 .ce-filter-reset {
   display: block; width: calc(100% - 20px); margin: 2px 10px 6px; min-height: 34px;
   border-radius: 8px; border: 1px dashed var(--card-border, rgba(255,255,255,.2));
-  background: transparent; color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer;
+  background: transparent; color: var(--muted); font-size: var(--fs-overline); font-weight: 700; cursor: pointer;
 }
 .ce-filter-reset:hover { color: var(--ink); background: rgba(255,255,255,.05); }
 

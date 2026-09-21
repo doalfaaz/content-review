@@ -56,7 +56,7 @@
   .topbar input[type="search"], .topbar input[class*="search"], .topbar .search-input {
     flex: 1 1 auto !important; min-width: 0 !important; width: auto !important;
   }
-  .topbar select { max-width: 92px !important; font-size: 12px !important; }
+  .topbar select { max-width: 92px !important; font-size: var(--fs-secondary) !important; }
   /* 44px touch law for the bar controls: expand the hit area with an
      invisible overlay — the visual stays the premium 28px chip. */
   .topbar .sidebar-toggle-btn, .topbar .theme-toggle-btn { position: relative !important; }
@@ -72,7 +72,7 @@
     gap: 12px !important;
     padding: 12px !important;
   }
-  .card-title, .ce-card-title { font-size: 15px !important; }
+  .card-title, .ce-card-title { font-size: var(--fs-body) !important; }
 
   /* Horizontal shelves scroll instead of crushing. */
   .ce-shelf-track, .ce-library-shelf {
@@ -91,9 +91,8 @@
     gap: 6px !important;
     padding: 8px 10px !important;
   }
-  .studio-title-box { max-width: 46vw !important; }
   .studio-title {
-    font-size: 14px !important;
+    font-size: var(--fs-body) !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -105,7 +104,7 @@
   .pill-btn {
     min-height: 40px !important;
     padding: 8px 14px !important;
-    font-size: 13px !important;
+    font-size: var(--fs-secondary) !important;
   }
   /* The ••• menu opens over the dock, not clipped at the right edge.
      WL2721/wl4887 (2026-09-19): `right: 0` anchors the menu's RIGHT edge to the
@@ -194,14 +193,14 @@
   }
   .studio-workspace.is-carousel-mode .ce-inspector-pinned .ce-deck-caption-input {
     min-height: 96px !important;
-    font-size: 16px !important; /* iOS zooms into <16px inputs */
+    font-size: var(--fs-section) !important; /* iOS zooms into <16px inputs */
   }
 
   /* Text inputs across the app: kill the iOS focus zoom.
      A8-P2-7: date/time inputs included — the Schedule sheet's date/time
      pickers were the last zoom triggers. */
   input[type="text"], input[type="search"], input[type="date"], input[type="time"], input[type="number"], textarea, select {
-    font-size: 16px !important;
+    font-size: var(--fs-section) !important;
   }
   /* A8-P2-4 (44px law): the owner drawer's nav rows were desktop-compact
      (21-34px). Touch rows get real targets; the visual rhythm stays tight
@@ -252,8 +251,7 @@
   .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card {
     width: 72vw !important;
   }
-  .pill-btn { padding: 8px 10px !important; font-size: 12px !important; }
-  .studio-title { max-width: 40vw !important; }
+  .pill-btn { padding: 8px 10px !important; font-size: var(--fs-secondary) !important; }
 }
 
 
@@ -306,7 +304,7 @@
   }
   .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn {
     height: 40px !important;
-    font-size: 13px !important;
+    font-size: var(--fs-secondary) !important;
   }
   /* Caption panel: own block, readable textarea. */
   .studio-workspace.is-carousel-mode .ce-inspector-pinned {
@@ -396,13 +394,13 @@ html.ce-phone .topbar > *, html.ce-phone .app-topbar > * { flex-shrink: 0 !impor
 
 html.ce-phone .topbar input[type="search"], html.ce-phone .topbar input[class*="search"], html.ce-phone .topbar .search-input { flex: 1 1 auto !important; min-width: 0 !important; width: auto !important; }
 
-html.ce-phone .topbar select { max-width: 92px !important; font-size: 12px !important; }
+html.ce-phone .topbar select { max-width: 92px !important; font-size: var(--fs-secondary) !important; }
 
 html.ce-phone .library-grid, html.ce-phone .poem-grid, html.ce-phone .posts-grid { grid-template-columns: 1fr !important;
     gap: 12px !important;
     padding: 12px !important; }
 
-html.ce-phone .card-title, html.ce-phone .ce-card-title { font-size: 15px !important; }
+html.ce-phone .card-title, html.ce-phone .ce-card-title { font-size: var(--fs-body) !important; }
 
 html.ce-phone .ce-shelf-track, html.ce-phone .ce-library-shelf { overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important; }
@@ -440,9 +438,8 @@ html.ce-phone /* Topbar wraps: back / title / actions never clip. */
     gap: 6px !important;
     padding: 8px 10px !important; }
 
-html.ce-phone .studio-title-box { max-width: 46vw !important; }
 
-html.ce-phone .studio-title { font-size: 14px !important;
+html.ce-phone .studio-title { font-size: var(--fs-body) !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -455,7 +452,7 @@ html.ce-phone .studio-primary-actions { gap: 6px !important; }
 
 html.ce-phone .pill-btn { min-height: 40px !important;
     padding: 8px 14px !important;
-    font-size: 13px !important; }
+    font-size: var(--fs-secondary) !important; }
 
 html.ce-phone /* The ••• menu opens over the dock, not clipped at the right edge. */
   .studio-more-menu { right: 0 !important;
@@ -506,10 +503,22 @@ html.ce-phone /* Caption column becomes a normal stacked panel. */
     grid-row: auto !important; }
 
 html.ce-phone .studio-workspace.is-carousel-mode .ce-inspector-pinned .ce-deck-caption-input { min-height: 96px !important;
-    font-size: 16px !important; /* iOS zooms into <16px inputs */ }
+    font-size: var(--fs-section) !important; /* iOS zooms into <16px inputs */ }
 
-html.ce-phone /* Text inputs across the app: kill the iOS focus zoom (date/time included, A8-P2-7). */
-  input[type="text"], input[type="search"], input[type="date"], input[type="time"], input[type="number"], textarea, select { font-size: 16px !important; }
+/* F-S14 (cloud/ce-ui, 2026-09-21): this rule is a top-level phone rule, but a
+   selector LIST only carries the `html.ce-phone` scope of its FIRST clause. The
+   other six clauses (`input[type=search|date|time|number]`, `textarea`, `select`)
+   were therefore bare globals that styled the DESKTOP app with
+   `font-size:16px !important`, beating the app's own authored sizes
+   (kanban selects declare 10-11px inline; the Schedule token textarea 12px).
+   Measured at 1440x900 on the shipped source: `.queue-caption-select` computed
+   16px instead of 10px, so its chosen caption needed 298px in a 183px usable
+   run — the owner saw "✎ Observation pehle, vision baad mei…" sheared mid-word
+   with no ellipsis, and "Pick time…" clipped by 3px in the 104px time select.
+   Every clause now carries the scope it always needed; the phone behaviour is
+   byte-identical because all clauses were already phone-gated in intent.
+   Guarded by qa/wb-ds-w4f/leak-clauses.mjs. */
+html.ce-phone input[type="text"], html.ce-phone input[type="search"], html.ce-phone input[type="date"], html.ce-phone input[type="time"], html.ce-phone input[type="number"], html.ce-phone textarea, html.ce-phone select { font-size: var(--fs-section) !important; }
 html.ce-phone #sidebar .nav-btn { min-height: 44px; }
 html.ce-phone #sidebar .nav-sub-btn { min-height: 40px; color: var(--muted); }
 html.ce-phone #sidebar .nav-nest-btn { min-height: 36px; color: var(--muted); }
@@ -552,9 +561,18 @@ html.ce-phone /* Download-for-phone button: full-width, first in the menu. */
 
 html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-filmstrip-card { width: 72vw !important; }
 
-html.ce-phone .pill-btn { padding: 8px 10px !important; font-size: 12px !important; }
+html.ce-phone .pill-btn { padding: 8px 10px !important; font-size: var(--fs-secondary) !important; }
 
-html.ce-phone .studio-title { max-width: 40vw !important; }
+/* W3-P2 SC-10 (2026-09-21): this was `max-width: 40vw` (161px at 402px) and it
+   is the rule that actually clipped the deck title — a FOURTH cap on the same
+   pair of elements (.studio-title-box carries 46/46/60vw, .studio-title carries
+   40vw here and 40vw at the media-query twin above). Measured on the merged
+   phone bundle: the title needs 180px ("Fear vs Belief — audit deck") and the
+   topbar's row 1 holds only Back (x 10..74) + this box, leaving ~310px free at
+   402px; nothing below it reflows because the box is a nowrap ellipsis inside a
+   wrap container (barOverflowX 0 before and after). 60vw = 241px fits the
+   measured title with room to spare. If a shorter cap is ever wanted, shorten
+   the string at the source rather than clipping mid-word. */
 
 
 /* class twin of @media (max-width: 700px) { */
@@ -593,7 +611,7 @@ html.ce-phone /* One-column Slides row: Add slide full width, icons row beneath.
     gap: 8px !important; }
 
 html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn { height: 40px !important;
-    font-size: 13px !important; }
+    font-size: var(--fs-secondary) !important; }
 
 html.ce-phone /* Caption panel: own block, readable textarea. */
   .studio-workspace.is-carousel-mode .ce-inspector-pinned { width: 100% !important;
@@ -631,7 +649,7 @@ html.ce-phone /* Look grid 3-up with readable faces. */
     font-weight: 700 !important;
     border-radius: 10px !important;
     color: #fff !important;
-    background: linear-gradient(135deg, #d4576b, #a83242) !important;
+    background: linear-gradient(135deg, var(--accent), #a83242) !important;
     border: 1px solid rgba(255,255,255,0.14) !important;
   }
   /* hide the native-only Export button in the menu on phone (the pack replaces it) */
@@ -646,7 +664,7 @@ html.ce-phone .studio-topbar #studio-download-pack-btn {
   font-weight: 700 !important;
   border-radius: 10px !important;
   color: #fff !important;
-  background: linear-gradient(135deg, #d4576b, #a83242) !important;
+  background: linear-gradient(135deg, var(--accent), #a83242) !important;
   border: 1px solid rgba(255,255,255,0.14) !important;
 }
 html.ce-phone .studio-topbar #studio-export-btn { display: none !important; }
@@ -663,11 +681,23 @@ html.ce-phone .studio-topbar #studio-export-btn { display: none !important; }
 html.ce-phone body {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+/* W12 FIX3 (2026-09-20): this rule used to own the toast's resting position
+   (bottom 24px + safe-area). The card now lives inside #ce-toast-stack, which
+   owns the anchor and is dock-aware (see the FIX3 block at the end of this
+   file). These two ids are the LEGACY handles for the live card, so the only
+   thing still needed here is the right-edge/safe-area box: `bottom` is left to
+   the stack, and the max-width is now the stack's job too. Kept as a fallback
+   for any caller that still paints a bare fixed toast (e.g. an older bundle
+   loading a newer stylesheet). */
 html.ce-phone #ce-app-toast,
 html.ce-phone #ce-queue-toast {
-  bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
   right: calc(16px + env(safe-area-inset-right, 0px)) !important;
   max-width: min(520px, calc(100vw - 32px - env(safe-area-inset-right, 0px) - env(safe-area-inset-left, 0px))) !important;
+}
+html.ce-phone #ce-toast-stack #ce-app-toast,
+html.ce-phone #ce-toast-stack #ce-queue-toast {
+  right: auto !important;
+  max-width: none !important;
 }
 html.ce-phone #studio {
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -689,10 +719,15 @@ html.ce-phone .studio-topbar {
 @media (max-width: 700px) {
   .ce-rail-track {
     scroll-snap-type: x proximity !important;
-    scroll-padding-inline: 16px !important;
-    padding-inline: 16px !important;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 32px), rgba(0,0,0,0.4) 100%);
-    mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 32px), rgba(0,0,0,0.4) 100%);
+    /* F-L05 (cloud/ce-ui): the 16px inline lead put the first carousel card at
+       x=40 while the poems rail starts at x=24 — a visible margin jog between
+       sibling shelves. Lead is now 0 so both rails share the main padding edge;
+       the right fade + snap still promise the swipe, and the peek math below
+       (authored for the x=40 start) only gains room. */
+    scroll-padding-inline: 0 16px !important;
+    padding-inline: 0 16px !important;
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 32px), rgba(0,0,0,0.4) 100%);
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 32px), rgba(0,0,0,0.4) 100%);
   }
   .ce-rail-track > * {
     scroll-snap-align: start !important;
@@ -711,11 +746,17 @@ html.ce-phone .studio-topbar {
   .ce-rail-nav-btn::before, .ce-rail-toggle-btn::before {
     content: ''; position: absolute; inset: -9px; border-radius: 16px;
   }
-  /* Studio Back / icon actions too (measured 29px tall on phone). */
+  /* W5 (qa/wb-ds-w5/M3-actions, 2026-09-21): the topbar tap-slop is the
+     size-aware form in native-studio.css:421-425 — `inset:
+     min(0px, calc(50% - 22px))` expands a control only until it reaches 44px
+     and stops there. This block used to re-declare it as a flat `inset: -8px`
+     (authored when the topbar controls measured 29px tall), which after the
+     44px floor landed expanded EVERY topbar control by 8px in all directions.
+     The action-rail rows sit 4px apart, so row 1's Send to Plan ate the top
+     3px of row 2's Post now (effective 90x41) — one row stealing its
+     neighbour's edge. Deleted: native-studio.css already carries the one
+     size-aware definition for this exact selector. */
   .studio-topbar button { position: relative; }
-  .studio-topbar button::before {
-    content: ''; position: absolute; inset: -8px; border-radius: 14px;
-  }
   /* Rail titles are pillar metadata — the same internal strings that were
      truncated on card chips. Let long ones ellipsize instead of pushing
      the count chip and arrows off-row. */
@@ -827,7 +868,7 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
   max-height: 56px !important;
   overflow: hidden !important;
   position: relative !important;
-  z-index: 20 !important;
+  z-index: var(--z-rail) !important;
 }
 /* Summoned state: the same panels become a real bottom sheet over the gallery.
    Keep the two selectors separate: CSS does not allow an @media block inside a
@@ -849,7 +890,7 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
-    z-index: 40 !important;
+    z-index: var(--z-dock-open) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
     background: rgba(12, 13, 18, 0.96) !important;
     backdrop-filter: blur(28px) saturate(180%) !important;
@@ -875,7 +916,7 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-op
   min-height: 180px !important;
   overflow: hidden !important;
   -webkit-overflow-scrolling: touch !important;
-  z-index: 40 !important;
+  z-index: var(--z-dock-open) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
   background: rgba(12, 13, 18, 0.96) !important;
   backdrop-filter: blur(28px) saturate(180%) !important;
@@ -887,7 +928,7 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-op
   inset: auto !important;
   flex: 0 0 56px !important;
   min-height: 56px !important;
-  z-index: 3 !important;
+  z-index: var(--z-content-hi) !important;
 }
 html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-inspector-scroll {
   display: flex !important;
@@ -929,15 +970,15 @@ html.ce-phone .ce-tools-toggle {
   cursor: pointer !important;
   position: sticky !important;
   top: 0 !important;
-  z-index: 2 !important;
+  z-index: var(--z-content) !important;
 }
 html.ce-phone .ce-tools-toggle-label {
-  font-size: 12px !important;
-  font-weight: 800 !important;
+  font-size: var(--fs-secondary) !important;
+  font-weight: 700 !important;
   letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
 }
-html.ce-phone .ce-tools-toggle-hint { font-size: 12px !important; opacity: 0.5 !important; }
+html.ce-phone .ce-tools-toggle-hint { font-size: var(--fs-secondary) !important; opacity: 0.5 !important; }
 html.ce-phone .ce-tools-toggle::after {
   content: '' !important;
   margin-left: auto !important;
@@ -1077,7 +1118,7 @@ html.ce-phone .ce-rail-track {
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
     box-shadow: none !important;
     position: relative !important;
-    z-index: 20 !important;
+    z-index: var(--z-rail) !important;
   }
   .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-dock {
     position: absolute !important;
@@ -1089,7 +1130,7 @@ html.ce-phone .ce-rail-track {
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
-    z-index: 40 !important;
+    z-index: var(--z-dock-open) !important;
     padding: 4px 16px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
     gap: 14px !important;
     border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
@@ -1127,6 +1168,66 @@ html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail {
   -webkit-overflow-scrolling: touch !important;
 }
 html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail > * { flex: 0 0 auto !important; }
+/* W7-N7 (ovf sweep, 2026-09-21): the phone layer flips the post rail into a
+   horizontal strip (rule above) but left the three groups the rail builder
+   injects (index.html renderMain — navGroup + postHooksGroup +
+   quickActionsGroup) in their DESKTOP vertical shape. Measured at 390x844 on
+   the merged bundle: `.ce-dock-hooks` measured 365x488 inside the 64px strip
+   (overflow-y:hidden), so 86.9% of the hook variations were unreachable and the
+   strip painted horizontally-sliced buttons; `.ce-dock-quick-actions` measured
+   365x112 (42.9% clipped, only "Cycle Design" half-visible). Cause:
+   `.ce-dock-group{flex-direction:column}` (native-studio.css:1090) and the
+   desktop-rail override `.ce-left-rail-hooks .ce-hook-card{width:100%}`
+   (native-studio.css:5086) are both authored for the 320px-wide VERTICAL
+   desktop rail. Phone-only: lay each group out as the row it is on the strip,
+   let the hook cards keep the sweep's own 210px shape, and give the strip the
+   height one row of cards needs. Desktop rail untouched (every rule is
+   html.ce-phone + :not(.is-carousel-mode)). */
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail {
+  max-height: 112px !important;
+  align-items: center !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail > .ce-dock-group {
+  flex-direction: row !important;
+  align-items: center !important;
+  max-height: 100% !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks {
+  width: auto !important;
+  min-width: 0 !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks .ce-section-header {
+  flex: 0 0 auto !important;
+  margin-bottom: 0 !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks .ce-hook-sweep {
+  flex-direction: row !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks .ce-hook-sweep-track {
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding-bottom: 2px !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks .ce-hook-card {
+  flex: 0 0 210px !important;
+  width: 210px !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-dock-quick-actions {
+  flex-direction: row !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-dock-quick-actions .pill-btn {
+  width: auto !important;
+  min-width: 0 !important;
+}
 html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-dock {
   order: 3 !important;
   flex: 0 0 auto !important;
@@ -1143,7 +1244,7 @@ html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-dock {
   border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
   box-shadow: none !important;
   position: relative !important;
-  z-index: 20 !important;
+  z-index: var(--z-rail) !important;
 }
 html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-dock {
   position: absolute !important;
@@ -1155,7 +1256,7 @@ html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-doc
   overflow-y: auto !important;
   overflow-x: hidden !important;
   -webkit-overflow-scrolling: touch !important;
-  z-index: 40 !important;
+  z-index: var(--z-dock-open) !important;
   padding: 4px 16px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
   gap: 14px !important;
   border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
@@ -1207,7 +1308,7 @@ html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-doc
   overflow-y: auto !important;
   overflow-x: hidden !important;
   -webkit-overflow-scrolling: touch !important;
-  z-index: 40 !important;
+  z-index: var(--z-dock-open) !important;
   padding: 10px 16px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
   gap: 12px !important;
   border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
@@ -1233,7 +1334,17 @@ html.ce-phone .studio-topbar {
   padding: 6px 10px !important;
   gap: 4px 6px !important;
 }
-html.ce-phone .studio-title-box { max-width: 34vw !important; }
+/* W3-P2 SC-10 (2026-09-21): this cap was 34vw (137px at 402px) — the narrowest
+   of THREE competing caps on .studio-title-box (46vw at this file's phone
+   block, 46vw again in the class twin, 34vw here), so it always won and the
+   deck title clipped mid-word ("Fear vs Belief — a…"). Measured on the merged
+   phone bundle: the title needs 180px for a normal deck name while the topbar's
+   row 1 holds ONLY Back (x 10..74) + the title box — ~310px of free run at
+   402px — and the action row below is untouched (the box cannot reflow the bar,
+   it is a nowrap ellipsis in a wrap container). 60vw = 241px at 402px fits the
+   measured 180px title with room to spare and still leaves the row-2 actions
+   their full width. Consolidating to one value; if a shorter cap is ever
+   wanted, shorten the string at the source instead of clipping mid-word. */
 /* Hit areas, not visual size: the icon buttons and the ••• / Typography summaries
    measure 38x38 and 32x32 / 34px tall. Shrinking them to 38px to save topbar height
    was the wrong trade — it broke the 44px phone floor this app enforces everywhere
@@ -1252,10 +1363,17 @@ html.ce-phone .ce-poem-typography > summary::after,
 html.ce-phone .ce-launch-board-waitlist > summary::after {
   content: '' !important;
   position: absolute !important;
-  /* -7px, not -5px: the smallest offender is the 32x32 ••• summary, and -5px only
-     reached 42x42 — still under the floor. -7px clears 44 on every one of them
-     (32+14=46, 34+14=48). */
-  inset: -7px !important;
+  /* W5 (qa/wb-ds-w5/M3-actions, 2026-09-21): this was a flat `inset: -7px`
+     (32+14=46, 34+14=48 — "clears 44 on every one of them"). But a flat
+     expansion also grows controls that ALREADY meet the floor, and the action
+     rail's rows sit 4px apart: the redo button's -7px overlay ate the bottom
+     2px of `Download for phone` (effective 42 against the 44 floor) and the
+     ••• summary's ate 3px off its neighbour. The size-aware form below is the
+     app's own pattern (native-studio.css:421-425) and is strictly better: it
+     expands only until the target reaches 44px and stops, so a 32px control
+     still lands on 44x44 while a 44px control expands by nothing and can no
+     longer reach into the row below. */
+  inset: min(0px, calc(50% - 22px)) !important;
   border-radius: 12px !important;
 }
 /* F05 P1 PARITY FIX (2026-09-15): this row was content-sized and refused to shrink. Measured by
@@ -1379,7 +1497,7 @@ html.ce-phone .studio-workspace.is-carousel-mode #ce-carousel-slide-scroll {
 
 html.ce-phone .studio-workspace.is-carousel-mode .ce-inspector-scroll {
   position: relative !important;
-  z-index: 6 !important;
+  z-index: var(--z-chrome) !important;
   height: auto !important;
   min-height: 44px !important;
   overflow: visible !important;
@@ -1398,7 +1516,7 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-too
   min-height: 56px !important;
   overflow: hidden !important;
   position: relative !important;
-  z-index: 25 !important;
+  z-index: var(--z-rail-hi) !important;
   display: flex !important;
   flex-direction: column !important;
   background: rgba(12, 13, 18, 0.96) !important;
@@ -1423,7 +1541,7 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-too
     min-height: 56px !important;
     overflow: hidden !important;
     position: relative !important;
-    z-index: 25 !important;
+    z-index: var(--z-rail-hi) !important;
     display: flex !important;
     flex-direction: column !important;
     background: rgba(12, 13, 18, 0.96) !important;
@@ -1445,7 +1563,7 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-too
 html.ce-phone .studio-workspace.is-carousel-mode .ce-tools-toggle {
   position: relative !important;
   top: auto !important;
-  z-index: 7 !important;
+  z-index: var(--z-chrome-hi) !important;
   width: 100% !important;
   height: 56px !important;
   min-height: 56px !important;
@@ -1457,11 +1575,11 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-tools-toggle {
 }
 html.ce-phone .studio-workspace.is-carousel-mode .ce-studio-inspector {
   position: relative !important;
-  z-index: 5 !important;
+  z-index: var(--z-chrome-lo) !important;
 }
 html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery {
   position: relative !important;
-  z-index: 1 !important;
+  z-index: var(--z-canvas) !important;
   overflow: hidden !important;
 }
 html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock .ce-tools-toggle::after {
@@ -1481,7 +1599,13 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-op
   position: fixed !important;
   left: 0 !important;
   right: 0 !important;
-  bottom: 0 !important;
+  /* W12-F2 (2026-09-21): same fix as ce-touch-edit.js openSheet() — the sheet
+     rests ON the shipbar band, not on the viewport bottom. `--ce-shipbar-h` is
+     published by placeShipBar() and is the single source of truth for the band
+     that carries #studio-post-btn; anchoring to it is what keeps the primary
+     ship control tappable while the tools sheet is open. Desktop never sets the
+     var, so this resolves to 0px there and is byte-identical to before. */
+  bottom: var(--ce-shipbar-h, 0px) !important;
   top: auto !important;
   width: 100vw !important;
   height: min(62vh, 560px) !important;
@@ -1489,7 +1613,7 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-op
   min-height: 180px !important;
   display: block !important;
   overflow: hidden !important;
-  z-index: 500 !important;
+  z-index: var(--z-sheet) !important;
   box-sizing: border-box !important;
   background: rgba(12, 13, 18, 0.98) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
@@ -1503,7 +1627,7 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-op
   width: 100% !important;
   height: 56px !important;
   min-height: 56px !important;
-  z-index: 3 !important;
+  z-index: var(--z-content-hi) !important;
 }
 html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-open .ce-inspector-scroll {
   position: absolute !important;
@@ -1548,7 +1672,7 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor.ce-tools-op
   flex-direction: column !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  z-index: 501 !important;
+  z-index: var(--z-sheet-hi) !important;
   background: rgba(12, 13, 18, 0.98) !important;
   padding: 0 !important;
 }
@@ -1642,7 +1766,7 @@ html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) > div {
 html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) > div:nth-child(2n) { border-right: 0; }
 html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) > div:nth-child(n+3) { border-bottom: 0; }
 html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) > div:last-child { border-right: 0; border-bottom: 0; }
-html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) strong { font-size: 23px; line-height: 1.05; }
+html.ce-phone .ce-readiness-row:not(.ce-grow-readiness) strong { font-size: var(--fs-display); line-height: 1.05; }
 html.ce-phone .ce-saved-empty-cta { min-height: 40px !important; }
 
 /* ── Saved-Bank tab strip (audit 2026-09-12) ──────────────────────────────────
@@ -1669,7 +1793,7 @@ html.ce-phone .ce-saved-subtabs {
   -webkit-overflow-scrolling: touch;
 }
 html.ce-phone .ce-saved-subtabs::-webkit-scrollbar { display: none; }
-html.ce-phone .ce-saved-tab-btn { white-space: nowrap; flex: 0 0 auto; padding: 6px 8px; font-size: 11.5px; }
+html.ce-phone .ce-saved-tab-btn { white-space: nowrap; flex: 0 0 auto; padding: 6px 8px; font-size: var(--fs-overline); }
 /* Nested insets, not sibling competition, were starving the strip: viewport 402 gave the
    workspace 354 and the header only 290, while the three tabs need 359. Trim the phone insets
    (+48) and the tab padding (-24) so all three tabs fit on one line with no scroll/clip. */
@@ -1837,7 +1961,7 @@ html.ce-phone .ce-grow-shell .ce-unmeasured-acts .ce-surface-button,
 html.ce-phone .ce-launch-workbench .ce-unmeasured-acts .ce-surface-button,
 html.ce-phone .ce-grow-shell .ce-unmeasured-unlock,
 html.ce-phone .ce-launch-workbench .ce-unmeasured-unlock {
-  font-size: 11px !important;
+  font-size: var(--fs-overline) !important;
 }
 
 html.ce-phone .ce-rail-nav-btn,
@@ -1930,6 +2054,82 @@ html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip--gallery .ce-film
   align-items: flex-start !important;
   padding-top: 12px !important;
 }
+
+/* ── W8-F5 (2026-09-21): the create control on the content shelves ───────────
+   Owner: "there's no add post now button kind of thing". Measured census of
+   every phone surface: ZERO creation controls. The only create path was
+   drawer -> Write — a navigation item, with no affordance on any surface that
+   shows content. The rail head is the row that already owns the shelf's
+   actions, so the create control goes FIRST in it, before the scroll arrows.
+
+   Form (M4-addpost measured V4 against three rejected variants): icon-only
+   44x44 circle, one glyph `+`. A labelled "+ Post" chip was measured at
+   [141,114,73,44] and overlapped the rail title by 12px at BOTH widths; a
+   labelled pill broke the shelf-switch row's no-scroll contract (486 vs 402).
+   The icon-only form measures 12px of clearance and 0 overlap at both widths.
+
+   Treatment is the studio band's neutral secondary (var(--surface) + a .26
+   border + var(--ink)) so it reads as the same family as every other secondary
+   control, and it is deliberately NOT accent-weight: the app runs exactly one
+   accent per screen and the create action is not the primary on a shelf whose
+   job is browsing. Desktop keeps the rail head's existing composition — this
+   block is phone-scoped like the rest of the file. */
+html.ce-phone .ce-rail-create-btn {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  font-size: var(--fs-title) !important;
+  line-height: 1 !important;
+  font-weight: 500 !important;
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  border: 1px solid rgba(255, 255, 255, 0.26) !important;
+  padding: 0 !important;
+}
+html.ce-phone .ce-rail-create-btn:active { background: var(--card-hover) !important; }
+html.ce-phone .ce-rail-create-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* W8-F5 (2026-09-21): the "where did it go" chip on the Write surface, revealed
+   after a successful Add to Plan. It is authored inside the same action group as
+   the button that staged the piece, so it participates in that group's existing
+   flex context instead of overriding it: on the phone that group is
+   `.ce-write-actions > div:last-child` (native-plan.css: `.ce-write-actions .ce-surface-button{flex:1}`)
+   and the chip simply claims a full line of its own, which is why it must NOT
+   restate `flex-basis: 100%` against a nowrap parent — that pushed it 312px wide
+   in a 312px parent and hung it 4px below the row's bottom edge (measured). It
+   inherits the group's flex:1 like its siblings and the wrap does the rest.
+   Neutral secondary treatment: it is a route, not a second primary. */
+html.ce-phone .ce-write-staged-nav,
+.ce-write-staged-nav {
+  flex: 1 1 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  height: auto !important;
+  margin-top: 8px !important;
+  padding: 8px 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.26) !important;
+  border-radius: 9px !important;
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  font-size: var(--fs-secondary) !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+}
+/* The action group is `display:flex` with no wrap (native-plan.css), so a
+   basis-100% child cannot take its own line — it just steals width from Copy and
+   Add to Plan and wraps THEIR labels instead (measured: "Add to Plan" broke to
+   three lines). Letting the group wrap is the actual precondition for the chip's
+   own line, and it changes nothing while the chip is hidden: the two buttons fit
+   on one line either way. */
+html.ce-phone .ce-write-actions > div { flex-wrap: wrap !important; }
+.ce-write-staged-nav[hidden] { display: none !important; }
+.ce-write-staged-nav:active { background: var(--card-hover) !important; }
 
 /* ── Phone topbar width budget (auditor M-3, 2026-09-13) ──────────────────────
    The search input is fixed 210px inside a margin-left:auto flex wrapper that
@@ -2077,10 +2277,11 @@ html.ce-phone .ce-grow-shell, html.ce-phone .ce-launch-workbench {
 /* wb-ds / W4-A2 (2026-09-19): same half-applied-theme defect as the desktop rule
    (index.html W4-A1). This shell-level rebind is UNSCOPED by theme, so on cream the
    shells kept the dark-theme pink while html.ce-phone body.bright-theme had already
-   deepened --accent-text to #b13a4c. Measured at 402x874: 6 failures on Grow and 8 on
-   Launch, all 10-11px accent LABELS at 3.08:1 (AA needs 4.5:1). The phone bright value
-   is #b13a4c (its own deeper crimson, not the desktop #8e2f3d). A/B verified: Grow 6 -> 0,
-   Launch 8 -> 1; dark theme unchanged. */
+   deepened --accent-text to #b13a4c. Measured at 402x874: 6 failures on Grow, all
+   10-11px accent LABELS at 3.08:1 (AA needs 4.5:1). The phone bright value is #b13a4c
+   (its own deeper crimson, not the desktop #8e2f3d). Verified: Grow 6 -> 0; dark theme
+   unchanged. (Launch carries no accent-label failures — its 2 accent buttons already
+   resolved correctly; its single furniture failure is .brand, a separate issue.) */
 html.ce-phone body.bright-theme .ce-grow-shell,
 html.ce-phone body.bright-theme .ce-launch-workbench,
 html.ce-phone body.bright-theme .ce-write-shell {
@@ -2186,7 +2387,7 @@ html.ce-phone .ce-write-field textarea {
      under the 18px phone body floor. The phone rule only changed min-height,
      so the write surface — the one place the owner types Hindi on a phone —
      was the app's only sub-18px body text. 18px is the floor, not a target. */
-  font-size: 18px !important;
+  font-size: var(--fs-section) !important;
 }
 html.ce-phone .ce-write-fieldbar { padding: 10px 22px 12px !important; }
 @media (max-width: 700px) {
@@ -2195,7 +2396,7 @@ html.ce-phone .ce-write-fieldbar { padding: 10px 22px 12px !important; }
     min-height: 150px !important;
     max-height: 34vh !important;
     field-sizing: content;
-    font-size: 18px !important;
+    font-size: var(--fs-section) !important;
   }
   .ce-write-fieldbar { padding: 10px 22px 12px !important; }
 }
@@ -2387,13 +2588,13 @@ html.ce-phone .ce-launch-intelligence-head > div > strong {
 html.ce-phone .ce-grow-shell .ce-grow-hero strong,
 html.ce-phone .ce-grow-shell .ce-grow-hero h2,
 html.ce-phone .ce-grow-shell .ce-grow-hero h3 {
-  font-size: 19px !important;
+  font-size: var(--fs-title) !important;
   line-height: 1.3 !important;
 }
 html.ce-phone .ce-launch-workbench h2,
 html.ce-phone .ce-launch-workbench h3,
 html.ce-phone .ce-launch-workbench .ce-launch-board-title {
-  font-size: 17px !important;
+  font-size: var(--fs-section) !important;
   line-height: 1.3 !important;
 }
 /* Primary actions: real 44px thumb floor, not 40px. */
@@ -2402,7 +2603,7 @@ html.ce-phone .pill-btn.is-primary,
 html.ce-phone .primary-action-btn,
 html.ce-phone button.is-primary {
   min-height: 44px !important;
-  font-size: 13px !important;
+  font-size: var(--fs-secondary) !important;
 }
 /* Route-level dominant CTA weight: the one primary control per view keeps
    the full 44px hit area and a heavier face so it reads as THE action. */
@@ -2410,7 +2611,7 @@ html.ce-phone #plan-schedule-all-ready-btn,
 html.ce-phone #plan-fill-week-empty,
 html.ce-phone #write-plan-btn {
   min-height: 44px !important;
-  font-weight: 750 !important;
+  font-weight: 700 !important;
 }
 
 
@@ -2514,3 +2715,1298 @@ html.ce-phone [data-ce-count] {
     letter-spacing: 0 !important;
   }
 }
+
+/* ==========================================================================
+   PHONE SCALE STEP-DOWN — W3-P1 mobilescale (2026-09-19)
+   Owner report: "the whole mobile UI reads too big — shrink the scale a
+   little, globally."
+
+   MEASURED CAUSE (merged bundle, 402x874 and 390x844, phone layer ON): the
+   phone layer never established a type scale of its own. Diffing the painted
+   text census against the same surfaces at 1440x900, 1206 of 1279 matched text
+   nodes resolved BYTE-IDENTICAL font-size + family to the desktop render —
+   desktop type on a 402px screen is what reads oversized. The same holds for
+   the rhythm: the tall blocks were the desktop workbench paddings
+   (.ce-saved-empty 60px, .ce-plan-empty-banner 28px, .ce-kanban-col-empty
+   32px, .ce-write-editor 26px, .ce-saved-workspace 64px bottom).
+
+   ONE KNOB, NOT FORTY EDITS. Two density tokens on html.ce-phone carry the
+   whole change set; every rule below reads from them, so the step-down is
+   tuned by editing two numbers:
+       --ph-scale   display type (>= 16px chrome headings)   default .9
+       --ph-pad     vertical rhythm / large paddings         default .7
+   Tokens, not a root font-size: the app's chrome type is authored in raw px
+   everywhere (no rem chain to scale), and a shrunken root would also drag the
+   artwork canvases that must stay untouched.
+
+   FLOORS HELD (verified live at 402 AND 390 after the change):
+     - 44px touch floor untouched — no rule here lowers a control's
+       min-height/min-width, and the post-change sweep measured 0 sub-44px
+       targets on all 7 surfaces;
+     - Devanagari write body stays 18px (.ce-write-field textarea is NOT here);
+     - no chrome text crosses the 14px prose floor (smallest stepped size
+       14.4px; the pre-existing 10-13.5px label/badge tiers are unchanged and
+       identical to their desktop values);
+     - artwork type (poem stage 21px, render-block faces) deliberately
+       untouched — that is the piece, not the UI;
+     - horizontal overflow 0 on every surface, both widths.
+
+   WHY NOT THE SIDE GUTTER: trimming .main-content's 24px inset was measured
+   and REJECTED — on a single-column phone every card is width-bound (4:3
+   aspect), so a smaller gutter makes the artwork LARGER (poem card 266 ->
+   276.8px). The gutter stays.
+   ========================================================================== */
+html.ce-phone {
+  --ph-scale: 0.9;
+  --ph-pad: 0.7;
+}
+
+/* ---- display type: the >= 16px chrome headings step down ~10% ---- */
+html.ce-phone .ce-saved-title,
+html.ce-phone .ce-grow-next-copy h2,
+html.ce-phone .ce-grow-shell .ce-grow-hero strong,
+html.ce-phone .ce-grow-shell .ce-grow-hero h2,
+html.ce-phone .ce-grow-shell .ce-grow-hero h3,
+html.ce-phone .ce-launch-empty-card strong,
+html.ce-phone .ce-section-heading h3,
+html.ce-phone .ce-saved-empty-title {
+  font-size: calc(20px * var(--ph-scale)) !important;
+}
+html.ce-phone .ce-saved-title { font-size: calc(22px * var(--ph-scale)) !important; }
+html.ce-phone .ce-grow-next-copy h2 { font-size: calc(20px * var(--ph-scale)) !important; }
+html.ce-phone .ce-launch-empty-card strong { font-size: calc(18px * var(--ph-scale)) !important; }
+html.ce-phone .ce-section-heading h3 { font-size: calc(18px * var(--ph-scale)) !important; }
+html.ce-phone .ce-saved-empty-title { font-size: calc(16px * var(--ph-scale)) !important; }
+html.ce-phone .ce-launch-workbench h2,
+html.ce-phone .ce-launch-workbench h3,
+html.ce-phone .ce-launch-workbench .ce-launch-board-title {
+  font-size: calc(17px * var(--ph-scale)) !important;
+}
+/* Inline-authored headings (style="font-size:Npx" in the markup) need the
+   stylesheet !important to win over the element's own inline declaration. */
+html.ce-phone .ce-write-head h2 { font-size: calc(18px * var(--ph-scale)) !important; }
+html.ce-phone .ce-plan-heading { font-size: calc(17px * var(--ph-scale)) !important; }
+html.ce-phone .ce-plan-empty strong { font-size: calc(16px * var(--ph-scale)) !important; }
+
+/* ---- vertical rhythm: the desktop workbench paddings step down ~30% ---- */
+html.ce-phone .ce-saved-workspace {
+  padding-top: calc(24px * var(--ph-pad)) !important;
+  padding-bottom: calc(64px * var(--ph-pad)) !important;
+}
+html.ce-phone .ce-saved-empty {
+  padding: calc(60px * var(--ph-pad)) 20px !important;
+  /* F-S15 follow-up (W4P-08, qa/wb-ds-w4-phone, 2026-09-21): the flat 34vh cap
+     painted a 297px card and left a measured 323px dead band under it on the
+     phone (37% of the 874px viewport) — the F-S15 leftover-column contract was
+     applied to Plan (.ce-native-empty) but never to Saved. Reserve the column
+     the card actually lives in: viewport minus the measured chrome + paddings
+     above it (55 topbar + 199 workspace head + 44 workspace pad-bottom + 1px
+     border ≈ 300px). Measured after: card 574px, band 323px -> 46px at 402x874. */
+  min-height: calc(100dvh - 300px) !important;
+}
+html.ce-phone .ce-plan-empty-banner {
+  padding: calc(28px * var(--ph-pad)) calc(24px * var(--ph-pad)) !important;
+}
+html.ce-phone .ce-kanban-col-empty {
+  padding: calc(32px * var(--ph-pad)) 14px !important;
+  min-height: 64px !important;
+}
+html.ce-phone .ce-write-editor {
+  padding: calc(26px * var(--ph-pad)) !important;
+}
+html.ce-phone .ce-write-field textarea {
+  padding: calc(22px * var(--ph-pad)) !important;
+}
+html.ce-phone .ce-write-fieldbar {
+  padding: calc(10px * var(--ph-pad)) calc(22px * var(--ph-pad)) calc(12px * var(--ph-pad)) !important;
+}
+html.ce-phone .ce-grow-shell .ce-grow-hero {
+  padding: calc(12px * var(--ph-pad)) calc(12px * var(--ph-pad)) calc(10px * var(--ph-pad)) !important;
+}
+html.ce-phone .ce-grow-shell .ce-unmeasured,
+html.ce-phone .ce-launch-workbench .ce-unmeasured {
+  padding: calc(12px * var(--ph-pad)) calc(14px * var(--ph-pad)) !important;
+}
+html.ce-phone .ce-loop-steps button {
+  min-height: 52px !important;
+  padding: calc(13px * var(--ph-pad)) 4px !important;
+}
+html.ce-phone .ce-launch-empty-card {
+  padding: calc(20px * var(--ph-pad)) !important;
+  min-height: 140px !important;
+}
+/* Content inset is deliberately NOT reduced: on a single-column phone every
+   card is width-bound (4:3 aspect), so trimming the gutter makes the artwork
+   LARGER — the opposite of the ask. Measured: 24px->16.8px grew the poem card
+   266 -> 276.8px. The gutter stays. */
+/* Shelf rhythm: the 20px desktop row-gap costs a card every ~13 rows on a
+   single-column phone masonry. */
+html.ce-phone .masonry-grid { row-gap: calc(20px * var(--ph-pad)) !important; }
+/* Trailing whitespace at the end of the scroll: the desktop 24px content
+   bottom pad and the ops shells' 54px tail are pure scroll-end dead space on
+   a phone. Scoped to .main-content so the Ideas surface (which owns its own
+   14px/54px inset) is untouched. */
+html.ce-phone #view.main-content {
+  padding-bottom: calc(24px * var(--ph-pad)) !important;
+}
+html.ce-phone .ce-plan-shell {
+  padding-bottom: calc(54px * var(--ph-pad)) !important;
+}
+html.ce-phone .ce-ops-shell {
+  padding-bottom: calc(54px * var(--ph-pad)) !important;
+}
+
+/* ── W4 phone floor sweep (2026-09-19, qa/w4-phone-deep) ────────────────────
+   Measured on the merged phone bundle at 402x874 + 390x844 (WebKit touch):
+   interactive controls painted below the 11px label floor and tap targets
+   below 44px that the desktop authored layer never re-scoped for the phone.
+   Chart micro-ink (fort day ticks, axis marks, slide artwork) is deliberately
+   NOT touched — WL1371 law. Additive block; no existing selector edited. */
+
+/* tap floors: waitlist disclosure + poem-dock disclosures sit at 34px */
+html.ce-phone .ce-launch-board-waitlist > summary,
+html.ce-phone #studio-dock summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+/* Re-parent-proof: opening the phone tools floats the inspector out of
+   .studio-workspace (measured: closest('.studio-workspace') === null with
+   tools open), so the is-carousel-mode-scoped floor at this file's
+   .ce-add-slide-btn rule stops binding and Add slide falls back to 28px.
+   Scoping to .ce-studio-inspector keeps the floor in both states. */
+html.ce-phone .studio-workspace.is-carousel-mode .ce-dock-structure .ce-add-slide-btn,
+html.ce-phone .ce-studio-inspector .ce-add-slide-btn {
+  height: 44px !important;
+  font-size: var(--fs-secondary) !important;
+}
+
+/* 11px label floors — launch workbench (controls + prose, not chart ink) */
+html.ce-phone .ce-receipt-quiet-btn,
+html.ce-phone .ce-launch-day-label,
+html.ce-phone .ce-launch-pillar-chip,
+html.ce-phone .ce-launch-day-why,
+html.ce-phone .ce-launch-day-actions button,
+html.ce-phone .ce-launch-day-actions summary,
+html.ce-phone .ce-contract-move em,
+html.ce-phone .ce-contract-move b,
+html.ce-phone .ce-receipt-eyebrow,
+html.ce-phone .ce-receipt-evidence,
+html.ce-phone .ce-launch-insights .ce-launch-insight span,
+html.ce-phone .ce-launch-board-range button,
+html.ce-phone .ce-launch-board-cadence button,
+html.ce-phone .ce-launch-wl-hint,
+html.ce-phone .ce-launch-wl-status,
+html.ce-phone .ce-launch-rail-note,
+html.ce-phone .ce-launch-board-eyebrow,
+html.ce-phone .ce-launch-move-depth,
+html.ce-phone .ce-launch-queue-note,
+html.ce-phone .ce-lq-empty,
+html.ce-phone .ce-launch-intelligence-head span,
+html.ce-phone .ce-launch-intelligence-head small,
+html.ce-phone .ce-launch-board-waitlist summary span,
+html.ce-phone .ce-evidence-chain span,
+html.ce-phone .ce-launch-contract em,
+html.ce-phone .ce-launch-contract b,
+html.ce-phone .ce-unmeasured span {
+  font-size: var(--fs-overline) !important;
+}
+
+/* 11px label floors — grow ledger prose (ticks/axis marks untouched) */
+html.ce-phone .ce-grow-shell .ce-grow-eyebrow,
+html.ce-phone .ce-grow-shell .ce-fort-cap,
+html.ce-phone .ce-grow-shell .ce-fort-legend,
+html.ce-phone .ce-grow-shell .ce-data-note,
+html.ce-phone .ce-grow-shell .ce-tide-name,
+html.ce-phone .ce-grow-shell .ce-tide-foot,
+html.ce-phone .ce-grow-shell .ce-tide-void,
+html.ce-phone .ce-grow-shell .ce-ans-empty,
+html.ce-phone .ce-grow-shell .ce-grow-readiness span,
+html.ce-phone .ce-grow-shell .ce-grow-readiness small,
+html.ce-phone .ce-grow-shell .ce-grow-proof-ledger,
+html.ce-phone .ce-grow-shell .ce-grow-rested-note,
+html.ce-phone .ce-grow-shell .ce-provenance,
+html.ce-phone .ce-grow-shell .ce-grow-more-moves > summary span,
+html.ce-phone .ce-grow-next-copy p,
+html.ce-phone .ce-grow-next-copy small,
+html.ce-phone .ce-grow-next-art small {
+  font-size: var(--fs-overline) !important;
+}
+
+/* 11px label floors — studio tools (both dock systems, both mount states) */
+html.ce-phone .studio-workspace.is-carousel-mode .ce-inspector-label,
+html.ce-phone .ce-studio-inspector .ce-inspector-label,
+html.ce-phone .ce-filmstrip-count,
+html.ce-phone .ce-poem-ratio-pill,
+html.ce-phone .ce-poem-ratio-label,
+html.ce-phone .ce-hook-card-angle,
+html.ce-phone .ce-hook-card-index,
+html.ce-phone .ce-dock-group-label,
+html.ce-phone .ce-typo-slider label,
+html.ce-phone .ce-typo-sliders label,
+html.ce-phone .ce-typo-slider output,
+html.ce-phone .ce-look-scope-row span,
+html.ce-phone .dock-label,
+html.ce-phone #ce-caption-label {
+  font-size: var(--fs-overline) !important;
+}
+
+/* 11px floors — write surface controls + drawer counters */
+html.ce-phone #write-undo-btn,
+html.ce-phone #write-redo-btn,
+html.ce-phone #write-count,
+html.ce-phone #write-save-state,
+html.ce-phone #write-design-note,
+html.ce-phone #write-design-count,
+html.ce-phone [data-ce-write-type],
+html.ce-phone .ce-write-design-group-label,
+html.ce-phone .nav-count-badge {
+  font-size: var(--fs-overline) !important;
+}
+
+/* rail dead strip: the track keeps 4px/14px padding (index.html rail CSS);
+   on the phone the bottom 14px paints as a dead band under every panel
+   cover (measured track 205 vs card 187 after the W3-P3 min-height fix). */
+html.ce-phone .ce-rail-track { padding-bottom: 2px !important; }
+
+/* ── W3-P2 SC-03 (2026-09-20): the filmstrip "+" was stranded offscreen ──────
+   The track snaps per card (x mandatory, cards center-aligned) and the add
+   button carried NO snap-align of its own, so the last snap stop rested 78px
+   short of scrollWidth (2768 of 2846 on a 402px phone) and the 56px button
+   sat fully outside the track's right edge: visibleFraction 0.000, a real tap
+   hit-tests 'offscreen'. The last card was still reachable, so this read as
+   "the + is missing", not as a broken rail.
+   Giving the button its own center stop makes it reachable (scrollLeft reaches
+   2846, visibleFraction 1.000, elementFromPoint 'self') and deliberately
+   scrolling the LAST CARD still lands it fully in view (scrollLeft 2768,
+   visibleFraction 1.000) — verified on the merged bundle at 402x874.
+   Snap is the owner's card-per-view law: it stays on. */
+.studio-workspace.is-carousel-mode .ce-filmstrip-add,
+html.ce-phone .studio-workspace.is-carousel-mode .ce-filmstrip-add {
+  scroll-snap-align: center;
+}
+
+/* ══ W12 FIX3 — TOAST STACK (F-S06 dock collision, F-S10 burst loss) ══════════
+   Additive block (W4 pattern). The toast manager in index.html now renders a
+   COLUMN of cards inside #ce-toast-stack instead of reusing one fixed node, and
+   anchors the column above the real bottom dock.
+
+   Ownership split, deliberate:
+     * ce-mobile.css owns the RESTING offset (--ce-toast-bottom = 24px + the
+       bottom safe-area) and the desktop look.
+     * index.html's ceToastLayout() owns the DOCK-AWARE offset: it measures the
+       live dock (getBoundingClientRect) and writes --ce-toast-bottom-px, so the
+       column can never cover the dock controls at any viewport. Nothing here is
+       a hardcoded pixel that breaks on another screen.
+
+   Measured before: toast y=769..820 vs studio dock y=799..844 at 390x844
+   (21px overlap, z-index 99999 over the dock). After: the column's bottom edge
+   sits 8px above the dock's measured top edge, overlap 0. */
+#ce-toast-stack {
+  position: fixed;
+  right: 24px;
+  bottom: var(--ce-toast-bottom-px, calc(24px + env(safe-area-inset-bottom, 0px)));
+  z-index: var(--z-toast-top);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  width: min(392px, calc(100vw - 40px));
+  max-height: calc(100vh - 120px);
+  pointer-events: none;
+  --ce-toast-bottom: 24px;
+}
+#ce-toast-stack > * { pointer-events: auto; }
+
+html.ce-phone #ce-toast-stack {
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  left: calc(16px + env(safe-area-inset-left, 0px));
+  width: auto;
+  max-width: min(520px, calc(100vw - 32px - env(safe-area-inset-right, 0px) - env(safe-area-inset-left, 0px)));
+  margin-left: auto;
+  --ce-toast-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+/* The dock's top edge already excludes the home indicator, so the phone stack
+   must NOT add the safe-area inset on top of --ce-toast-bottom-px (that would
+   double-count it and float the column into the middle of the screen). The
+   fallback path (no dock) still gets the inset through --ce-toast-bottom. */
+html.ce-phone #ce-toast-stack { bottom: var(--ce-toast-bottom-px, var(--ce-toast-bottom)); }
+
+/* P4 BLANK TEMPLATES (owner ask 2026-09-20) — the Style grid grew from 9 to 11
+   swatches (Photo + seven Paper presets + Editorial + Blank Light + Blank Dark).
+   The 5-column phone rule above was sized for 9: eleven chips at 5 columns wrap
+   to THREE rows, pushing the Canvas ratio rail out of the first sheet viewport —
+   the exact regression the H01-6 comment forbids. 6 columns keeps it at two rows
+   on a 402px phone (11 chips = 6 + 5) with every style still visible at rest.
+   APPEND-ONLY: this overrides the earlier rule by cascade order, it never edits
+   an existing selector, and desktop keeps its untouched 3-col grid. */
+html.ce-phone #dock-canvas-section .ce-template-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+}
+
+/* ══ W12 FIX3 (F-S07) — shelf switcher on the phone layer ════════════════════
+   Placement only (pill styling lives in native-saved.css, the file that owns
+   shelf/drawer rules). The row pins directly under the MEASURED topbar —
+   --topbar-h is published live by ceSyncTopbarHeight() — and the scroll
+   container's clearance is raised by the row's own MEASURED height
+   (--ce-shelf-row-h, written by syncShelfSwitch() in index.html, 0px when the
+   row is not shown). No hardcoded bar height anywhere: both reservations are
+   numbers the app measured, so a font/locale change cannot desync them.
+
+   Desktop untouched: this block is scoped to html.ce-phone, and
+   #ce-shelf-switch is display:none outside the library tab. */
+html.ce-phone #ce-shelf-switch {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--topbar-h, calc(108px + env(safe-area-inset-top, 0px)));
+  z-index: var(--z-shelf);                      /* above content, below topbar (120) */
+  padding: 6px 16px 8px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border-bottom: 1px solid var(--border);
+  box-sizing: border-box;
+}
+/* W4 deep-audit (wb-ds-w4-lib, 2026-09-21): the sort popover is ported to
+   <body> (position:fixed, z-index:60 from native-studio.css) but the phone
+   layer pins the topbar (120) and the shelf-switch row (118) OVER its first
+   rows. Measured on 402x874: popover top 57, topbar 0-111, shelf-switch
+   111-170; elementFromPoint at the "Cadence" row center (224,94) returned
+   INPUT.search-input and at "Most liked" (224,147) returned BUTTON.ce-shelf-pill
+   — the first two sort options were untappable, and tapping them changed
+   nothing. Raise the popover above both fixed bars while it is open. */
+html.ce-phone .ce-sort-popover,
+html.ce-phone #poem-sort-popover {
+  z-index: var(--z-popover) !important;
+}
+/* Clearance contract: on the library tab the scroll surface starts below
+   bar + row; off it, the row is absent and --ce-shelf-row-h is 0px, so this one
+   rule covers both states.
+   ⚠ SPECIFICITY: an earlier `html.ce-phone #view` rule at ~2261 also carries
+   `!important`, and a later rule with EQUAL specificity loses. This block
+   therefore repeats the `html.ce-phone #view.main-content` shape used by the
+   rule it must beat — measured failure without it: the pad stayed at
+   --topbar-h and the first poem card painted under the pill row. */
+html.ce-phone #view.main-content {
+  padding-top: calc(var(--topbar-h, calc(108px + env(safe-area-inset-top, 0px))) + var(--ce-shelf-row-h, 0px)) !important;
+}
+
+/* ON state (phone, Library tab only). ID + html.ce-phone + html.ce-shelf-on-html
+   is strictly higher specificity than native-saved.css's `#ce-shelf-switch
+   { display: none }`, so this rule wins regardless of file order — the earlier
+   class-level attempt lost the tie and the row never appeared. */
+html.ce-phone.ce-shelf-on-html #ce-shelf-switch { display: flex; }
+
+/* Three pills must fit 390px without clipping the last one. Measured at
+   390x844: Poems 120 + Carousels 133 + Posts 112 + 2 gaps (12) + 32 padding
+   = 409px, so Posts was pushed 3px past the right edge (inViewport false).
+   Tighten the pill padding/gap on the narrowest phones only; 402px keeps the
+   roomier measure. Never a horizontal scroll for three fixed labels.
+
+   F-W5-M4 (qa/wb-ds-w5/M4-addpost, 2026-09-21): the "402px keeps the roomier
+   measure" half of that reasoning was wrong — room mode's content is 409px
+   wide, so 402 did NOT fit. Measured band where the row is genuinely
+   scrollable (scrollLeft 0 -> N, not just scrollWidth > clientWidth):
+   401-408px inclusive, overflow 8px at 401 down to 1px at 408, clean from
+   409. 402 is the iPhone 16/17 Pro logical width, i.e. the owner's phone.
+   Threshold extended 400 -> 408 so the compact measure covers the whole
+   broken band; every width >= 409 is unchanged. */
+@media (max-width: 408px) {
+  html.ce-phone #ce-shelf-switch { padding-left: 12px; padding-right: 12px; }
+  html.ce-phone #ce-shelf-switch .ce-shelf-pill { padding-left: 11px; padding-right: 11px; gap: 5px; }
+  html.ce-phone #ce-shelf-switch { gap: 5px; }
+}
+
+/* ==========================================================================
+   P5 / W12 phone-chrome lane (2026-09-20) — three owner-screenshot defects.
+   ADDITIVE block: no existing selector edited, no desktop leakage (every rule
+   is html.ce-phone scoped or inside @media (max-width:700px), matching the
+   file's existing twin pattern). Measured on the MERGED phone bundle
+   (web/build_pages_merge.py) in WebKit at 390x844 + 402x874, touch emulation.
+   ========================================================================== */
+
+/* ---- A: the "shown smaller than authored" chip must never run VERTICALLY
+   down the artwork.
+   MEASURED BEFORE (tools open): the phone rule at ~2286 sets
+   writing-mode: vertical-rl, so the chip painted as a 25 x 180.5px strip in the
+   stage's right gutter. That gutter is only free for narrow canvases: at 4:3
+   the canvas is 366px wide (right edge 378) and the strip overlapped the
+   artwork by 3512 px² at 390x844 (3302 px² at 402x874); the 158.5px text also
+   overflowed the 136.5px content box, so the tail clipped. This is the owner's
+   image 4 (vertical strip, cut off, over the poem).
+   FIX: the chip gets its own band on the open sheet's own opaque surface — one
+   line, right-docked, never over artwork, never clipped — and the dock reserves
+   that band (padding-top) so nothing else can occupy it. The closed-state
+   home (bottom-right above the TOOLS row) is untouched: measured clean
+   (box 180.5x25 at y755-780, canvas bottom 624.5, clearance 130.5px). */
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-canvas-wrap[data-ce-fit-below-authored]::after {
+  writing-mode: horizontal-tb !important;
+  left: auto !important;
+  right: 16px !important;
+  top: auto !important;
+  /* W8-F4 (2026-09-21): the anchor tracks the dock's REAL top edge. The old
+     `calc(42vh - 26px)` assumed the dock sat flush on the viewport bottom; the
+     shipbar band (57px at 390x844) sits below the workspace, so the dock's top
+     moved up by that band and the fixed chip stayed 57px too low — measured at
+     390x844 tools-open: chip box [193.5, 490.1, 180.5, 25.4] vs dock top 432.5,
+     landing inside the STYLE row and covering 3 swatches (y 478.5-522.5). With
+     the band's height published as --ce-shipbar-h by placeShipBar, the chip
+     sits in the dock's reserved 26px band at every width; desktop leaves the
+     var unset (0px) and is byte-identical to before. */
+  bottom: calc(42vh + var(--ce-shipbar-h, 0px) - 26px) !important;
+  padding: 4px 10px !important;
+  max-width: calc(100vw - 32px) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  z-index: var(--z-route-lo) !important;   /* the open sheet is a z-40 stacking context; the chip sits on it */
+}
+@media (max-width: 700px) {
+  .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-canvas-wrap[data-ce-fit-below-authored]::after {
+    writing-mode: horizontal-tb !important;
+    left: auto !important;
+    right: 16px !important;
+    top: auto !important;
+    bottom: calc(42vh + var(--ce-shipbar-h, 0px) - 26px) !important;
+    padding: 4px 10px !important;
+    max-width: calc(100vw - 32px) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    z-index: var(--z-route-lo) !important;
+  }
+}
+/* The sheet's sticky CLOSE TOOLS row OWNS the chip's band: it is 70px tall
+   (26px band + the 44px touch floor) with its opaque surface, the chip sits in
+   the top 25px of it, and the label rides the bottom 44px — so nothing can ever
+   scroll into the chip's band (the row paints over it) and the row can never
+   cover the disclosure. Measured at 390x844: row 490.5-560.5, chip 490.5-515.5,
+   label 533.5-548.5 — no intersection. */
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-dock {
+  padding-top: 0 !important;
+}
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock .ce-tools-toggle {
+  top: 0 !important;
+  min-height: 70px !important;
+  align-items: flex-end !important;
+  padding-bottom: 12px !important;
+}
+@media (max-width: 700px) {
+  .studio-workspace.ce-tools-open:not(.is-carousel-mode) .studio-dock {
+    padding-top: 0 !important;
+  }
+  .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock .ce-tools-toggle {
+    top: 0 !important;
+    min-height: 70px !important;
+    align-items: flex-end !important;
+    padding-bottom: 12px !important;
+  }
+}
+
+/* ---- B: "CLOSE TOOLS" collided with the backdrop strip.
+   MEASURED BEFORE: the sticky toggle row carried background: rgba(0,0,0,0), so
+   the photo strip scrolled underneath it and showed through the label.
+   At scrollTop 312 (390x844): row y 500.5-544.5 vs first thumb y 506.5-561.2 →
+   2078.6 px² of overlap (2109.2 px² at 402x874), with "Backdrop, text, style"
+   legible through the row — the owner's image 4 exactly.
+   FIX: the row now OWNS its band — an OPAQUE sheet surface plus a hairline
+   under it. Opaque rather than 0.96 + blur, measured: a 0.96-alpha surface lets
+   the thumbnail underneath lift the band from lum 14.3 (the surface itself) to
+   23.7 peak / 19.5 mean, while #0c0d12 holds 14.3 at every scroll offset. The
+   pixel proof below is on the opaque value. Scoped to the OPEN state: the
+   closed dock is 45px tall with nothing behind the row (scrollHeight 44), so it
+   needs no change. */
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) #studio-dock .ce-tools-toggle {
+  background: #0c0d12 !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+}
+
+/* ---- C: the trio reads "greyed-out" — verdict measured, not guessed.
+   VERDICT: NOT disabled. Measured on all three: no `disabled` attribute, no
+   aria-disabled, tabIndex 0, cursor:pointer, pointer-events:auto, ancestor
+   opacity product 1.000, and every one is wired and functional (a click on
+   "Download for phone" renders the poem → "Rendering your poem at
+   1080x1350…" then "Saved …png (1080x1350)"; "Schedule" reports its honest
+   refusal "Scheduling needs the Mac app — nothing was sent to Meta."; the •••
+   opens its menu with 3 enabled items).
+   So this is verdict 2 — a CONTRAST failure on the two pills:
+     Download for phone — white 12px/700 on the gradient's light end, measured
+       3.91:1 at the label's own box (AA needs 4.5:1)  → FAIL
+     Schedule           — white 11px/800, measured 4.24:1               → FAIL
+     •••                — #f3f1ec on #17161e = 15.9:1                   → PASS
+   (the "washed-out" read is the pale rose light stop #d96a7c, whose own
+   contrast to white is only 3.33:1, sitting beside the saturated Send-to-Plan
+   primary #bf4b5d).
+   FIX: the gradient's light stop moves #d96a7c → #c44254. White on the new
+   stop is 4.94:1, and re-measured AT THE LABEL it is 5.41:1 (Download) and
+   5.66:1 (Schedule) — AA clear, gradient family and crimson identity kept.
+   The ••• was never a contrast failure; its 1.28:1 border is what read as
+   inert next to two pills, so its border/surface are lifted (still a neutral
+   secondary — it must not compete with the primary). */
+html.ce-phone .studio-topbar #studio-download-pack-btn {
+  background: linear-gradient(135deg, #c44254, #8e2f3d) !important;
+}
+html.ce-phone #ce-web-schedule-btn {
+  background: linear-gradient(135deg, #c44254, #8e2f3d) !important;
+}
+@media (max-width: 700px) {
+  .studio-workspace .studio-topbar #studio-download-pack-btn {
+    background: linear-gradient(135deg, #c44254, #8e2f3d) !important;
+  }
+  #ce-web-schedule-btn {
+    background: linear-gradient(135deg, #c44254, #8e2f3d) !important;
+  }
+}
+html.ce-phone .studio-topbar .studio-more-actions > summary {
+  border-color: rgba(255, 255, 255, 0.26) !important;
+  background: color-mix(in srgb, var(--surface) 86%, #ffffff 14%) !important;
+  color: var(--ink) !important;
+}
+
+/* ══ W12 FIX3 (F-S12) — honest busy label for slow surface switches ═══════════
+   F-S12: a tab switch blocks the main thread up to 3023ms with no feedback, so
+   the natural response is to tap again and queue more of the same work. This
+   label is painted BEFORE a pass that was measured slow last time (see
+   ceNavRunWithFeedback in index.html), so it is on screen for the whole freeze
+   instead of appearing after it. It never shows for a fast pass.
+
+   Placement: just under the measured topbar, centred, so it cannot cover the
+   shelf switcher (which owns the row below the bar) and cannot be mistaken for
+   a toast (toasts are bottom-anchored above the dock).
+   Deliberately NOT a spinner: text that names the surface and counts the
+   seconds. */
+#ce-nav-busy {
+  position: fixed;
+  top: calc(var(--topbar-h, calc(108px + env(safe-area-inset-top, 0px))) + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  z-index: var(--z-hud);                      /* above the topbar (120): it describes the bar's work */
+  display: none;
+  max-width: calc(100vw - 32px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
+  color: var(--ink);
+  font-size: var(--fs-secondary);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;              /* it must never eat a tap */
+  opacity: 0;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+#ce-nav-busy.ce-nav-busy-on {
+  display: block;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── ADA / cloud/ce-ui: Ideas surface phone treatment ─────────────────────
+   The parity renderer (index.html :3065+) compacts desktop rows, but the
+   phone layer had zero rules scoped to the screen root `.ce-ideas-parity`
+   (audit D-table): filter controls stayed desktop-dense and card hit areas
+   sat under the 44px tap law. The rules below are additive to the parity
+   block in index.html — selectors repeat there, phone-only here. */
+html.ce-phone .ce-ideas-parity { padding-inline: 4px; }
+html.ce-phone .ce-ideas-parity .ce-ideas-card { min-height: 44px; }
+html.ce-phone .ce-ideas-parity .ce-ideas-action,
+html.ce-phone .ce-ideas-parity .ce-ideas-card-actions .ce-ideas-action { min-height: 44px; }
+html.ce-phone .ce-ideas-parity .ce-ideas-controls { display: flex; flex-wrap: wrap; gap: 8px; }
+html.ce-phone .ce-ideas-parity .ce-ideas-controls > * { min-height: 44px; }
+
+/* ── W4P-02 (qa/wb-ds-w4-phone, 2026-09-21): the shelf row painted UNDER the
+   open studio's topbar. The row is a fixed layer at z 118; the studio is a
+   fixed layer at z 200 whose .studio-topbar carries z 50 and paints its own
+   background — so every pill was covered by the studio's action band. Measured
+   at 402x874 with the carousel studio open: pill centres [76,83] / [208,83] /
+   [337,83] all resolved to #studio-download-pack-btn / #ce-web-schedule-btn /
+   .studio-primary-actions, never to the pill. The pills contributed ZERO
+   painted pixels (pixel diff of the band before/after hiding them = 0.0), yet
+   stayed focusable: tabIndex 0, no [inert] ancestor, visibility visible — so a
+   keyboard user could land on three controls they cannot see.
+   Fix: the row is Library chrome; while the studio (a full-screen editor) is
+   open it is not part of the screen, so take it out of both paint and the tab
+   order. visibility (not display) keeps the row's measured height intact for
+   --ce-shelf-row-h, so no layout shift when the studio closes. */
+html.ce-phone:has(#studio.open) #ce-shelf-switch {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ── W4P-12 (qa/wb-ds-w4-phone, 2026-09-21): same class of ghost, second host.
+   The settings modal is a full-screen layer (fixed, z 2100, 402x874) that fully
+   contains the shelf row's box (nav 0,55,402,59; pills 16,61,120,44). The modal
+   does inert its siblings correctly (BUTTON#sidebar-edge-trigger, ASIDE#sidebar,
+   HEADER, DIV#view, DIV#studio all carry [inert]) — but the shelf nav is NOT one
+   of them: measured inertHost=null, ariaHost=null, tabIndex 0, and pill.focus()
+   succeeded while the modal was open (activeElement became the pill). So a
+   keyboard user could focus and activate three controls painted behind a
+   full-screen modal. Same remedy as the studio case above: while the modal is
+   open the row is not part of the screen. visibility:hidden (not display:none)
+   keeps --ce-shelf-row-h intact so there is no layout shift on close. */
+html.ce-phone:has(#ce-settings-modal:not([hidden])) #ce-shelf-switch {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================================================
+   W5 studio-panel lane (2026-09-21) — the panel BELOW the card.
+   Owner: "the worst part — you can see the panel below it". Two defects in the
+   phone studio's card/panel composition, both measured on the MERGED phone
+   bundle (web/build_pages_merge.py) in WebKit at 402x874 + 390x844, touch
+   emulation, pin in qa/wb-ds-w5 (index.html 77d6466a, ce-mobile 903ec249).
+   ADDITIVE: no existing selector edited; every rule is html.ce-phone scoped.
+   ========================================================================== */
+
+/* ---- 1: the post-path caption field overflowed the sheet's own viewport ----
+   MEASURED BEFORE (402x874, post open, tools open): the caption textarea is a
+   flat 260px (native-studio.css:3203 `.ce-dock-caption #ce-full-caption-editor`
+   height:260px, min 240) inside a scroller that is only 270px tall
+   (#carousel-dock-controls clientH 270) — so the field's bottom 45.9px sat
+   OUTSIDE the scroller box and was untypeable (elementFromPoint at the field's
+   own bottom edge = OFFSCREEN; visiblePct 82.3). At 390x844 the cut is 58.5px
+   (visiblePct 77.5). The poem path already had a compact phone rule
+   (ce-mobile.css:1367); the post path never got the twin, so the SAME field
+   shipped two different heights depending on which studio you opened.
+   FIX: give the post path the same compact phone field. The value stays fully
+   editable (the sheet still scrolls; scrollH 1534 -> 1424), and the caption
+   group now ends at 821.9 inside the 860 scroller bottom — 0px cut, 100%
+   visible, focus lands on the textarea (verified both widths). */
+html.ce-phone .studio-workspace.ce-tools-open:not(.is-carousel-mode) .ce-dock-caption #ce-full-caption-editor {
+  height: 150px !important;
+  min-height: 150px !important;
+  max-height: 150px !important;
+}
+
+/* ---- 2: the poem card was pinned to the stage's LEFT edge, leaving a dead
+   gutter on the right — the owner's "card at top-left with a dead right half".
+   MEASURED BEFORE (402x874, poem, tools open): stage 402x303.9, card 224x280 at
+   x=12 -> leftGutter 12, rightGutter 166 (110px of it pure dead stage; the rest
+   is the wrap's own slack). The stage is a flex COLUMN
+   (ce-mobile.css:1777/2010 set align-items:flex-start + justify-content:
+   flex-start), so the card's horizontal position is governed by ALIGN-ITEMS —
+   justify-content cannot move it. The card is height-bound (zoom 0.3862 for a
+   1:1 at 303.9px of stage), so it can never fill the width; the free run must
+   be SPLIT, not dumped on one side.
+   FIX: auto side margins on the wrap absorb the free space (the wrap is the
+   flex item the stage aligns). Measured after: leftGutter = rightGutter = 89 at
+   402 (63.5 at 390), no overflow (docOvfX 0, stageOvf 0), and the CLOSED state
+   is untouched — when the card is width-bound (378px at 402) the margins are 0
+   and the geometry is byte-identical (card 12,215,378x472.5 before and after).
+   NOTE this centres the card; it does NOT make it bigger. Growing it needs the
+   stage to be taller (measured: stage 304->480px grows the card 224->365px), and
+   that is a structural re-layout — spec'd in DESIGN_SPEC.md, not applied here. */
+html.ce-phone .studio-workspace:not(.is-carousel-mode) #studio-canvas {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* ==========================================================================
+   W5 action-rail lane (qa/wb-ds-w5/M3-actions, 2026-09-21) — the studio
+   ACTION ROW. Owner: "buttons look awkwardly big — Download for phone /
+   Schedule / ••• / Send to Plan — like desktop sublimated into phone; other
+   themes show small buttons".
+
+   MEASURED CAUSE (merged phone bundle, WebKit, 402x874 + 390x844, phone layer
+   ON, zero console errors): the band was 4 rows / 203px = 23.2% of an 874px
+   viewport — 4.5x the dock's 45px on a screen whose whole job is the artwork.
+   Three of the four rows were the same defect: the desktop topbar was allowed
+   to wrap and nothing re-composed it for the thumb.
+     row 1  y=6    Back(64) · title(110)
+     row 2  y=54   Download for phone(155) · Schedule(83) · •••(44)  [88px trailing slack]
+     row 3  y=104  Post now(85) ··171px dead gap·· Send to Plan(126)
+     row 4  y=152  undo/redo/reset — ALL THREE disabled (opacity .45) at open
+   The owner's "small buttons" read is not about pixel height (every control
+   already meets the app's 44px floor): it is that THREE controls painted at
+   accent weight (Download and Schedule both carry the crimson gradient family
+   from the contrast fix above; Send to Plan carries flat --accent) so nothing
+   read as primary. Census across all 8 other surfaces: every one runs at most
+   ONE accent control and keeps the rest neutral at 11-13px. This band was the
+   only place in the app with three.
+
+   FIX — composition only, CSS-only, no DOM change, no control removed:
+   `display: contents` takes the wrapper out of layout so its five children
+   become real topbar flex items (the wrapper's own `flex: 1 1 100%` is what
+   forced the wrap), then `order` composes two rows. The 6px column gap comes
+   from the topbar's own `gap: 4px 6px`. Verified: topbar 203 -> 153px
+   (23.2% -> 17.5%), artwork 626 -> 676px, every hit box still >= 44px, both
+   widths, zero overflow, zero errors. The three JS callers that touch
+   `.studio-primary-actions` (index.html:3031/3042, ce-touch-edit.js:1013) use
+   it only as an insertBefore TARGET and read no geometry, so reparenting the
+   pack/schedule buttons is unaffected — re-verified after the change.
+
+   DELIBERATELY NOT DONE — collapsing the all-disabled history row to reach
+   105px. Measured: it shifts the artwork 48px on the FIRST real design change
+   (clicking a look card commits undo -> the cluster returns -> the canvas
+   moves under the owner's eyes exactly while he is judging that change).
+   Trading a fixed 48px of chrome for a 48px jump mid-edit is a bad deal;
+   the row stays. Reclaiming it needs the band to reserve the height, which is
+   structural — spec'd in DESIGN_SPEC.md, not applied here.
+
+   The gradient->neutral demotion of the two secondary pills is the ONE
+   judgment call in this block (it changes accent identity, not just layout).
+   It is isolated to the two selectors below so it can be reverted alone. */
+html.ce-phone .studio-topbar > .studio-primary-actions {
+  display: contents !important;
+}
+/* row 1: identity + the single ship action */
+html.ce-phone .studio-topbar > .studio-primary-actions > .studio-more-actions {
+  order: 38 !important;
+  margin-left: auto !important;      /* was on #studio-post-btn: as a wrapped row it became a 171px hole */
+}
+html.ce-phone .studio-topbar > .studio-primary-actions > #studio-post-btn {
+  order: 39 !important;
+  margin-left: 0 !important;
+}
+/* row 2: the authoring rail */
+html.ce-phone .studio-topbar > .studio-primary-actions > #studio-download-pack-btn { order: 41 !important; }
+html.ce-phone .studio-topbar > .studio-primary-actions > #ce-web-schedule-btn { order: 42 !important; }
+html.ce-phone .studio-topbar > .studio-primary-actions > #studio-postnow { order: 43 !important; }
+/* history follows the rail, left-aligned like every other row */
+html.ce-phone .studio-topbar .studio-history-controls { order: 60 !important; margin-left: 0 !important; }
+
+/* hierarchy: ONE accent per screen. The two secondary pills take the same
+   neutral treatment the ••• summary already ships (border lifted to .26 for
+   the inert read that fix addressed), so Send to Plan is unambiguously THE
+   action. Every control keeps its 44px target and its job. */
+html.ce-phone .studio-topbar > .studio-primary-actions > #studio-download-pack-btn,
+html.ce-phone .studio-topbar > .studio-primary-actions > #ce-web-schedule-btn {
+  background: var(--surface) !important;
+  border: 1px solid rgba(255, 255, 255, 0.26) !important;
+  color: var(--ink) !important;
+  font-weight: 600 !important;
+  /* one type step for the secondary tier: Schedule is injected at 11px by
+     ce-touch-edit.js and Download ships 12px, so the rail read as two sets.
+     12/600 secondary vs 13/700 primary = exactly two sizes, one hierarchy step. */
+  font-size: var(--fs-secondary) !important;
+  padding: 8px 12px !important;
+}
+html.ce-phone .studio-topbar > .studio-primary-actions > #studio-postnow > summary {
+  padding: 8px 12px !important;
+  min-height: 44px !important;
+}
+/* ---- the deck title: express the CONSTRAINT, not a stale vw number ----------
+   W3-P2 SC-10 (this file, 2026-09-21) raised the deck-title cap to 60vw so a
+   normal title ("Fear vs Belief — audit deck", measured 180px) stops clipping
+   mid-word — on the premise that "the topbar's row 1 holds ONLY Back + the
+   title box, ~310px of free run at 402px". The rail above puts ••• and Send to
+   Plan on row 1, so that premise no longer holds: the measured run is
+   79.7..216.3 = 136.6px, i.e. 130.6px for the title after the 6px gap.
+   A hard-coded vw cap goes stale against both changes — this pair of elements
+   had accumulated FIVE competing caps (46/46/60/40/34vw) for exactly that
+   reason, and this lane's own 28vw was the sixth. Expressed directly instead:
+   the title takes the slack between Back and ••• and ellipsizes past it.
+   Measured 402x874: title 112.5 -> 130.6px (18px of dead slack reclaimed),
+   rows and every sibling x unchanged, maxRowRight 392, docOvX 0. 390x844:
+   109.2 -> 118.6px. The long title still ellipsizes at both widths — that is
+   the rail's honest cost, recorded in DESIGN_SPEC.md §6.5. */
+html.ce-phone .studio-topbar > .studio-title-box {
+  max-width: none !important;
+  /* ROOT FIX (fix/mobile-overhaul, 2026-09-21): the basis was 0.
+     Measured before: 402px topbar, 382px content, row 1 needs
+       back 66 + title 10 + more 44 + download 144 + schedule 81 + 4x6 gap = 382
+     so the row "fit" exactly and flex-wrap never fired; the title-box, being the
+     only flexible item, absorbed the whole deficit and rendered 25px pristine /
+     9.9px after the type scale (the brief's "truncated to ~5 chars"). With a real
+     basis the row can no longer fit and wraps: measured after, title 9.9 -> 259.7px
+     and the title no longer clips (scrollWidth <= clientWidth).
+     A basis is the correct lever; the five competing max-width caps this element
+     accumulated (46/46/60/40/34vw) were all attempts to fix it one level too low,
+     so three of them are deleted in the same edit — see the caps removed below. */
+  flex: 1 1 160px !important;
+  min-width: 0 !important;
+}
+/* the ship pair keeps its intrinsic size so the title cannot squeeze it */
+html.ce-phone .studio-topbar > .studio-primary-actions > #studio-post-btn,
+html.ce-phone .studio-topbar > .studio-primary-actions > .studio-more-actions {
+  flex: 0 0 auto !important;
+}
+
+/* ---- the "Post now" caption menu opened 145px OFF-SCREEN LEFT --------------
+   MEASURED (402x874, menu open): menu x=-145.2, w=240, right=94.8 — only the
+   right 95px of a 240px menu was on screen, so the caption rows and the
+   "No caption" / "Edit caption…" entries were unreachable by finger; the menu
+   read as an empty dark slab with two emoji floating in it.
+   ROOT CAUSE: native-studio.css:362 is `position: absolute; right: 0` anchored
+   to .studio-postnow, which sits at x=10 on the phone.
+   This is the exact twin of a defect already fixed one control to the left:
+   .studio-more-menu carried the identical `right: 0` bug and was clamped by
+   the WL2721/wl4887 block above — the fix was never mirrored to
+   .studio-postnow-menu, which was added later.
+   FORM: `position: fixed; left/right: 8px; top: auto`. `fixed` is the
+   load-bearing part, not the insets: the nearest POSITIONED ancestor is
+   `details#studio-postnow` itself (native-studio.css:351, position:relative),
+   so an `absolute` clamp resolves `left/right` against that 88.8px pill and
+   squeezes the menu into a **72.8px column** (measured x=255.3 w=72.8 h=454.5)
+   — which is also why a row hit-test reads 4/7: the sampled centres fall
+   outside the narrow strip. `fixed` moves the containing block to the topbar
+   (its backdrop-filter) / viewport, so 8px insets give the full 386px.
+   `top: auto` then resolves to the STATIC position — directly below the
+   trigger — so the menu stays anchored to Post now at any topbar height.
+   Corrections to earlier notes in this block, per the corrected matrix
+   (probe29/30/31 -> out/clamp-forms-corrected.json, out/f3-drift.json):
+   `top: calc(100% + 8px)` is NOT merely "pushed below the viewport once the
+   filter is gone" — it measures y=882 in filter-absent mode (387-391px below
+   the 874px viewport, the range tracking the menu's own height across runs)
+   because 100% then means the full viewport. And a magic `top: 160px` is not
+   equivalent: it passes today only because this lane's rail shrank the topbar
+   to 153px, while on the 203px pre-rail topbar it lands 43px INSIDE the band,
+   detached from its trigger. `fixed + top:auto` is the only form that is
+   viewport-clamped, trigger-anchored AND invariant across both modes.
+   Verified: 7/7 rows reachable, offLeft/offRight/offBottom all 0, at 402 + 390. */
+html.ce-phone .studio-postnow-menu {
+  position: fixed !important;
+  left: 8px !important;
+  right: 8px !important;
+  top: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  width: auto !important;
+  max-height: 52vh !important;
+  overflow-y: auto !important;
+}
+
+/* ==========================================================================
+   W5 studio-panel lane (2026-09-21) — the STYLE row's mini previews.
+   Owner's screenshot: the swatch tiles read as fragments, not designs.
+   MEASURED (merged phone bundle, WebKit, 402x874 + 390x844, phone layer ON):
+   the mini is authored 451x338 and carries a CONSTANT `transform: scale(.195)`
+   (native-studio.css:778-787) — a number authored for the DESKTOP tile, whose
+   frame is 87x63.25. The phone tile is 56.7x44 (frame 48.7x36), so the same
+   constant paints an 87.9x65.9 mini inside a 48.7x36 window: 44.7% of the
+   width and 45.4% of the height (≈70% of the design AREA) is clipped away —
+   every tile showed only its top-left corner fragment, text cut mid-word.
+   FIX (fluid, not a second constant): make the frame a size container and let
+   the mini's scale DERIVE from it —
+     scale(min(calc(100cqw / 451px), calc(100cqh / 338px)))
+   — so the mini fits whatever tile the layout gives it, at any width, with no
+   second magic number to drift. Type-math + container queries verified live in
+   this WebKit before writing (CSS.supports: transform type-math true,
+   container-type:size true; computed matrix on a 49x36 frame = 0.106509).
+   Verified: clipW 44.7% -> 0, clipH 45.4% -> 0 at 402 AND 390; desktop control
+   at 1440 is byte-identical (0.195 untouched — this block is html.ce-phone
+   scoped only). */
+html.ce-phone #dock-canvas-section .ce-template-preview-frame {
+  container-type: size !important;
+}
+html.ce-phone #dock-canvas-section .ce-template-preview-scale {
+  transform: scale(min(calc(100cqw / 451px), calc(100cqh / 338px))) !important;
+}
+
+/* ==========================================================================
+   W6 planlaunch lane (2026-09-21) — phone layout: two grid-item blowouts.
+   Same class both times: a grid/flex item's automatic min-width (min-content)
+   exceeds the shell's content box, so the item — and the surface around it —
+   lays out wider than the shell and the page gains horizontal scroll instead
+   of shrinking its designed inner columns.
+
+   1. .ce-launch-workbench (display:grid, native-plan.css:546). The rail
+      section's min-content measures 367px (title/day/state/fix all nowrap),
+      so at 402 the track computed 366.75px inside a 354px content box: every
+      section measured 367px, the row right edge landed at 405 (viewport 402;
+      405 vs 390 on a 390px phone) and the rail's date/state/Fix column sat in
+      the clipped band while the page scrolled sideways. min-width:0 restores
+      the designed shrink (title and state carry their own ellipsis):
+      track 326px, kidMaxRight 364, the strip's own overflow-x scroll
+      unchanged, desktop unchanged (1440 measured identical).
+   2. .ce-grow-shell .ce-ans-chart. The phone control floor in this file sets
+      min-width:44px on every button; the answers chart is 12 .ce-ans-col
+      buttons, so the chart measured 594px inside its 326px box and the WHOLE
+      Grow surface scrolled ~230px sideways (view scrollWidth 632 vs 402).
+      The columns keep their 44px tap width — the chart takes the app's own
+      strip pattern and scrolls within itself, so the page never moves.
+   ========================================================================== */
+@media (max-width: 700px) {
+  .ce-launch-workbench > * { min-width: 0; }
+  .ce-grow-shell .ce-ans-chart { overflow-x: auto; overflow-y: hidden; }
+}
+
+/* ==========================================================================
+   M5-polish (qa/wb-ds-w5/M5-polish, 2026-09-21) — global phone polish sweep.
+   Every rule below was measured live in WebKit at 402x874 AND 390x844 on this
+   tree before landing; each carries its own before/after numbers. Additive
+   block: no existing selector is edited or removed here.
+   ========================================================================== */
+
+/* 1. Launch intelligence head — the week's cadence label was starved to
+      "THIS WEEK 7-…". MEASURED: strong box 31x16 in a 113px budget, over=105px
+      at 402 (26px/over=110 at 390). Root cause: the wrapper is `flex:0 1 auto`
+      so it may shrink below its content, while the sibling <small> takes
+      `flex:1 1 auto` and wins the space. The label must never truncate; the
+      caption may. AFTER: strong over=0 (136px at 402, 131px at 390); the
+      caption ellipsizes instead (small over 166->271 at 402) — its own
+      text-overflow:ellipsis was already authored at index.html:2519. */
+html.ce-phone .ce-launch-intelligence-head > div { flex: 0 0 auto !important; }
+html.ce-phone .ce-launch-intelligence-head small { flex: 1 1 0% !important; }
+
+/* 2. Launch morning contract — "One move" (the single next action) was pushed
+      right by `margin-left:auto` (index.html:2199): measured mvX 122 vs
+      siblings at 53 at 402 (mvX 110 at 390), reading as a trailing caption.
+      AFTER: mvX 53 = flush with "Yesterday"/"Today" at both widths; the
+      contract's height is unchanged (71px) and the auto-wrap is untouched. */
+html.ce-phone .ce-launch-contract .ce-contract-move { margin-left: 0 !important; }
+
+/* 3. Grow fortnight ledger — day labels were sheared mid-glyph: 12 of 14
+      cells at 17.94px (17.08px at 390) against 20.2-22.2px of text, so every
+      two-digit date lost its last character ("9/1(", "9/1'"). The honest
+      phone form is decimation, not a smaller font: hide odd ticks, keep the
+      last (today, .is-today) always visible, and let visible ticks paint
+      fully. AFTER: 7 labels, 0 clipped, today present at both widths; the
+      day slot is aria-hidden already (index.html:20378) so no SR regression. */
+html.ce-phone .ce-grow-shell .ce-fort-days span:nth-child(odd):not(.is-today) { visibility: hidden !important; }
+html.ce-phone .ce-grow-shell .ce-fort-days span { overflow: visible !important; }
+
+/* 4. Ideas section titles — 11 of 181 truncated mid-word at 402 (13 at 390,
+      worst over=51px) because nowrap + uppercase + .07em tracking could never
+      fit a 44px-min grid cell. Give the title two lines instead of a broken
+      word; keep the clamp as the safety net. MEASURED AFTER: 0 of 181
+      clipped at both widths; every section head stays exactly 44px
+      (maxHeadH 44 across 14 sampled heads) — the rhythm does not move. */
+html.ce-phone .ce-ideas-parity .ce-ideas-section-title {
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+}
+
+/* 5. Saved Bank sub-tabs — the density dial took the one navigation tier
+      below the 12px label floor (11.5px vs desktop's 12px, native-saved.css:
+      396-412). These are navigation choices, not captions: hold 12px.
+      AFTER: 12px, over=0 on all three at both widths; boxes grow <=4px
+      (82->84 / 81->83 / 136->140), no wrap, no overflow. */
+html.ce-phone .ce-saved-tab-btn { font-size: var(--fs-secondary) !important; }
+
+/* ==========================================================================
+   W8-F4 (2026-09-21) — THE PANEL UNDER THE CARD, phone post path.
+   The post rail was three fixed-width desktop columns (nav 365 + hooks 365 +
+   quick-actions 365 = 1135px of content) inside a 64→112px phone strip with
+   overflow-x:auto, so the owner saw ONE column per screen with no cue that two
+   more existed, the hooks column carried its own nested x-scroller (track
+   sw 864 inside cw 199), and the strip was 74px of chrome the artwork paid for
+   (stage bottom 687 vs dock top 799 = 112px band where W6-16 measured a void).
+   Measured before (390x844, post open, merged bundle): rail sw 1135 / cw 389;
+   rail children at x=12, x=385, x=758 — 2 of 3 groups entirely off-screen.
+   AFTER: the three groups become ONE snap-scrolled continuum with the app's own
+   rail language (the same right-edge fade + x-proximity snap every shelf rail
+   uses, ce-mobile.css:729-741), and the strip height drops 112 -> 96 so the
+   artwork gains 16px. Every control keeps its box; nothing is hidden.
+   Scope: html.ce-phone + :not(.is-carousel-mode) — the carousel path and the
+   desktop rail are untouched. */
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail {
+  max-height: 96px !important;
+  gap: 6px !important;
+  padding: 6px 0 !important;
+  scroll-snap-type: x proximity !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-padding-inline: 12px 16px !important;
+  /* scroll affordance — same fade the shelf rails use (ce-mobile.css:729-741),
+     so "there is more to the right" is visible instead of inferred. */
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 32px), rgba(0,0,0,0.35) 100%) !important;
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 32px), rgba(0,0,0,0.35) 100%) !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail > .ce-dock-group {
+  scroll-snap-align: start !important;
+  padding-left: 12px !important;
+  padding-right: 10px !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail > .ce-dock-group:first-child {
+  padding-left: 12px !important;
+}
+/* The hooks column's own nested x-scroller is deleted: the track lays its
+   cards out in the rail's single scroll continuum (flex:0 0 auto, no inner
+   scrollbar), so one swipe walks nav -> hooks -> quick actions without a
+   scroller-inside-a-scroller trap. */
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks .ce-hook-sweep-track {
+  overflow: visible !important;
+  scroll-snap-type: none !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks .ce-hook-card {
+  scroll-snap-align: start !important;
+}
+/* W8-F4 (2026-09-21) — THE CLIP THAT SURVIVED THE FIRST PASS.
+   Unclipping the track was not enough: the hooks GROUP still carried
+   `overflow-x: hidden` from native-studio.css:4816 (`.is-post-mode .ce-dock-group`),
+   so the group stayed 389px wide with scrollWidth 1042 and clipped cards 2-4 at
+   its own right edge. Measured on the merged bundle at 390x844, post open:
+     BEFORE  rail sw 1179/cw 389, group sw 1042/cw 389 ox=hidden,
+             best per-card visibility [1.00, 0.00, 0.00, 0.00]  -> 3 of 4 hook
+             angles unreachable at EVERY rail scroll position
+     AFTER   rail sw 1842/cw 389, group sw 1052 ox=visible, no sibling overlap,
+             best per-card visibility [1.00, 1.00, 1.00, 1.00]
+   The group now grows to its content (`width:auto` + `flex:0 0 auto`) so
+   nav -> hooks -> quick-actions lay out in SEQUENCE in the rail's own
+   continuum: the group box ends where the cards end, so the next group starts
+   after them instead of overlapping them (variant A — unclipping alone — kept
+   the 389px box and let the quick-actions group sit on top of cards 2-4).
+   Every rule is html.ce-phone + :not(.is-carousel-mode): the desktop 320px
+   vertical rail and the carousel path keep their authored shapes. */
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail > .ce-dock-group {
+  overflow: visible !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks {
+  overflow: visible !important;
+  width: auto !important;
+  max-width: none !important;
+  flex: 0 0 auto !important;
+}
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks .ce-hook-sweep,
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks .ce-hook-options-sweep,
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks .ce-hook-options-list {
+  width: auto !important;
+  max-width: none !important;
+  flex: 0 0 auto !important;
+  overflow: visible !important;
+}
+/* One row of cards at the strip height: 96 - 12 (rail pad) - 2 (track pad) =
+   the card gets the honest remainder; it was height:100% of an unpadded box. */
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-left-rail-hooks .ce-hook-card {
+  height: auto !important;
+  min-height: 74px !important;
+}
+/* The quick-actions group rides the same continuum instead of sitting at
+   x=758 (2 screens away). */
+html.ce-phone .studio-workspace:not(.is-carousel-mode) .studio-left-rail .ce-dock-quick-actions {
+  flex: 0 0 auto !important;
+  scroll-snap-align: start !important;
+}
+/* The carousel inspector keeps a 100px scrollHeight inside a 56px box while
+   collapsed (children display:none, so the row paints EMPTY) — measured
+   .ce-inspector-scroll box [0,845,374,44] clipped by its 56px aside. The
+   collapsed inspector is a TOOLS toggle and nothing else; hide the orphan
+   scroll box so it cannot paint a dead band or a 45px clip. */
+html.ce-phone .studio-workspace.is-carousel-mode .ce-carousel-editor:not(.ce-tools-open) .ce-studio-inspector > .ce-inspector-scroll {
+  display: none !important;
+}
+
+/* ==========================================================================
+   P2 STUDIO PANEL (2026-09-21) — THE THUMB-ZONE SHIP BAR + topbar demotion.
+
+   OWNER (2026-09-20): "the ordering of the entire panel and the entire
+   structuring is pretty bad ... it has kept the primary buttons to the lowest
+   part and kept design and all those on top like it should be VICE VERSA or
+   some better kind of redesigning of the panel to make it look and work
+   better."
+
+   MEASURED BEFORE (merged phone bundle, WebKit, phone layer ON, poem open,
+   390x844 — qa/w12-p2-studio-panel/OUT/probe.json):
+     topbar 153px = 18.1% of the viewport, THREE wrapped rows
+       row 1 y=6    Back · title · ••• · Send to Plan      <- the ship primary
+       row 2 y=54   Download for phone · Schedule · Post now
+       row 3 y=102  undo · redo · reset (all disabled at open)
+     Send to Plan   reach 3.3% down the viewport — the LEAST reachable control
+     Tools (design) reach 97.4% — the MOST reachable
+   So the surface asked the owner to reach furthest for the one thing the whole
+   screen exists to do, and put the design door under his thumb. That is the
+   inversion, stated as numbers.
+
+   THE HIERARCHY NOW (three tiers, one job each):
+     TIER 1 — shipbar, bottom-anchored in the thumb zone (y 787..844 at 390x844,
+       one row, 57px):
+       [Tools — Backdrop, text, style] · [Post now ▾] · [Send to Plan (n)]
+       The ship pair is the near end, which is where the thumb already is; the
+       design door leads the band because it is the most-used authoring control,
+       but it takes the slack and never carries accent weight.
+     TIER 2 — topbar, identity + doorways/exports:
+       Back · title · [••• design/asset menu] · [Download for phone] ·
+       [Schedule] · [status]
+       The ••• menu keeps the full secondary set (Save to Bank / Place in next
+       open slot / Export PNG / Copy). "Place in next open slot" stays HERE —
+       E01's ship grammar is untouched: exactly one primary ship control.
+     TIER 3 — history (undo/redo/reset), topbar far end, all DISABLED at open;
+       they matter only after a design change, so they belong at the least
+       reachable end. An earlier draft put them in the shipbar; the two-row band
+       it produced (105px) then collided with the PWA tip docked at bottom:72px,
+       and the band is one row (57px) as measured.
+
+   WHY A REAL ROW, NOT A FIXED OVERLAY: the shipbar is an in-flow flex child of
+   .studio-editor, so the stage's fit stays honest. An overlay would let the
+   stage keep believing it owns space it does not have — the exact defect F-010
+   recorded for the tools sheet. A fixed child was not available either:
+   .studio-topbar carries backdrop-filter, which makes it the containing block
+   for fixed descendants (measured: a fixed probe inside the topbar resolved to
+   bottom=152 against an 844px viewport, not 844).
+
+   ONE BOTTOM BAND, NOT TWO: the dock's Tools row moves into the shipbar, so
+   the closed surface loses the dock's separate 45px row and gains a single
+   designed band. The dock keeps every section it owns; only its toggle moves.
+
+   SCOPE: every rule is html.ce-phone. The desktop topbar is untouched — the
+   desktop `order` rules in native-studio.css still read
+   Back · title · [••• | Download | Schedule] · [Post now | Send to Plan] ·
+   history, and the desktop markup order is byte-identical to before.
+   ========================================================================== */
+
+/* The bar itself: a real band at the bottom of the studio column. */
+html.ce-phone .studio-shipbar {
+  /* RETRACTED (2026-09-21, manager): an earlier revision added `position: relative`
+     here with a comment claiming z-index on a static box is a no-op, so positioning
+     the band was what kept `#studio-post-btn` ("Send to Plan") on top. BOTH HALVES
+     WERE WRONG and the comment taught a false model, so it is removed rather than
+     left to mislead:
+       1. CSS DOES honor z-index on a `position: static` box when that box is a FLEX
+          or GRID ITEM (Flexbox §5.4 / Grid §6.1). This band is a flex item of the
+          studio column, so its `z-index: 30` below was live all along. A runtime
+          sweep measured 0 of the 10 suspected "dead" z-indexes actually dead.
+       2. It could not have fixed the occlusion anyway: the tools sheet is portaled
+          to <body> at z-index 500 while this band lives inside `#studio`, a
+          stacking context at z-index 200 — a descendant can never out-paint it.
+     The real fix is geometric and sits below: the sheet anchors to
+     `--ce-shipbar-h` so the two bottom bands tile instead of overlapping. */
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 56px !important;
+  padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.10) !important;
+  background: rgba(12, 13, 18, 0.96) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  box-sizing: border-box !important;
+  z-index: var(--z-shipbar) !important;
+  /* MEASURED at 390x844 (this lane's probe): the band holds the design door,
+     the ghost ship and the primary. A single row is what keeps it a BAND and
+     not a slab — and the first two-row draft (105px) collided with the PWA
+     tip, which docks at bottom:72px and would have covered the design row for
+     its 12s life. History is the TERTIARY tier by the brief, so it rides the
+     topbar (where it was authored) and the band stays one row of the controls
+     the owner actually touches on every poem: the design door, then the ship
+     pair, ending on the primary in the bottom-right corner. */
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+}
+/* The design door leads the band: it takes the slack, so the ship pair is
+   pushed to the right end without a magic gap value. It is thumb-reachable but
+   unambiguously secondary — it never carries accent weight. */
+html.ce-phone .studio-shipbar > .ce-tools-toggle {
+  position: static !important;
+  order: 1 !important;
+  flex: 1 1 96px !important;
+  width: auto !important;
+  min-width: 96px !important;
+  min-height: 44px !important;
+  padding: 0 4px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+  /* the hint must never wrap to a second line and steal the band's height */
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+html.ce-phone .studio-shipbar > .ce-tools-toggle-hint,
+html.ce-phone .studio-shipbar .ce-tools-toggle-hint {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+html.ce-phone .studio-shipbar > .ce-tools-toggle::after {
+  transform: rotate(225deg) !important;   /* chevron up = opens the sheet */
+}
+html.ce-phone .studio-workspace.ce-tools-open .studio-shipbar > .ce-tools-toggle::after {
+  transform: rotate(45deg) !important;    /* chevron down = closes it */
+}
+/* the ghost ship: secondary, never primary-red (b-postnow law) */
+html.ce-phone .studio-shipbar > #studio-postnow {
+  order: 2 !important;
+  margin-left: 0 !important;
+  flex: 0 0 auto !important;
+}
+html.ce-phone .studio-shipbar > #studio-postnow > summary {
+  min-height: 44px !important;
+  padding: 8px 12px !important;
+}
+/* THE primary: the last control in the band = the closest point to the thumb. */
+html.ce-phone .studio-shipbar > #studio-post-btn {
+  order: 3 !important;
+  margin-left: 0 !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  min-height: 44px !important;
+}
+/* The menus anchored to controls that now live at the BOTTOM must open UPWARD:
+   native-studio.css anchors both at `top: calc(100% + 8px)` (below the
+   trigger), which on a bottom-anchored band would paint them off the bottom
+   edge. `bottom: calc(100% + 8px)` flips them into the artwork's field. The
+   existing viewport clamps (left/right 8px, fixed) still apply — see the
+   .studio-postnow-menu block above; only the vertical anchor changes here. */
+html.ce-phone .studio-shipbar .studio-more-menu,
+html.ce-phone .studio-shipbar .studio-postnow-menu {
+  top: auto !important;
+  bottom: calc(100% + 8px) !important;
+  max-height: 52vh !important;
+  overflow-y: auto !important;
+}
+
+/* ---- the dock, relieved of its own closed-state row ----------------------
+   The toggle now lives in the shipbar, so the closed dock has nothing left to
+   paint. Collapsing it (rather than leaving a 45px empty band) is what buys
+   the artwork its space back. The carousel path keeps its inspector toggle
+   and is excluded everywhere below. */
+html.ce-phone .studio-workspace:not(.is-carousel-mode):not(.ce-tools-open) #studio-dock {
+  display: none !important;
+}
+
+/* ---- the topbar, demoted to the secondary tier ---------------------------
+   With the ship pair and history gone, the remaining band is Back · title ·
+   ••• · Download · Schedule — two short rows instead of three. The status
+   chip rides along (it is feedback, not a control). */
+html.ce-phone .studio-topbar > .studio-primary-actions {
+  display: contents !important;
+}
+html.ce-phone .studio-topbar > .studio-back-btn { order: 1 !important; }
+html.ce-phone .studio-topbar > .studio-title-box {
+  order: 2 !important;
+  /* ROOT FIX (fix/mobile-overhaul, 2026-09-21): basis 0 -> 160px. This rule is the
+     LAST owner of the basis (it sits below the other title-box block), so it is the
+     one that must carry the real value. Measured 402x874: with basis 0 the row needs
+     exactly 382px of 382px available, flex-wrap never fires, and the title-box (the
+     only flexible item) renders 25px pristine / 9.9px after the type scale — the
+     brief's "title truncated to ~5 chars". With a real basis the row wraps and the
+     title measures 259.7px, no clipping. */
+  flex: 1 1 160px !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+html.ce-phone .studio-topbar > #studio-status { order: 3 !important; }
+html.ce-phone .studio-topbar > .studio-primary-actions > .studio-more-actions {
+  order: 4 !important;
+  margin-left: auto !important;
+}
+html.ce-phone .studio-topbar > .studio-primary-actions > #studio-download-pack-btn { order: 5 !important; }
+html.ce-phone .studio-topbar > .studio-primary-actions > #ce-web-schedule-btn { order: 6 !important; }
+/* TERTIARY — edit history. It takes its own row at the FAR end of the surface
+   (the top), which is exactly where a rare, often-disabled control belongs: at
+   open all three are disabled, and they matter only after a design change. */
+html.ce-phone .studio-topbar > .studio-history-controls {
+  order: 7 !important;
+  flex: 1 1 100% !important;
+  margin-left: 0 !important;
+  padding-right: 0 !important;
+  border-right: 0 !important;
+  justify-content: flex-start !important;
+}
+/* The two secondary pills take the neutral treatment the ••• summary ships, so
+   the topbar carries ZERO accent controls: the only accent on the whole surface
+   is Send to Plan in the shipbar. That is the "one primary per screen" census
+   the rest of the app already passes. */
+html.ce-phone .studio-topbar > .studio-primary-actions > #studio-download-pack-btn,
+html.ce-phone .studio-topbar > .studio-primary-actions > #ce-web-schedule-btn {
+  background: var(--surface) !important;
+  border: 1px solid rgba(255, 255, 255, 0.26) !important;
+  color: var(--ink) !important;
+  font-weight: 600 !important;
+  font-size: var(--fs-secondary) !important;
+  padding: 8px 12px !important;
+}
+/* History is no longer a topbar child on phone (it moved to the shipbar), so
+   the earlier phone `order` rules for it are inert here. Left in place on
+   purpose: they still govern the desktop bar and any no-JS fallback. */
