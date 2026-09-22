@@ -30,7 +30,7 @@
        A missing stage is safer than arming a preview node. */
     var stage = container.querySelector('#ce-real-stage, .ce-carousel-slide-stage, .ce-postcore-stage, .ce-poem-stage, .ce-studio-post-frame, #active-studio-canvas');
     if (!stage) return;
-    var editables = stage.querySelectorAll('[data-ce-block="content"], [data-ce-block="hook"], [data-ce-block="body"], .kickline[data-ce-edit]');
+    var editables = stage.querySelectorAll('[data-ce-block="content"], [data-ce-block="hook"], [data-ce-block="body"], .kickline[data-ce-edit], #studio-editable-text');
     editables.forEach(function (el) {
       if (el.__ceTouchArmed) return;
       el.__ceTouchArmed = true;
@@ -262,11 +262,26 @@
   // webviews deny Local-Network-Access, Mac asleep, cellular), never leave a
   // silent dead button. Surface the manual route once and record the mode.
   window.__CE_SYNC_UNREACHABLE__ = false;
+  /* F-DUR (hank/ce-touch-edit, 2026-09-22): the toast latch is separate from
+     the unreachable STATE. The state is refreshed on every failure (so
+     ce_last_sync_error always names the newest cause); the toast fires once
+     per outage and the latch resets only when a sync actually succeeds, so
+     a NEW outage is reported instead of being swallowed by the last one's. */
+  var unreachableToastShown = false;
   function markUnreachable(mode) {
-    if (window.__CE_SYNC_UNREACHABLE__) return;
     window.__CE_SYNC_UNREACHABLE__ = true;
     try { localStorage.setItem('ce_last_sync_error', mode + ' @ ' + new Date().toISOString()); } catch (_) {}
-    if (window.showAppToast) window.showAppToast('Mac unreachable — open in Safari or use Download-for-phone');
+    if (unreachableToastShown) return;
+    unreachableToastShown = true;
+    /* Queued edits are named in the failure toast — a count that exists but
+       is never surfaced is the same lie as the count not existing. */
+    var queued = 0;
+    try { queued = countUnsyncedEdits(); } catch (_q) { queued = 0; }
+    window.__CE_UNSYNCED_EDITS__ = queued;
+    if (window.showAppToast) window.showAppToast(
+      queued > 0
+        ? 'Mac unreachable — ' + queued + (queued === 1 ? ' edit' : ' edits') + ' queued'
+        : 'Mac unreachable — open in Safari or use Download-for-phone');
     console.warn('[ce-sync] unreachable:', mode);
   }
   var reachFlapGuard = 0;
@@ -274,10 +289,24 @@
     // flap guard (audit 9.14): only clear when actually flagged, and not
     // more than once a minute.
     if (!window.__CE_SYNC_UNREACHABLE__) return;
+    /* F-05 (cloud/ce-ui, 2026-09-21): a single successful call is NOT proof the
+       phone is in sync — edits can still be queued behind it. Only report
+       healthy when nothing is waiting; otherwise name the real pending count
+       so the surface cannot claim a sync it has not performed. */
+    var pending = 0;
+    try { pending = countUnsyncedEdits(); } catch (_c) { pending = 0; }
+    if (pending > 0) {
+      window.__CE_UNSYNCED_EDITS__ = pending;
+      try { localStorage.setItem('ce_last_sync_error', 'pending-edits @ ' + new Date().toISOString()); } catch (_) {}
+      if (window.showAppToast) window.showAppToast(pending === 1 ? '1 edit still waiting for your Mac' : pending + ' edits still waiting for your Mac');
+      return;
+    }
+    window.__CE_UNSYNCED_EDITS__ = 0;
     var now = Date.now();
     if (now - reachFlapGuard < 60000) return;
     reachFlapGuard = now;
     window.__CE_SYNC_UNREACHABLE__ = false;
+    unreachableToastShown = false;   /* proven reachability re-arms the one-toast-per-outage latch */
     try { localStorage.removeItem('ce_last_sync_error'); } catch (_) {}
   }
   function findSyncEndpoint(cb) {
@@ -412,7 +441,8 @@
 
   /* ---- Write key (P0-2) ---------------------------------------------------
      Writes on the sync server require the shared write key (X-CE-Sync-Key
-     header / ?k= param). The owner pastes it ONCE via prompt(); it lives in
+     header, always — never a URL param, see the 2026-09-22 note below).
+     The owner pastes it ONCE via prompt(); it lives in
      localStorage `ce_sync_key`. This helper is for WRITES: the server now
      key-gates the data reads too (/bank, /schedule-requests, /decks), so a
      caller that needs one of those must send the same key — see
@@ -434,6 +464,7 @@
      copy of the pairing flow. One pairing path, one place to fix it. */
   window.__CE_ENSURE_WRITE_KEY__ = ensureWriteKey;
 
+  var persistFailToastShown = false;
   window.__CE_PERSIST_DECK_EDIT__ = function (deck) {
     if (!deck || !deck.id) return;
     var store = {};
@@ -444,41 +475,85 @@
       slides: deck.slides,
       updatedAt: Date.now()
     };
+    var persistFailed = false;
     try { localStorage.setItem('ce_deck_edits', JSON.stringify(store)); } catch (_) {
+      persistFailed = true;
       /* BO: a failed localStorage write meant the edit lived only in memory —
          a reload silently lost it while the UI read as if it were kept. Record
          the state so a surface can warn. */
       window.__CE_PERSIST_LAST_ERROR__ = 'localstorage-write-failed @ ' + new Date().toISOString();
       try { console.warn('[ce-sync] deck edit persisted in memory only — localStorage write failed'); } catch (_w) {}
+      /* F-DUR (hank/ce-touch-edit, 2026-09-22): the diagnostic flag above was
+         written for nothing to read — the user saw a normal save while the
+         edit could not survive a reload. This is NOT a Mac-reachability
+         failure, so it gets its own honest line, once per failure episode
+         (a later successful write re-arms it). */
+      if (!persistFailToastShown) {
+        persistFailToastShown = true;
+        /* F-DUR (hank/ce-touch-edit, 2026-09-22): __CE_PERSIST_LAST_ERROR__ was
+           WRITTEN above and read by NOTHING in the repo (grep: 1 live write,
+           0 reads) — a diagnostic the owner never sees is the silent failure
+           it was meant to expose. Surface it on the SAME toast, not a new
+           mechanism: the recorded cause is appended so the user sees WHY the
+           edit will not survive a reload. */
+        var persistCause = window.__CE_PERSIST_LAST_ERROR__ || 'localstorage-write-failed';
+        if (window.showAppToast) window.showAppToast('Edit kept in memory only — storage full; it will not survive a reload (' + persistCause + ')');
+      }
     }
+    if (!persistFailed) persistFailToastShown = false;
     if (!window.__CE_SYNC_ENDPOINT__) {
       /* BO: no endpoint meant the edit stayed local with no signal at all —
          expose the count of pushed-but-unsynced edits so the shelf surface can
-         say "N edits waiting for your Mac". */
-      window.__CE_UNSYNCED_EDITS__ = (window.__CE_UNSYNCED_EDITS__ || 0) + 1;
+         say "N edits waiting for your Mac".
+         F-B04: this used to be `+= 1`, an INCREMENT — so the number was a count
+         of write ATTEMPTS, not of records still waiting, and it could never go
+         down when a drain succeeded. It is now recomputed from the store, which
+         is the thing the claim is actually about. */
+      window.__CE_UNSYNCED_EDITS__ = countUnsyncedEdits();
       return;
     }
-    var payload = { deckId: deck.id, deck: store[deck.id] };
+    /* F-08 (cloud/ce-ui, 2026-09-21): an oversize-guard + 403-retry `attempt`
+       chain and its `send`/payload scaffolding used to sit here and were NEVER
+       called — this path delegates to pushDeckEdit (below), which owns the same
+       guard chain for both the write and the drain. Dead protection reads as
+       protection, so it is gone rather than left unreachable. */
+    pushDeckEdit(deck.id, store[deck.id], null);
+  };
+
+  /* ── F-B04 · the push chain, extracted so the DRAIN can reuse it ───────────
+     `done(status)` is called with:
+        'ok'     the server took this edit
+        'stale'  the server kept an OLDER copy (LWW loss) — still waiting
+        'fail'   rejected or unreachable — still waiting
+     The counter is refreshed from the store in every terminal branch, so no
+     single write can clear a count that belongs to other records. */
+  function pushDeckEdit(deckId, record, done) {
+    var payload = { deckId: deckId, deck: record };
     var base = window.__CE_SYNC_ENDPOINT__;
     function send(key, viaGet) {
-      // Resolves {status} on any HTTP response, null on network failure
-      // (WebKit/Safari blocks public->private POST bodies at the network
-      // level — that is a rejection, so the GET /set?d= fallback exists).
       var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-      var req = viaGet
-        ? fetch(base + '/set?d=' + encodeURIComponent(b64) + (key ? '&k=' + encodeURIComponent(key) : ''))
-        : fetch(base + '/decks', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key },
-            body: JSON.stringify(payload)
-          });
-      return req.then(
+      /* F-SEC (audit 2026-09-22): the GET fallback carried the write key as `&k=`
+         in the URL, so every fallback write put a live credential into browser
+         history, the server request line and any proxy log. The server accepts
+         `X-CE-Sync-Key` on GET (ce-lan-serve.py advertises it in
+         Access-Control-Allow-Headers and _proxy forwards it), so the key travels
+         as a header on BOTH verbs and never in the URL. */
+      /* F-DUR (hank/ce-touch-edit, 2026-09-22): a fetch whose promise never
+         settled used to wedge the whole chain — neither .then nor .catch
+         ran, drainInFlight stayed true, and every later retry was blocked
+         while the edit looked saved. Every write is now capped at 15s: the
+         AbortController cancels the request where supported, and the race
+         settles the promise even where it is not. A timeout resolves to a
+         marked result ({timeout:true}) so the caller records the real cause
+         and treats it exactly like a network failure — GET fallback, edit
+         stays queued, drain releases. */
+      var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+      var reqOpts = viaGet
+        ? { headers: key ? { 'X-CE-Sync-Key': key } : {} }
+        : { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key }, body: JSON.stringify(payload) };
+      if (ctrl) reqOpts.signal = ctrl.signal;
+      var req = fetch(base + (viaGet ? '/set?d=' + encodeURIComponent(b64) : '/decks'), reqOpts).then(
         function (r) {
-          /* WL0498 (2026-09-19): the body was discarded, so a losing LWW write
-             (200 {ok:true, stale:true}) looked exactly like a win — the phone
-             reported the edit as synced while the server had kept the older
-             copy. Read the body so the caller can tell the two apart; a body
-             that is not JSON (or empty) leaves stale=false, unchanged. */
           return r.text().then(
             function (txt) {
               var body = null;
@@ -488,22 +563,24 @@
             function () { return { status: r.status, body: null }; }
           );
         },
-        function () { return null; }
+        function (err) {
+          if (ctrl && ctrl.signal && ctrl.signal.aborted) return { status: 0, timeout: true };
+          if (err && err.name === 'AbortError') return { status: 0, timeout: true };
+          return null;
+        }
       );
+      var timeoutP = new Promise(function (resolve) {
+        var t = setTimeout(function () {
+          try { if (ctrl) ctrl.abort(); } catch (_ab) {}
+          resolve({ status: 0, timeout: true });
+        }, 15000);
+        req.then(function () { clearTimeout(t); }, function () { clearTimeout(t); });
+      });
+      return Promise.race([req, timeoutP]);
     }
-    /* R14-05 (2026-09-19): the GET /set fallback carries the deck base64 in the
-       request LINE; the sync server's stdlib readline ceiling (65537) answers
-       414 BEFORE any handler runs, and the old code called markReachable() for
-       every non-403 status — so an oversize deck "synced" green into the void.
-       Cap the raw deck JSON at 44 KB (44*1024*4/3 ≈ 58.7 KB b64 + path/key/query
-       stays under 64 KB) and say so honestly instead of firing a doomed 414. */
-    var GET_SET_MAX_JSON_BYTES = 45056;   // 44 KB deck JSON ceiling for GET fallback
+    var GET_SET_MAX_JSON_BYTES = 45056;
     function attempt(key, viaGet) {
       if (viaGet) {
-        /* Byte length, not .length: the app's content is Devanagari — each
-           Hindi char is 1 UTF-16 unit but 3 UTF-8 bytes, and b64 encodes the
-           UTF-8 form, so a code-unit count under-reads the request line by up
-           to 3x. TextEncoder where available, escaped-length fallback. */
         var jsonBytes = 0;
         try {
           var json = JSON.stringify(payload);
@@ -512,13 +589,12 @@
             : encodeURIComponent(json).replace(/%[0-9A-Fa-f]{2}/g, 'x').length;
         } catch (_b) {}
         if (jsonBytes > GET_SET_MAX_JSON_BYTES) {
-          markUnreachable('deck-too-large-for-phone-sync');   // toast: "edit this deck on the Mac"
+          markUnreachable('deck-too-large-for-phone-sync');
           return Promise.resolve({ status: 0, oversize: true });
         }
       }
       return send(key, viaGet).then(function (res) {
         if (res && res.status === 403) {
-          // Wrong/missing write key — clear it, prompt once, retry same verb.
           try { localStorage.removeItem('ce_sync_key'); } catch (_) {}
           return new Promise(function (resolve) {
             ensureWriteKey(function (newKey) {
@@ -527,27 +603,91 @@
             });
           });
         }
-        if (!res && !viaGet) return attempt(key || getWriteKey(), true); // POST blocked → GET write
+        if ((!res || res.timeout) && !viaGet) return attempt(key || getWriteKey(), true);
         return res;
       });
     }
     attempt(getWriteKey(), false).then(function (res) {
-      // A 4xx/5xx (or the client-side oversize refusal, status 0) is a
-      // REJECTION, not reachability — the old `!res ? unreachable : reachable`
-      // marked 414/413/429 green. Only a real 2xx/3xx means the write landed.
-      if (!res || !res.status || res.status >= 400) { markUnreachable('write-rejected-' + (res && res.status ? res.status : 'network')); return; }
-      /* WL0498: 200 {stale:true} means the server KEPT THE OLDER COPY — this
-         edit was discarded, so reporting it as synced is a false claim. Say so
-         and keep the local copy (it is still in ce_deck_edits) so the next
-         write can win once the server copy advances. */
+      if (!res || !res.status || res.status >= 400) {
+        /* The oversize branch already recorded its precise cause; do not
+           overwrite 'deck-too-large-for-phone-sync' with a generic miss. */
+        if (!(res && res.oversize)) {
+          markUnreachable(res && res.timeout ? 'timeout' : 'write-rejected-' + (res && res.status ? res.status : 'network'));
+        }
+        if (done) done('fail');
+        return;
+      }
       if (res.body && res.body.stale === true) {
         markUnreachable('edit-superseded-by-newer-remote-copy');
+        if (done) done('stale');
         return;
       }
       markReachable();
-      window.__CE_UNSYNCED_EDITS__ = 0;
-    }).catch(function () { markUnreachable('write-failed'); });
-  };
+      window.__CE_UNSYNCED_EDITS__ = countUnsyncedEdits();
+      if (done) done('ok');
+    }).catch(function () {
+      markUnreachable('write-failed');
+      if (done) done('fail');
+    });
+  }
+
+  /* How many records in ce_deck_edits are NOT yet known to the Mac. The pull
+     path records what the server last served in `ce_deck_synced_at` (id ->
+     updatedAt), so "waiting" is local.updatedAt > synced[id] — the same
+     comparison the drain uses, so the number and the action can never disagree. */
+  function countUnsyncedEdits() {
+    var store = {}, synced = {};
+    try { store = JSON.parse(localStorage.getItem('ce_deck_edits') || '{}'); } catch (_) { return 0; }
+    try { synced = JSON.parse(localStorage.getItem('ce_deck_synced_at') || '{}'); } catch (_) {}
+    var n = 0;
+    Object.keys(store).forEach(function (id) {
+      var mine = (store[id] && store[id].updatedAt) || 0;
+      if (mine > (synced[id] || 0)) n++;
+    });
+    return n;
+  }
+
+  /* The drain. Walks every waiting record and re-pushes it, oldest first, and
+     STOPS at the first failure — an unreachable Mac must not be hammered, and a
+     partially-drained queue is reported honestly rather than zeroed. Runs only
+     on the reachability transition (see pullRemoteEdits), which is the moment
+     the endpoint is proven live. */
+  var drainInFlight = false;
+  function drainUnsyncedEdits() {
+    if (drainInFlight || !window.__CE_SYNC_ENDPOINT__) return;
+    var store = {}, synced = {};
+    try { store = JSON.parse(localStorage.getItem('ce_deck_edits') || '{}'); } catch (_) { return; }
+    try { synced = JSON.parse(localStorage.getItem('ce_deck_synced_at') || '{}'); } catch (_) {}
+    var waiting = Object.keys(store).filter(function (id) {
+      return ((store[id] && store[id].updatedAt) || 0) > (synced[id] || 0);
+    }).sort(function (a, b) { return (store[a].updatedAt || 0) - (store[b].updatedAt || 0); });
+    if (!waiting.length) { window.__CE_UNSYNCED_EDITS__ = 0; return; }
+    drainInFlight = true;
+    var i = 0;
+    (function next() {
+      if (i >= waiting.length) {
+        drainInFlight = false;
+        window.__CE_UNSYNCED_EDITS__ = countUnsyncedEdits();
+        return;
+      }
+      var id = waiting[i++];
+      pushDeckEdit(id, store[id], function (status) {
+        if (status !== 'ok') {
+          /* Stopped — the Mac is not taking writes right now. Leave the rest
+             queued; the next successful pull tries again. */
+          drainInFlight = false;
+          window.__CE_UNSYNCED_EDITS__ = countUnsyncedEdits();
+          return;
+        }
+        try {
+          synced[id] = store[id].updatedAt;
+          localStorage.setItem('ce_deck_synced_at', JSON.stringify(synced));
+        } catch (_) {}
+        next();
+      });
+    })();
+  }
+  window.__CE_DRAIN_UNSYNCED_EDITS__ = drainUnsyncedEdits;
 
   // Boot: re-apply locally-edited decks over the static payload so the site
   // shows YOUR version, and keep the arm hook attached to every canvas render.
@@ -584,12 +724,18 @@
     if (pullFailures < 3) return;
     try { localStorage.removeItem('ce_sync_endpoint'); } catch (_) {}
     window.__CE_SYNC_ENDPOINT__ = null;
-    pullFailures = 0;
+    /* F-06 (cloud/ce-ui, 2026-09-21): this used to reset pullFailures to 0
+       BEFORE the caller tested `pullFailures === 0`, so a third consecutive
+       failed pull made the app declare the unreachable Mac reachable and
+       delete its own error record. Reset the counter only AFTER the caller has
+       decided reachability from the pre-heal value; the error record stays in
+       place until a genuinely successful pull clears it. */
     /* BO-P8: the silent re-discovery could leave the owner staring at a stale
        deck with no error state — name it once per heal. */
     if (window.showAppToast) window.showAppToast('Mac still unreachable — showing your last synced copy');
     findSyncEndpoint(function (b) { if (b) window.__CE_SYNC_ENDPOINT__ = b; });
   }
+  function healResetPullFailures() { pullFailures = 0; }
   function pullRemoteEdits() {
     // F-02: reads are key-gated. Share visitors (no key) skip silently —
     // they read the static share-decks payload, never the private store.
@@ -597,14 +743,41 @@
     var key = getWriteKey();
     if (!key) return;
     var base = window.__CE_SYNC_ENDPOINT__;
-    fetch(base + '/decks', { headers: { 'X-CE-Sync-Key': key } })
-      .then(function (r) { return r.ok ? r.json() : null; })
+    /* F-DUR (hank/ce-touch-edit, 2026-09-22, sibling of the write-path fix): a
+       pull whose fetch never settles left the phone on a stale deck with NO
+       signal — `pullFailures` stayed flat, `markUnreachable` never fired, and
+       the UI read as if the copy were current. Every pull is now capped at 15s:
+       the AbortController cancels the request where supported (the same pattern
+       as pushDeckEdit's send), and the abort lands in the existing .catch below,
+       so it takes the normal failure path (name the cause, heal, retry). The
+       success path is unchanged. */
+    var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+    var pullOpts = { headers: { 'X-CE-Sync-Key': key } };
+    if (ctrl) pullOpts.signal = ctrl.signal;
+    var pullTimer = setTimeout(function () { try { if (ctrl) ctrl.abort(); } catch (_ab) {} }, 15000);
+    fetch(base + '/decks', pullOpts)
+      .then(function (r) { clearTimeout(pullTimer); return r.ok ? r.json() : null; })
       .then(function (data) {
-        if (!data || !data.decks) { pullFailures++; healEndpointIfDead(); if (pullFailures === 0) markReachable(); else markUnreachable('pull-' + pullFailures); return; }
+        if (!data || !data.decks) { pullFailures++; markUnreachable('pull-' + pullFailures); healEndpointIfDead(); healResetPullFailures(); return; }
         pullFailures = 0;
         markReachable();
         var local = {};
         try { local = JSON.parse(localStorage.getItem('ce_deck_edits') || '{}'); } catch (_) {}
+        /* F-B04: a pull that SUCCEEDED is proof the Mac is reachable — the one
+           moment a stranded edit can be expected to land. Record what the server
+           just served (so "waiting" has a real baseline) and drain the queue.
+           This is the path that did not exist: before it, a phone edit made
+           while the Mac was away waited forever. */
+        try {
+          var syncedNow = {};
+          try { syncedNow = JSON.parse(localStorage.getItem('ce_deck_synced_at') || '{}'); } catch (_) {}
+          Object.keys(data.decks).forEach(function (id) {
+            var r = data.decks[id];
+            if (r && (r.updatedAt || 0) > (syncedNow[id] || 0)) syncedNow[id] = r.updatedAt || 0;
+          });
+          localStorage.setItem('ce_deck_synced_at', JSON.stringify(syncedNow));
+        } catch (_) {}
+        drainUnsyncedEdits();
         Object.keys(data.decks).forEach(function (id) {
           var remote = data.decks[id];
           var mine = local[id];
@@ -629,10 +802,12 @@
         });
         try { localStorage.setItem('ce_deck_edits', JSON.stringify(local)); } catch (_) {}
       })
-      .catch(function () {
+      .catch(function (err) {
+        clearTimeout(pullTimer);
         pullFailures++;
-        markUnreachable('pull-network');
+        markUnreachable((err && err.name === 'AbortError') ? 'pull-timeout' : 'pull-network');
         healEndpointIfDead();
+        healResetPullFailures();
       });
   }
   // test/probe hook (final refinement): deterministic pull for E2E checks
@@ -673,7 +848,13 @@
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
         var rows = ((j && j.requests) || []).filter(function (row) { return row && (row.state === 'failed' || row.state === 'needs_verification'); });
-        if (!rows.length) return;
+        if (!rows.length) {
+          /* F-11 (cloud/ce-ui, 2026-09-21): this was an early return, so the
+             normal "nothing failed" case said nothing and the probe result
+             vanished. It is information, not a failure: state it calmly. */
+          if (window.showAppToast) window.showAppToast('All clear: no schedules are waiting to be retried.', { tone: 'info' });
+          return;
+        }
         window.__CE_SCHED_FAILED__ = rows;
         var n = rows.length;
         var verifyCount = rows.filter(function (row) { return row.state === 'needs_verification'; }).length;
@@ -737,12 +918,12 @@
             retryEl.disabled = false;
             if (out.s === 200) {
               retryEl.style.display = 'none';
-              statusEl.textContent = 'Re-queued. Your Mac will try Meta again within ~30s.';
+              statusEl.textContent = 'Re-queued \u2014 waiting for your Mac to pick it up (it must be running).';
               ceScheduleWatch(key, id, statusEl, retryEl);
             } else {
-              statusEl.textContent = (out.j && out.j.error) ? out.j.error : 'Retry did not go through.';
+              statusEl.textContent = (out.j && out.j.error) ? out.j.error : 'Retry did not go through \u2014 the row could not be re-queued on your Mac. Re-open this sheet to check its state.';
             }
-          }, function () { retryEl.disabled = false; statusEl.textContent = 'Network failed on retry.'; });
+          }, function () { retryEl.disabled = false; statusEl.textContent = 'Network failed on retry \u2014 the retry never reached your Mac. Check the Wi-Fi and tap Retry again.'; });
       };
     };
     var tick = function () {
@@ -752,15 +933,25 @@
         var st = String(row.state || '');
         if (st === 'pending' || st === 'queued' || st === 'scheduling') {
           statusEl.textContent = waited() < 45
-            ? 'Queued \u2014 your Mac picks it up within ~30s (it must be running).'
-            : 'Still working on your Mac \u2014 ' + waited() + 's so far, last checked just now.';
+            ? 'Queued \u2014 your Mac has not picked it up yet (it must be running).'
+            : 'Still waiting on your Mac \u2014 ' + waited() + 's so far, last checked just now.';
           keepWatching();
           return;
         }
+        /* F-S-NNR (cloud/ce-ui, 2026-09-21): the Mac books a phone row with
+           publishNow false (App/CEMetaPublisher.swift:936), so even a row the
+           Mac reports back as 'scheduled' is booked on Meta's clock and may
+           still be hours or days from going live. The old 'it landed' line
+           read as proof the post was up. Only the row's own state is claimed
+           here; the scheduled minute is named when the row carries one. */
         if (st === 'scheduled' || st === 'published') {
-          statusEl.textContent = 'Confirmed: on Meta\u2019s clock. Your Mac reported it landed.';
+          var booked = '';
+          if (row.scheduleUnixMs) {
+            try { booked = ' for ' + new Date(Number(row.scheduleUnixMs)).toLocaleString(); } catch (_b) {}
+          }
+          statusEl.textContent = 'Booked on Meta\u2019s clock' + booked + ' \u2014 that is the time it should go live. Your Mac cannot confirm the actual publish here.';
           if (retryEl) retryEl.style.display = 'none';
-          if (window.showAppToast) window.showAppToast('Schedule confirmed by your Mac');
+          if (window.showAppToast) window.showAppToast('Your Mac booked it on Meta\u2019s clock' + booked);
           if (typeof onDone === 'function') onDone('scheduled');
           return;
         }
@@ -786,29 +977,76 @@
     if (!deck || !deck.slides || !deck.slides.length) { if (window.showAppToast) window.showAppToast('Open a deck first'); return; }
     var old = document.getElementById('ce-sched-sheet');
     if (old) old.remove();
+    var returnFocus = document.activeElement;
     var sheet = document.createElement('div');
     sheet.id = 'ce-sched-sheet';
+    /* A11y (cloud/ce-ui, 2026-09-21): this was a bare div — a screen reader
+       saw no dialog at all. Name it, mark it modal, trap focus inside and give
+       Escape a close path; focus returns to whatever opened it. */
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'true');
+    sheet.setAttribute('aria-label', 'Schedule');
     sheet.style.cssText = 'position:fixed;inset:0;z-index:var(--z-toast-hi);background:rgba(0,0,0,.55);display:flex;align-items:flex-end;';
     var slides = deck.slides.length;
+    function esc(v) {
+      return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    var safeTitle = esc(String(deck.title || deck.id).slice(0, 40));
+    var safeMin = esc(istFloorPlus7DateStr());
+    var safeTime = esc((window.CE_SCHEDULE_DEFAULTS || {}).timeValue || '11:30');
     sheet.innerHTML =
       '<div style="width:100%;background:#1c1a24;color:#fff;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));font-family:-apple-system,system-ui,sans-serif;">' +
-      '<div style="font-weight:700;font-size:var(--fs-body);margin-bottom:10px">Schedule \u201C' + String(deck.title || deck.id).slice(0, 40) + '\u201D on Meta\u2019s clock</div>' +
+      '<div id="ce-sched-title" style="font-weight:700;font-size:var(--fs-body);margin-bottom:10px">Schedule \u201C' + safeTitle + '\u201D on Meta\u2019s clock</div>' +
       '<label style="font-size:var(--fs-overline);opacity:.75" for="ce-sched-platform">Platform</label>' +
       '<select id="ce-sched-platform" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
       '<option value="facebook">Facebook — fully automatic, holds on Meta\u2019s clock</option>' +
       '<option value="instagram">Instagram — fires from the Mac at its minute (\u226410 slides)</option></select>' +
       '<label style="font-size:var(--fs-overline);opacity:.75" id="ce-sched-datelabel" for="ce-sched-date">Date (a week+ out — owner law)</label>' +
-      '<input id="ce-sched-date" type="date" min="' + istFloorPlus7DateStr() + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
+      '<input id="ce-sched-date" type="date" min="' + safeMin + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
       '<label style="font-size:var(--fs-overline);opacity:.75" for="ce-sched-time">Time (IST)</label>' +
-      '<input id="ce-sched-time" type="time" value="' + ((window.CE_SCHEDULE_DEFAULTS||{}).timeValue || '11:30') + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
+      '<input id="ce-sched-time" type="time" value="' + safeTime + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
       '<label style="font-size:var(--fs-overline);opacity:.75" for="ce-sched-caption">Caption</label>' +
       '<textarea id="ce-sched-caption" rows="3" style="width:100%;padding:10px;margin:4px 0 12px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444;box-sizing:border-box"></textarea>' +
       '<div style="display:flex;gap:8px">' +
       '<button id="ce-sched-go" style="flex:1;padding:12px;border:0;border-radius:10px;font-weight:700;background:var(--accent);color:#fff;font-size:var(--fs-body)">Schedule (week+ out)</button>' +
       '<button id="ce-sched-cancel" style="padding:12px 18px;border:1px solid #555;border-radius:10px;background:transparent;color:#fff;font-weight:700">Cancel</button></div>' +
-      '<div id="ce-sched-status" style="font-size:var(--fs-overline);opacity:.8;margin-top:8px;min-height:16px"></div>' +
+      '<div id="ce-sched-status" role="status" aria-live="polite" aria-atomic="true" style="font-size:var(--fs-overline);opacity:.8;margin-top:8px;min-height:16px"></div>' +
       '<button id="ce-sched-retry" type="button" style="display:none;width:100%;margin-top:8px;padding:11px;border:1px solid var(--accent);border-radius:10px;background:transparent;color:var(--accent-text);font-weight:700;font-size:var(--fs-secondary)">Retry this schedule</button></div>';
     document.body.appendChild(sheet);
+    /* A11y: Escape closes, focus is trapped while the dialog is open, and the
+       trigger regains focus on close. Hostile/refused messages stay until the
+       user acts — a 1.1s self-clear cannot be read. */
+    var onKeydown = function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closeSheet(); return; }
+      if (e.key !== 'Tab') return;
+      var focusables = sheet.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      var list = [];
+      for (var i = 0; i < focusables.length; i++) {
+        var f = focusables[i];
+        if (!f.disabled && f.offsetParent !== null) list.push(f);
+      }
+      if (!list.length) return;
+      var first = list[0], last = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    function clearPending() {
+      if (sheet.__ceStatusTimer) { clearTimeout(sheet.__ceStatusTimer); sheet.__ceStatusTimer = 0; }
+    }
+    function closeSheet() {
+      clearPending();
+      document.removeEventListener('keydown', onKeydown, true);
+      sheet.remove();
+      try { if (returnFocus && returnFocus.focus) returnFocus.focus(); } catch (_rf) {}
+    }
+    sheet.__ceClose = closeSheet;
+    document.addEventListener('keydown', onKeydown, true);
+    setTimeout(function () {
+      var firstField = sheet.querySelector('#ce-sched-platform');
+      if (firstField) try { firstField.focus(); } catch (_ff) {}
+    }, 0);
     /* Production consent (owner 2026-09-10): the SERVER is the floor's single
        truth — when its ce_allow_soon marker is on, near dates are legitimate
        production schedules, so the min follows the live floor instead of the
@@ -832,7 +1070,7 @@
     var cap = '';
     try { cap = ((window.state && window.state.igCaption) || (deck.slides[0] && (deck.slides[0].html || deck.slides[0].text)) || '').replace(/<[^>]+>/g, ''); } catch (_) {}
     sheet.querySelector('#ce-sched-caption').value = cap;
-    sheet.querySelector('#ce-sched-cancel').onclick = function () { sheet.remove(); };
+    sheet.querySelector('#ce-sched-cancel').onclick = function () { closeSheet(); };
     // Owner 2026-09-11: a schedule that failed on the Mac used to be invisible on
     // the phone. Ask the relay on open and say it out loud.
     try { ensureWriteKey(function (k) { ceScheduleMount(k); }); } catch (_mm) {}
@@ -842,17 +1080,17 @@
       var time = sheet.querySelector('#ce-sched-time').value || (window.CE_SCHEDULE_DEFAULTS||{}).poemMorningValue || '11:30';
       var caption = sheet.querySelector('#ce-sched-caption').value.trim();
       var status = sheet.querySelector('#ce-sched-status');
-      if (!date) { status.textContent = 'Pick a date first.'; return; }
-      if (platform === 'instagram' && slides > 10) { status.textContent = 'IG carousels cap at 10 slides (Meta API). Use Download-for-phone + manual posting.'; return; }
-      if (!caption) { status.textContent = 'Add a caption.'; return; }
+      if (!date) { status.textContent = 'Date is missing \u2014 pick the day this should go on Meta, then tap Schedule again.'; return; }
+      if (platform === 'instagram' && slides > 10) { status.textContent = 'This deck has ' + slides + ' slides, over Instagram\u2019s 10-slide API cap \u2014 use Download-for-phone and post it by hand.'; return; }
+      if (!caption) { status.textContent = 'Caption is empty \u2014 Meta needs one, so nothing was queued. Add it and tap Schedule again.'; return; }
       var unixMs = new Date(date + 'T' + time + ':00' + SYNC_IST).getTime();
       var payload = { deckId: deck.id, platform: platform, caption: caption, scheduleUnixMs: unixMs, slidesCount: slides };
       var btn = sheet.querySelector('#ce-sched-go');
-      if (window.__CE_SYNC_UNREACHABLE__) { status.textContent = 'Mac unreachable — open in Safari or use Download-for-phone.'; return; }
+      if (window.__CE_SYNC_UNREACHABLE__) { status.textContent = 'Mac unreachable \u2014 nothing was queued. Open this in Safari, or use Download-for-phone.'; return; }
       btn.disabled = true; status.textContent = 'Sending to your Mac\u2026';
       function submit(key) {
         var ep = window.__CE_SYNC_ENDPOINT__;
-        if (!ep) { status.textContent = 'Sync endpoint not discovered yet — check the Mac is reachable.'; btn.disabled = false; return Promise.resolve(null); }
+        if (!ep) { status.textContent = 'Sync endpoint not found \u2014 nothing was queued. Make sure the Mac app is open on the same Wi-Fi, then tap Schedule again.'; btn.disabled = false; return Promise.resolve(null); }
         return fetch(ep + '/schedule', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key },
@@ -860,13 +1098,13 @@
         }).then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); });
       }
       ensureWriteKey(function (key) {
-        if (!key) { status.textContent = 'Write key needed for scheduling.'; btn.disabled = false; return; }
+        if (!key) { status.textContent = 'Write key missing \u2014 nothing was queued. Pair this phone with your Mac again, then tap Schedule.'; btn.disabled = false; return; }
         submit(key).then(function (res) {
           if (res && res.status === 403) {
             try { localStorage.removeItem('ce_sync_key'); } catch (_) {}
             ensureWriteKey(function (k2) {
-              if (!k2) { status.textContent = 'Write key needed.'; btn.disabled = false; return; }
-              submit(k2).then(function (r2) { finish(r2, k2); }, function () { status.textContent = 'Network failed.'; btn.disabled = false; });
+              if (!k2) { status.textContent = 'Write key missing \u2014 nothing was queued. Pair this phone with your Mac again, then tap Schedule.'; btn.disabled = false; return; }
+              submit(k2).then(function (r2) { finish(r2, k2); }, function () { status.textContent = 'Network dropped \u2014 nothing was queued. Check the Wi-Fi and tap Schedule again.'; btn.disabled = false; });
             });
             return;
           }
@@ -881,14 +1119,14 @@
         if (res && res.status === 409) {
           btn.disabled = true;
           statusEl.textContent = 'Already scheduled for that time'
-            + (res.body && res.body.state ? ' (' + res.body.state + ')' : '')
+            + (res.body && res.body.state ? ' (row state: ' + res.body.state + ')' : '')
             + ' \u2014 it was not queued twice.';
           if (window.showAppToast) window.showAppToast('Already scheduled for that time');
           return;
         }
         btn.disabled = false;
         if (res && res.status === 200 && res.body && res.body.ok) {
-          status.textContent = 'Queued \u2014 your Mac schedules it on Meta\u2019s clock within ~30s (must be running).';
+          status.textContent = 'Queued \u2014 waiting for your Mac to pick it up and book it on Meta\u2019s clock (the Mac must be running; the phone cannot confirm the booking).';
           if (window.showAppToast) window.showAppToast('Schedule queued to your Mac');
           // Owner 2026-09-11: the sheet used to close 2.6s after "Queued", so the
           // real outcome (landed / refused) was never seen. It now stays open and
@@ -902,7 +1140,7 @@
             });
           }
         } else {
-          status.textContent = (res && res.body && res.body.error) ? res.body.error : 'Could not queue the schedule.';
+          status.textContent = (res && res.body && res.body.error) ? res.body.error : 'Nothing queued: the Mac could not create the schedule row. Check that it is running and reachable, then tap Schedule again.';
         }
       }
     };
@@ -923,7 +1161,19 @@
         if (!row) { if (tries < 30) setTimeout(tick, 4000); return; }
         var st = String(row.state || '');
         if (st === 'scheduled' || st === 'published') {
-          say('Armed on your Mac — @doalfaaz goes live within ~3 min.');
+          /* F-S-NNR (cloud/ce-ui, 2026-09-21): this said '@doalfaaz goes live
+             within ~3 min'. Nothing in this row supports that: the Mac books
+             phone rows with publishNow false (App/CEMetaPublisher.swift:936),
+             so 'scheduled' means a booking on Meta's clock, and for a post-now
+             row that minute is the one the sync server stamped
+             (now + 150s, ops/ce_deck_sync.py). The phone still receives no
+             confirmation that anything reached Meta's feed, so it says queued
+             and names the booked minute instead of inventing a live window. */
+          var booked = '';
+          if (row.scheduleUnixMs) {
+            try { booked = ' for ' + new Date(Number(row.scheduleUnixMs)).toLocaleString(); } catch (_b) {}
+          }
+          say('Queued on your Mac' + booked + ' \u2014 it cannot confirm the post went live.');
           return;
         }
         if (st === 'failed' || st === 'needs_verification' || st === 'superseded') {
@@ -963,7 +1213,7 @@
     var payload = { deckId: deckId, caption: caption, slidesCount: slides, platform: 'instagram', kind: 'post_now', type: type };
     var submit = function (key) {
       var ep = window.__CE_SYNC_ENDPOINT__;
-      if (!ep) { say('Mac unreachable — sync endpoint not found. Nothing was sent.'); return Promise.resolve(null); }
+      if (!ep) { say('Mac unreachable — sync endpoint not found, so nothing was sent. Open this in Safari, or use Download-for-phone.'); return Promise.resolve(null); }
       return fetch(ep + '/post-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key },
@@ -972,28 +1222,31 @@
     };
     var finish = function (res, usedKey) {
       if (res && res.s === 200 && res.j && res.j.ok) {
-        say('Posting from your Mac within ~3 min — @doalfaaz goes live.');
+        // F-S18 (cloud/ce-ui, 2026-09-20): HTTP 200 means the request row is
+        // queued, not that the post is live — only cePostNowWatch's row state
+        // may say live/scheduled.
+        say('Queued on your Mac - waiting for it to pick the row up\u2026');
         if (res.j.id && usedKey) cePostNowWatch(usedKey, res.j.id);
         return;
       }
-      say((res && res.j && res.j.error) ? res.j.error : 'The Mac refused the post — nothing was sent.');
+      say((res && res.j && res.j.error) ? res.j.error : 'Nothing queued: the Mac could not create the request row. Check that it is running and signed in to Meta, then try again.');
     };
-    if (window.__CE_SYNC_UNREACHABLE__) { say('Mac unreachable — nothing was sent.'); return; }
+    if (window.__CE_SYNC_UNREACHABLE__) { say('Mac unreachable \u2014 nothing was sent. Open this in Safari, or use Download-for-phone.'); return; }
     findSyncEndpoint(function (base) {
       if (base) window.__CE_SYNC_ENDPOINT__ = base;
       ensureWriteKey(function (key) {
-        if (!key) { say('Write key needed — nothing was sent.'); return; }
+        if (!key) { say('Write key missing \u2014 nothing was sent. Pair this phone with your Mac again.'); return; }
         submit(key).then(function (res) {
           if (res && res.s === 403) {
             try { localStorage.removeItem('ce_sync_key'); } catch (_) {}
             ensureWriteKey(function (k2) {
-              if (!k2) { say('Write key needed — nothing was sent.'); return; }
-              submit(k2).then(function (r2) { finish(r2, k2); }, function () { say('Network failed — nothing was sent.'); });
+              if (!k2) { say('Write key missing \u2014 nothing was sent. Pair this phone with your Mac again.'); return; }
+              submit(k2).then(function (r2) { finish(r2, k2); }, function () { say('Network dropped \u2014 nothing was sent. Check the Wi-Fi and tap Post now again.'); });
             });
             return;
           }
           finish(res, key);
-        }, function () { say('Mac unreachable — nothing was sent.'); });
+        }, function () { say('Mac unreachable \u2014 nothing was sent. Open this in Safari, or use Download-for-phone.'); });
       });
     });
   };
@@ -1023,27 +1276,37 @@
       btn.type = 'button';
       btn.id = 'ce-web-schedule-btn';
       btn.textContent = 'Schedule';
-      btn.title = 'Queue this piece on Meta\u2019s clock (a week+ out)';
+      btn.title = 'Queue this piece for your Mac to book on Meta\u2019s clock (a week+ out)';
       btn.style.cssText = 'display:inline-flex; align-items:center; min-height:40px; padding:8px 14px; font-weight:700; border-radius:10px; color:#fff; background:#2e6f5e; border:1px solid rgba(255,255,255,0.14); cursor:pointer;';
       // H01-7 FIX (2026-09-15, lane H01_DEEP_PANEL_AUDIT): this control was a COMPLETELY silent
       // no-op on the phone web bundle - measured "threw: null, and no toast, no status text, no
       // error". The phone surface is a REVIEW surface served publicly, so a control that looks
       // live and does nothing is the worst combination: the owner cannot tell a refusal from a
-      // success. Mirror the pattern the codebase already uses for exactly this case
-      // (studioSavePoem, index.html:8772, which DOES say "Save unavailable outside the native
-      // Studio bridge") instead of being mute. Short-circuit only on a provably absent bridge,
-      // so a real dispatch can never be falsely reported as unsent.
+      // success.
+      // F-04 (cloud/ce-ui, 2026-09-21): the old handler short-circuited on an absent ceBridge,
+      // but __CE_PHONE_SCHEDULE__ does NOT need the native bridge — it queues through the sync
+      // server (POST /schedule) on the web/LAN surface too. Gating on ceBridge made a working
+      // path a dead no-op there. Call it whenever it is callable; the sync layer itself reports
+      // "Mac unreachable / write key needed" honestly when it cannot reach the Mac.
       btn.onclick = function () {
-        var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
-        if (!br) {
-          if (window.showAppToast) window.showAppToast('Scheduling needs the Mac app \u2014 nothing was sent to Meta.');
+        if (typeof window.__CE_PHONE_SCHEDULE__ === 'function') {
+          try { window.__CE_PHONE_SCHEDULE__(); } catch (e) {
+            if (window.showAppToast) window.showAppToast('Schedule failed: ' + ((e && e.message) || String(e)) + ' \u2014 nothing was queued for Meta. Reload the page and try again.');
+          }
           return;
         }
-        try { window.__CE_PHONE_SCHEDULE__(); } catch (e) {
-          if (window.showAppToast) window.showAppToast('Schedule failed: ' + ((e && e.message) || String(e)) + ' \u2014 nothing was sent to Meta.');
-        }
+        if (window.showAppToast) window.showAppToast('Scheduling needs the Mac app \u2014 nothing was queued. Open the studio on your Mac, or use Download-for-phone.');
       };
       justCreated = true;
+    }
+    /* No surface can schedule without the real path (native bridge or the sync
+       server). Never present a visible control that cannot perform its action. */
+    var hasBridge = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge);
+    var hasSchedulePath = typeof window.__CE_PHONE_SCHEDULE__ === 'function' &&
+      (hasBridge || !!window.__CE_SYNC_ENDPOINT__);
+    if (!hasSchedulePath) {
+      if (btn) btn.remove();
+      return;
     }
     if (btn.parentElement !== home) {
       home.insertBefore(btn, (pack && pack.parentElement === home) ? pack : home.firstChild);
@@ -1528,19 +1791,22 @@
         : (dataUrls.length + ' images (' + first + ' \u2026)');
       /* P1-phone-download: the end state names the step that is left instead of
          claiming a save the sheet has not performed, and a refused sheet keeps
-         the rendered file so the next tap costs nothing. */
+         the rendered file so the next tap costs nothing. Every branch below
+         states only what this code has actually observed: 'Saved' is shown only
+         after saveImages reported the plain download outcome, and the Photos
+         branches say the save is still the user's tap. */
       if (res.outcome === 'needs-tap') {
-        say('Rendered ' + label + ' \u2014 tap Save to Photos once more and it lands in Photos' +
+        say('Rendered ' + label + ' \u2014 not in Photos yet; tap Save to Photos once more and it lands there' +
           (copied ? ' (poem text copied).' : '.'));
       } else if (res.outcome === 'shared') {
-        say('Poem rendered \u2014 tap Save Image once and ' + label + ' lands in Photos (' + W + '\u00d7' + H + ')' +
-          (copied ? ' \u2014 poem text copied.' : '.'));
+        say('Rendered ' + label + ' (' + W + '\u00d7' + H + ') \u2014 not in Photos yet; tap Save Image in the share sheet and it lands there' +
+          (copied ? ' (poem text copied).' : '.'));
       } else {
         say('Saved ' + label + ' (' + W + '\u00d7' + H + ')' + (copied ? ' \u2014 poem text copied.' : '.'));
       }
       return true;
     } catch (err) {
-      say('Poem download failed: ' + (err && err.message ? err.message : err));
+      say('Download failed: ' + (err && err.message ? err.message : err) + ' \u2014 nothing was saved or shared. Check the Wi-Fi and try again.');
       return true;
     } finally {
       holder.remove();
@@ -1719,7 +1985,30 @@
          the number is how the two drift apart, so read the rung. */
       dock.style.setProperty('z-index', 'var(--z-sheet)', 'important');
       dock.style.setProperty('box-sizing', 'border-box', 'important');
-      dock.style.setProperty('background', 'rgba(12, 13, 18, 0.98)', 'important');
+      /* D-05 (2026-09-21, manager): this inline write is the LAST word on the
+         sheet's ground — it is what an actual tap produces, and an inline
+         `!important` beats every stylesheet rule that is not itself `!important`
+         on the same property. The literal rgba(12,13,18,0.98) was authored for
+         the dark studio with the theme never asked, so on cream the sheet stayed
+         near-black under near-black text: measured 402x874, light theme,
+         `#ce-studio-inspector .ce-tools-toggle` rgba-composited rgb(24,22,27)
+         on rgb(17,18,22) = 1.04:1 (invisible) and `.ce-inspector-label`
+         rgb(107,101,119) on rgb(17,18,22) = 3.35:1 (sub-AA). Dark measured
+         17.20:1 / 5.38:1 and is correct, so only the bright branch moves.
+         The ground is asked of the same body class the rest of the app toggles
+         (`document.body.classList.contains('bright-theme')`, set by
+         applyTheme / the boot script from localStorage `ce_theme`), and the
+         cream value is the bright chrome's own rgba(248,246,240,.78) glass at
+         the sheet's authored 0.98 alpha — not a new color. ce-mobile.css
+         re-states the same pair so the sheet is correct whether or not this
+         function ran (the sheet also exists in the `:906` /
+         `.ce-carousel-editor` CSS path); the two can never disagree because the
+         theme test is the same one. */
+      var brightSheet = false;
+      try { brightSheet = document.body.classList.contains('bright-theme'); } catch (_eBright) { }
+      dock.style.setProperty('background',
+        brightSheet ? 'rgba(248, 246, 240, 0.98)' : 'rgba(12, 13, 18, 0.98)', 'important');
+      dock.style.setProperty('color', brightSheet ? '#18161b' : '#f3f1ec', 'important');
       var scroll = dock.querySelector('.ce-inspector-scroll');
       var pinned = dock.querySelector('.ce-inspector-pinned');
       if (scroll) {

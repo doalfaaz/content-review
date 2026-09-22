@@ -89,6 +89,7 @@
     --z-nav-scrim-hi: 114;    /* the scrim on phone */
     --z-nav: 115;             /* the nav drawer */
     --z-shelf: 118;           /* the shelf switch row (above content, below the app bar) */
+    --z-shelf-hi: 119;        /* chrome that must clear the shelf row it sits in */
     --z-appbar: 120;          /* the app's top bar band */
     --z-hud: 121;             /* transient HUD text (nav busy) */
     --z-popover: 130;         /* popovers summoned from chrome (sort menus) */
@@ -984,6 +985,85 @@
   .topbar button, .topbar input {
     -webkit-app-region: no-drag;
   }
+
+  /* ── Three-zone topbar + desktop shelf chips (Zola2, 2026-09-22). ─────────
+     Left and right zones flex equally so the centre chips land on the bar's true
+     midline regardless of how wide each side's controls are — no 800px void, no
+     off-centre cluster. */
+  .ce-topbar-zone { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .ce-topbar-zone--left { flex: 1 1 0; }
+  .ce-topbar-zone--right { flex: 1 1 0; justify-content: flex-end; gap: 8px; }
+
+  .ce-top-shelf {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0 12px;
+    padding: 2px;
+    border: 1px solid var(--card-border);
+    background: var(--card);
+    border-radius: 8px;
+    flex: 0 0 auto;
+  }
+  html.ce-phone .ce-top-shelf { display: none; }
+  /* The chips describe the Library collection, so they only paint there. */
+  html:not(.ce-shelf-on-html) .ce-top-shelf { visibility: hidden; }
+
+  .ce-top-shelf-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: var(--fs-secondary);
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.15s, color 0.15s, background-color 0.15s ease;
+  }
+  .ce-top-shelf-pill .nav-count-badge { font-size: var(--fs-overline); opacity: 0.72; }
+  .ce-top-shelf-pill:hover { color: var(--ink); }
+  .ce-top-shelf-pill.active {
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .ce-top-shelf-pill.active .nav-count-badge { opacity: 0.9; }
+  .ce-top-shelf-pill:focus-visible,
+  .ce-lib-position:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Quiet position read-out: "24 of 2,496 poems". Understated on purpose — a
+     tool label, not a dashboard stat. */
+  .ce-lib-position {
+    font-size: var(--fs-overline);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+    padding: 0 4px;
+  }
+  html.ce-phone .ce-lib-position { display: none; }
+
+  /* Visible field treatment so the search box reads as a field, not floating text. */
+  #search.search-input {
+    margin-left: 0;
+    flex: 0 0 auto;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.28), 0 0 0 0 transparent;
+  }
+  #search.search-input:focus {
+    border-color: var(--accent);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.28), 0 0 0 2px var(--accent-border);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ce-top-shelf-pill { transition: none; }
+  }
   /* Expanded sidebar keeps the floating bar to its right; collapsed → full width. */
   .app-container:has(.sidebar:not(.collapsed)) .topbar { left: 220px; }
 
@@ -1486,23 +1566,28 @@
      layout. Non-fullscreen windows keep the full reservation. */
   body.ce-fullscreen .main-content { padding-top: 10px; }
 
-  /* Poem library grid — row-major CSS grid, not column-count masonry.
-     Multi-column balancing repainted the wrong compositor layer on scroll when
-     incremental chunks loaded (cards looked like they swapped poems). */
-  /* Owner law 2026-09-03: exactly 3 readable columns by default (his earlier
-     "expand to 3, make it readable" ask) — dense mode can tighten below. */
+  /* Poem library grid — TRUE MASONRY (Zola2, 2026-09-22). It was a row-major CSS
+     grid with align-items:start, so a short card in a row left a dead notch under
+     it equal to its tallest neighbour — the owner's "left card ends 110px above the
+     two beside it" defect. Cards now flow into the currently-shortest column, so
+     verse of varying length packs with no vertical gaps. Columns are real flex
+     children built in JS (__ceMasonryAppend), NOT CSS column-count: the 2026-09-03
+     law rejected column-count because its rebalancing repainted the wrong
+     compositor layer on incremental chunk loads (cards looked like they swapped
+     poems). Append-only flex columns never rebalance the items already placed,
+     which keeps that law intact. */
   .masonry-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    align-items: flex-start;
     gap: 20px;
     padding-bottom: 40px;
-    align-items: start;
   }
-  @media (max-width: 1100px) {
-    .masonry-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  @media (max-width: 640px) {
-    .masonry-grid { grid-template-columns: minmax(0, 1fr); }
+  .ce-masonry-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1 1 0;
+    min-width: 0;
   }
 
   .masonry-item {
@@ -1899,7 +1984,8 @@
     transition: background var(--dur-fast) var(--ease-std), color var(--dur-fast) var(--ease-std);
   }
   .ce-toast-undo:hover { background: var(--accent-border); color: var(--ink); }
-  #view.is-dense .masonry-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+  #view.is-dense .masonry-grid { gap: 12px; }
+  #view.is-dense .ce-masonry-col { gap: 12px; }
   .ce-empty-cta {
     margin-top: 12px;
     border: 0; border-radius: var(--radius);
@@ -2782,8 +2868,11 @@
 
   <!-- Workspace -->
   <main class="workspace" aria-label="Content workspace">
-    <!-- Topbar -->
+    <!-- Topbar — three zones (Zola2, 2026-09-22): identity + view controls left,
+         the shelf/filter chips centred, search + settings right. Before this the
+         bar was two clusters with ~800px of dead space between them. -->
     <header class="topbar">
+      <div class="ce-topbar-zone ce-topbar-zone--left">
       <button class="sidebar-toggle-btn" id="sidebar-toggle" title="Toggle Sidebar (⌘B)" aria-label="Toggle Sidebar"><span class="ce-ic ce-ic--sidebar"></span></button>
 
       <!-- Section Switcher (For Poems: Photo vs Paper) -->
@@ -2811,12 +2900,27 @@
         <span id="poem-sort-label">Cadence</span>
       </button>
       <div class="ce-sort-popover" id="poem-sort-popover" role="listbox" aria-label="Sort poems by" hidden></div>
+      </div>
 
       <!-- Saved/Queue launchers live in the sidebar only — topbar duplicates were cut.
            The legacy #meta channel (permanently display:none, wrote queue counts
            nobody could see) was removed with its writers in the 2026-09-18 audit pass. -->
 
-      <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+      <!-- Centre zone: the desk had NO collection switcher on the first screen while
+           the phone did. This row is the desktop twin of #ce-shelf-switch, wired in
+           syncShelfSwitch() from the same live counts (the drawer badges), so the two
+           can never disagree. It paints on the library surface only, like the phone row. -->
+      <nav class="ce-top-shelf" id="ce-top-shelf" aria-label="Library shelf">
+        <button type="button" class="ce-top-shelf-pill active" data-lib="poems">Poems <span class="nav-count-badge" data-top-shelf-count="poems"></span></button>
+        <button type="button" class="ce-top-shelf-pill" data-lib="carousels">Carousels <span class="nav-count-badge" data-top-shelf-count="carousels"></span></button>
+        <button type="button" class="ce-top-shelf-pill" data-lib="posts">Posts <span class="nav-count-badge" data-top-shelf-count="posts"></span></button>
+      </nav>
+
+      <div class="ce-topbar-zone ce-topbar-zone--right">
+        <!-- Position indicator (Zola2, 2026-09-22): a quiet "shown of filtered
+             total" read-out, at the head of the right zone so it never disturbs
+             the centre chips' alignment. Driven by syncLibraryPosition(). -->
+        <span class="ce-lib-position" id="ce-lib-position" role="status" aria-live="polite" hidden></span>
         <input type="text" class="search-input" id="search" placeholder="Search..." autocomplete="off" aria-label="Search" />
         <button class="theme-toggle-btn" id="settings-toggle" type="button" title="Publishing handoff" aria-label="Publishing handoff">
           <span class="ce-ic ce-ic--gear ce-ic--14" aria-hidden="true"></span>
@@ -3063,7 +3167,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=1cb5e39920"></script>
-<script src="./deck_index.js?v=347dc6e80a"></script>
+<script src="./deck_index.js?v=0835ea4fea"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <script>
 /* d01 (b-core, 2026-09-19) — catalog-failure surface. The phone boots ONLY on
@@ -3115,16 +3219,16 @@
   }
 })();
 </script>
-<link rel="stylesheet" href="./native-ideas.css?v=aa2ae90180" />
-<link rel="stylesheet" href="./native-plan.css?v=a8270ce3d6" />
-<link rel="stylesheet" href="./native-saved.css?v=aef73af7c1" />
-<link rel="stylesheet" href="./native-studio.css?v=33f60fd582" />
+<link rel="stylesheet" href="./native-ideas.css?v=e5ddd656c9" />
+<link rel="stylesheet" href="./native-plan.css?v=e2954b4fca" />
+<link rel="stylesheet" href="./native-saved.css?v=73f3339d79" />
+<link rel="stylesheet" href="./native-studio.css?v=92fafca348" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<script src="./ce-touch-edit.js?v=60a8815ddf"></script>
+<script src="./ce-touch-edit.js?v=d53471f4c3"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -3357,7 +3461,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   } catch (_) {}
 })();
 </script>
-<link rel="stylesheet" href="./ce-mobile.css?v=4f84fcc329" />
+<link rel="stylesheet" href="./ce-mobile.css?v=44d07a1b3b" />
 <!-- Ideas surface density + crimson rebind (2026-09-17). The parity renderer
      ships tall outline cards and the catalog is ~600 ideas, so the tab read
      as pink-tinted text walls. Cards now render as compact rows that expand
@@ -3715,7 +3819,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   };
 })();
 </script>
-<script src="./native-ideas.js?v=1550c235d4"></script>
+<script src="./native-ideas.js?v=8cd3804168"></script>
 <script>
 /* Ideas rows expand/collapse companion: the parity renderer rebuilds
    #view innerHTML on every filter/group change, so row state lives in a
@@ -5759,6 +5863,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     deckExportToken: 0,
     poemSaveTimeout: null,
     deckSaveTimeout: null,
+    /* W8-F2: the native push is async, so the deck save ack arrives first and
+       the phone-sync verdict settles later. Track the deck id whose sync is
+       still pending; a settled failure must not be overwritten by a later
+       success claim for a different deck. */
+    studioSaveSyncDeckId: '',
+    studioSaveSyncPending: false,
     poemChunkGen: 0,
     studioDirty: false,
     studioMessage: '',
@@ -7946,7 +8056,58 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
      empty Finder window was presented as "your slides are here" — a hand-off
      that handed off nothing. ok:false means nothing has been exported for this
      piece yet, so the owner gets the next action instead of a false success. */
+  /* ── Slides-folder reveal, TOP-LEVEL (Zola2, 2026-09-22). ──────────────────
+     This used to be a function declared inside renderMain()'s Plan branch, so
+     the top-level ceBatchPublishPrepSelected saw `typeof revealSlidesFolder ===
+     'undefined'` and silently skipped the reveal while still toasting that the
+     folders were revealed. It lives here now, on window, so the Plan handlers
+     and the batch path call the SAME definition. It returns a promise that
+     settles when the native bridge answers with the folder's real fate. */
+  function ceRevealSlidesFolder(q) {
+    var contentId = String((q && q.item && (q.item.content_id || q.item.id)) || (q && (q.content_id || q.id)) || '');
+    if (!contentId) return Promise.resolve(false);
+    var path = '~/Library/Application Support/Content Engine Studio/exports/' + contentId;
+    var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
+    if (!br) {
+      showQueueToast('Slides stored at: ' + path);
+      /* No bridge: the path is real but nothing was opened — not a success. */
+      return Promise.resolve(false);
+    }
+    var revealPromise = new Promise(function (resolve) {
+      window.__CE_FOLDER_PENDING__ = window.__CE_FOLDER_PENDING__ || {};
+      window.__CE_FOLDER_PENDING__[contentId] = resolve;
+      setTimeout(function () {
+        if (window.__CE_FOLDER_PENDING__ && window.__CE_FOLDER_PENDING__[contentId] === resolve) {
+          delete window.__CE_FOLDER_PENDING__[contentId];
+          resolve(false);
+        }
+      }, 8000);
+    });
+    try {
+      br.postMessage({ action: 'openFolder', path: path, report: 'ceFolderOpened:' + contentId });
+    } catch (_of) {
+      delete window.__CE_FOLDER_PENDING__[contentId];
+      try { br.postMessage({ action: 'openFolder', path: path }); } catch (_of2) {}
+      showQueueToast('Slides stored at: ' + path);
+      return Promise.resolve(false);
+    }
+    return revealPromise;
+  }
+  window.ceRevealSlidesFolder = ceRevealSlidesFolder;
+  window.revealSlidesFolder = ceRevealSlidesFolder;
+
   window.ceFolderOpened = function (contentId, ok) {
+    /* Zola2 (2026-09-22): resolve any pending reveal promise for this piece so a
+       caller that needs the REAL outcome (ceBatchPublishPrepSelected) can await
+       it instead of toasting success before the bridge answers. */
+    try {
+      var key = String(contentId || '');
+      var pend = window.__CE_FOLDER_PENDING__ && window.__CE_FOLDER_PENDING__[key];
+      if (pend) {
+        delete window.__CE_FOLDER_PENDING__[key];
+        pend(!!ok);
+      }
+    } catch (_fp) {}
     try {
       if (ok) {
         showAppToast('Slides folder open — drag & drop into Creator Studio!', { icon: 'check' });
@@ -8990,6 +9151,92 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
      shelf subsets (allCleanPoems, __CE_PURE_POSTS__, the ideas dedupe) are
      display counts and must never print as corpus numbers — they are what the
      defect looked like: 2,098 clean poems printed while the store held 2,496. */
+  /* ── TRUE MASONRY (Zola2, 2026-09-22). ───────────────────────────────────
+     Cards are appended into the currently-shortest column instead of a row-major
+     CSS grid, so a short card no longer leaves a dead notch under it. Column
+     count follows the same 3 / 2 / 1 breakpoints the old grid used (1100px,
+     640px). Heights are estimated from each card's face aspect-ratio, which is
+     set in the markup before any image decodes, so packing is stable without
+     waiting on network; a column is never reordered once items land in it. */
+  function ceMasonryColumnCount() {
+    var w = window.innerWidth || document.documentElement.clientWidth || 1440;
+    if (w <= 640) return 1;
+    if (w <= 1100) return 2;
+    return 3;
+  }
+  window.ceMasonryColumnCount = ceMasonryColumnCount;
+
+  function ceMasonryState(grid) {
+    var want = ceMasonryColumnCount();
+    var st = grid.__ceMasonry;
+    /* Validity is "my columns are still my children", NOT isConnected: a grid
+       that is populated before it is inserted into the document is never
+       connected, so isConnected() reported stale forever and every append
+       rebuilt the whole grid. */
+    if (st && st.count === want && st.cols[0] && st.cols[0].parentNode === grid) {
+      return st;
+    }
+    /* Re-entrancy guard. The reflow below calls ceMasonryAppend once per card,
+       and ceMasonryAppend asks for the state again -- without this flag the
+       rebuild recursed into itself once per card and froze the tab. */
+    if (grid.__ceMasonryBuilding) {
+      return st || { count: want, cols: [], heights: [] };
+    }
+    grid.__ceMasonryBuilding = true;
+    try {
+      // Breakpoint changed: re-flow the cards already on screen into the new
+      // column count so a resize never leaves the page at the old width's shape.
+      var items = Array.prototype.slice.call(grid.querySelectorAll('.masonry-item'));
+      grid.innerHTML = '';
+      var cols = [];
+      for (var i = 0; i < want; i++) {
+        var col = document.createElement('div');
+        col.className = 'ce-masonry-col';
+        grid.appendChild(col);
+        cols.push(col);
+      }
+      grid.__ceMasonry = { count: want, cols: cols, heights: new Array(want).fill(0) };
+      var w = (grid.clientWidth || 1200) / want;
+      items.forEach(function (it) {
+        var ratio = Number(it.getAttribute('data-ce-mratio')) || 1.5;
+        ceMasonryAppend(grid, it, w * ratio);
+      });
+    } finally {
+      grid.__ceMasonryBuilding = false;
+    }
+    return grid.__ceMasonry;
+  }
+  window.ceMasonryState = ceMasonryState;
+
+  function ceMasonryAppend(grid, item, estHeight) {
+    var st = ceMasonryState(grid);
+    // Mid-rebuild the state has no columns yet; land the card directly rather
+    // than indexing into an empty array.
+    if (!st || !st.cols || !st.cols.length) { grid.appendChild(item); return; }
+    var pick = 0;
+    for (var i = 1; i < st.heights.length; i++) {
+      if (st.heights[i] < st.heights[pick]) pick = i;
+    }
+    st.cols[pick].appendChild(item);
+    st.heights[pick] += (Number(estHeight) > 0 ? Number(estHeight) : 360) + 20;
+  }
+  window.ceMasonryAppend = ceMasonryAppend;
+
+  // One debounced breakpoint listener: a window resize that crosses 1100/640
+  // re-flows the visible poem cards into the new column count.
+  (function () {
+    var t = 0, last = ceMasonryColumnCount();
+    window.addEventListener('resize', function () {
+      if (ceMasonryColumnCount() === last) return;
+      last = ceMasonryColumnCount();
+      clearTimeout(t);
+      t = setTimeout(function () {
+        var g = document.querySelector('.masonry-grid');
+        if (g) { try { ceMasonryState(g); } catch (_e) {} }
+      }, 120);
+    });
+  })();
+
   function ceCorpusCounts() {
     var cat = { poem: 0, post: 0, idea: 0 };
     if (Array.isArray(window.ALL_CONTENT_DATA)) {
@@ -9974,7 +10221,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       + '<div class="ce-editorial-grid" aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(73,57,41,.05) 1px,transparent 1px),linear-gradient(rgba(73,57,41,.04) 1px,transparent 1px);background-size:29px 29px;mask-image:linear-gradient(180deg,rgba(0,0,0,.42),transparent 72%);"></div>'
       + '<div class="ce-editorial-topline" style="position:absolute;left:64px;right:64px;top:38px;display:flex;align-items:center;gap:12px;color:#8a7665;font:600 var(--fs-overline)/1.2 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;"><span>Doalfaaz</span><span style="height:1px;flex:1;background:#b9a795;"></span><span>Poem / ' + escapeHtml(String(title || 'Untitled').slice(0, 22)) + '</span></div>'
       + '<div class="ce-editorial-accent" aria-hidden="true" style="position:absolute;left:64px;top:84px;width:34px;height:4px;background:#c23d50;border-radius:99px;"></div>'
-      + '<div class="ce-poem-text-block" data-ce-font-start="' + fontSize + '" data-ce-font-floor="' + poemNoWrapFloorPx(canvasW) + '" style="position:absolute;z-index:var(--z-content);left:64px;right:64px;' + topStyle + 'font-family:' + fontFamily + ';font-size:' + fontSize + 'px;line-height:' + lineHeight + ';font-weight:' + fontWeight + ';color:' + customColor + ';text-align:' + align + ';max-width:100%;max-height:calc(100% - 150px);overflow:hidden;">' + formattedLines + '</div>'
+      + '<div class="ce-poem-text-block" lang="hi" data-ce-font-start="' + fontSize + '" data-ce-font-floor="' + poemNoWrapFloorPx(canvasW) + '" style="position:absolute;z-index:var(--z-content);left:64px;right:64px;' + topStyle + 'font-family:' + fontFamily + ';font-size:' + fontSize + 'px;line-height:' + lineHeight + ';font-weight:' + fontWeight + ';color:' + customColor + ';text-align:' + align + ';max-width:100%;max-height:calc(100% - 150px);overflow:hidden;">' + formattedLines + '</div>'
       + '<div class="ce-editorial-footer" style="position:absolute;z-index:var(--z-content);left:64px;right:64px;bottom:38px;display:flex;justify-content:space-between;gap:16px;align-items:center;color:#766b60;font:500 var(--fs-secondary)/1.4 "Kohinoor Devanagari","Noto Sans Devanagari","Devanagari Sangam MN",sans-serif;letter-spacing:.03em;"><span>एक ठहरा हुआ सच</span><span>' + escapeHtml(sigText) + '</span></div>'
       + '</div></div>';
   }
@@ -10051,7 +10298,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         <div style="position:absolute; inset:0; background-color:#1c1a24; background-image:url('${photoUrl}'); background-size:cover; background-position:center; filter:grayscale(1) contrast(1.06) brightness(0.85);"></div>
         <div style="position:absolute; inset:0; background:${shade}; z-index:var(--z-canvas);"></div>
         <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(5,5,6,0.78) 0%, rgba(5,5,6,0.30) 30%, rgba(5,5,6,0) 52%); z-index:var(--z-canvas);"></div>
-        <div class="ce-poem-text-block" data-ce-font-start="${fontSize}" data-ce-font-floor="${Math.round(30 * canvasW / 1080)}" style="position:absolute; z-index:var(--z-content); left:${previewInset}px; right:${previewInset}px; ${topStyle} font-family:${fontFamily}; font-size:${fontSize}px; line-height:${lineHeight}; font-weight:${fontWeight}; color:${customColor}; text-align:${align}; text-shadow:${shadowEnabled ? '0 2px 14px rgba(0,0,0,0.9)' : 'none'}; max-width:100%; max-height:calc(100% - 64px); overflow:hidden;">
+        <div class="ce-poem-text-block" lang="hi" data-ce-font-start="${fontSize}" data-ce-font-floor="${Math.round(30 * canvasW / 1080)}" style="position:absolute; z-index:var(--z-content); left:${previewInset}px; right:${previewInset}px; ${topStyle} font-family:${fontFamily}; font-size:${fontSize}px; line-height:${lineHeight}; font-weight:${fontWeight}; color:${customColor}; text-align:${align}; text-shadow:${shadowEnabled ? '0 2px 14px rgba(0,0,0,0.9)' : 'none'}; max-width:100%; max-height:calc(100% - 64px); overflow:hidden;">
           ${formattedLines}
         </div>
         <div style="position:absolute; z-index:var(--z-content); left:${previewInset}px; right:${align === 'center' ? '0' : previewInset + 'px'}; bottom:28px; font-family:'Kohinoor Devanagari','Noto Sans Devanagari','Devanagari Sangam MN',sans-serif; font-size:var(--fs-body); font-weight:500; color:rgba(255,255,255,0.75); text-align:${align};">
@@ -10142,7 +10389,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         ${preset.hasMarginLine ? `
           <div style="position:absolute; left:32px; top:0; bottom:0; width:2px; background:#d4a58c; opacity:0.8; z-index:var(--z-canvas);"></div>
         ` : ''}
-        <div class="ce-poem-text-block" data-ce-font-start="${fontSize}" data-ce-font-floor="${Math.round(30 * canvasW / 1080)}" style="position:absolute; z-index:var(--z-content); left:${leftPad}px; right:${previewInset}px; ${topStyle} font-family:${fontFamily}; font-size:${fontSize}px; line-height:${lineHeight}; font-weight:${fontWeight}; color:${customColor}; text-align:${align}; text-shadow:${shadowEnabled ? '0 1px 4px rgba(0,0,0,0.2)' : 'none'}; max-width:100%;">
+        <div class="ce-poem-text-block" lang="hi" data-ce-font-start="${fontSize}" data-ce-font-floor="${Math.round(30 * canvasW / 1080)}" style="position:absolute; z-index:var(--z-content); left:${leftPad}px; right:${previewInset}px; ${topStyle} font-family:${fontFamily}; font-size:${fontSize}px; line-height:${lineHeight}; font-weight:${fontWeight}; color:${customColor}; text-align:${align}; text-shadow:${shadowEnabled ? '0 1px 4px rgba(0,0,0,0.2)' : 'none'}; max-width:100%;">
           ${formattedLines}
         </div>
         <div style="position:absolute; z-index:var(--z-content); left:${leftPad}px; right:${align === 'center' ? '0' : previewInset + 'px'}; bottom:28px; font-family:'Kohinoor Devanagari','Noto Sans Devanagari','Devanagari Sangam MN',sans-serif; font-size:var(--fs-body); font-weight:500; color:${preset.sig}; text-align:${align === 'center' ? 'center' : (preset.hasMarginLine ? 'right' : align)};">
@@ -10629,12 +10876,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
   function copyPlainText(text) {
     var value = String(text || '');
-    try {
-      if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge) {
-        window.webkit.messageHandlers.ceBridge.postMessage({ action: 'copyText', text: value });
-        window.__CE_LAST_COPY_OK__ = true;
-      }
-    } catch (_bridgeErr) {}
     function legacyCopy() {
       var field = document.createElement('textarea');
       field.value = value;
@@ -10649,10 +10890,48 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       field.remove();
       return copied;
     }
-    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-      return navigator.clipboard.writeText(value).then(function () { return true; }).catch(legacyCopy);
+    /* F-COPY-TRUTH (cloud/ce-copy, 2026-09-21): this used to set
+       __CE_LAST_COPY_OK__ = true the moment the message was POSTED, so a native
+       pasteboard refusal still toasted “Copied” and nothing ever read the real
+       answer. The bridge replies later through __CE_COPY_RESULT__ (AppDelegate
+       copyText). Resolve on THAT answer with a bounded wait; if the native side
+       never answers, fall back to the web clipboard rather than lying. */
+    var bridge = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
+    if (bridge) {
+      return new Promise(function (resolve) {
+        var settled = false;
+        var prevHandler = window.__CE_COPY_RESULT__;
+        var finish = function (ok) {
+          if (settled) return;
+          settled = true;
+          window.__CE_COPY_RESULT__ = prevHandler;
+          window.__CE_LAST_COPY_OK__ = !!ok;
+          resolve(!!ok);
+        };
+        /* Write locally FIRST, then ask the bridge. Waiting on the native answer
+           before copying anything left a 1.2s window in which the clipboard was
+           still empty, so a paste immediately after the click got nothing. The
+           native pasteboard answer still decides what we CLAIM -- this only
+           makes sure something real is on the clipboard straight away. */
+        var localOk = legacyCopy();
+        window.__CE_COPY_RESULT__ = function (ok) { finish(!!ok); };
+        setTimeout(function () { finish(localOk); }, 1200);
+        try {
+          bridge.postMessage({ action: 'copyText', text: value });
+        } catch (_bridgeErr) {
+          window.__CE_COPY_RESULT__ = prevHandler;
+          finish(localOk);
+        }
+      });
     }
-    return Promise.resolve(legacyCopy());
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      return navigator.clipboard.writeText(value)
+        .then(function () { window.__CE_LAST_COPY_OK__ = true; return true; })
+        .catch(function () { var ok = legacyCopy(); window.__CE_LAST_COPY_OK__ = ok; return ok; });
+    }
+    var ok = legacyCopy();
+    window.__CE_LAST_COPY_OK__ = ok;
+    return Promise.resolve(ok);
   }
 
   function studioDeckId(item, type) {
@@ -10661,8 +10940,55 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return String(item.id || '');
   }
 
+  /* F-POEM-DECK (cloud/ce-poem, 2026-09-21): the phone long-press commit in
+     ce-touch-edit.js resolves its target through studioDeck() and its text
+     change is dropped on the floor when that returns null. Poems ARE not a
+     deck, but they are the same EDITABLE RECORD, so resolve them here instead
+     of returning null into a silent discard. The returned object is the poem's
+     own backing record: slide 0 is a live view over item.text, so a write to
+     deck.slides[0].text lands on the poem (and reaches the poem save path). */
+  function studioPoemDeck() {
+    var item = state.currentItem;
+    if (!item) return null;
+    /* A write through this view is a real edit (the phone long-press commit
+       lands here). Mirror it into the poem draft and arm the poem autosave so
+       the change reaches SQLite through studioSavePoem, not ce_deck_edits —
+       the deck-edit store is keyed by deck id and would strand a poem's text. */
+    var __poemDeckWrite = function (v) {
+      item.text = String(v == null ? '' : v);
+      try { state.studioDraftText = item.text; } catch (_pd) {}
+      try { state.studioDirty = true; } catch (_pd2) {}
+      try { if (typeof studioTriggerAutoSave === 'function') studioTriggerAutoSave(); } catch (_pd3) {}
+    };
+    var slides = [{
+      role: 'poem',
+      single: true,
+      get text() { return String(item.text || ''); },
+      set text(v) { __poemDeckWrite(v); },
+      get html() { return String(item.text || ''); },
+      set html(v) { __poemDeckWrite(v); }
+    }];
+    return {
+      __poem: true,
+      id: String(item.id || item.content_id || ''),
+      title: String(item.title || String(item.text || '').split(/\r?\n/)[0] || 'Poem'),
+      look: item.look,
+      slides: slides
+    };
+  }
+
   function studioDeck() {
-    if (!state.currentItem || (state.currentType !== 'carousel' && state.currentType !== 'post')) return null;
+    if (!state.currentItem) return null;
+    if (state.currentType === 'poem') return studioPoemDeck();
+    if (state.currentType !== 'carousel' && state.currentType !== 'post') {
+      /* F-POEM-DECK: a caller that reaches here is committing an edit. Silent
+         null is how that edit used to disappear; say so instead. */
+      studioSetMessage('This piece cannot be edited in Studio yet — the change was not saved.');
+      if (typeof showAppToast === 'function') {
+        showAppToast('This piece cannot be edited in Studio yet — the change was not saved.', { isError: true, icon: 'warning' });
+      }
+      return null;
+    }
     var id = studioDeckId(state.currentItem, state.currentType);
     var designId = state.currentItem && state.currentItem.designId;
     // The active item can be a Saved Bank/Queue snapshot. Prefer its authored
@@ -10694,6 +11020,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // exists only while the asset-less post is open in Studio.
       synthDeck.__synth = true;
       return synthDeck;
+    }
+    /* F-POEM-DECK: a carousel/post whose backing record never hydrated. The
+       commit path reads a null here as "nothing to write" and drops the edit,
+       so surface the failure rather than returning silently. */
+    studioSetMessage('This design is still loading — the change was not saved. Try again in a moment.');
+    if (typeof showAppToast === 'function') {
+      showAppToast('This design is still loading — the change was not saved.', { isError: true, icon: 'warning' });
     }
     return null;
   }
@@ -11783,10 +12116,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           state.studioDraftText = null;
           state.studioDirty = false;
           /* BO-P2: the save result now carries the phone-sync outcome — "Saved"
-             used to claim the whole pipeline when only the SQLite leg landed. */
+             used to claim the whole pipeline when only the SQLite leg landed.
+             W8-F2: the push is async, so 'pending' means the Mac save landed
+             while the phone copy is still unconfirmed; the sync verdict settles
+             separately through window.__CE_SAVE_SYNC_RESULT__. */
+          state.studioSaveSyncDeckId = (syncState === 'pending') ? String(id) : '';
+          state.studioSaveSyncPending = (syncState === 'pending');
           state.studioMessage = syncState === 'failed'
             ? 'Saved on this Mac — the phone copy did not confirm (sync failed; will retry on next save).'
-            : 'Saved to native library.';
+            : syncState === 'pending'
+              ? 'Saved on this Mac. Phone sync is still confirming…'
+              : 'Saved to native library.';
         }
       } else {
         state.studioSaveFailed = true;
@@ -11818,6 +12158,29 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     state.studioSaveFailed = false;
     return true;
   }
+
+  /* W8-F2: the native deck save is a two-leg pipeline — SQLite (local, the
+     real save) and the async phone/deck-sync push. The local ack fires first;
+     this is the web-side settle hook the native push calls back into once the
+     push resolves, so a pending phone-sync state cannot hang forever. It only
+     ever touches the SYNC sentence: local save success/failure is owned by
+     __CE_SAVE_RESULT__ and is never reversed here. */
+  window.__CE_SAVE_SYNC_RESULT__ = function (deckId, ok) {
+    var target = String(deckId == null ? '' : deckId);
+    // Ignore a verdict for a deck that is not the one still waiting, so a late
+    // result from an earlier save cannot overwrite the current state's message.
+    if (!state.studioSaveSyncPending || target !== String(state.studioSaveSyncDeckId || '')) return;
+    state.studioSaveSyncPending = false;
+    state.studioSaveSyncDeckId = '';
+    // Truthful settle: a confirmed push clears the pending sentence; an
+    // unconfirmed push says the Mac save landed but the phone copy did not.
+    state.studioMessage = (ok === true)
+      ? 'Saved to native library. Phone sync confirmed.'
+      : 'Saved on this Mac — the phone copy did not confirm (sync failed; will retry on next save).';
+    studioUpdateHistoryControls();
+    var msgEl = document.getElementById('studio-save-msg');
+    if (msgEl) msgEl.textContent = state.studioMessage;
+  };
 
   function studioExportUnavailable() {
     studioSetMessage('Full-resolution file export is not connected in this native build yet.');
@@ -12110,6 +12473,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
            empty segments so the count the owner reads is real. */
         var segs = paths ? paths.split(',').filter(function (p) { return p && p.trim(); }) : [];
         var count = segs.length;
+        /* F-EXPORT-ZERO (cloud/ce-export, 2026-09-21): ok with no non-empty
+           path wrote nothing, but this branch still said "Exported 0 slides"
+           in the success voice. Zero exported slides is a failure, not a
+           success with a small number. */
+        if (count === 0) {
+          studioSetMessage('Export failed: the native library reported success but wrote no slides. Nothing was exported.');
+          return;
+        }
         markQueueItemsExported(deckExportId, paths);
         studioSetMessage('Exported ' + count + ' slide' + (count === 1 ? '' : 's') + ' to Application Support exports.');
       } else {
@@ -15629,18 +16000,55 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // and mobile viewports that lay out above 700px before pinch/scale).
       var phoneDock = (((typeof window !== 'undefined' && window.innerWidth) || 1440) <= 700)
         || document.documentElement.classList.contains('ce-phone');
-      var dockToggleMarkup = phoneDock
+      /* F-DOCK-02 (fix/carousel-tools-toggle, 2026-09-21): the Tools toggle may
+         only exist when a `.ce-carousel-editor` is there for it to open. On the
+         static-fallback canvas path (deck without gallery slides, or a deck whose
+         slides are still hydrating) `getElementById('ce-studio-inspector')` is
+         null, `dockControls` falls back to `#carousel-dock-controls`, and the
+         painted toggle could never bind — measured live: `t.onclick` was an
+         object (never assigned), tap left aria-expanded false, and ZERO
+         `.ce-carousel-editor` nodes existed in the document. Resolve the editor
+         BEFORE composing the markup: no editor -> no toggle (the columns render
+         in-flow anyway on that surface); editor mounts later -> the next
+         renderCarouselDock pass paints the toggle bound. */
+      var toolsEditorEl0 = dockControls.closest('.ce-carousel-editor') || document.querySelector('.ce-carousel-editor');
+      var dockToggleMarkup = (phoneDock && toolsEditorEl0)
         ? '<button type="button" class="ce-tools-toggle" id="ce-tools-toggle" aria-expanded="false" aria-controls="ce-studio-inspector">'
           + '<span class="ce-tools-toggle-label">Tools</span>'
           + '<span class="ce-tools-toggle-hint" title="Design, text, caption">Design, text, caption</span></button>'
         : '';
+      /* F-DOCK-03 (LANE W3, 2026-09-22): the markup above is conditional on a node
+         that mounts ASYNCHRONOUSLY, and F-DOCK-02's own comment claimed the
+         recovery was "editor mounts later -> the next renderCarouselDock pass
+         paints the toggle bound". NOTHING GUARANTEED THAT PASS. All 9
+         renderCarouselDock call sites are event-driven (open, slide select, undo,
+         hydration); none is an observer or a post-mount callback keyed to
+         `.ce-carousel-editor` APPEARING. Measured 2026-09-22 in the release gate:
+         on a carousel open that took the static-fallback canvas, the editor
+         mounted at index.html:13752 but the dock was never re-rendered, so ZERO
+         `#ce-tools-toggle` existed and the design/text/caption sheet was
+         UNREACHABLE for that entire open (HARD-4 red, 2/2 runs).
+         Root fix: stop hoping for a later pass and MAKE the mount itself the
+         trigger. The observer is installed only in the missing-editor state, is
+         a named singleton so repeated opens cannot stack watchers, disconnects on
+         first hit, and re-renders the dock through the same function that painted
+         it so the toggle is painted AND bound. */
+      if (phoneDock && !toolsEditorEl0 && !window.__CE_TOOLS_TOGGLE_WATCH__) {
+        window.__CE_TOOLS_TOGGLE_WATCH__ = new MutationObserver(function () {
+          if (!document.querySelector('.ce-carousel-editor')) return;
+          try { window.__CE_TOOLS_TOGGLE_WATCH__.disconnect(); } catch (_dsc) {}
+          window.__CE_TOOLS_TOGGLE_WATCH__ = null;
+          renderCarouselDock(totalSlides, deck, slides);
+        });
+        window.__CE_TOOLS_TOGGLE_WATCH__.observe(document.body, { childList: true, subtree: true });
+      }
       dockControls.innerHTML = dockToggleMarkup
         + '<div class="ce-inspector-scroll">' + presentationColumn + slideColumn + contentColumn + '</div>'
         + '<div class="ce-inspector-pinned">' + captionSection + '</div>';
       try { if (window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__) requestAnimationFrame(window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__); } catch (_fitQ) {}
-      if (phoneDock) {
+      if (phoneDock && toolsEditorEl0) {
         var toolsToggleBtn = dockControls.querySelector('#ce-tools-toggle');
-        var toolsEditorEl = dockControls.closest('.ce-carousel-editor') || document.querySelector('.ce-carousel-editor');
+        var toolsEditorEl = toolsEditorEl0;
         if (toolsToggleBtn && toolsEditorEl) {
           toolsToggleBtn.onclick = function () {
             var toolsOpen = toolsEditorEl.classList.toggle('ce-tools-open');
@@ -17562,8 +17970,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   window.ceMakeCardKeyboardOperable = ceMakeCardKeyboardOperable;
 
-  function ceAppendCarouselCard(track, deck, idx) {
-    if (ceLibraryItemTriaged('carousel', deck)) return;
+  function ceAppendCarouselCard(track, deck, idx, triage) {
+    if ((triage ? triage.triaged('carousel', deck) : ceLibraryItemTriaged('carousel', deck))) return;
     var card = document.createElement('div');
     card.className = 'pure-card deck-card';
     var html;
@@ -17592,8 +18000,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }
     track.appendChild(card);
   }
-  function ceAppendPostCard(track, post, idx) {
-    if (ceLibraryItemTriaged('post', post)) return;
+  function ceAppendPostCard(track, post, idx, triage) {
+    if ((triage ? triage.triaged('post', post) : ceLibraryItemTriaged('post', post))) return;
     var card = document.createElement('div');
     card.className = 'pure-card deck-card';
     var look = postCanonicalLook(post);
@@ -17627,8 +18035,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }
     track.appendChild(card);
   }
-  function ceAppendRailFallback(track, kind, item) {
-    if (ceLibraryItemTriaged(kind, item)) return;
+  function ceAppendRailFallback(track, kind, item, triage) {
+    if ((triage ? triage.triaged(kind, item) : ceLibraryItemTriaged(kind, item))) return;
     var card = document.createElement('div');
     card.className = 'pure-card deck-card';
     var title = String(item && (item.title || item.id) || (kind === 'post' ? 'Untitled post' : 'Untitled'));
@@ -17680,13 +18088,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     try {
       ceRemoveRailLoadMore(track);
       cePromoteRailChunk(track, kind, start, count);
+      /* PERF: the chunk's rows share one triage index instead of rescanning
+         savedItems + queueItems once per appended card. */
+      var __chunkTriage = ceLibraryTriageIndex();
       for (var i = 0; i < count; i++) {
         var item = items[start + i];
         try {
-          if (kind === 'carousel') ceAppendCarouselCard(track, item, (track.__ceBase || 0) + start + i);
-          else ceAppendPostCard(track, item, (track.__ceBase || 0) + start + i);
+          if (kind === 'carousel') ceAppendCarouselCard(track, item, (track.__ceBase || 0) + start + i, __chunkTriage);
+          else ceAppendPostCard(track, item, (track.__ceBase || 0) + start + i, __chunkTriage);
         } catch (_e) {
-          try { ceAppendRailFallback(track, kind, item); } catch (_e2) {}
+          try { ceAppendRailFallback(track, kind, item, __chunkTriage); } catch (_e2) {}
         }
       }
       track.__ceChunkMounted = start + count;
@@ -18222,9 +18633,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         state.savedSelectedIds.clear();
         updateTopbarSavedBadge();
         updateTopbarQueueBadge();
-        if (__stagedN > 0) showAppToast('Staged ' + __stagedN + ' item' + (__stagedN === 1 ? '' : 's') + ' to Plan calendar', { icon: 'queue' });
-        if (typeof navigateTo === 'function') navigateTo('plan');
-        else renderMain();
+        if (__stagedN > 0) {
+          showAppToast('Staged ' + __stagedN + ' item' + (__stagedN === 1 ? '' : 's') + ' to Plan calendar', { icon: 'queue' });
+          /* F-PROMOTE-NAV: navigate only when something actually landed in the
+             queue; a fully-failed stage must not land on an empty calendar. */
+          if (typeof navigateTo === 'function') navigateTo('plan');
+          else renderMain();
+        } else {
+          renderMain();
+        }
       };
     }
     var rejectBulkBtn = container.querySelector('#ce-bulk-reject-btn');
@@ -18422,9 +18839,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           }
           if (window.__CE_SAVED_BANK_PUSH__) { try { window.__CE_SAVED_BANK_PUSH__(); } catch (_e2) {} }
           updateTopbarSavedBadge();
-          if (__queued) showAppToast('Added to Plan calendar', { icon: 'calendar' });
-          if (typeof navigateTo === 'function') navigateTo('plan');
-          else renderMain();
+          /* F-PROMOTE-NAV (cloud/ce-saved, 2026-09-21): the jump to Plan ran even
+             when the queue add failed, landing the owner on a calendar that does
+             not hold the piece he just promoted. Navigate only on success; a
+             failed add stays here with the row's own honest message. */
+          if (__queued) {
+            showAppToast('Added to Plan calendar', { icon: 'calendar' });
+            if (typeof navigateTo === 'function') navigateTo('plan');
+            else renderMain();
+          } else {
+            renderMain();
+          }
         };
       }
 
@@ -18855,6 +19280,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (window.__CE_POEM_IO__) { try { window.__CE_POEM_IO__.disconnect(); } catch (_e) {} window.__CE_POEM_IO__ = null; }
 
         function appendPoemChunk(requested) {
+          /* The triage index must be rebuilt per chunk, not captured once for
+             the whole render: chunks mount later (load-more and the scroll
+             observer), and a poem saved or rejected in between would still be
+             shown by a snapshot taken before that happened. Building it here is
+             O(saved + queued), not O(poems), so the per-row scan stays gone. */
+          var __poemTriage = ceLibraryTriageIndex();
           if (poemGen !== state.poemChunkGen) return 0;
           const size = Number(requested) > 0 ? Number(requested) : window.__CE_POEM_CHUNK_SIZE__;
           const presetCount = state.poemSection === 'photo' ? PHOTO_PRESETS.length : PAPER_PRESETS.length;
@@ -18864,7 +19295,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             const idx = poemCursor;
             const poem = poems[idx];
 
-            if (ceLibraryItemTriaged('poem', poem)) {
+            if (__poemTriage.triaged('poem', poem)) {
               poemCursor++;
               continue;
             }
@@ -18970,11 +19401,23 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                 style: surfaceStyle
               });
             }
-            masonry.appendChild(item);
+            // TRUE MASONRY (Zola2): pack into the shortest column using the
+            // card face's declared aspect-ratio, known before any image decodes.
+            var __mRatio = 1.5;
+            var __mRatioM = /aspect-ratio:\s*([0-9.]+)\s*\/\s*([0-9.]+)/.exec(__poemFaceHtml || '');
+            if (__mRatioM) {
+              var __mW = parseFloat(__mRatioM[1]); var __mH = parseFloat(__mRatioM[2]);
+              if (__mW > 0 && __mH > 0) __mRatio = __mH / __mW;
+            }
+            var __mEst = (masonry.clientWidth || 1200) / ceMasonryColumnCount() * __mRatio;
+            try { item.setAttribute('data-ce-mratio', String(__mRatio)); } catch (_mr) {}
+            if (masonry && typeof ceMasonryAppend === 'function') ceMasonryAppend(masonry, item, __mEst);
+            else masonry.appendChild(item);
             } catch (_cardErr) {}
             poemCursor++;
           }
           window.__CE_POEM_MOUNTED_COUNT__ = poemCursor;
+          try { if (typeof syncLibraryPosition === 'function') syncLibraryPosition(); } catch (_lp) {}
           if (poemLoadMoreBtn && poemCursor < poems.length) {
             poemLoadMoreBtn.textContent = 'Load more poems (' + (poems.length - poemCursor) + ')';
           }
@@ -19022,6 +19465,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
       } else if (state.libraryType === 'carousels') {
         if (poemSections) poemSections.style.display = 'none';
+        /* PERF: one id index for the whole filter pass, not one scan per row. */
+        var __deckTriage = ceLibraryTriageIndex();
         /* In native mode, never fall back to static deck fixtures. */
         var deckIndex;
         if (window.__CE_NATIVE_APP__) {
@@ -19033,7 +19478,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         }
         const decks = deckIndex.filter(d => {
           if (!d || typeof d !== 'object') return false;
-          if (ceLibraryItemTriaged('carousel', d)) return false;
+          if (__deckTriage.triaged('carousel', d)) return false;
           if (!query) return true;
           var __dhay = (d.title || '') + ' ' + (d.pillar || '');
           if (typeof window.ceSearchHit === 'function') return window.ceSearchHit(__dhay, queryFold);
@@ -19211,6 +19656,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           }
         }
         var rawPosts;
+        /* PERF: one id index for the whole filter pass, not one scan per row. */
+        var __postTriage = ceLibraryTriageIndex();
         if (window.__CE_NATIVE_APP__) {
           rawPosts = ((typeof ceSafePurePosts === 'function') ? ceSafePurePosts() : ((window.__CE_PURE_POSTS__ || function () { return window.__NATIVE_POSTS__ || []; })())).filter(function (p) {
             if (!p || typeof p !== 'object') return false;
@@ -19223,7 +19670,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           rawPosts = (window.ALL_CONTENT_DATA || []).filter(function (x) { return x.kind === 'post'; });
         }
         const posts = rawPosts.filter(p => {
-          if (ceLibraryItemTriaged('post', p)) return false;
+          if (__postTriage.triaged('post', p)) return false;
           if (!query) return true;
           var __phay = (p.title || '') + ' ' + (p.body || '');
           if (typeof window.ceSearchHit === 'function') return window.ceSearchHit(__phay, queryFold);
@@ -19790,34 +20237,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         });
       }
 
-      function revealSlidesFolder(q) {
-        var contentId = String(q.item && (q.item.content_id || q.item.id) || '');
-        if (!contentId) return;
-        var path = '~/Library/Application Support/Content Engine Studio/exports/' + contentId;
-        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge) {
-          /* WL0610 (2026-09-19): this posted 'openFolder' and then ALWAYS toasted
-             success. When the export folder does not exist yet (nothing exported
-             for this piece), the bridge opened an empty Finder window and the
-             owner was told the slides were there to drag — a manual hand-off that
-             silently hands off nothing. Ask the bridge to report the truth back
-             and only claim success when the folder is real. */
-          try {
-            window.webkit.messageHandlers.ceBridge.postMessage({ action: 'openFolder', path: path, report: 'ceFolderOpened:' + contentId });
-          } catch (_of) {
-            window.webkit.messageHandlers.ceBridge.postMessage({ action: 'openFolder', path: path });
-            showQueueToast('Slides stored at: ' + path);
-            return;
-          }
-          /* COPY LAW #1 — F03 (w12-fix1, 2026-09-20): this toasted "Opening slides
-             folder — drag & drop into Creator Studio once it appears" BEFORE the
-             bridge had answered anything. The real fate arrives in
-             window.ceFolderOpened (WL0610) — that is the only place allowed to
-             claim the hand-off happened. Claiming it here meant a success toast
-             followed by nothing whenever the resolve failed. */
-        } else {
-          showQueueToast('Slides stored at: ' + path);
-        }
-      }
+      /* Zola2 (2026-09-22): the reveal now lives at TOP level
+         (window.ceRevealSlidesFolder / window.revealSlidesFolder) so the
+         top-level ceBatchPublishPrepSelected can call and await it. The Plan
+         handlers below still call the bare name, which resolves to that global. */
+      var revealSlidesFolder = window.ceRevealSlidesFolder;
       /* WL0610 companion: the bridge answers with the real fate of the folder.
          `ok:false` means nothing was exported for this piece yet, so the owner
          gets the next action instead of a false success. Registered at TOP
@@ -20121,7 +20545,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
            artwork, carrying selection + type + author + the piece's own actions.
            Authored artwork is never overlaid — the rail is a footer, not a badge. */
         return `
-          <div class="ce-kanban-card${isUnscheduled ? ' ce-plan-inbox-card ce-staged-row--inbox' : ''}${isPlanSelected ? ' is-selected' : ''}" data-queue-index="${idx}" draggable="true" role="listitem" aria-label="${typeLabel}${creatorLabel ? ', ' + escapeHtml(creatorLabel) : ''}${queueDisplayTitle(q) ? ', ' + escapeHtml(queueDisplayTitle(q)) : ''}">
+          <div class="ce-kanban-card${isUnscheduled ? ' ce-plan-inbox-card ce-staged-row--inbox' : ''}${isPlanSelected ? ' is-selected' : ''}" data-queue-index="${idx}" data-queue-id="${escapeHtml(String(q.id || ''))}" draggable="true" role="listitem" aria-label="${typeLabel}${creatorLabel ? ', ' + escapeHtml(creatorLabel) : ''}${queueDisplayTitle(q) ? ', ' + escapeHtml(queueDisplayTitle(q)) : ''}">
             <div class="ce-kanban-art-block">
               <div class="ce-staged-art-wrap ce-staged-open" data-idx="${idx}" title="Click to edit in Studio" style="cursor:pointer;">
                 <div class="ce-staged-face-preview">
@@ -20391,7 +20815,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           ${planMode === 'list' ? (planCalendarVisible.length > 0 ? `
             <div class="ce-staged-list">
               ${planCalendarVisible.map(({ q, idx }) => `
-                <div class="ce-staged-row${state.planSelectedIds && state.planSelectedIds.has(q.id) ? ' is-selected' : ''}" data-queue-index="${idx}" role="listitem" aria-label="${escapeHtml(queueTypeLabel(q))}${queueCreatorLabel(q) ? ', ' + escapeHtml(queueCreatorLabel(q)) : ''}, ${escapeHtml(queueDisplayTitle(q))}${q.scheduled && q.scheduleTime ? ', ' + escapeHtml(q.scheduleSlot || q.scheduleTime) : ''}" style="display:flex; flex-direction:row; align-items:stretch; gap:18px; padding:16px 18px; margin-bottom:14px; border-radius:14px; background:var(--card-bg, rgba(255,255,255,0.04)); border:1px solid var(--border-color, rgba(120,120,150,0.18)); box-shadow:0 2px 10px rgba(0,0,0,0.06); position:relative;">
+                <div class="ce-staged-row${state.planSelectedIds && state.planSelectedIds.has(q.id) ? ' is-selected' : ''}" data-queue-index="${idx}" data-queue-id="${escapeHtml(String(q.id || ''))}" role="listitem" aria-label="${escapeHtml(queueTypeLabel(q))}${queueCreatorLabel(q) ? ', ' + escapeHtml(queueCreatorLabel(q)) : ''}, ${escapeHtml(queueDisplayTitle(q))}${q.scheduled && q.scheduleTime ? ', ' + escapeHtml(q.scheduleSlot || q.scheduleTime) : ''}" style="display:flex; flex-direction:row; align-items:stretch; gap:18px; padding:16px 18px; margin-bottom:14px; border-radius:14px; background:var(--card-bg, rgba(255,255,255,0.04)); border:1px solid var(--border-color, rgba(120,120,150,0.18)); box-shadow:0 2px 10px rgba(0,0,0,0.06); position:relative;">
                   <button type="button" class="ce-plan-select-toggle ce-plan-select-toggle--list${state.planSelectedIds && state.planSelectedIds.has(q.id) ? ' is-selected' : ''}" data-idx="${idx}" aria-label="Select for batch action" title="Select for batch action">${state.planSelectedIds && state.planSelectedIds.has(q.id) ? '<span class="ce-ic ce-ic--check ce-ic--11"></span>' : ''}</button>
                   <div class="ce-kanban-art-block" style="flex:0 0 112px;">
                     <div class="ce-staged-art-wrap" data-idx="${idx}" style="width:112px; height:140px; border-radius:0; overflow:hidden; background:#111; border:0; cursor:pointer; position:relative; display:flex; align-items:center; justify-content:center;" title="Click to edit in Studio">
@@ -20691,8 +21115,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       planBox.querySelectorAll('.ce-plan-select-toggle').forEach(function (btn) {
         btn.onclick = function (e) {
           e.stopPropagation();
-          var idx = Number(btn.getAttribute('data-idx'));
-          var q = state.queueItems[idx];
+          var __t = ceQueueResolveTarget(btn);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          var q = __t.item;
           if (!q || !q.id) return;
           if (!state.planSelectedIds) state.planSelectedIds = new Set();
           if (state.planSelectedIds.has(q.id)) state.planSelectedIds.delete(q.id);
@@ -20784,11 +21209,40 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         renderMain();
       };
 
+      /* F-STALE-IDX (cloud/ce-plan, 2026-09-21): every card button used to carry
+         a positional data-idx into state.queueItems. __rereadStores swaps the
+         whole array on a background storage/focus event, so a card rendered
+         before that swap pointed at whatever row now occupies the old index —
+         the next click edited, removed or re-dated a different user's piece.
+         Cards now carry the item's own data-queue-id; resolve by identity and
+         refuse loudly when that piece is gone instead of mutating a stranger. */
+      var ceQueueResolveTarget = function (el) {
+        var host = el && el.closest ? (el.closest('[data-queue-id]') || el) : el;
+        var want = host && host.getAttribute ? (host.getAttribute('data-queue-id') || '') : '';
+        if (want) {
+          var rows = Array.isArray(state.queueItems) ? state.queueItems : [];
+          for (var i = 0; i < rows.length; i++) {
+            if (rows[i] && String(rows[i].id || '') === want) return { item: rows[i], id: want, stale: false };
+          }
+          return { item: null, id: want, stale: true };
+        }
+        /* Legacy markup without the id attribute: fall back to position. */
+        var idx = Number(el && el.getAttribute ? el.getAttribute('data-idx') : NaN);
+        var direct = (!isNaN(idx) && Array.isArray(state.queueItems)) ? state.queueItems[idx] : null;
+        return { item: direct || null, id: '', stale: false };
+      };
+      /* A card whose piece no longer exists must say so and repaint the list,
+         never fall through to a positional mutation. */
+      var ceQueueStaleTarget = function () {
+        showQueueToast('This list changed in another window — the card you clicked is gone. Refreshed.', true);
+        renderMain();
+      };
+
       planBox.querySelectorAll('.queue-open-composer-btn').forEach(btn => {
         btn.onclick = function () {
-          var card = btn.closest('[data-queue-index], .ce-kanban-card');
-          var idx = card ? Number(card.getAttribute('data-queue-index')) : Number(btn.getAttribute('data-idx'));
-          var q = state.queueItems[idx];
+          var __t = ceQueueResolveTarget(btn);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          var q = __t.item;
           if (!q) { openMetaComposer(); return; }
           if (window.__CE_META_HAS_TOKEN__) {
             // Card-in-column law (owner 2026-09-10): the column header IS the
@@ -20819,8 +21273,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
       planBox.querySelectorAll('.queue-copy-caption-btn').forEach(btn => {
         btn.onclick = function () {
-          var idx = Number(btn.getAttribute('data-idx'));
-          var queued = state.queueItems[idx];
+          var __t = ceQueueResolveTarget(btn);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          var queued = __t.item;
           if (!queued) return;
           var caption = getMetaFormattedCaption(queued);
           copyPlainText(caption).then(function (ok) {
@@ -20843,8 +21298,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
       planBox.querySelectorAll('.queue-reveal-slides-btn').forEach(btn => {
         btn.onclick = function () {
-          var idx = Number(btn.getAttribute('data-idx'));
-          var queued = state.queueItems[idx];
+          var __t = ceQueueResolveTarget(btn);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          var queued = __t.item;
           if (!queued) return;
           revealSlidesFolder(queued);
         };
@@ -20853,17 +21309,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       planBox.querySelectorAll('.kanban-day-select').forEach(select => {
         select.onchange = function (e) {
           e.stopPropagation();
-          var idx = Number(select.getAttribute('data-idx'));
+          var __t = ceQueueResolveTarget(select);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          var q = __t.item;
           var newDay = select.value;
-          if (state.queueItems[idx]) {
-            state.queueItems[idx].scheduledDay = newDay;
+          if (q) {
+            q.scheduledDay = newDay;
             var selectedDay = kanbanDays.find(function (d) { return d.id === newDay; });
-            if (selectedDay && selectedDay.dateKey) state.queueItems[idx].scheduleDate = selectedDay.dateKey;
+            if (selectedDay && selectedDay.dateKey) q.scheduleDate = selectedDay.dateKey;
             // Owner fixed the placement — a "skipped: past its time" judgment is
             // now stale and must not keep showing on the card.
-            if (state.queueItems[idx].metaState === 'skipped') {
-              delete state.queueItems[idx].metaState;
-              delete state.queueItems[idx].metaError;
+            if (q.metaState === 'skipped') {
+              delete q.metaState;
+              delete q.metaError;
             }
             /* L1-04 class: the move is a persisted claim. */
             var __moveOk = false;
@@ -20878,13 +21336,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       planBox.querySelectorAll('.kanban-time-select').forEach(select => {
         select.onchange = function (e) {
           e.stopPropagation();
-          var idx = Number(select.getAttribute('data-idx'));
+          var __t = ceQueueResolveTarget(select);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          var q = __t.item;
           var newTime = select.value;
-          if (state.queueItems[idx]) {
-            state.queueItems[idx].scheduleTime = newTime;
-            if (state.queueItems[idx].metaState === 'skipped') {
-              delete state.queueItems[idx].metaState;
-              delete state.queueItems[idx].metaError;
+          if (q) {
+            q.scheduleTime = newTime;
+            if (q.metaState === 'skipped') {
+              delete q.metaState;
+              delete q.metaError;
             }
             /* L1-04 class: the time stamp is a persisted claim. */
             var __timeOk = false;
@@ -20901,8 +21361,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       planBox.querySelectorAll('.queue-caption-select').forEach(select => {
         select.onchange = function (e) {
           e.stopPropagation();
-          var idx = Number(select.getAttribute('data-idx'));
-          var q = state.queueItems[idx];
+          var __t = ceQueueResolveTarget(select);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          var q = __t.item;
           if (!q) return;
           var v = String(select.value || '');
           if (v === 'auto') {
@@ -20948,7 +21409,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       planBox.querySelectorAll('.ce-kanban-card').forEach(card => {
         card.ondragstart = function (e) {
           card.classList.add('is-dragging');
-          e.dataTransfer.setData('text/plain', card.getAttribute('data-queue-index'));
+          e.dataTransfer.setData('text/plain', card.getAttribute('data-queue-id') || card.getAttribute('data-queue-index'));
           e.dataTransfer.effectAllowed = 'move';
         };
         card.ondragend = function () {
@@ -20973,10 +21434,28 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         dropZone.ondrop = function (e) {
           e.preventDefault();
           visualZone.classList.remove('is-drop-target');
-          var queueIdx = Number(e.dataTransfer.getData('text/plain'));
+          /* F-STALE-IDX: the drag payload is the piece's own id, so a list that
+             changed under the drag cannot land the move on another row. */
+          var dragRef = String(e.dataTransfer.getData('text/plain') || '');
           var targetColId = dropZone.getAttribute('data-col-id') || visualZone.getAttribute('data-col-id');
-          var queued = state.queueItems[queueIdx];
-          if (isNaN(queueIdx) || !queued || !targetColId) return;
+          var queued = null;
+          if (dragRef) {
+            for (var __qi = 0; __qi < state.queueItems.length; __qi++) {
+              if (state.queueItems[__qi] && String(state.queueItems[__qi].id || '') === dragRef) { queued = state.queueItems[__qi]; break; }
+            }
+          }
+          if (!queued) {
+            var legacyIdx = Number(dragRef);
+            if (!isNaN(legacyIdx) && state.queueItems[legacyIdx]) queued = state.queueItems[legacyIdx];
+          }
+          if (!queued || !targetColId) {
+            if (dragRef) ceQueueStaleTarget();
+            return;
+          }
+          /* L1-04 class: the move is a persisted claim — the toast below now
+             waits for the write, exactly like the sibling day-select handler
+             above. It used to announce before (and regardless of) the write. */
+          var __dropOk = false;
           if (targetColId === 'unassigned') {
             if (queued.metaGraphId || queued.metaState === 'scheduled') {
               showQueueToast('Remove this piece from Meta’s clock before returning it to Unscheduled', true);
@@ -20987,15 +21466,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             queued.scheduleTime = '';
             queued.scheduleSlot = '';
             queued.scheduled = false;
-            showQueueToast('Moved to Unscheduled');
+            try { __dropOk = cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems)) !== false; } catch (_e) { __dropOk = false; }
+            if (__dropOk) showQueueToast('Moved to Unscheduled');
           } else {
             queued.scheduledDay = targetColId;
             var droppedDay = kanbanDays.find(function (d) { return d.id === targetColId; });
             queued.scheduleDate = droppedDay && droppedDay.dateKey ? droppedDay.dateKey : null;
             var matchedDay = kanbanDays.find(function (d) { return d.id === targetColId; });
-            showQueueToast('✓ Moved to ' + (matchedDay ? matchedDay.label : targetColId));
+            try { __dropOk = cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems)) !== false; } catch (_e) { __dropOk = false; }
+            if (__dropOk) showQueueToast('✓ Moved to ' + (matchedDay ? matchedDay.label : targetColId));
           }
-          cePersistOrWarn('ce_queue_items', JSON.stringify(state.queueItems));
           renderMain();
         };
       });
@@ -21003,8 +21483,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       planBox.querySelectorAll('.queue-ready-topost').forEach(function (toggle) {
         toggle.onclick = function (e) {
           e.stopPropagation();
-          var idx = Number(toggle.getAttribute('data-idx'));
-          var queued = state.queueItems[idx];
+          var __t = ceQueueResolveTarget(toggle);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          var queued = __t.item;
           if (queued) {
             var next = toggle.tagName === 'INPUT'
               ? !!toggle.checked
@@ -21019,8 +21500,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       planBox.querySelectorAll('.ce-staged-art-wrap, .ce-staged-open, .queue-open-studio-btn').forEach(button => {
         button.onclick = function (e) {
           e.stopPropagation();
-          const idx = Number(button.getAttribute('data-idx') || (button.closest('.ce-staged-row, .ce-kanban-card') && button.closest('.ce-staged-row, .ce-kanban-card').getAttribute('data-queue-index')));
-          const queued = state.queueItems[idx];
+          var __t = ceQueueResolveTarget(button.closest('[data-queue-id]') || button);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          const queued = __t.item;
+          const idx = state.queueItems.indexOf(queued);
           if (queued && queued.type === 'idea' && queued.item) {
             state.writeDraft = String(queued.item.text || queued.item.body || '');
             try {
@@ -21039,7 +21522,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       planBox.querySelectorAll('.queue-del-btn').forEach(btn => {
         btn.onclick = (e) => {
           e.stopPropagation();
-          const idx = Number(btn.getAttribute('data-idx'));
+          var __t = ceQueueResolveTarget(btn);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          const idx = state.queueItems.indexOf(__t.item);
+          if (idx < 0) { ceQueueStaleTarget(); return; }
           /* F-09-2 FIX (2026-09-18 R2): the handler used to fire its own
              unconditional "Moved back to Saved Bank" toast right after the call,
              clobbering (single shared #ce-app-toast node, last write wins) both
@@ -21056,15 +21542,19 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       planBox.querySelectorAll('.queue-unschedule-btn').forEach(btn => {
         btn.onclick = (e) => {
           e.stopPropagation();
-          const idx = Number(btn.getAttribute('data-idx'));
-          const q = state.queueItems && state.queueItems[idx];
+          var __t = ceQueueResolveTarget(btn);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          const q = __t.item;
           if (q) ceUnscheduleQueueItems([q]);
         };
       });
       planBox.querySelectorAll('.queue-save-bank-btn').forEach(btn => {
         btn.onclick = (e) => {
           e.stopPropagation();
-          const idx = Number(btn.getAttribute('data-idx'));
+          var __t = ceQueueResolveTarget(btn);
+          if (__t.stale) { ceQueueStaleTarget(); return; }
+          const idx = state.queueItems.indexOf(__t.item);
+          if (idx < 0) { ceQueueStaleTarget(); return; }
           /* Same single-toast-owner rule as .queue-del-btn above (F-09-2):
              the callee's own message is the honest one for every outcome —
              including the armed refusal, which the old unconditional
@@ -22653,6 +23143,41 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     return isItemRejected(type, item) || isItemSaved(type, item) || isItemQueued(type, item);
   }
 
+  /* PERF (cloud/ce-perf, 2026-09-21): ceLibraryItemTriaged scans savedItems and
+     queueItems linearly, and the library filter calls it once per row (~961
+     rows), i.e. O(rows x (saved + queued)) on EVERY keystroke. Build the id
+     membership once per filter pass instead and answer in O(1). Results are
+     identical to the per-row predicate: the same getContentKey identity, the
+     same 'rejected'/'any saved' split, the same queue identity. */
+  function ceLibraryTriageIndex() {
+    var rejected = new Set();
+    var saved = new Set();
+    (Array.isArray(state.savedItems) ? state.savedItems : []).forEach(function (s) {
+      if (!s) return;
+      var key = getContentKey(s.type, s.item);
+      if (!key) return;
+      saved.add(key);
+      if (s.status === 'rejected') rejected.add(key);
+    });
+    var queued = new Set();
+    (Array.isArray(state.queueItems) ? state.queueItems : []).forEach(function (q) {
+      if (!q) return;
+      var key = getContentKey(q.type, q.item);
+      if (key) queued.add(key);
+    });
+    return {
+      rejected: rejected,
+      saved: saved,
+      queued: queued,
+      triaged: function (type, item) {
+        var key = getContentKey(type, item);
+        if (!key) return false;
+        return rejected.has(key) || saved.has(key) || queued.has(key);
+      }
+    };
+  }
+  window.ceLibraryTriageIndex = ceLibraryTriageIndex;
+
   function addToSavedBank(type, item, design, status) {
     if (!item) return false;
     var key = getContentKey(type, item);
@@ -24106,6 +24631,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var channel = channelOpt || (channelSelect ? channelSelect.value : 'all');
     var prepped = 0;
     var combinedCaptions = [];
+    var revealPromises = [];
     selected.forEach(function (q, idx) {
       if (!q) return;
       var caption = '';
@@ -24121,14 +24647,49 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       if (caption) {
         combinedCaptions.push('=== [' + (idx + 1) + '/' + selected.length + '] ' + queueDisplayTitle(q) + ' ===\n' + caption);
       }
-      if (typeof revealSlidesFolder === 'function') revealSlidesFolder(q);
+      /* Zola2 (2026-09-22): collect the reveal promise. window.revealSlidesFolder
+         now returns one that settles when the bridge answers ceFolderOpened with
+         the REAL fate; it is no longer fire-and-forget as far as this toast goes. */
+      var __revealFn = window.revealSlidesFolder;
+      if (typeof __revealFn === 'function') {
+        try {
+          var __rp = __revealFn(q);
+          if (__rp && typeof __rp.then === 'function') revealPromises.push(__rp);
+        } catch (_rpe) { revealPromises.push(Promise.resolve(false)); }
+      }
       prepped++;
     });
-    if (combinedCaptions.length && typeof copyPlainText === 'function') {
-      copyPlainText(combinedCaptions.join('\n\n\n'));
-    }
-    showAppToast('Prep ready for ' + prepped + ' piece' + (prepped === 1 ? '' : 's'), {
-      detail: 'Captions copied and slide folders revealed in Finder' + (channel === 'all' ? ' (all channels).' : ' for ' + String(channel).toUpperCase() + '.')
+    /* F-COPY-TRUTH (extended Zola2 2026-09-22): the toast used to promise BOTH
+       halves from the same tick that fired them — a refused clipboard write OR an
+       unexported piece still read as "captions copied and slide folders
+       revealed". Wait for the pasteboard answer AND every folder bridge answer,
+       then report exactly which halves happened. */
+    var __prepCopy = (combinedCaptions.length && typeof copyPlainText === 'function')
+      ? copyPlainText(combinedCaptions.join('\n\n\n'))
+      : Promise.resolve(null);
+    var __prepFolders = revealPromises.length
+      ? Promise.all(revealPromises).then(function (rs) { return rs.filter(Boolean).length; })
+      : Promise.resolve(0);
+    Promise.all([Promise.resolve(__prepCopy), __prepFolders]).then(function (res) {
+      var __copied = res[0];
+      var __opened = res[1] || 0;
+      var copied = (__copied === true);
+      var copyFailed = (__copied === false);
+      var noCaptions = (__copied === null);
+      var chLabel = (channel === 'all') ? ' (all channels)' : ' for ' + String(channel).toUpperCase();
+      var copyPart = copied
+        ? 'Captions copied' + chLabel + '.'
+        : (copyFailed ? 'The captions could NOT be copied — copy them from the queue card instead.'
+          : 'No captions to copy' + chLabel + '.');
+      var folderPart = __opened
+        ? (__opened === prepped
+          ? ' ' + (__opened === 1 ? 'The slide folder opened' : 'All ' + __opened + ' slide folders opened') + ' in Finder.'
+          : ' ' + __opened + ' of ' + prepped + ' slide folders opened in Finder — the rest have no export yet; export those pieces first.')
+        : ' No exported slides for these pieces yet — export them first, then hand off.';
+      showAppToast('Prep ready for ' + prepped + ' piece' + (prepped === 1 ? '' : 's'), {
+        isError: copyFailed || __opened === 0,
+        detail: copyPart + folderPart
+      });
     });
     return prepped;
   }
@@ -24613,33 +25174,69 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (!row) return;
     var onLibrary = state.activeTab === 'library';
     row.classList.toggle('ce-shelf-on', onLibrary);
+
+    /* Zola2 (2026-09-22): the DESKTOP twin row in the topbar (#ce-top-shelf) is
+       driven in the same pass from the same source — the drawer badges — so the
+       desktop, the phone row and the drawer can never print different numbers. */
+    var topRow = document.getElementById('ce-top-shelf');
+    [row, topRow].forEach(function (r) {
+      if (!r) return;
+      var countAttr = (r === topRow) ? 'data-top-shelf-count' : 'data-shelf-count';
+      var pairs = [['poems', 'nav-poem-count'], ['carousels', 'nav-carousel-count'], ['posts', 'nav-post-count']];
+      pairs.forEach(function (p) {
+        var pill = r.querySelector('button[data-lib="' + p[0] + '"]');
+        if (!pill) return;
+        var active = onLibrary && state.libraryType === p[0];
+        pill.classList.toggle('active', active);
+        if (active) pill.setAttribute('aria-current', 'true'); else pill.removeAttribute('aria-current');
+        var slot = pill.querySelector('[' + countAttr + ']');
+        var src = document.getElementById(p[1]);
+        if (slot) {
+          var txt = src ? String(src.textContent || '').trim() : '';
+          if (txt) { slot.textContent = txt; slot.style.display = ''; }
+          else { slot.textContent = ''; slot.style.display = 'none'; }
+        }
+      });
+    });
+
     /* The html-level flag is what the phone layer keys visibility on
        (html.ce-phone:not(.ce-shelf-on-html) #ce-shelf-switch { visibility:
        hidden }) — the row's display is an ID-level rule in native-saved.css, so
-       visibility is the one property that can hide it without a specificity war. */
+       visibility is the one property that can hide it without a specificity war.
+       The desktop topbar row keys on the same flag. */
     document.documentElement.classList.toggle('ce-shelf-on-html', onLibrary);
     /* The clearance contract (ce-mobile.css): #view's top pad = --topbar-h +
        --ce-shelf-row-h. Publishing the row's OWN measured height keeps the two
        bars in sync without a hardcoded number; 0px off-library collapses it. */
     var rowH = onLibrary ? Math.ceil(row.getBoundingClientRect().height) : 0;
     document.documentElement.style.setProperty('--ce-shelf-row-h', rowH + 'px');
-    var pairs = [['poems', 'nav-poem-count'], ['carousels', 'nav-carousel-count'], ['posts', 'nav-post-count']];
-    pairs.forEach(function (p) {
-      var pill = row.querySelector('button[data-lib="' + p[0] + '"]');
-      if (!pill) return;
-      var active = onLibrary && state.libraryType === p[0];
-      pill.classList.toggle('active', active);
-      if (active) pill.setAttribute('aria-current', 'true'); else pill.removeAttribute('aria-current');
-      var slot = pill.querySelector('[data-shelf-count]');
-      var src = document.getElementById(p[1]);
-      if (slot) {
-        var txt = src ? String(src.textContent || '').trim() : '';
-        if (txt) { slot.textContent = txt; slot.style.display = ''; }
-        else { slot.textContent = ''; slot.style.display = 'none'; }
-      }
-    });
+    try { syncLibraryPosition(); } catch (_lp) {}
   }
   window.__CE_SYNC_SHELF_SWITCH__ = syncShelfSwitch;
+
+  /* ── Quiet position read-out (Zola2, 2026-09-22). ───────────────────────
+     "24 of 2,496 poems" — how many cards are on screen against the filtered
+     total, so the poet can tell where he is in a 2,496-poem collection. Reads
+     the render's OWN numbers (window.__CE_LAST_LIBRARY__ and the mounted
+     count), never a re-count that could drift from what is painted. */
+  function syncLibraryPosition() {
+    var el = document.getElementById('ce-lib-position');
+    if (!el) return;
+    var onLibrary = state.activeTab === 'library';
+    var last = window.__CE_LAST_LIBRARY__ || {};
+    var kind = state.libraryType || 'poems';
+    var list = kind === 'poems' ? (last.poems || []) : (kind === 'carousels' ? (last.decks || []) : (last.posts || []));
+    var total = Array.isArray(list) ? list.length : 0;
+    if (!onLibrary || !total) { el.hidden = true; el.textContent = ''; return; }
+    var shown = (kind === 'poems')
+      ? Number(window.__CE_POEM_MOUNTED_COUNT__ || 0)
+      : (document.querySelectorAll('#view .masonry-item, #view .ce-rail-card, #view .pure-card').length || 0);
+    if (!shown || shown > total) shown = total;
+    var noun = kind === 'poems' ? (total === 1 ? 'poem' : 'poems') : (kind === 'carousels' ? 'carousels' : 'posts');
+    el.textContent = shown.toLocaleString('en-IN') + ' of ' + total.toLocaleString('en-IN') + ' ' + noun;
+    el.hidden = false;
+  }
+  window.syncLibraryPosition = syncLibraryPosition;
 
   /* WL2522 (2026-09-19): the selected route and the selected library type
      were expressed ONLY by the presentational .active class — a CDP census at
@@ -25365,7 +25962,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
        use — so there is a single shelf-change code path, and the drawer's own
        .active mirroring (inside setLibraryType) keeps both switchers in sync.
        stopPropagation keeps the tap from reaching the drawer/scrim handlers. */
-    document.querySelectorAll('#ce-shelf-switch button[data-lib]').forEach(btn => {
+    document.querySelectorAll('#ce-shelf-switch button[data-lib], #ce-top-shelf button[data-lib]').forEach(btn => {
       btn.onclick = (e) => {
         e.stopPropagation();
         var lib = btn.getAttribute('data-lib');
@@ -26108,12 +26705,25 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var __rereadStores = function () {
       try {
         if (__studioBusy()) return false;
+        var __qBefore = null;
+        try { __qBefore = JSON.stringify(state.queueItems); } catch (_qb) {}
         var q = readStoredJSON('ce_queue_items', []);
         if (Array.isArray(q)) state.queueItems = q;
         var b = readStoredJSON('ce_saved_bank', []);
         if (Array.isArray(b)) state.savedItems = b;
         if (typeof updateTopbarQueueBadge === 'function') updateTopbarQueueBadge();
         if (typeof updateTopbarSavedBadge === 'function') updateTopbarSavedBadge();
+        /* F-STALE-IDX (cloud/ce-plan, 2026-09-21): this swap replaced the whole
+           array while the already-rendered cards kept their old positional
+           data-idx, so the next click hit a different piece. The cards now
+           resolve by their own data-queue-id, but a list that changed under the
+           user still has to REPAINT — otherwise the visible cards and the store
+           disagree until some other render happens. */
+        var __qAfter = null;
+        try { __qAfter = JSON.stringify(state.queueItems); } catch (_qa) {}
+        if (__qBefore !== __qAfter && typeof renderMain === 'function') {
+          try { renderMain(); } catch (_rrRender) {}
+        }
         return true;
       } catch (_rr) { return false; }
     };

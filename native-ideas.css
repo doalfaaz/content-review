@@ -35,6 +35,12 @@ body:not(.bright-theme) .ce-ideas-parity {
 .ce-ideas-filter-menu-wrap{position:relative;margin-left:auto}.ce-ideas-filter-menu{display:inline-flex;align-items:center;gap:7px;border-color:var(--ideas-line);background:var(--ideas-surface)}
 .ce-ideas-summary{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 15px;color:var(--ideas-muted);font-size:var(--fs-overline);font-weight:600}
 .ce-ideas-action{min-width:44px;border-radius:8px}.ce-ideas-action.is-primary{background:var(--ideas-ink);border-color:var(--ideas-ink);color:var(--ideas-surface)}
+/* Touch surfaces without the ce-phone class (tablet, touch laptop, any coarse
+   pointer) still need the 44x44 minimum: 38px is a mouse-density box. The
+   pointer-coarse query leaves desktop density untouched. */
+@media (pointer: coarse) {
+  .ce-ideas-action{min-width:44px;min-height:44px}
+}
 
 .ce-ideas-filter-menu::after {
   content: "";

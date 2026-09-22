@@ -15,6 +15,17 @@
   --deva-lh-tight: 1.45;
   --deva-lh-loose: 1.6;
   --deva-matra-padding: 0.15em;
+  /* Tova-2 (poem-card rhythm, 2026-09-20): DEVANAGARI verse is not Latin text.
+     Matras sit above and below the baseline, so two adjacent lines at a
+     Latin-comfortable leading collide. 1.78 is the authored Studio value
+     (POEM_TYPOGRAPHY.lineHeight); verse surfaces set 1.82 to give the
+     shirorekha and the below-baseline matras visibly more air. */
+  --deva-lh-verse: 1.82;
+  /* Vertical anchor for card verse: optics, not geometry — slightly above true
+     centre is where the eye expects a column of verse to start. */
+  --poem-verse-anchor: 46%;
+  /* The signature sits on one fixed inset from the card's bottom edge. */
+  --poem-sig-inset: 32px;
 }
 
 /* Never cross-fade the whole editor over Library pixels. The old opacity
@@ -787,17 +798,24 @@
   pointer-events: none;
 }
 
+/* 2026-09-22 (ada-4): a photo strip with a data-driven number of thumbs must
+   never wrap onto a sibling control. The row is its own horizontal scroll
+   container, so the strip's height is always exactly one thumb row and no
+   thumb can land on the tools door beneath it. */
 .studio-dock .photo-strip {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
   gap: 6px;
   width: 100%;
   max-width: none;
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .studio-dock .photo-thumb {
-  width: 100%;
+  flex: 0 0 auto;
+  width: calc((100% - 5 * 6px) / 6);
   min-width: 0;
   height: auto;
   aspect-ratio: 1;
@@ -1873,6 +1891,15 @@
   letter-spacing: 0 !important;
   overflow-wrap: break-word !important;
   word-break: normal !important;
+  /* The bundled Mukta Devanagari faces are declared only through --font-deva
+     (index.html @font-face + token); the poem body stack never named it, so
+     poems rendered in the OS fallback while the correct face shipped. Apply
+     the token here so the Devanagari poem bodies use the bundled Mukta faces.
+     Interface chrome (.mark/.kickline) keeps its own Roman stack. */
+  font-family: var(--font-deva, 'Mukta', 'Kohinoor Devanagari', 'Noto Sans Devanagari', 'Devanagari Sangam MN', sans-serif);
+}
+.ce-postcore-face .q {
+  font-family: var(--font-deva, 'Mukta', 'Kohinoor Devanagari', 'Noto Sans Devanagari', 'Devanagari Sangam MN', sans-serif);
 }
 .pc-whiteroom .mark {
   position: relative !important;
@@ -2984,6 +3011,18 @@
 #studio-editable-text[contenteditable="false"] { cursor: grab; user-select: none; -webkit-user-select: none; }
 #studio-editable-text[contenteditable="true"] { cursor: text; user-select: text; -webkit-user-select: text; }
 
+/* Touch edit arming (ce-touch-edit.js) sets an inline touch-action:none on
+   every editable block; inline author styles lose to an !important stylesheet
+   rule, so this narrows the swallow to the gesture axis the block actually
+   intercepts. pan-y keeps its own long-press writing while vertical page
+   scroll keeps working (touch-action:none trapped the whole page). */
+[data-ce-block="content"],
+[data-ce-block="hook"],
+[data-ce-block="body"],
+.kickline[data-ce-edit] {
+  touch-action: pan-y !important;
+}
+
 .ce-draggable-box.is-dragging {
   cursor: grabbing !important;
   outline: 2px solid var(--accent) !important;
@@ -3018,6 +3057,12 @@
 .ce-draggable-box:hover .ce-drag-handle-bar,
 .ce-draggable-box.is-selected .ce-drag-handle-bar {
   opacity: 1;
+}
+
+/* Touch has no hover: the handle (the only way to drag a block) was
+   unreachable on a coarse pointer. Reveal it persistently there. */
+@media (pointer: coarse) {
+  .ce-drag-handle-bar { opacity: 1; pointer-events: auto; }
 }
 
 .ce-drag-handle-bar:active {
@@ -4473,6 +4518,88 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   -webkit-font-smoothing: subpixel-antialiased;
 }
 
+/* 2026-09-22 (surface-capture floor: desktop+phone 02/03/04/05/06/09/12/15/27/28/
+   30/31 each reported `.ce-poem-text-block` as actionable clipped content, e.g.
+   scrollH 90 / clientH 83). The three poem emitters in index.html hard-write
+   `overflow:hidden` and a `max-height` onto every verse block, so a verse that
+   outgrew its box was clipped with no way to reach the hidden lines — the
+   element's own content IS the content. INVARIANT: a poem verse on any
+   browse/preview/drawer/settings surface must never be clipped out of its
+   container at any width. Overflow is made scrollable rather than hidden so the
+   box keeps its authored geometry (no ancestor becomes the next clipped
+   offender) while every hidden line stays reachable. */
+.ce-poem-text-block {
+  overflow: auto !important;
+}
+
+/* ==========================================================================
+   Tova-2 (poem-card rhythm, 2026-09-20) — ONE rhythm for every browse card.
+   The library shelf, Saved bank, Next-Best rail and Plan queue all render the
+   same `.ce-poem-face` face. Rhythm is fixed in the face's own 580px canvas
+   (fitPoemShelfStages scales the whole canvas uniformly), so one rule here
+   reaches every card at every width.
+
+   Before: verse `pos` came from the per-preset inline style (`top` or `mid`),
+   so scanning a column the eye found the text at a different height in every
+   card. Now every browse face anchors the verse at the SAME optical point —
+   slightly above true centre, the traditional setting for verse — and the
+   signature is pinned to one bottom inset instead of riding the text flow.
+
+   Scope is deliberate: these selectors are browse/preview faces ONLY. Studio's
+   authored `#studio-editable-text` and the reviewer's `.ce-poem-reader-paper`
+   set their own anchors, so the preview→Studio hand-off stays faithful. */
+.masonry-item .ce-poem-text-block,
+.ce-saved-card .ce-poem-text-block,
+.ce-next-best-card .ce-poem-text-block,
+.ce-kanban-card .ce-poem-text-block,
+.ce-poem-preview-wrap .ce-poem-text-block,
+.ce-queue-card .ce-poem-text-block {
+  top: var(--poem-verse-anchor, 46%) !important;
+  transform: translateY(-50%) !important;
+  line-height: var(--deva-lh-verse, 1.82) !important;
+  text-wrap: pretty;
+  overflow-wrap: normal;
+}
+
+/* The attribution is a signature, not a trailing line: one inset from the
+   bottom of every card, so it reads as a steady mark down a column. */
+.masonry-item .ce-poem-face:not([data-ce-poem-photo-only]) .ce-poem-stage > div:last-child:not(.ce-poem-text-block),
+.ce-saved-card .ce-poem-face:not([data-ce-poem-photo-only]) .ce-poem-stage > div:last-child:not(.ce-poem-text-block),
+.ce-next-best-card .ce-poem-face:not([data-ce-poem-photo-only]) .ce-poem-stage > div:last-child:not(.ce-poem-text-block),
+.ce-kanban-card .ce-poem-face:not([data-ce-poem-photo-only]) .ce-poem-stage > div:last-child:not(.ce-poem-text-block),
+.ce-poem-preview-wrap .ce-poem-face:not([data-ce-poem-photo-only]) .ce-poem-stage > div:last-child:not(.ce-poem-text-block),
+.ce-queue-card .ce-poem-face:not([data-ce-poem-photo-only]) .ce-poem-stage > div:last-child:not(.ce-poem-text-block) {
+  bottom: var(--poem-sig-inset, 32px) !important;
+}
+
+/* SCRIM — the highest-value change here. Devanagari strokes broke up where a
+   lit face sat behind them (white highlight under white type). This is a
+   gradient sized to the TEXT BLOCK (`inset` follows the block, plus a quarter
+   of a line of bleed on the leading and trailing edges), never the whole card,
+   so the photograph still reads. `--z-canvas-under` (=0) keeps it inside the text
+   block's own stacking context: above the photo layers, behind the verse. The
+   block forms its own stacking context, so the token and the old bare `-1` place
+   it identically among siblings while keeping the layer on the published ladder
+   (F-S13 audit 2026-09-22: a bare negative literal is unreadable against the rungs).
+   Photo family only — paper/editorial faces are ink-on-light and a dark scrim
+   would hurt them. */
+.ce-poem-face[data-ce-poem-family="photo"] .ce-poem-text-block::before {
+  content: "";
+  position: absolute;
+  z-index: var(--z-canvas-under);
+  inset: -0.35em -0.25em;
+  border-radius: 0.2em;
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.42) 14%,
+    rgba(0, 0, 0, 0.46) 86%,
+    rgba(0, 0, 0, 0) 100%);
+  pointer-events: none;
+}
+
+/* The long-poem reader sets its own leading in the rule below, after this
+   block, on purpose: it is a reading surface with its own measure. */
+
 /* Emil Kowalski Tactile Button Spring */
 .studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-compact-tool:active,
 .studio-workspace.is-carousel-mode .ce-tool-segmented-group .ce-text-tool-btn:active,
@@ -5541,7 +5668,11 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 }
 .ce-poem-reader-text {
   font-family: 'Kohinoor Devanagari', 'Noto Serif Devanagari', system-ui, sans-serif;
-  font-size: var(--fs-title); line-height: 1.6; white-space: normal;
+  /* Tova-2 (poem-card rhythm, 2026-09-20): 1.6 is a Latin reading lead — the
+     matras above and below the Devanagari baseline touched between lines. The
+     reader is verse read for real, so it takes the same generous measure as
+     the cards (--deva-lh-verse). */
+  font-size: var(--fs-title); line-height: var(--deva-lh-verse, 1.82); white-space: normal;
 }
 .ce-poem-reader-close {
   position: absolute; top: 10px; right: 12px; width: 32px; height: 32px;

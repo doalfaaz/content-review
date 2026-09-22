@@ -1,5 +1,11 @@
 (function () {
   'use strict';
+  /* Idempotency guard (cloud/ce-ui, 2026-09-21): a second injection of this
+     script used to build a second module instance, which added a SECOND
+     document click listener — every tap then ran handleClick twice (double
+     navigation, double copy, double schedule). The first injection is the one
+     owner; a repeat is a plain no-op. */
+  if (window.__CE_IDEAS_IMPL__) return;
 
   var filter = 'all';
   var language = 'english';
@@ -148,6 +154,19 @@
     }) : [];
   }
 
+  /* The deduped, richest-wins source list never changes while the page is up
+     (window.__HTML_IDEAS__ is baked at load). Recomputing dedupe + richScore
+     across all 704 records on every filter/search keystroke was pure waste —
+     cache it and only recompute if the host array is replaced. */
+  var __dedupedCache = null;
+  var __dedupedCacheFor = null;
+  function dedupedSource() {
+    if (__dedupedCache && __dedupedCacheFor === window.__HTML_IDEAS__) return __dedupedCache;
+    __dedupedCache = dedupe(sourceItems());
+    __dedupedCacheFor = window.__HTML_IDEAS__;
+    return __dedupedCache;
+  }
+
   function matches(item) {
     if (filter === 'psychology' && categoryOf(item) !== 'psychology') return false;
     if (filter === 'philosophy' && categoryOf(item) !== 'philosophy') return false;
@@ -176,7 +195,7 @@
   function groupedItems() {
     var groups = Object.create(null);
     var order = [];
-    dedupe(sourceItems()).filter(matches).forEach(function (item) {
+    dedupedSource().filter(matches).forEach(function (item) {
       var topic = topicOf(item);
       var key = topic.toLowerCase();
       if (!groups[key]) {
@@ -228,28 +247,31 @@
       (points.length ? '<div class="ce-ideas-points">' + points.map(pointHtml).join('') + '</div>' : '') +
       (pending ? '<div class="ce-ideas-card-pending">Structured outline pending for this idea.</div>' : '') +
       '<div class="ce-ideas-card-actions">' +
-      '<button type="button" class="ce-ideas-action is-primary" data-ce-idea-forward="' + esc(item.id || title) + '">Take forward</button>' +
-      '<button type="button" class="ce-ideas-action" data-ce-idea-schedule="' + esc(item.id || title) + '">Schedule</button>' +
-      '<button type="button" class="ce-ideas-action" data-ce-idea-copy="' + esc(item.id || title) + '">Copy</button>' +
+      '<button type="button" class="ce-ideas-action is-primary" data-ce-idea-forward="' + esc(item.id || title) + '" data-ce-idea-label="Take forward">Take forward</button>' +
+      '<button type="button" class="ce-ideas-action" data-ce-idea-schedule="' + esc(item.id || title) + '" data-ce-idea-label="Schedule">Schedule</button>' +
+      '<button type="button" class="ce-ideas-action" data-ce-idea-copy="' + esc(item.id || title) + '" data-ce-idea-label="Copy">Copy</button>' +
       '<span class="ce-ideas-action-status" aria-live="polite"></span>' +
       '</div></article>';
   }
 
   function controlsHtml() {
+    /* F-13 (cloud/ce-ui, 2026-09-21): these toggles carried only the visual
+       is-active class — a screen reader could not tell which filter was on.
+       aria-pressed mirrors each toggle's visual state exactly. */
     return '<div class="ce-ideas-controls" aria-label="Ideas filters">' +
       '<span class="ce-ideas-filter-group" role="group" aria-label="Idea category">' +
       ['all', 'psychology', 'philosophy'].map(function (value) {
         var label = value === 'all' ? 'All' : value.charAt(0).toUpperCase() + value.slice(1);
-        return '<button type="button" class="ce-ideas-filter ' + (filter === value ? 'is-active' : '') + '" data-ce-ideas-filter="' + value + '">' + label + '</button>';
+        return '<button type="button" class="ce-ideas-filter ' + (filter === value ? 'is-active' : '') + '" data-ce-ideas-filter="' + value + '" aria-pressed="' + (filter === value ? 'true' : 'false') + '">' + label + '</button>';
       }).join('') + '</span>' +
       '<span class="ce-ideas-filter-group ce-ideas-language" role="group" aria-label="Idea language">' +
       ['english', 'hinglish'].map(function (value) {
-        return '<button type="button" class="ce-ideas-filter ' + (language === value ? 'is-active' : '') + '" data-ce-ideas-language="' + value + '">' + value.charAt(0).toUpperCase() + value.slice(1) + '</button>';
+        return '<button type="button" class="ce-ideas-filter ' + (language === value ? 'is-active' : '') + '" data-ce-ideas-language="' + value + '" aria-pressed="' + (language === value ? 'true' : 'false') + '">' + value.charAt(0).toUpperCase() + value.slice(1) + '</button>';
       }).join('') + '</span>' +
       '<span class="ce-ideas-filter-menu-wrap">' +
-      '<button type="button" class="ce-ideas-filter-menu ' + (structuredOnly ? 'is-active' : '') + '" data-ce-ideas-filter-menu>Filters</button>' +
-      '<span class="ce-ideas-filter-popover" ' + (filterMenuOpen ? '' : 'hidden') + '>' +
-      '<button type="button" class="ce-ideas-menu-item ' + (structuredOnly ? 'is-active' : '') + '" data-ce-ideas-structured="toggle">Structured outlines only</button>' +
+      '<button type="button" class="ce-ideas-filter-menu ' + (structuredOnly ? 'is-active' : '') + '" data-ce-ideas-filter-menu aria-haspopup="true" aria-expanded="' + (filterMenuOpen ? 'true' : 'false') + '" aria-pressed="' + (structuredOnly ? 'true' : 'false') + '" aria-controls="ce-ideas-filter-popover">Filters</button>' +
+      '<span class="ce-ideas-filter-popover" id="ce-ideas-filter-popover" ' + (filterMenuOpen ? '' : 'hidden') + '>' +
+      '<button type="button" class="ce-ideas-menu-item ' + (structuredOnly ? 'is-active' : '') + '" data-ce-ideas-structured="toggle" aria-pressed="' + (structuredOnly ? 'true' : 'false') + '">Structured outlines only</button>' +
       '<button type="button" class="ce-ideas-menu-item" data-ce-ideas-clear>Clear filters</button>' +
       '</span></span></div>';
   }
@@ -266,24 +288,45 @@
       '</section>';
   }
 
+  // Each action button owns its authored label. The label is read from the
+  // button's own data attribute (falling back to its text) so a restore can
+  // never borrow another button's label.
+  function labelOf(button) {
+    if (!button) return '';
+    var authored = button.getAttribute && button.getAttribute('data-ce-idea-label');
+    if (authored) return authored;
+    return button.textContent || '';
+  }
+
+  // The card's polite live region is the single owner of transient status
+  // text, so assistive technology announces the outcome. The button keeps its
+  // identity: its label is written to the region, never over the button.
+  // F-14 (cloud/ce-ui, 2026-09-21): `success` only paints the is-success tint.
+  // It is NEVER a claim on its own — every caller passes true only for a state
+  // it has actually observed (a clipboard write that resolved, a queue row the
+  // host bridge reported it created).
   function setStatus(button, text, success) {
     if (!button) return;
-    button.textContent = text;
+    var card = button.closest ? button.closest('.ce-ideas-card') : null;
+    var region = card ? card.querySelector('.ce-ideas-action-status[aria-live]') : null;
+    var authored = labelOf(button);
+    if (region) region.textContent = text;
     if (success) button.classList.add('is-success');
     window.setTimeout(function () {
       if (!button.isConnected) return;
-      button.textContent = button.getAttribute('data-ce-idea-copy') ? 'Copy' : 'Take forward';
+      button.textContent = authored;
       button.classList.remove('is-success');
+      if (region && region.isConnected) region.textContent = '';
     }, 1100);
   }
 
   function copyItem(item, button) {
     var text = cardText(item);
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () { setStatus(button, '✓ Copied', true); }).catch(function () { setStatus(button, '⚠ Unavailable', false); });
+      navigator.clipboard.writeText(text).then(function () { setStatus(button, 'Copied to clipboard', true); }).catch(function () { setStatus(button, 'Copy blocked by the browser — select the text and copy it by hand.', false); });
       return;
     }
-    setStatus(button, '⚠ Unavailable', false);
+    setStatus(button, 'Copy unavailable — this browser has no clipboard access. Select the text and copy it by hand.', false);
   }
 
   function scheduleIdeaItem(item, button) {
@@ -293,6 +336,7 @@
       try { if (typeof window.__CE_SET_MODAL_BACKGROUND__ === 'function') window.__CE_SET_MODAL_BACKGROUND__(false); } catch (_oldModalBg) {}
       existing.remove();
     }
+    var opener = button || null;
     var now = new Date();
     var today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
     var modal = document.createElement('div');
@@ -305,21 +349,35 @@
     } catch (_scheduleState) {}
     modal.innerHTML = '<div class="ce-idea-schedule-card" role="dialog" aria-modal="true" aria-labelledby="ce-idea-schedule-title">' +
       '<div class="ce-idea-schedule-head"><div><strong id="ce-idea-schedule-title">Schedule idea</strong><span>' + esc(titleOf(item)) + '</span></div><button type="button" data-ce-idea-schedule-close aria-label="Close">×</button></div>' +
-      '<p class="ce-idea-schedule-note">This keeps the idea as a Draft in Plan. Shape it in Write before publishing.</p>' +
+      '<p class="ce-idea-schedule-note">This creates a scheduled draft slot: a Draft in Plan for that date and time. Shape it in Write before publishing.</p>' +
       '<label>Date<input type="date" data-ce-idea-schedule-date min="' + today + '" value="' + today + '"></label>' +
       '<label>Time<input type="time" data-ce-idea-schedule-time value="21:00"></label>' +
       '<div class="ce-idea-schedule-actions"><button type="button" data-ce-idea-schedule-cancel>Cancel</button><button type="button" class="is-primary" data-ce-idea-schedule-save>Schedule draft</button></div>' +
+      '<p class="ce-idea-schedule-error" data-ce-idea-schedule-error role="alert" aria-live="assertive" hidden style="margin:8px 0 0;color:#ffb4b4;font-size:13px;line-height:1.35"></p>' +
       '</div>';
     document.body.appendChild(modal);
     try { if (typeof window.__CE_SET_MODAL_BACKGROUND__ === 'function') window.__CE_SET_MODAL_BACKGROUND__(true); } catch (_modalBg) {}
     var close = function () {
+      modal.removeEventListener('keydown', onKeydown);
       try {
         var scheduleState = window.__CE_STATE__ || window.state;
         if (scheduleState) scheduleState.scheduleTarget = null;
       } catch (_scheduleClear) {}
       try { if (typeof window.__CE_SET_MODAL_BACKGROUND__ === 'function') window.__CE_SET_MODAL_BACKGROUND__(false); } catch (_modalBgClose) {}
       modal.remove();
+      // Restore focus to the control that opened the dialog, when it is still
+      // mounted; otherwise leave focus on the document body rather than a
+      // detached node.
+      if (opener && opener.isConnected && typeof opener.focus === 'function') opener.focus();
     };
+    function onKeydown(event) {
+      if (event.key === 'Escape' || event.key === 'Esc') {
+        event.preventDefault();
+        event.stopPropagation();
+        close();
+      }
+    }
+    modal.addEventListener('keydown', onKeydown);
     modal.querySelector('[data-ce-idea-schedule-close]').onclick = close;
     modal.querySelector('[data-ce-idea-schedule-cancel]').onclick = close;
     modal.addEventListener('click', function (event) { if (event.target === modal) close(); });
@@ -334,12 +392,32 @@
       var parts = time.split(':').map(Number);
       var h = parts[0], minute = parts[1];
       var label = (h % 12 || 12) + ':' + String(minute).padStart(2, '0') + ' ' + (h >= 12 ? 'PM' : 'AM');
+      /* A queue row only exists if the host bridge exists AND accepts the row.
+         A missing bridge or a rejected row is not a schedule: keep the dialog
+         open, say so on the card's polite region, and do not fire the
+         scheduled hook on an item that never entered the queue. */
       var bridge = window.__CE_ADD_TO_QUEUE__;
-      var row = bridge && bridge('idea', item, { ideaSource: 'ideas' }, { scheduleDate: date, scheduleTime: label, scheduled: true, readyToPost: false });
+      var row = (typeof bridge === 'function')
+        ? bridge('idea', item, { ideaSource: 'ideas' }, { scheduleDate: date, scheduleTime: label, scheduled: true, readyToPost: false })
+        : false;
       if (row !== false) {
         if (typeof window.__CE_IDEA_SCHEDULED__ === 'function') window.__CE_IDEA_SCHEDULED__(item, date, label);
-        setStatus(button, '✓ Scheduled', true);
+        /* F-14 (cloud/ce-ui, 2026-09-21): the host bridge only reports that it
+           wrote a queue row in this browser's own store. It cannot know whether
+           the Mac received it, so the status names the row and stops there. */
+        setStatus(button, 'Draft slot added to Plan for ' + date + ' ' + label, true);
         close();
+        return;
+      }
+      /* F-10 (cloud/ce-ui, 2026-09-21): the failure was announced only on the
+         card's live region, which self-clears after 1.1s while this dialog
+         stayed open — the reason vanished before it could be read or acted on.
+         Keep it in the dialog until the user changes something or retries. */
+      setStatus(button, 'Not scheduled', false);
+      var errEl = modal.querySelector('[data-ce-idea-schedule-error]');
+      if (errEl) {
+        errEl.textContent = 'Not scheduled: the queue door did not accept a row, so nothing was added to Plan. Check the Mac app is available, then try again.';
+        errEl.hidden = false;
       }
     };
     var input = modal.querySelector('[data-ce-idea-schedule-date]');
@@ -369,12 +447,12 @@
         var __draftOk = (typeof window.cePersistOrWarn === 'function')
           ? window.cePersistOrWarn('ce_write_draft', draft)
           : (function () { try { localStorage.setItem('ce_write_draft', draft); return true; } catch (_e) { return false; } })();
-        if (!__draftOk) { setStatus(button, '⚠ Draft not saved', false); return; }
+        if (!__draftOk) { setStatus(button, 'Draft not saved — this browser’s storage is full. Clear some space and tap again.', false); return; }
       }
       if (typeof window.__CE_NAVIGATE__ === 'function') window.__CE_NAVIGATE__('write');
-      setStatus(button, '✓ Taken to Write', true);
+      setStatus(button, 'Draft saved and taken to Write', true);
     } catch (e) {
-      setStatus(button, '⚠ Unavailable', false);
+      setStatus(button, 'Could not open this idea as a draft — reload the page and try again.', false);
     }
   }
 
@@ -382,20 +460,43 @@
     if (nextContext) context = nextContext;
     var view = document.getElementById('view');
     if (!view) return;
-    var all = dedupe(sourceItems());
     var groups = groupedItems();
     var visibleCount = groups.reduce(function (total, group) { return total + group.items.length; }, 0);
     if (groups.length && !Object.keys(openGroups).some(function (key) { return openGroups[key]; })) openGroups[groups[0].key] = true;
     /* The hidden #meta topbar channel is gone (W9, 2026-09-18) — the summary
        line inside the surface below is the visible owner of the count. */
     view.className = 'view ce-ideas-parity';
-    view.innerHTML = controlsHtml() +
-      '<div class="ce-ideas-summary"><span>' + visibleCount + ' ideas to explore</span>' + (structuredOnly ? '<span>structured outlines</span>' : '') + '</div>' +
-      (groups.length ? groups.map(sectionHtml).join('') : '<div class="ce-ideas-empty">No ideas match these filters. Clear a filter or search again.</div>');
+    /* Reuse the controls + summary nodes across re-renders and swap only the
+       sections list. A filter/search keystroke used to rewrite the whole
+       surface through one large innerHTML assignment (controls, summary and
+       every visible card); now the chrome survives and only the list is
+       updated. Visible results are identical — the list markup is the same
+       string the whole-surface write produced. */
+    var list = view.querySelector('.ce-ideas-list');
+    var chromeOk = !!view.querySelector('.ce-ideas-controls') && !!view.querySelector('.ce-ideas-summary');
+    if (!list || !chromeOk) {
+      view.innerHTML = controlsHtml() +
+        '<div class="ce-ideas-summary"><span>' + visibleCount + ' ideas to explore</span>' + (structuredOnly ? '<span>structured outlines</span>' : '') + '</div>' +
+        '<div class="ce-ideas-list"></div>';
+      list = view.querySelector('.ce-ideas-list');
+    } else {
+      var summary = view.querySelector('.ce-ideas-summary');
+      var summaryHtml = '<span>' + visibleCount + ' ideas to explore</span>' + (structuredOnly ? '<span>structured outlines</span>' : '');
+      if (summary.innerHTML !== summaryHtml) summary.innerHTML = summaryHtml;
+      var controls = view.querySelector('.ce-ideas-controls');
+      var controlsFresh = controlsHtml();
+      if (controls.outerHTML !== controlsFresh) {
+        var holder = document.createElement('div');
+        holder.innerHTML = controlsFresh;
+        controls.replaceWith(holder.firstChild);
+      }
+    }
+    if (!list) return;
+    list.innerHTML = groups.length ? groups.map(sectionHtml).join('') : '<div class="ce-ideas-empty">No ideas match these filters yet — clear a filter, or search for another word.</div>';
   }
 
   function findItem(id) {
-    return dedupe(sourceItems()).find(function (item) { return String(item.id || titleOf(item)) === String(id); }) || null;
+    return dedupedSource().find(function (item) { return String(item.id || titleOf(item)) === String(id); }) || null;
   }
 
   function handleClick(event) {
@@ -430,6 +531,13 @@
       event.preventDefault();
       filterMenuOpen = !filterMenuOpen;
       render();
+      // Move focus into the popover when it opens so keyboard users land on
+      // its first item; the trigger keeps the expanded state in its markup.
+      if (filterMenuOpen) {
+        var popover = document.getElementById('ce-ideas-filter-popover');
+        var firstItem = popover ? popover.querySelector('button') : null;
+        if (firstItem) firstItem.focus();
+      }
       return;
     }
     if (target.closest('[data-ce-ideas-structured]')) {
@@ -447,6 +555,18 @@
       structuredOnly = false;
       filterMenuOpen = false;
       openGroups = Object.create(null);
+      /* F-09 (cloud/ce-ui, 2026-09-21): the empty state offers this action as
+         the remedy when nothing matches, but it left the SEARCH QUERY intact —
+         so a query with no hits stayed empty and the promised remedy was a
+         no-op. Clear the query too (host state + the visible search field) and
+         re-run, mirroring the host's own clear-search escape. */
+      context = { query: '' };
+      try {
+        var hostState = window.__CE_STATE__ || window.state;
+        if (hostState) hostState.searchQuery = '';
+        var searchInput = document.getElementById('search');
+        if (searchInput) searchInput.value = '';
+      } catch (_q) {}
       render();
       return;
     }
@@ -465,13 +585,6 @@
       copyItem(findItem(copyButton.getAttribute('data-ce-idea-copy')), copyButton);
       return;
     }
-    var scheduleButton = target.closest('[data-ce-idea-schedule]');
-    if (scheduleButton) {
-      event.preventDefault();
-      event.stopPropagation();
-      scheduleIdeaItem(findItem(scheduleButton.getAttribute('data-ce-idea-schedule')), scheduleButton);
-      return;
-    }
     var forwardButton = target.closest('[data-ce-idea-forward]');
     if (forwardButton) {
       event.preventDefault();
@@ -481,6 +594,12 @@
   }
 
   document.addEventListener('click', handleClick, false);
+  /* The one owner of this surface. A repeat injection hits the guard at the top
+     and returns before binding a second listener. teardown() lets a host that
+     genuinely wants to unmount remove the listener cleanly. */
+  window.__CE_IDEAS_IMPL__ = {
+    teardown: function () { document.removeEventListener('click', handleClick, false); }
+  };
 
   window.__CE_IDEA_SCHEDULED__ = function (item, date, label) {
     try {
@@ -509,5 +628,13 @@
   mounted = true;
   window.__CE_IDEAS_RENDER__ = render;
   window.__CE_IDEAS_RENDERER__ = { render: render, setContext: function (nextContext) { context = nextContext || {}; } };
-  if (mounted && document.getElementById('view') && document.body.classList.contains('bright-theme')) render();
+  // The surface owns its own mount; render when the host view is present.
+  // Gating on the bright theme left Ideas blank in the default theme, so the
+  // tab only painted after an unrelated theme toggle. Skip when the host has
+  // already mounted its own Ideas render, and mark ours so a second boot pass
+  // cannot overwrite it.
+  if (mounted && document.getElementById('view') && !window.__CE_IDEAS_MOUNTED_BY_HOST__) {
+    window.__CE_IDEAS_BOOT_RENDERED__ = true;
+    render();
+  }
 })();

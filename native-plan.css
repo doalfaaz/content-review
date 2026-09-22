@@ -312,6 +312,16 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
   left: 0;
   pointer-events: none;
 }
+/* Tova-2 (poem-card rhythm, 2026-09-20): the verse is now optically centred
+   (`top:46%` + `translateY(-50%)`, native-studio.css). A block taller than the
+   space above the anchor would have its FIRST line clipped by the wrap's
+   overflow:hidden. Capping the block at 76% of the face keeps it inside on
+   both sides (top 8%, bottom 84%) and clear of the 32px signature rail,
+   whatever the line count. */
+.ce-kanban-card .ce-poem-preview-wrap .ce-poem-text-block,
+.ce-poem-preview-wrap .ce-poem-text-block {
+  max-height: 76% !important;
+}
 
 /* ── Content-first plan card (owner law 2026-09-13) ────────────────────────
    The card's object is the PIECE. Before this, a detached metadata row
