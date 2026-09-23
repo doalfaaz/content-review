@@ -40,7 +40,7 @@
   --fs-small: 0.9375rem;
   --fs-body: 1rem;
   --fs-lead: 1.1875rem;
-  --fs-h2: clamp(1.375rem, 1.05rem + 1.7vw, 1.75rem);
+  --fs-h2: clamp(1.1875rem, 1rem + 0.9vw, 1.375rem);
   --fs-h1: clamp(2.25rem, 1.5rem + 4.4vw, 3.5rem);
   --fs-price: clamp(2.5rem, 1.7rem + 4.5vw, 3.75rem);
   /* viewport-fit=cover opts into the notch area, so every surface touching a
@@ -49,6 +49,7 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: #e7dfcd; }
 body {
   background: var(--paper); color: var(--ink);
   font-family: var(--serif); font-size: var(--fs-body); font-weight: 400;
@@ -56,7 +57,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 a { color: var(--madder); }
-.wrap { max-width: 640px; margin: 0 auto; padding: 0 22px; }
+.wrap { max-width: 680px; margin: 0 auto; padding: 0 22px; }
+
+/* The page is a sheet of paper. On desktop it sits centred with real margins
+   and a hairline, instead of running the full width of the window. */
+@media (min-width: 760px) {
+  body {
+    max-width: 800px; margin: 0 auto; background: var(--paper);
+    border-left: 1px solid var(--rule); border-right: 1px solid var(--rule);
+    box-shadow: 0 0 0 1px rgba(35,31,24,0.05), 0 18px 44px rgba(35,31,24,0.09);
+  }
+}
 
 /* MASTHEAD: a printed masthead, not an app bar. */
 .masthead { padding-top: calc(26px + var(--safe-top)); }
@@ -73,37 +84,37 @@ a { color: var(--madder); }
 }
 
 /* HERO: the honest fact first, the ask last. */
-.hero { padding: 46px 0 10px; }
+.hero { padding: 48px 0 8px; }
 .hero-kicker {
   font-family: var(--sans); font-size: var(--fs-micro); font-weight: 600;
   letter-spacing: 0.24em; text-transform: uppercase; color: var(--madder);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 .hero h1 {
   font-size: var(--fs-h1); font-weight: 600; letter-spacing: -0.01em;
-  line-height: 1.12; margin-bottom: 22px;
+  line-height: 1.12; margin-bottom: 24px;
 }
 .hero h1 em { font-style: italic; font-weight: 500; color: var(--madder); }
-.hero-sub { font-size: var(--fs-lead); color: var(--ink2); line-height: 1.65; max-width: 34rem; }
+.hero-sub { font-size: var(--fs-body); color: var(--ink2); line-height: 1.7; max-width: 36rem; }
 .hero-sub strong { color: var(--ink); font-weight: 600; }
 .hero-route {
-  margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--rule);
+  margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--rule);
   font-family: var(--sans); font-size: var(--fs-micro); font-weight: 500;
   letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink3);
   line-height: 1.9;
 }
 
 /* OPENING: the ladder stated up front, before anything is asked. */
-.opening { padding: 44px 0 8px; }
+.opening { padding: 48px 0 8px; }
 .section-label {
   font-family: var(--sans); font-size: var(--fs-micro); font-weight: 600;
   letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink3);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 .ladder { border: 2px solid var(--ink); border-radius: 2px; }
 .rung {
   display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
-  padding: 16px 18px; border-bottom: 1px solid var(--rule-strong);
+  padding: 16px; border-bottom: 1px solid var(--rule-strong);
 }
 .rung:last-child { border-bottom: 0; }
 .rung-who { font-family: var(--sans); font-size: var(--fs-small); font-weight: 500; color: var(--ink2); }
@@ -111,22 +122,22 @@ a { color: var(--madder); }
   display: block; font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--madder); margin-top: 2px;
 }
-.rung-price { font-size: var(--fs-h2); font-weight: 700; color: var(--ink); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rung-price { font-size: var(--fs-lead); font-weight: 700; color: var(--ink); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .rung.rung-live { background: rgba(142,59,38,0.07); }
 .rung.rung-live .rung-price { color: var(--madder); }
 .ladder-note {
   font-size: var(--fs-small); color: var(--ink2); line-height: 1.7;
-  margin-top: 14px; max-width: 34rem;
+  margin-top: 16px; max-width: 36rem;
 }
 .ladder-note strong { color: var(--ink); font-weight: 600; }
 
 /* EVIDENCE: each claim carries its grade. Nothing is rounded up. */
 .evidence { padding: 48px 0 8px; }
-.evidence-lede { font-size: var(--fs-lead); color: var(--ink2); line-height: 1.7; max-width: 34rem; margin-bottom: 22px; }
+.evidence-lede { font-size: var(--fs-body); color: var(--ink2); line-height: 1.7; max-width: 36rem; margin-bottom: 24px; }
 .evidence-list { list-style: none; border-top: 2px solid var(--ink); }
 .evidence-list li {
   padding: 16px 0; border-bottom: 1px solid var(--rule);
-  color: var(--ink2); line-height: 1.65;
+  color: var(--ink2); line-height: 1.7;
 }
 .evidence-list strong { color: var(--ink); font-weight: 600; }
 .grade {
@@ -137,18 +148,21 @@ a { color: var(--madder); }
 }
 .grade-counted { background: rgba(47,107,65,0.12); color: var(--green); }
 .grade-floor, .grade-quoted { background: rgba(142,59,38,0.1); color: var(--madder); }
-.evidence-foot { font-size: var(--fs-small); color: var(--ink2); font-style: italic; margin-top: 16px; max-width: 34rem; }
+.evidence-foot { font-size: var(--fs-small); color: var(--ink2); font-style: italic; margin-top: 16px; max-width: 36rem; }
 
 /* WHY A POET: the specific paragraph the brief asks for. */
 .why { padding: 48px 0 8px; }
-.why-body { font-size: var(--fs-lead); line-height: 1.7; max-width: 34rem; }
+.why-body { font-size: var(--fs-body); line-height: 1.7; max-width: 36rem; }
 .why-body strong { font-weight: 600; }
 
 /* LETTER: the confession set as an actual letter. */
-.letter { padding: 52px 0 8px; }
+/* The sheet is capped in ch, not rem, so the measure stays in the 60-66
+   character band at every width and the block still reads as a letter. */
+.letter { padding: 48px 0 8px; }
 .letter-body {
-  font-size: var(--fs-lead); line-height: 1.85; white-space: pre-wrap;
-  border-left: 3px solid var(--madder); padding-left: 22px;
+  max-width: 62ch; font-size: var(--fs-lead); line-height: 1.85;
+  white-space: pre-wrap; padding-left: 24px;
+  border-left: 2px solid rgba(142,59,38,0.45);
 }
 .letter-body::first-letter {
   float: left; font-size: 2.9em; font-weight: 700; color: var(--madder);
@@ -156,16 +170,16 @@ a { color: var(--madder); }
 }
 .letter-body .hl { color: var(--madder); font-weight: 600; }
 .letter-sig {
-  margin-top: 18px; font-family: var(--sans); font-size: var(--fs-small);
+  margin-top: 24px; font-family: var(--sans); font-size: var(--fs-small);
   font-weight: 500; letter-spacing: 0.06em; color: var(--ink2);
 }
 
 /* IS / ISN'T */
 .honest { padding: 48px 0 8px; }
-.honest-grid { display: grid; grid-template-columns: 1fr; gap: 28px; }
+.honest-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
 @media (min-width: 600px) { .honest-grid { grid-template-columns: 1fr 1fr; } }
 .honest-col h3 {
-  font-size: 1.0625rem; font-weight: 700; padding-bottom: 8px;
+  font-size: var(--fs-body); font-weight: 700; padding-bottom: 8px;
   border-bottom: 2px solid var(--ink); margin-bottom: 4px;
 }
 .honest-col.is h3 { color: var(--green); }
@@ -173,41 +187,51 @@ a { color: var(--madder); }
 .honest-col ul { list-style: none; }
 .honest-col li {
   font-family: var(--sans); font-size: var(--fs-small); color: var(--ink2);
-  padding: 8px 0; border-bottom: 1px solid var(--rule); line-height: 1.55;
+  padding: 8px 0; border-bottom: 1px solid var(--rule); line-height: 1.6;
 }
 
 /* THE DOOR: one action, the ladder, and what happens next. */
 .door { padding: 56px 0 calc(72px + var(--safe-bottom)); }
-.door-rule { border-top: 2px solid var(--ink); padding-top: 30px; }
-.door h2 { font-size: var(--fs-h2); font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; margin-bottom: 14px; }
-.door-lead { font-size: var(--fs-lead); color: var(--ink2); line-height: 1.65; margin-bottom: 22px; max-width: 34rem; }
-.door-price { font-size: var(--fs-price); font-weight: 700; color: var(--madder); letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
-.door-facts { color: var(--ink2); margin-bottom: 10px; max-width: 34rem; line-height: 1.65; }
+.door-rule { border-top: 2px solid var(--ink); padding-top: 32px; }
+.door h2 { font-size: var(--fs-h2); font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; margin-bottom: 16px; max-width: 30rem; }
+.door-lead { font-size: var(--fs-body); color: var(--ink2); line-height: 1.7; margin-bottom: 24px; max-width: 36rem; }
+.door-price {
+  font-size: var(--fs-h2); font-weight: 700; color: var(--madder);
+  letter-spacing: -0.01em; line-height: 1.2; margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.door-facts { color: var(--ink2); margin-bottom: 16px; max-width: 36rem; line-height: 1.7; }
 .door-note {
-  font-size: var(--fs-lead); font-style: italic; color: var(--ink);
-  margin: 18px 0 26px;
+  font-size: var(--fs-body); font-style: italic; color: var(--ink);
+  margin: 16px 0 32px;
 }
 
 /* FORM */
-.capture-form { display: grid; gap: 16px; margin-bottom: 18px; max-width: 30rem; }
-.field { display: grid; gap: 6px; }
+.capture-form { display: grid; gap: 16px; margin-bottom: 16px; max-width: 30rem; }
+.field { display: grid; gap: 8px; }
 .field-label { font-family: var(--sans); font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
 .field input {
-  width: 100%; min-height: 52px; padding: 0 14px;
-  background: #fffdf7; color: var(--ink); border: 1.5px solid rgba(35,31,24,0.45);
-  border-radius: 2px; font-family: var(--sans); font-size: 1rem; font-weight: 400;
+  width: 100%; min-height: 48px; padding: 0 14px;
+  background: #fffdf7; color: var(--ink); border: 1.5px solid var(--rule-strong);
+  border-radius: 2px; font-family: var(--sans); font-size: var(--fs-body); font-weight: 400;
 }
 .field input::placeholder { color: var(--ink3); }
-.field input:focus-visible { outline: 3px solid var(--madder); outline-offset: 2px; border-color: var(--madder); }
-.field input[aria-invalid="true"] { border-color: var(--madder-deep); }
-.field-hint { font-family: var(--sans); font-size: var(--fs-micro); color: var(--ink3); line-height: 1.5; }
+.field input:focus-visible {
+  outline: 2px solid transparent; outline-offset: 2px;
+  border-color: var(--madder); box-shadow: 0 0 0 3px rgba(142,59,38,0.28);
+}
+.field input[aria-invalid="true"] { border-color: var(--madder-deep); box-shadow: 0 0 0 1px var(--madder-deep); }
+.field-hint { font-family: var(--sans); font-size: var(--fs-small); color: var(--ink3); line-height: 1.5; }
 .field-err { font-family: var(--sans); font-size: var(--fs-small); font-weight: 500; color: var(--madder-deep); line-height: 1.5; }
+/* Empty error and hint nodes must never hold open a gap in the 8px rhythm. */
+.field-err:empty, .field-hint:empty { display: none; }
+.field-err:not(:empty), .field-hint:not(:empty) { margin-top: 2px; }
 
 .cta {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   min-height: 54px; padding: 0 30px; width: 100%;
   background: var(--madder); color: var(--paper);
-  font-family: var(--sans); font-size: 1rem; font-weight: 600;
+  font-family: var(--sans); font-size: var(--fs-body); font-weight: 600;
   letter-spacing: 0.02em; text-decoration: none; border: 0; border-radius: 2px;
   cursor: pointer; transition: background 0.15s ease;
 }
@@ -219,6 +243,7 @@ a { color: var(--madder); }
 .cta:hover { background: var(--madder-deep); }
 .cta:active { background: var(--madder-deep); }
 .cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.wl-retry:focus-visible { outline: 3px solid var(--madder); outline-offset: 2px; }
 .cta[disabled] { opacity: 0.75; cursor: progress; }
 .btn-spin {
   width: 16px; height: 16px; border-radius: 50%;
@@ -229,45 +254,49 @@ a { color: var(--madder); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* WHATSAPP BUBBLE PREVIEW: the exact message, shown before the tap. */
-.bubble-wrap { margin-top: 18px; max-width: 34rem; }
+.bubble-wrap { margin-top: 16px; max-width: 36rem; }
 .bubble-label {
   font-family: var(--sans); font-size: var(--fs-micro); font-weight: 600;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3);
-  margin-bottom: 10px;
+  letter-spacing: 0.02em; color: var(--ink3);
+  margin-bottom: 12px;
 }
 /* Outgoing-right, so the preview reads as the message about to be sent. */
 .wa-bubble {
   display: block; position: relative; background: #dcf8c6; color: #10240f;
-  border-radius: 10px 10px 2px 10px; padding: 12px 14px 8px;
+  border-radius: 8px 8px 8px 2px; padding: 12px 16px 8px;
   font-family: var(--sans); font-size: var(--fs-small); line-height: 1.6;
   white-space: pre-wrap; word-break: break-word;
   box-shadow: 0 1px 1px rgba(35,31,24,0.15);
-  margin-left: auto; max-width: 34rem;
+  margin-left: auto; max-width: min(100%, 30rem);
 }
+/* Tail sits inside the lower-right corner of its own box: the flat corner
+   and the wedge overlap by the padding, so the shape never bleeds outside. */
 .wa-bubble::after {
-  content: ""; position: absolute; right: -8px; bottom: 0;
-  width: 10px; height: 14px; background: #dcf8c6;
-  clip-path: polygon(0 0, 0 100%, 100% 100%);
+  content: ""; position: absolute; right: 0; bottom: 0;
+  border-width: 0 0 14px 14px; border-style: solid;
+  border-color: transparent transparent #dcf8c6 transparent;
 }
 .wa-bubble .wa-msg { display: block; }
 .wa-stamp {
   display: block; text-align: right; font-family: var(--sans);
   font-size: var(--fs-micro); color: rgba(16,36,15,0.55);
-  letter-spacing: 0.02em; margin-top: 4px;
+  letter-spacing: 0.02em; margin-top: 4px; padding-right: 8px;
 }
 .next-step {
   font-family: var(--sans); font-size: var(--fs-small); color: var(--ink2);
-  line-height: 1.65; margin-top: 12px; max-width: 34rem;
+  line-height: 1.7; margin-top: 16px; max-width: 36rem;
 }
+.next-step a { display: inline-flex; align-items: center; min-height: 48px; }
+.next-step a:focus-visible { outline: 3px solid var(--madder); outline-offset: 2px; }
 .next-step strong { color: var(--ink); font-weight: 600; }
 .cta-fallback { margin-top: 18px; }
 .wl-status { font-family: var(--sans); font-size: var(--fs-small); color: var(--ink2); margin-top: 12px; }
 .wl-success {
   margin-top: 16px; padding: 16px; border: 1.5px solid var(--green);
-  border-radius: 2px; background: rgba(47,107,65,0.07); max-width: 34rem;
+  border-radius: 2px; background: rgba(47,107,65,0.07); max-width: 36rem;
 }
 .wl-success-title { font-weight: 600; color: var(--ink); margin-bottom: 6px; }
-.wl-success p { font-family: var(--sans); font-size: var(--fs-small); color: var(--ink2); line-height: 1.65; }
+.wl-success p { font-family: var(--sans); font-size: var(--fs-small); color: var(--ink2); line-height: 1.7; }
 .wl-retry { display: inline-flex; align-items: center; min-height: 48px; font-family: var(--sans); font-size: var(--fs-small); font-weight: 600; margin-top: 6px; }
 
 footer {
@@ -335,7 +364,7 @@ footer {
         <span class="rung-price">₹1,999</span>
       </div>
     </div>
-    <p class="ladder-note"><strong>Joining the waitlist is free, and nothing is charged now.</strong> When doors open, your WhatsApp is where the message lands. The first 50 seats are ₹999 because those buyers move first. After that the price steps up to ₹1,499, then ₹1,999 standing. It rises as blocks fill; it does not fall.</p>
+    <p class="ladder-note"><strong>Joining the waitlist is free, and nothing is charged now.</strong> When doors open, your WhatsApp is where the message lands. The first 50 seats are ₹999 because those buyers move first.</p>
     <p class="ladder-note">Paid once. Access is lifetime. 14 days to ask for the money back, one message, no reason asked.</p>
   </div>
 </section>
@@ -359,7 +388,7 @@ footer {
 <section class="why" aria-labelledby="whyLabel">
   <div class="wrap">
     <h2 class="section-label" id="whyLabel">Why a poet teaches this</h2>
-    <p class="why-body">I write poetry to a quarter of a million readers, and I have taught <strong>5 live batches to 1,000+ students</strong>, with <strong>81% of them finishing</strong> the internal run. The poems name the feeling; the course does the work underneath it. It is the same voice in both, which is the only reason it holds together.</p>
+    <p class="why-body">I have taught <strong>5 live batches to 1,000+ students</strong>, with <strong>81% of them finishing</strong> the internal run. The poems name the feeling; the course does the work underneath it. It is the same voice in both, which is the only reason it holds together.</p>
   </div>
 </section>
 
@@ -444,7 +473,7 @@ Name: your name
 WhatsApp: your number
 
 First 50 seats are ₹999. Please tell me when doors open.</span><span class="wa-stamp" aria-hidden="true">now ✓✓</span></p>
-      <p class="next-step" id="wlNext"><strong>What happens next:</strong> add your name and number above, then press Send in the WhatsApp chat that opens. Joining is free and nothing is charged. You are told when the doors open.</p>
+      <p class="next-step" id="wlNext"><strong>What happens next:</strong> add your name and number above, then press Send in the WhatsApp chat that opens. Joining is free and nothing is charged.</p>
     </div>
 
     <p class="wl-status" id="wlStatus" role="status"></p>
