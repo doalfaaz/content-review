@@ -12,6 +12,12 @@
   var structuredOnly = false;
   var filterMenuOpen = false;
   var openGroups = Object.create(null);
+  /* ADA P1-1 (ideas-ada, 2026-09-23): the card outline's expanded state is
+     owned HERE, next to the markup that renders it, so cardHtml can bake
+     `is-open` + `aria-expanded` on the first paint of every re-render. The
+     host handler no longer keeps a parallel keyed map re-applied by a
+     MutationObserver — one state owner, one toggle path. */
+  var openCards = Object.create(null);
   var context = { query: '' };
   var mounted = false;
 
@@ -236,16 +242,39 @@
     return '<div class="ce-ideas-point">' + lead + esc(point.text) + subpoints + '</div>';
   }
 
+  /* aria-controls splits on whitespace, so the outline ids need a token — an
+     authored idea id can contain spaces or quotes. The raw id stays on the
+     button's data attribute (matched by string compare, no selector). */
+  function outlineToken(value) {
+    return Array.from(String(value == null ? '' : value))
+      .map(function (ch) { return ch.codePointAt(0).toString(16); }).join('-') || 'idea';
+  }
+
   function cardHtml(item) {
     var points = pointsOf(item);
     var intro = bodyOf(item);
     var title = titleOf(item);
     var pending = !intro && !points.length;
-    return '<article class="ce-ideas-card" data-ce-idea-id="' + esc(item.id || title) + '">' +
-      '<h3>' + esc(title) + '</h3>' +
-      (intro ? '<div class="ce-ideas-card-intro">' + esc(intro) + '</div>' : '') +
-      (points.length ? '<div class="ce-ideas-points">' + points.map(pointHtml).join('') + '</div>' : '') +
-      (pending ? '<div class="ce-ideas-card-pending">Structured outline pending for this idea.</div>' : '') +
+    var id = String(item.id || title);
+    var token = outlineToken(id);
+    var isOpen = !!openCards[id];
+    /* The outline is three sibling regions (intro / points / pending), each hid
+       den by the host's collapsed-card rule. aria-controls takes a
+       space-separated id list, so the button points at exactly the regions
+       this card rendered — the relationship is real even while collapsed. */
+    var outlineIds = [];
+    var introId = '';
+    var pointsId = '';
+    var pendingId = '';
+    if (intro) { introId = 'ce-idea-intro-' + token; outlineIds.push(introId); }
+    if (points.length) { pointsId = 'ce-idea-points-' + token; outlineIds.push(pointsId); }
+    if (pending) { pendingId = 'ce-idea-pending-' + token; outlineIds.push(pendingId); }
+    var controls = outlineIds.length ? ' aria-controls="' + esc(outlineIds.join(' ')) + '"' : '';
+    return '<article class="ce-ideas-card' + (isOpen ? ' is-open' : '') + '" data-ce-idea-id="' + esc(id) + '">' +
+      '<h3><button type="button" class="ce-ideas-card-toggle" data-ce-ideas-card-toggle="' + esc(id) + '" aria-expanded="' + (isOpen ? 'true' : 'false') + '"' + controls + '>' + esc(title) + '</button></h3>' +
+      (intro ? '<div class="ce-ideas-card-intro"' + (introId ? ' id="' + esc(introId) + '"' : '') + '>' + esc(intro) + '</div>' : '') +
+      (points.length ? '<div class="ce-ideas-points"' + (pointsId ? ' id="' + esc(pointsId) + '"' : '') + '>' + points.map(pointHtml).join('') + '</div>' : '') +
+      (pending ? '<div class="ce-ideas-card-pending"' + (pendingId ? ' id="' + esc(pendingId) + '"' : '') + '>Structured outline pending for this idea.</div>' : '') +
       '<div class="ce-ideas-card-actions">' +
       /* F-ID10 (ideas-copy, 2026-09-23): "Take forward" named a destination only the
          toast knew, and "Schedule" collided with Plan's Meta-clock meaning while
@@ -471,6 +500,15 @@
     var groups = groupedItems();
     var visibleCount = groups.reduce(function (total, group) { return total + group.items.length; }, 0);
     if (groups.length && !Object.keys(openGroups).some(function (key) { return openGroups[key]; })) openGroups[groups[0].key] = true;
+    /* ADA P2-2 (ideas-copy, 2026-09-23): "632 ideas to explore" against the 8
+       cards of the single auto-opened group reads as data loss on a phone.
+       Qualify the raw total with how many of the visible topic groups are
+       actually open, computed from openGroups (the same state sectionHtml
+       renders), so filtering, expansion and the empty state all stay honest. */
+    var topicCounts = groups.map(function (group) { return group.key; });
+    var openTopicCount = topicCounts.filter(function (key) { return !!openGroups[key]; }).length;
+    var summaryCounts = visibleCount + (visibleCount === 1 ? ' idea to explore' : ' ideas to explore') +
+      (groups.length ? ' · ' + openTopicCount + ' of ' + groups.length + (groups.length === 1 ? ' topic open' : ' topics open') : '');
     /* The hidden #meta topbar channel is gone (W9, 2026-09-18) — the summary
        line inside the surface below is the visible owner of the count. */
     view.className = 'view ce-ideas-parity';
@@ -484,12 +522,12 @@
     var chromeOk = !!view.querySelector('.ce-ideas-controls') && !!view.querySelector('.ce-ideas-summary');
     if (!list || !chromeOk) {
       view.innerHTML = controlsHtml() +
-        '<div class="ce-ideas-summary"><span>' + visibleCount + (visibleCount === 1 ? ' idea to explore' : ' ideas to explore') + '</span>' + (structuredOnly ? '<span>structured outlines</span>' : '') + '</div>' +
+        '<div class="ce-ideas-summary"><span>' + summaryCounts + '</span>' + (structuredOnly ? '<span>structured outlines</span>' : '') + '</div>' +
         '<div class="ce-ideas-list"></div>';
       list = view.querySelector('.ce-ideas-list');
     } else {
       var summary = view.querySelector('.ce-ideas-summary');
-      var summaryHtml = '<span>' + visibleCount + (visibleCount === 1 ? ' idea to explore' : ' ideas to explore') + '</span>' + (structuredOnly ? '<span>structured outlines</span>' : '');
+      var summaryHtml = '<span>' + summaryCounts + '</span>' + (structuredOnly ? '<span>structured outlines</span>' : '');
       if (summary.innerHTML !== summaryHtml) summary.innerHTML = summaryHtml;
       var controls = view.querySelector('.ce-ideas-controls');
       var controlsFresh = controlsHtml();
@@ -507,6 +545,33 @@
 
   function findItem(id) {
     return dedupedSource().find(function (item) { return String(item.id || titleOf(item)) === String(id); }) || null;
+  }
+
+  /* ADA P1-1 (ideas-ada, 2026-09-23): the single toggle path for a card's
+     outline. The title button and the article-level touch convenience both
+     land here, so the class and aria-expanded can never disagree. Updates
+     the live card in place (no re-render) and records the state so the next
+     render() bakes it into the rebuilt markup. Matching by data attribute
+     instead of a selector avoids quoting/escaping an authored id. */
+  function cardElement(id) {
+    var cards = document.querySelectorAll('#view.ce-ideas-parity .ce-ideas-card');
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].getAttribute('data-ce-idea-id') === String(id)) return cards[i];
+    }
+    return null;
+  }
+
+  function toggleCard(id) {
+    var key = String(id == null ? '' : id);
+    if (!key) return false;
+    var next = !openCards[key];
+    openCards[key] = next;
+    var card = cardElement(key);
+    if (!card) return next;
+    card.classList.toggle('is-open', next);
+    var toggle = card.querySelector('[data-ce-ideas-card-toggle]');
+    if (toggle) toggle.setAttribute('aria-expanded', next ? 'true' : 'false');
+    return next;
   }
 
   function handleClick(event) {
@@ -588,6 +653,14 @@
       render();
       return;
     }
+    /* The card title button. It is a real <button>, so Enter and Space arrive
+       here as clicks — keyboard and pointer share this one branch. */
+    var cardToggle = target.closest('[data-ce-ideas-card-toggle]');
+    if (cardToggle) {
+      event.preventDefault();
+      toggleCard(cardToggle.getAttribute('data-ce-ideas-card-toggle'));
+      return;
+    }
     var copyButton = target.closest('[data-ce-idea-copy]');
     if (copyButton) {
       event.preventDefault();
@@ -610,6 +683,9 @@
   window.__CE_IDEAS_IMPL__ = {
     teardown: function () { document.removeEventListener('click', handleClick, false); }
   };
+  /* The card-outline toggle, exposed so the host's article-level tap handler
+     goes through this same state instead of keeping its own copy. */
+  window.__CE_IDEA_TOGGLE_CARD__ = toggleCard;
 
   window.__CE_IDEA_SCHEDULED__ = function (item, date, label) {
     try {

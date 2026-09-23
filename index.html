@@ -168,7 +168,10 @@
        true destructive affordances; --warn flattens to muted — a fact with a fix
        path is never red (grow/launch precedent). */
     --danger: #c43b4e;
-    --warn: var(--muted);
+    /* F-PL25 (index, 2026-09-23, audit P1-6): --warn was an alias of --muted, so a
+       warning label rendered the exact same ink as helper text - a semantic token
+       with no semantics. It owns a gold now. */
+    --warn: #d9a441;
     --info: #6fa8dc;
     --success: #57b98a;
     /* Radius family: 18px cards / 12px controls / 8px chips / 999 pills.
@@ -243,7 +246,7 @@
     --grad-accent-text: linear-gradient(135deg, #8e2f3d, #bf4b5d);
     --crimson-wash: radial-gradient(circle at 85% 10%, rgba(217, 106, 124, 0.09), transparent 45%);
     --danger: #962c3d;
-    --warn: var(--muted);
+    --warn: #8a6216;
     --info: #0055d4;
     --success: #0f8a52;
     --shadow-1: 0 1px 2px rgba(74, 62, 40, 0.10);
@@ -501,13 +504,22 @@
   body.bright-theme .ce-settings-card textarea {
     background: rgba(255, 255, 255, 0.72);
   }
+  /* F-PL20 (polish, 2026-09-23, audit M4/D4): four actions in one flex row wrapped
+     to two and three line buttons in the 320px card and clipped Close. They form an
+     even 2x2 grid of one-line buttons. */
   .ce-settings-actions {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
     margin-top: 14px;
-    justify-content: flex-end;
   }
   .ce-settings-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    white-space: nowrap;
     border-radius: 8px;
     padding: 7px 14px;
     font-size: var(--fs-secondary);
@@ -646,7 +658,7 @@
     overflow: hidden;
   }
 
-  /* F-M01 (tab-switch, 2026-09-23): <div class="studio-editor" id="studio"> is a
+  /* F-M01 (tab-switch, 2026-09-23): the #studio div (class studio-editor) is a
      SIBLING of #view, and its closed state was only opacity:0 + pointer-events:
      none. It therefore stayed a full-viewport (874px at 402x874) painted layer
      keeping its box in the layout and its contents in the tab order over EVERY
@@ -869,7 +881,11 @@
     margin-top: 4px;
     margin-bottom: 8px;
   }
-  .nav-btn svg, .nav-sub-btn svg { width:14px; height:14px; flex:none; opacity:.72; }
+  /* F-PL23 (index, 2026-09-23, audit P0-2): every nav glyph rendered 14x14 at .72
+     opacity - under the app's own legibility floor for a primary navigation mark and
+     read as a placeholder beside 16-20px controls elsewhere. 16px/.85 keeps the 34px
+     button height and the 195px label column unchanged. */
+  .nav-btn svg, .nav-sub-btn svg { width:16px; height:16px; flex:none; opacity:.85; }
   .nav-btn.is-active svg, .nav-btn.active svg { opacity:1; }
   .nav-sub-btn { display:flex; align-items:center; gap:7px;
     border: none;
@@ -1031,12 +1047,13 @@
     font-size: var(--fs-secondary);
     font-weight: 600;
     padding: 5px 12px;
-    border-radius: 6px;
+    min-height: var(--h-ctl, 28px);
+    border-radius: var(--r-ctl, 8px);
     cursor: pointer;
     white-space: nowrap;
     transition: transform 0.15s, color 0.15s, background-color 0.15s ease;
   }
-  .ce-top-shelf-pill .nav-count-badge { font-size: var(--fs-overline); opacity: 0.72; }
+  .ce-top-shelf-pill .nav-count-badge { font-size: var(--fs-overline); }
   .ce-top-shelf-pill:hover { color: var(--ink); }
   .ce-top-shelf-pill.active {
     background: var(--surface);
@@ -1092,9 +1109,9 @@
     color: var(--muted);
     font-size: var(--fs-secondary);
     font-weight: 700;
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
+    width: var(--h-ctl, 28px);
+    height: var(--h-ctl, 28px);
+    border-radius: var(--r-ctl, 8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1453,6 +1470,10 @@
     padding: 2px;
     gap: 2px;
   }
+  /* F-PL24 (index, 2026-09-23, audit P1-1/P1-4): the topbar mixed 26/28/30/32px
+     control heights and 6/7/8/9px radii in one band - three independent rules each
+     hard-coding a different box. The existing --h-ctl/--r-ctl tokens give the row
+     one baseline and one control radius; no new constant is introduced. */
   .section-btn {
     border: none;
     background: transparent;
@@ -1460,7 +1481,8 @@
     font-size: var(--fs-secondary);
     font-weight: 600;
     padding: 5px 12px;
-    border-radius: 6px;
+    min-height: var(--h-ctl, 28px);
+    border-radius: var(--r-ctl, 8px);
     cursor: pointer;
     transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s, border-color 0.15s, background-color 0.15s ease;
   }
@@ -1499,8 +1521,8 @@
     border: 1px solid var(--card-border);
     background: var(--card);
     color: var(--ink);
-    width: 32px;
-    height: 32px;
+    width: var(--h-ctl, 28px);
+    height: var(--h-ctl, 28px);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -1530,8 +1552,9 @@
     width: 210px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    border-radius: var(--r-ctl, 8px);
     padding: 6px 12px;
+    min-height: var(--h-ctl, 28px);
     color: var(--ink);
     font-size: var(--fs-secondary);
     outline: none;
@@ -1844,22 +1867,28 @@
     transition: transform 0.25s, opacity 0.25s, box-shadow 0.25s, border-color 0.25s, background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Studio Floating Inspector Dock */
-  .studio-dock {
-    min-height: 96px;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
-    backdrop-filter: blur(16px);
-    display: flex;
-    align-items: center;
-    padding: 10px 24px;
-    gap: 20px;
-    z-index: var(--z-dock);
-  }
+  /* N1/N9 (desktop-design, 2026-09-23): a `.studio-dock` block sat here
+     (min-height/row-flex/border-top/background) that native-studio.css:494 —
+     loaded later (:3322) — overrides on every one of those properties: the dock
+     is a 336px right-hand column (`height:100%`, `flex-direction:column`,
+     `border-top:0`). Two opposite box models, one dead; the survivor is the
+     external rule. The `.dock-section`/`.dock-label` rules below are live and
+     stay (they exist nowhere else). */
   .dock-section {
     display: flex;
     flex-direction: column;
     gap: 6px;
+  }
+  /* F-PL28 (index, 2026-09-23, audit desktop P1-2): the dock already scrolls
+     (.studio-dock overflow-y:auto, native-studio.css:510) so section bodies are meant
+     to move inside it - but every label scrolled away with its body, leaving the owner
+     reading unnamed controls. The label pins to the top of the scroll surface. */
+  .studio-dock .dock-label {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-content);
+    background: inherit;
+    padding: 2px 0;
   }
   .dock-label {
     font-size: var(--fs-overline);
@@ -2379,6 +2408,14 @@
      shared .ce-cont-legend carries 12px side padding for the continuum). */
   .ce-launch-intelligence .ce-launch-intelligence-head .ce-cont-legend { padding: 0; margin-top: 5px; gap: 4px 12px; }
   .ce-launch-intelligence .ce-launch-intelligence-head .ce-cont-legend > span { white-space: nowrap; }
+  /* F-PL21 (polish, 2026-09-23, audit D3): the head's first block shrank to its
+     title, so the legend's three swatches stacked vertically under it. The block
+     takes the free width and the legend runs as one row. */
+  .ce-launch-intelligence .ce-launch-intelligence-head > div { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+  .ce-launch-intelligence .ce-launch-intelligence-head > div > .ce-launch-rhythm { flex: 1 1 100%; min-width: 0; }
+  .ce-launch-intelligence .ce-launch-intelligence-head > div > .ce-cont-legend { flex: 1 1 100%; display: flex; flex-wrap: wrap; }
+  .ce-launch-daysafe-law { margin-left: auto; color: var(--faint); }
+  html.ce-phone .ce-launch-daysafe-law { margin-left: 0; flex-basis: 100%; }
 
   /* P0.9 / P0.14 — Day Receipt + morning contract strip. Launch alone owns the
      day verdict; WON is only painted on schedule-confirmation evidence. Quiet /
@@ -2495,7 +2532,11 @@
     --grad-accent-text: linear-gradient(135deg, #bf4b5d, #d96a7c);
     --grad-bar: linear-gradient(180deg, #e0879a, #d96a7c 45%, #bf4b5d);
     --crimson-wash: radial-gradient(circle at 85% 10%, rgba(217,106,124,.06), transparent 45%);
-    --warn: var(--muted);
+    /* F-PL25 (index, 2026-09-23, audit P1-6): this rebind re-flattened --warn to
+       --muted on the ops shells, which own every --warn consumer (.ce-aud-gaps,
+       .ce-aud-delta, .ce-meta-chip--skipped). Without gold here the root fix is
+       inert on the only surfaces that read the token. */
+    --warn: #d9a441;
     --danger: var(--muted);
     font-variant-numeric: tabular-nums;
   }
@@ -2683,7 +2724,7 @@
      a closed disclosure with a real 32px hit target. Open state shows the file
      list inside the same hairline box the surface used before. */
   .ce-grow-shell .ce-data-sources, .ce-launch-workbench .ce-data-sources { border-top: 1px solid var(--hairline); }
-  .ce-grow-shell .ce-data-sources > summary, .ce-launch-workbench .ce-data-sources > summary { display: flex; align-items: center; min-height: 32px; color: var(--faint); font-size: var(--fs-overline); font-weight: 600; letter-spacing: .04em; cursor: pointer; list-style: none; }
+  .ce-grow-shell .ce-data-sources > summary, .ce-launch-workbench .ce-data-sources > summary { display: flex; align-items: center; min-height: 44px; color: var(--faint); font-size: var(--fs-overline); font-weight: 600; letter-spacing: .04em; cursor: pointer; list-style: none; }
   .ce-grow-shell .ce-data-sources > summary::-webkit-details-marker, .ce-launch-workbench .ce-data-sources > summary::-webkit-details-marker { display: none; }
   .ce-grow-shell .ce-data-sources > summary::before, .ce-launch-workbench .ce-data-sources > summary::before { content: '\25B8'; margin-right: 6px; color: var(--faint); }
   .ce-grow-shell .ce-data-sources[open] > summary::before, .ce-launch-workbench .ce-data-sources[open] > summary::before { content: '\25BE'; }
@@ -2813,6 +2854,13 @@
      2.4.13 minimum, so keyboard focus was invisible on every non-button focusable.
      Use the dedicated TEXT token: 5.17:1 dark / 7.41:1 light, both themes. */
   :focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; border-radius: 6px; }
+  /* F-PL27 (index, 2026-09-23, audit desktop P2-5): the primary navigation was the
+     one control the generic ring above missed (the rail resets its own border), so nav
+     buttons took a browser-default outline instead of the design system's. Inset so the
+     34px row does not shift on focus. */
+  #sidebar-nav .nav-btn:focus-visible,
+  #sidebar-nav .nav-sub-btn:focus-visible,
+  #sidebar-nav .nav-nest-btn:focus-visible { outline: 2px solid var(--accent-text); outline-offset: -2px; }
   ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
   body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 </style>
@@ -3288,16 +3336,16 @@
   }
 })();
 </script>
-<link rel="stylesheet" href="./native-ideas.css?v=b90b6e2846" />
-<link rel="stylesheet" href="./native-plan.css?v=20e0476f87" />
-<link rel="stylesheet" href="./native-saved.css?v=4dcc604503" />
-<link rel="stylesheet" href="./native-studio.css?v=f6443bf597" />
+<link rel="stylesheet" href="./native-ideas.css?v=ab10327c48" />
+<link rel="stylesheet" href="./native-plan.css?v=ed3a17b5b9" />
+<link rel="stylesheet" href="./native-saved.css?v=ded9862486" />
+<link rel="stylesheet" href="./native-studio.css?v=be38c6be7d" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<script src="./ce-touch-edit.js?v=501904dc70"></script>
+<script src="./ce-touch-edit.js?v=ab77463465"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -3530,7 +3578,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   } catch (_) {}
 })();
 </script>
-<link rel="stylesheet" href="./ce-mobile.css?v=f3296774fa" />
+<link rel="stylesheet" href="./ce-mobile.css?v=06c21de5d2" />
 <!-- Ideas surface density + crimson rebind (2026-09-17). The parity renderer
      ships tall outline cards and the catalog is ~600 ideas, so the tab read
      as pink-tinted text walls. Cards now render as compact rows that expand
@@ -3636,6 +3684,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     background: var(--ideas-row);
   }
   .ce-ideas-parity .ce-ideas-card h3 {
+    display: flex;
+    align-items: baseline;
     flex: 1 1 auto;
     min-width: 0;
     font-size: var(--fs-secondary);
@@ -3646,6 +3696,33 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  /* ADA P1-1 (ideas-ada, 2026-09-23): the title is a real <button> so a
+     keyboard or screen-reader user can expand the outline; it must read as the
+     heading text, not as a chrome control, and carry the row's truncation. */
+  .ce-ideas-parity .ce-ideas-card-toggle {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ce-ideas-parity .ce-ideas-card.is-open .ce-ideas-card-toggle { white-space: normal; overflow: visible; }
+  .ce-ideas-parity .ce-ideas-card-toggle:focus-visible {
+    outline: 2px solid var(--ideas-accent-text);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+  .ce-ideas-parity .ce-ideas-card h3:focus-within { overflow: visible; }
   .ce-ideas-parity .ce-ideas-card:has(.ce-ideas-points, .ce-ideas-card-intro) > h3::before {
     content: '›';
     display: inline-block;
@@ -3669,7 +3746,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   .ce-ideas-parity .ce-ideas-card-actions .ce-ideas-action {
     padding: 5px 10px;
   }
-  .ce-ideas-parity .ce-ideas-card:not(.is-open):not(:hover):not(:focus-within) .ce-ideas-action:not(.is-primary) { opacity: .45; }
+  /* F-PL22 (polish, 2026-09-23, audit S4): the resting dim is a hover reveal. A
+     phone cannot hover, so there it left Schedule draft and Copy permanently at 45%
+     and read as disabled. The dim applies only where a pointer can reveal it. */
+  @media (hover: hover) and (pointer: fine) {
+    .ce-ideas-parity .ce-ideas-card:not(.is-open):not(:hover):not(:focus-within) .ce-ideas-action:not(.is-primary) { opacity: .45; }
+  }
   .ce-ideas-parity .ce-ideas-action-status { font-size: var(--fs-overline); color: var(--ideas-muted); }
 
   /* Expanded row: the full card returns, still tightened. */
@@ -3734,6 +3816,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
      two — and the divider-heads stay slim. */
   html.ce-phone .ce-ideas-parity .ce-ideas-card { flex-wrap: wrap; row-gap: 6px; }
   html.ce-phone .ce-ideas-parity .ce-ideas-card h3 { flex: 1 1 100%; font-size: var(--fs-secondary); white-space: normal; }
+  html.ce-phone .ce-ideas-parity .ce-ideas-card .ce-ideas-card-toggle { white-space: normal; }
   html.ce-phone .ce-ideas-parity .ce-ideas-card-actions { flex: 1 1 100%; }
   html.ce-phone .ce-ideas-parity .ce-ideas-card-actions .ce-ideas-action { flex: 1 1 auto; }
   /* ADA/cloud/ce-ui: divider-heads still toggle their section on tap — 38px
@@ -3886,16 +3969,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   };
 })();
 </script>
-<script src="./native-ideas.js?v=4017911ce3"></script>
+<script src="./native-ideas.js?v=18c9d85232"></script>
 <script>
-/* Ideas rows expand/collapse companion: the parity renderer rebuilds
-   #view innerHTML on every filter/group change, so row state lives in a
-   keyed map here and is re-applied after each render. Delegation sits on
-   document (bubbling reaches it after the renderer's own handler); action
-   buttons are skipped so Take forward / Schedule / Copy behave identically. */
+/* Ideas rows expand/collapse companion: the delegated idea handlers in
+   native-ideas.js own the card's open state and its aria-expanded. This block
+   keeps the whole article tappable on touch — the title itself is now a real
+   <button> and reaches the same toggle path through that directory. Action
+   buttons are skipped so Draft in Write / Schedule draft / Copy behave
+   identically. */
 (function () {
   'use strict';
-  var openRows = Object.create(null);
   document.addEventListener('click', function (event) {
     var card = event.target && event.target.closest
       ? event.target.closest('#view.ce-ideas-parity .ce-ideas-card')
@@ -3904,21 +3987,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (event.target.closest('button, a, input, textarea, select, .ce-ideas-card-actions')) return;
     var title = event.target.closest ? event.target.closest('h3') : null;
     if (event.target !== card && !(title && title.parentElement === card)) return;
-    var id = card.getAttribute('data-ce-idea-id') || '';
-    openRows[id] = !openRows[id];
-    card.classList.toggle('is-open', !!openRows[id]);
+    if (typeof window.__CE_IDEA_TOGGLE_CARD__ === 'function') {
+      window.__CE_IDEA_TOGGLE_CARD__(card.getAttribute('data-ce-idea-id') || '');
+    }
   }, false);
-  var ideasView = document.getElementById('view');
-  if (ideasView && typeof MutationObserver === 'function') {
-    new MutationObserver(function () {
-      if (!ideasView.classList.contains('ce-ideas-parity')) return;
-      var cards = ideasView.querySelectorAll('.ce-ideas-card');
-      for (var i = 0; i < cards.length; i++) {
-        var id = cards[i].getAttribute('data-ce-idea-id') || '';
-        if (openRows[id]) cards[i].classList.add('is-open');
-      }
-    }).observe(ideasView, { childList: true });
-  }
 })();
 </script>
 <script src="./ce-insights.js?v=e30373b449"></script>
@@ -5906,6 +5978,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     studioPoemTextShadow: true,
     studioPoemSelected: false,
     studioPoemEditing: false,
+    /* P-3 (phone-studio, 2026-09-23): the carousel Tools sheet's open flag lived
+       only on the `.ce-carousel-editor` node, which updateStudioCanvas() rebuilds
+       on every look/slide/undo action — so the first tool tap closed the sheet
+       the owner was working in. The flag belongs on state (which survives the
+       rebuild, like studioPoemSelected) and is re-applied where the fresh editor
+       is created. */
+    studioToolsOpen: false,
     studioPoemEditBefore: null,
     studioDraftText: null,
     studioEditTarget: null,
@@ -6819,15 +6898,38 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
 
   const CE_POEM_DEFAULT_STYLE_KEY = 'ce_poem_default_style';
+  /* F-VT01 (verify-tree, 2026-09-23): a persisted style id must be the CANONICAL
+     PAPER_PRESETS id (white-balloon / gallery-ivory / notebook-margin / …), the
+     same string renderPaperPoemHtml and poemDefaultTextColor read. The rail used
+     to write legacy aliases (paper / ivory / notebook) that this allow list
+     rejected, so setPoemDefaultStyleType coerced the choice to 'photo' and the
+     owner's swatch silently did not stick. The alias map below keeps OLD saved
+     values (alias strings) resolving to their canonical preset on read; new
+     writes are normalised back to the canonical id. */
+  const CE_POEM_STYLE_ALIASES = {
+    'paper': 'white-balloon',
+    'ivory': 'gallery-ivory',
+    'notebook': 'notebook-margin',
+    'zen': 'minimal-zen',
+    'noir': 'midnight-noir',
+    'dusk': 'dusk-ember',
+    'banaras': 'banaras-ghat'
+  };
+  function poemCanonicalStyleType(value) {
+    var v = String(value || '');
+    return CE_POEM_STYLE_ALIASES[v] || v;
+  }
   function poemDefaultStyleType() {
     var allowed = ['editorial-ink', 'photo', 'white-balloon', 'gallery-ivory', 'notebook-margin', 'minimal-zen', 'midnight-noir', 'dusk-ember', 'banaras-ghat', 'blank', 'blank-2', 'blank-3'];
     var value = '';
     try { value = String(localStorage.getItem(CE_POEM_DEFAULT_STYLE_KEY) || ''); } catch (_e) {}
-    return allowed.indexOf(value) >= 0 ? value : 'photo';
+    var canonical = poemCanonicalStyleType(value);
+    return allowed.indexOf(canonical) >= 0 ? canonical : 'photo';
   }
   function setPoemDefaultStyleType(value) {
     var allowed = ['editorial-ink', 'photo', 'white-balloon', 'gallery-ivory', 'notebook-margin', 'minimal-zen', 'midnight-noir', 'dusk-ember', 'banaras-ghat', 'blank', 'blank-2', 'blank-3'];
-    var next = allowed.indexOf(String(value || '')) >= 0 ? String(value) : 'photo';
+    var canonical = poemCanonicalStyleType(value);
+    var next = allowed.indexOf(canonical) >= 0 ? canonical : 'photo';
     try { localStorage.setItem(CE_POEM_DEFAULT_STYLE_KEY, next); } catch (_e) {}
     return next;
   }
@@ -7724,8 +7826,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }
     // E-004 fix 2026-09-05: the sheet was keyboard-inert — focus never entered it
     // and Escape did nothing. Move focus to Close and allow Esc/Enter dismissal.
+    // F-PL26 (index, 2026-09-23, audit phone P1-2): closeBtn.focus() made the
+    // overflow-y:auto card scroll ITSELF down to reveal the button, so on every phone
+    // width the owner landed mid-sheet with the title and the token field above the
+    // fold. Focus without scrolling, and pin the open frame to the top as belt-and-braces.
     var closeBtn = document.getElementById('ce-settings-close');
-    if (closeBtn) { try { closeBtn.focus(); } catch (_e) {} }
+    if (closeBtn) { try { closeBtn.focus({ preventScroll: true }); } catch (_e) { try { closeBtn.focus(); } catch (_e2) {} } }
+    var settingsCard = modal.querySelector('.ce-settings-card');
+    if (settingsCard) { try { settingsCard.scrollTop = 0; } catch (_e3) {} }
     if (modal.__ceEscHandler) document.removeEventListener('keydown', modal.__ceEscHandler, true);
     modal.__ceEscHandler = function (e) {
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); ceCloseSettingsModal(); }
@@ -10870,7 +10978,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   // Publishable standalone posts are hook-only assets. The canvas carries the
   // hook line plus the brand mark only — internal taxonomy (pillar), section
   // chips ("POST") and body/caption copy never leak onto the face.
-  function renderPostCoreFallbackHtml(post, lookIdx, deckId) {
+  function renderPostCoreFallbackHtml(post, lookIdx, deckId, opts) {
     if (!window.PostCore || !window.PostCore.html) return '';
     const info = postDisplayParts(post);
     const title = escapeHtml(info.title);
@@ -10878,8 +10986,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       ? window.PostCore.TEMPLATES
       : ['witness-lamp-post', 'quote-broadsheet', 'soft-redline-truth', 'diwan-frame-post', 'mirror-white-room', 'sawaal-hawa'];
     const variant = variants[lookIdx % variants.length];
-    // every template finds its field: sher treatments read poem, poster treatments read line1
-    const values = { handle: '@doalfaaz', line1: title, poem: title };
+    // every template finds its field: sher treatments read poem, poster treatments read line1.
+    // P0-1 (index, 2026-09-23, audit PHONE_IDEAS_SAVED_PLAN_WRITE): defaulting poem
+    // to the FIRST LINE alone dropped every later line on all 57 Post designs in the
+    // Write preview (the sher/stack templates read multi-line copy from v.poem via
+    // poemLines()). Only the two Write callers opt into {"full":true} so the hook-only
+    // contract for Library/shelf/Plan faces is unchanged.
+    const full = (opts && opts.full && post && typeof post.text === 'string')
+      ? escapeHtml(post.text) : title;
+    const values = { handle: '@doalfaaz', line1: title, poem: full };
     try {
       const markup = window.PostCore.html(variant, values);
       const postKey = escapeHtml(post && (post.id || post.content_id) || '');
@@ -11084,6 +11199,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var full = (window.__CE_DECKS_FULL__ && ((designId && window.__CE_DECKS_FULL__[designId]) || (id && window.__CE_DECKS_FULL__[id]))) || null;
     if (full) return full;
     if (state.currentType === 'post') {
+      /* F-SD01 (studio-deck, 2026-09-23): the synth deck must keep one identity
+         while its post is open. Building a fresh object per call made every
+         edit mutate a throwaway copy, so studioCommitHistory saw before===after
+         and silently dropped font and alignment changes on slide-less posts.
+         It is cached non-enumerably on the item, so it never serialises. */
+      if (state.currentItem.__ceSynthDeck) return state.currentItem.__ceSynthDeck;
       var display = postDisplayParts(state.currentItem);
       var synthDeck = {
         id: studioDeckId(state.currentItem, 'post') || ('post:' + (state.currentItem.id || 'draft')),
@@ -11103,6 +11224,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       // masquerade as an authored deck for shelf faces and autosave. This deck
       // exists only while the asset-less post is open in Studio.
       synthDeck.__synth = true;
+      try { Object.defineProperty(state.currentItem, '__ceSynthDeck', { value: synthDeck, enumerable: false, configurable: true, writable: true }); } catch (_) {}
       return synthDeck;
     }
     /* F-POEM-DECK: a carousel/post whose backing record never hydrated. The
@@ -14507,7 +14629,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         { role: 'hook', text: deck.title, kicker: '' },
         { role: 'cta', text: 'Save this carousel. It is meant for someone you know.', kicker: '@DOALFAAZ' }   /* WL9619 / H0333 (2026-09-19): this was 'Save this carousel and share it with someone who needs it.' - a TWO-ASK (save + share) in one demo caption, against the one-ask rule this repo states at CE-FUNNEL-AUDIT.md:45 ("every caption the engine ships ends with exactly one ask ... never two asks"). The ask is now Save alone; the second sentence names the recipient without commanding a share. */
       ];
-      if (window.CarouselCore && deck.slides && deck.slides.length) {
+      // P0-1 (index, 2026-09-23, audit PHONE_LIBRARY_STUDIO): the gallery branch was
+      // gated on deck.slides alone, but line above already synthesises slides when the
+      // deck is slide-less. A carousel opened from the Library with an empty deck.slides
+      // therefore fell through to the photo/poem canvas with no `.ce-carousel-editor` in
+      // the DOM, so on a phone every carousel tool (Design, Font, align, slide ops,
+      // caption editor) was clipped inside a 56px inspector holding 1792px of content
+      // with no Tools toggle to open it. Gate on the resolved slides array instead.
+      if (window.CarouselCore && slides && slides.length) {
         canvasWrap.classList.add('ce-studio-canvas-wrap--carousel');
         const selectedIdx = Math.max(0, Math.min(slides.length - 1, state.currentSlideIdx));
         state.currentSlideIdx = selectedIdx;
@@ -14540,7 +14669,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         // Owner 2026-09-03 (hard correction): NO center hero. The deck IS the
         // swipe gallery — one expanded rail of all slides. Tools live only in
         // the bottom dock (never a second mini slide strip).
-        canvasWrap.innerHTML = '<div class="ce-carousel-editor ce-carousel-editor--gallery">'
+        canvasWrap.innerHTML = '<div class="ce-carousel-editor ce-carousel-editor--gallery' + (state.studioToolsOpen ? ' ce-tools-open' : '') + '">'
           + '<div class="ce-filmstrip ce-filmstrip--gallery" id="ce-filmstrip" data-ce-authored-w="' + stripDims.miniW + '">'
           + '<div class="ce-filmstrip-header" aria-live="polite"><span class="ce-filmstrip-count" id="ce-filmstrip-count">1/' + slides.length + '</span><span class="ce-filmstrip-progress"><i id="ce-filmstrip-progress"></i></span></div>'
           + '<div class="ce-filmstrip-track" id="ce-carousel-slide-scroll" role="listbox" aria-label="All slides">'
@@ -16136,6 +16265,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (toolsToggleBtn && toolsEditorEl) {
           toolsToggleBtn.onclick = function () {
             var toolsOpen = toolsEditorEl.classList.toggle('ce-tools-open');
+            state.studioToolsOpen = toolsOpen;
             toolsToggleBtn.setAttribute('aria-expanded', toolsOpen ? 'true' : 'false');
             var toolsLabel = toolsToggleBtn.querySelector('.ce-tools-toggle-label');
             if (toolsLabel) toolsLabel.textContent = toolsOpen ? 'Close tools' : 'Tools';
@@ -16542,7 +16672,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     state.studioEditing = false;
     state.studioPoemSelected = false;
     state.studioPoemEditing = false;
-    state.studioPoemEditBefore = null;
+    /* P-3 (phone-studio, 2026-09-23): the carousel Tools sheet's open flag is a
+       fresh-entry state, like the poem selection above — a new piece opens with
+       the sheet closed; only an in-place canvas re-render (which is what used to
+       drop it) keeps it open. */
+    state.studioToolsOpen = false;
     state.studioSavePending = false;
     state.studioDirty = false;
     state.studioMessage = '';
@@ -16836,6 +16970,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             var ws = document.querySelector('.studio-workspace');
             if (!ws) return;
             var openNow = ws.classList.toggle('ce-tools-open');
+            state.studioToolsOpen = openNow;
             dockToggle.setAttribute('aria-expanded', openNow ? 'true' : 'false');
             var lbl = dockToggle.querySelector('.ce-tools-toggle-label');
             if (lbl) lbl.textContent = openNow ? 'Close tools' : 'Tools';
@@ -18665,10 +18800,16 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       + '<button type="button" class="ce-saved-tab-btn' + (activeFilter === 'rejected' ? ' active' : '') + '" data-saved-filter="rejected"><span class="ce-ic ce-ic--delete ce-ic--13"></span> Rejected / Archive' + (badgeRejected ? ' (' + badgeRejected + ')' : '') + filteredMarker + '</button>'
       + '</div>'
       + '<div class="ce-saved-type-filters">'
-      + '<button type="button" class="ce-type-pill' + (activeType === 'all' ? ' active' : '') + '" data-type-filter="all">All</button>'
-      + '<button type="button" class="ce-type-pill' + (activeType === 'post' ? ' active' : '') + '" data-type-filter="post">Posts</button>'
-      + '<button type="button" class="ce-type-pill' + (activeType === 'carousel' ? ' active' : '') + '" data-type-filter="carousel">Carousels</button>'
-      + '<button type="button" class="ce-type-pill' + (activeType === 'poem' ? ' active' : '') + '" data-type-filter="poem">Poems</button>'
+      + '<button type="button" class="ce-type-pill' + (activeType === 'all' ? ' active' : '') + '" data-type-filter="all" aria-pressed="' + (activeType === 'all') + '">All</button>'
+      + '<button type="button" class="ce-type-pill' + (activeType === 'post' ? ' active' : '') + '" data-type-filter="post" aria-pressed="' + (activeType === 'post') + '">Posts</button>'
+      + '<button type="button" class="ce-type-pill' + (activeType === 'carousel' ? ' active' : '') + '" data-type-filter="carousel" aria-pressed="' + (activeType === 'carousel') + '">Carousels</button>'
+      + '<button type="button" class="ce-type-pill' + (activeType === 'poem' ? ' active' : '') + '" data-type-filter="poem" aria-pressed="' + (activeType === 'poem') + '">Poems</button>'
+      + '</div>'
+      /* L4 (phone-nav-library-saved, 2026-09-23): a fully empty bank dims and
+         disables every non-All pill, so the row reads broken with no reason
+         printed. State why in words, from the same savedTypeTotals the pills use. */
+      + (!(savedTypeTotals.post > 0 || savedTypeTotals.carousel > 0 || savedTypeTotals.poem > 0)
+          ? '<p class="ce-saved-type-note" role="status">Bank is empty — there is nothing to filter yet.</p>' : '')
       + '</div>'
       + '</div>'
       + bulkBarHtml
@@ -18791,6 +18932,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       btn.disabled = pillEmpty;
       btn.style.opacity = pillEmpty ? '.4' : '';
       btn.style.cursor = pillEmpty ? 'not-allowed' : '';
+      /* L3 (phone-nav-library-saved, 2026-09-23): the type pills are single-select
+         filters, so the active one must be announced; the Ideas toggles already
+         carry aria-pressed. Set on every pass so the value tracks the filter. */
+      btn.setAttribute('aria-pressed', String(pillType === activeType));
       btn.onclick = function () {
         if (pillEmpty) return;
         state.savedTypeFilter = pillType;
@@ -20143,7 +20288,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             ? renderPhotoPoemHtml({ id: 'live_1', text: txt, theme: 'Custom' }, state.writeDesignIdx % PHOTO_PRESETS.length)
             : renderPaperPoemHtml({ id: 'live_1', text: txt, theme: 'Custom' }, state.writeDesignIdx % PAPER_PRESETS.length);
         } else {
-          writePreview.innerHTML = renderPostCoreFallbackHtml(writeDraftItem(txt), state.writeDesignIdx % (postTemplateCount() || 6), '');
+          writePreview.innerHTML = renderPostCoreFallbackHtml(writeDraftItem(txt), state.writeDesignIdx % (postTemplateCount() || 6), '', { full: true });
         }
         if (writeDesignRail) {
           // 2026-08-26: the Write design rail used to cap at a fixed 6 faces while the
@@ -20179,7 +20324,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               + g.tiles.map(function (t) {
                 var face = state.writeType === 'poem'
                   ? (t.idx % 2 === 0 ? renderPhotoPoemHtml({ id: 'live_1', text: writeRailText, theme: 'Custom' }, t.idx % PHOTO_PRESETS.length) : renderPaperPoemHtml({ id: 'live_1', text: writeRailText, theme: 'Custom' }, t.idx % PAPER_PRESETS.length))
-                  : renderPostCoreFallbackHtml(writeDraftItem(writeRailText), t.idx % __wCount, '');
+                  : renderPostCoreFallbackHtml(writeDraftItem(writeRailText), t.idx % __wCount, '', { full: true });
                 return '<button type="button" data-ce-write-design="' + t.idx + '" data-ce-signature="' + t.sig + '" class="' + (t.sig === __wSelSig ? 'is-active' : '') + '" aria-label="Preview design ' + (t.idx + 1) + ' — ' + escapeHtml(g.label) + '">' + face + '</button>';
               }).join('') + '</div></div>';
           }).join('');
@@ -20933,9 +21078,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:10px;">
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
               <h3 class="ce-plan-heading" style="margin:0; font-size:var(--fs-section); font-weight:700; color:var(--ink);">Plan & Queue</h3>
-              <button id="plan-schedule-all-ready-btn" type="button" title="Place all Ready pieces a week+ out (owner law — Meta refuses sooner) with human-ish times between 9am and 9pm." style="background:var(--accent); color:#fff; border:1px solid transparent; padding:5px 14px; border-radius:7px; font-size:var(--fs-secondary); font-weight:700; cursor:pointer;">Schedule all ready</button>
+              <button id="plan-schedule-all-ready-btn" type="button" title="Place all Ready pieces a week+ out (owner law — Meta refuses sooner) with human-ish times between 9am and 9pm." style="background:var(--accent-press); color:#fff; border:1px solid transparent; padding:5px 14px; border-radius:7px; font-size:var(--fs-secondary); font-weight:700; cursor:pointer;">Schedule all ready</button>
               ${planFailedMeta > 0 ? `<button id="ce-plan-batch-meta-btn" type="button" title="Re-send the ${planFailedMeta} failed Ready piece${planFailedMeta === 1 ? '' : 's'} to Meta's clock (same confirm as Schedule)." style="background:rgba(217,106,124,0.16); color:#d96a7c; border:1px solid rgba(217,106,124,0.38); padding:5px 12px; border-radius:7px; font-size:var(--fs-secondary); font-weight:700; cursor:pointer;">Retry failed (${planFailedMeta})</button>` : ''}
-              <button id="plan-select-all-ready-btn" type="button" title="Tick every staged piece as Ready" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:var(--fs-secondary); font-weight:600; cursor:pointer;">Mark all ready</button>
+              <button id="plan-select-all-ready-btn" type="button" title="Tick every staged piece as Ready" style="background:var(--card); color:var(--ink); border:1px solid var(--card-border); padding:5px 12px; border-radius:7px; font-size:var(--fs-secondary); font-weight:600; cursor:pointer;">Mark all ready</button>
               <button id="plan-auto-schedule-btn" type="button" title="Pull from Saved Bank / library into empty day slots." style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:var(--fs-secondary); font-weight:600; cursor:pointer;">Fill week</button>
               <button id="plan-open-meta-btn" type="button" aria-label="Open Meta tools" title="Open Meta Business Suite in your browser" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); width:28px; height:26px; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
                 <span class="ce-ic ce-ic--arrow-up-right ce-ic--12"></span>
@@ -20952,10 +21097,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               </details>
               ` : ''}
               <div class="plan-view-toggle" style="display:flex; background:var(--card); border:1px solid var(--card-border); border-radius:7px; padding:2px; gap:2px; margin-left:4px;">
-                <button id="plan-view-kanban-btn" type="button" style="border:none; background:${planMode !== 'list' ? 'rgba(255,255,255,0.14)' : 'transparent'}; color:${planMode !== 'list' ? 'var(--ink)' : 'var(--muted)'}; padding:4px 9px; border-radius:5px; font-size:var(--fs-secondary); font-weight:${planMode !== 'list' ? '700' : '500'}; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                <button id="plan-view-kanban-btn" type="button" aria-pressed="${planMode !== 'list'}" style="border:none; background:${planMode !== 'list' ? 'rgba(255,255,255,0.14)' : 'transparent'}; color:${planMode !== 'list' ? 'var(--ink)' : 'var(--muted)'}; padding:4px 9px; border-radius:5px; font-size:var(--fs-secondary); font-weight:${planMode !== 'list' ? '700' : '500'}; cursor:pointer; display:flex; align-items:center; gap:4px;">
                   <span aria-hidden="true">⊞</span> Board
                 </button>
-                <button id="plan-view-list-btn" type="button" style="border:none; background:${planMode === 'list' ? 'rgba(255,255,255,0.14)' : 'transparent'}; color:${planMode === 'list' ? 'var(--ink)' : 'var(--muted)'}; padding:4px 9px; border-radius:5px; font-size:var(--fs-secondary); font-weight:${planMode === 'list' ? '700' : '500'}; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                <button id="plan-view-list-btn" type="button" aria-pressed="${planMode === 'list'}" style="border:none; background:${planMode === 'list' ? 'rgba(255,255,255,0.14)' : 'transparent'}; color:${planMode === 'list' ? 'var(--ink)' : 'var(--muted)'}; padding:4px 9px; border-radius:5px; font-size:var(--fs-secondary); font-weight:${planMode === 'list' ? '700' : '500'}; cursor:pointer; display:flex; align-items:center; gap:4px;">
                   <span aria-hidden="true">☰</span> List
                 </button>
               </div>
@@ -21872,10 +22017,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (s.work > __workPeak) __workPeak = s.work;
       });
       /* The posting silence draws as a hatched band over the longest
-         landed-free run inside the window (>=3 days earns the label). */
+         landed-free run inside the window (>=3 days earns the label).
+         P0-1 (grow-honesty, 2026-09-23): a before-tracking day has no
+         measurement, so it is not a quiet day — only slots the ledger
+         covers (`!s.pre`) can extend the counted run. */
       var __runStart = -1, __runLen = 0, __gapStart = -1, __gapLen = 0;
       __fortSlots.forEach(function (s, i) {
-        if (!s.landed) {
+        if (!s.landed && !s.pre) {
           if (__runStart < 0) { __runStart = i; __runLen = 0; }
           __runLen++;
           if (__runLen > __gapLen) { __gapLen = __runLen; __gapStart = __runStart; }
@@ -22685,7 +22833,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               + '<span>' + __daysSafeMeta + ' on Meta\u2019s clock' + (__daysSafeLocal ? ' \u00b7 ' + __daysSafeLocal + ' staged locally' : '') + '</span>'
             : '<strong>No piece staged yet</strong><span>Place one and the safe days start counting</span>'}
           ${__daysSafeLocal ? '<span class="ce-local-tag">Local only until Meta confirms</span>' : ''}
-          <span style="margin-left:auto">A missed day never doubles tomorrow.</span>
+          <span class="ce-launch-daysafe-law">A missed day never doubles tomorrow.</span>
         </div>
 
         <section class="ce-launch-queue" aria-label="Schedule rail">
@@ -22720,12 +22868,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             </div>
             <small>${(__boardPieces.length || __boardStaged) ? "Local only · live from your board · nothing estimated" : "Nothing staged yet · pick pieces from Library and the week fills in"}</small>
           </div>
-          <div class="ce-launch-insights">
-            <div class="ce-launch-insight${__boardPieces.length ? "" : " is-zero"}"><strong>${__boardPieces.length}/${__planLen}</strong><span>days covered</span></div>
-            <div class="ce-launch-insight${Object.keys(__boardPillars).length ? "" : " is-zero"}"><strong>${Object.keys(__boardPillars).length}</strong><span>pillars this week</span></div>
-            <div class="ce-launch-insight${Object.keys(__boardLooks).length ? "" : " is-zero"}"><strong>${Object.keys(__boardLooks).length}</strong><span>looks used</span></div>
-            <div class="ce-launch-insight${__boardStaged ? "" : " is-zero"}"><strong>${__boardStaged}</strong><span>staged in Plan</span></div>
-          </div>
+          ${/* P2-1 (launch-honesty, 2026-09-23): four bare zeros read as measured
+                results under the "Nothing staged yet" card; an un-staged board
+                states that in words instead. */ ''}
+          ${__boardPieces.length
+            ? '<div class="ce-launch-insights">'
+              + '<div class="ce-launch-insight"><strong>' + __boardPieces.length + '/' + __planLen + '</strong><span>days covered</span></div>'
+              + '<div class="ce-launch-insight"><strong>' + Object.keys(__boardPillars).length + '</strong><span>pillars this week</span></div>'
+              + '<div class="ce-launch-insight"><strong>' + Object.keys(__boardLooks).length + '</strong><span>looks used</span></div>'
+              + '<div class="ce-launch-insight' + (__boardStaged ? '' : ' is-zero') + '"><strong>' + __boardStaged + '</strong><span>staged in Plan</span></div>'
+              + '</div>'
+            : '<div class="ce-launch-insights is-empty"><span>Nothing staged this week — the counts start when you place a piece.</span></div>'}
         </section>
 
         <details class="ce-launch-board-waitlist">
@@ -26465,11 +26618,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       poemApplyTypography('studioType', type, 'Changed poem style');
     }
 
+    /* F-VT01 (verify-tree, 2026-09-23): these three swatches used to emit the
+       legacy aliases 'paper'/'ivory'/'notebook'. poemApplyTypography persists
+       the value through setPoemDefaultStyleType, whose allow list holds the
+       canonical PAPER_PRESETS ids, so the alias was coerced to 'photo' and the
+       chosen card was lost on the next open. Emit the canonical id the
+       renderer reads; the alias map keeps old saved values resolving. */
     const typeBtnMap = [
       { id: 'btn-type-photo', type: 'photo' },
-      { id: 'btn-type-paper', type: 'paper' },
-      { id: 'btn-type-ivory', type: 'ivory' },
-      { id: 'btn-type-notebook', type: 'notebook' },
+      { id: 'btn-type-paper', type: 'white-balloon' },
+      { id: 'btn-type-ivory', type: 'gallery-ivory' },
+      { id: 'btn-type-notebook', type: 'notebook-margin' },
       { id: 'btn-type-zen', type: 'minimal-zen' },
       { id: 'btn-type-noir', type: 'midnight-noir' },
       { id: 'btn-type-dusk', type: 'dusk-ember' },
@@ -26743,6 +26902,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var addMenu = document.getElementById('ce-add-block-menu');
         if (addMenu && addMenu.classList.contains('open')) {
           addMenu.classList.remove('open');
+          e.preventDefault();
+          return;
+        }
+        /* P-8 (phone-studio, 2026-09-23): the studio topbar's `•••` and Post-now
+           popovers are <details>, and WebKit does not close an open <details> on
+           Escape. One handler closes either popover and returns focus to its
+           summary, the same contract the settings modal uses. */
+        var openPop = document.querySelector('.studio-more-actions[open], .studio-postnow[open]');
+        if (openPop) {
+          openPop.removeAttribute('open');
+          var popSummary = openPop.querySelector('summary');
+          if (popSummary && typeof popSummary.focus === 'function') popSummary.focus({ preventScroll: true });
           e.preventDefault();
           return;
         }

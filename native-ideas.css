@@ -61,6 +61,15 @@ body:not(.bright-theme) .ce-ideas-parity {
 .ce-ideas-parity .ce-ideas-card .ce-ideas-card-actions .ce-ideas-action{min-width:44px;min-height:44px;border-radius:8px;font-size:var(--fs-secondary)}
 .ce-ideas-parity .ce-ideas-action{min-width:44px;min-height:44px;border-radius:8px;font-size:var(--fs-secondary)}
 .ce-ideas-action.is-primary{background:var(--ideas-ink);border-color:var(--ideas-ink);color:var(--ideas-surface)}
+/* F-ID20/F-ID22/N5/N6 (ideas-css, 2026-09-23): a non-primary action is a chip,
+   not a floating word — a visible hairline plus resting --ideas-ink so it reads
+   live beside the solid primary instead of disabled (2.94:1 was the failure at
+   --ideas-muted). One selector owns the secondary treatment; the primary and
+   success rules below are the only other owners. The quiet ground is a whisper
+   of ink so the border, not a fill, carries the affordance. */
+.ce-ideas-action:not(.is-primary){border-color:var(--ideas-line);background:color-mix(in srgb,var(--ideas-ink) 4%,transparent);color:var(--ideas-ink)}
+.ce-ideas-action:not(.is-primary):hover{border-color:color-mix(in srgb,var(--ideas-accent) 55%,var(--ideas-line));background:color-mix(in srgb,var(--ideas-ink) 8%,transparent)}
+.ce-ideas-action:not(.is-primary):focus-visible{outline:2px solid var(--ideas-accent);outline-offset:2px}
 /* Touch surfaces without the ce-phone class (tablet, touch laptop, any coarse
    pointer) still need the 44x44 minimum: 38px is a mouse-density box. The
    pointer-coarse query leaves desktop density untouched. */
@@ -306,6 +315,9 @@ body:not(.bright-theme) .ce-ideas-point strong { font-weight: 700; color: #f6bfc
 
 .ce-ideas-card-actions {
   display: flex;
+  /* F-ID21 (polish, 2026-09-23, audit D5): collapsed cards carry their actions at
+     the right of the title row; the open card now ends on the same side. */
+  justify-content: flex-end;
   gap: 7px;
   flex-wrap: wrap;
   align-items: center;
@@ -321,7 +333,6 @@ body:not(.bright-theme) .ce-ideas-point strong { font-weight: 700; color: #f6bfc
    floor. Scoped through .ce-ideas-card so it outranks the duplicate at
    index.html:3503, which loads later and would otherwise re-impose 11px. */
 .ce-ideas-parity .ce-ideas-card .ce-ideas-card-actions .ce-ideas-action { padding: 7px 11px; }
-.ce-ideas-action.is-primary { background: var(--ideas-ink); border-color: var(--ideas-ink); color: var(--ideas-surface); }
 .ce-ideas-action.is-success { background: #eaf8ef; border-color: #bfe4ca; color: #197042; }
 body:not(.bright-theme) .ce-ideas-action.is-success { background: rgba(52, 211, 153, .12); border-color: rgba(52, 211, 153, .30); color: #6ee7b7; }
 
@@ -351,12 +362,4 @@ body:not(.bright-theme) .ce-ideas-action.is-success { background: rgba(52, 211, 
   .ce-ideas-card-grid { grid-template-columns: 1fr; padding: 10px; }
 }
 
-/* F-ID20 (ideas-css, 2026-09-23): the card's secondary actions were transparent
-   with muted text beside a solid primary, so "Schedule draft" and "Copy" read as
-   disabled. A secondary action keeps a visible hairline and ink-2 text: quieter
-   than the primary, but unmistakably live. */
-.ce-ideas-parity .ce-ideas-card .ce-ideas-card-actions .ce-ideas-action:not(.is-primary){
-  border-color:var(--ideas-line);
-  color:var(--ideas-ink);
-  background:color-mix(in srgb,var(--ideas-ink) 4%,transparent);
-}
+

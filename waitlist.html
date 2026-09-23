@@ -53,7 +53,9 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--text);
   font-family: var(--sans); font-size: var(--fs-body); font-weight: 300;
-  line-height: 1.65; min-height: 100vh; overflow-x: hidden;
+  /* 100svh first is the floor for browsers without dvh; 100dvh tracks the
+     visible viewport as browser chrome collapses and expands. */
+  line-height: 1.65; min-height: 100svh; min-height: 100dvh; overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 a { color: var(--gold); text-decoration: none; }
@@ -65,16 +67,22 @@ a { color: var(--gold); text-decoration: none; }
 .nav {
   position: sticky; top: 0; z-index: 100;
   background: rgba(9,9,12,0.92); backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--border); height: 52px;
-  display: flex; align-items: center; justify-content: center; padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  height: calc(52px + env(safe-area-inset-top, 0px));
+  display: flex; align-items: center; justify-content: center;
+  /* Keep a full 52px content row after adding the notch inset. */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+  padding-bottom: 0;
 }
 .nav-brand { font-size: var(--fs-micro); font-weight: 500; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; }
 
 /* HERO */
 .hero { padding: 60px 0 30px; text-align: center; }
 .hero-eyebrow {
-  display: inline-block; font-size: var(--fs-micro); font-weight: 600;
-  letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dim);
+  display: inline-block; font-size: var(--fs-small); font-weight: 500;
+  letter-spacing: 0.01em; color: var(--gold-dim);
   margin-bottom: 14px; padding: 0 0 9px; border-bottom: 1px solid var(--border-gold);
 }
 .hero h1 {
@@ -171,12 +179,18 @@ a { color: var(--gold); text-decoration: none; }
 
 .cta-main {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  min-height: 52px; padding: 0 28px; background: var(--gold); color: var(--bg);
+  min-height: 52px; padding: 0 20px; background: var(--gold); color: var(--bg);
   font-family: var(--sans); font-size: 0.9375rem; font-weight: 600;
   letter-spacing: 0.02em; border: none; border-radius: 6px; cursor: pointer;
   transition: transform 0.18s var(--ease), box-shadow 0.25s var(--ease), opacity 0.18s var(--ease);
   box-shadow: 0 4px 24px rgba(200,169,110,0.3);
   text-decoration: none;
+}
+/* Short labels stay on one line at 320px without dropping below the 52px
+   touch height: the label may shrink slightly, the height never does. */
+.cta-main > span { white-space: nowrap; }
+@media (max-width: 360px) {
+  .cta-main { padding: 0 14px; font-size: 0.875rem; letter-spacing: 0.01em; }
 }
 .cta-main:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,169,110,0.4); }
 .cta-main:active { transform: translateY(0); }
@@ -205,12 +219,21 @@ a { color: var(--gold); text-decoration: none; }
 .wl-retry:focus-visible { outline: 3px solid var(--gold-pale); outline-offset: 2px; }
 
 .cta-sub { font-size: var(--fs-small); color: var(--text3); margin-top: 18px; line-height: 1.6; }
-/* The exact WhatsApp payload, shown as it will look in the chat bubble. */
+/* The preview and wa.me link use the same message builder. */
 .wa-bubble {
-  display: block; margin: 10px auto; padding: 10px 12px; max-width: 32rem;
-  text-align: left; background: var(--bg3); border: 1px solid var(--border);
-  border-radius: 3px 12px 12px 12px; color: var(--text2); font-size: var(--fs-small);
-  line-height: 1.5;
+  display: block; position: relative; margin: 10px 8px 10px auto; padding: 10px 12px; max-width: 32rem;
+  text-align: left; background: #dcf8c6; color: #10240f; border: none;
+  border-radius: 12px 12px 3px 12px; font-size: var(--fs-small);
+  line-height: 1.5; white-space: pre-line; overflow-wrap: anywhere;
+}
+.wa-bubble::after {
+  content: ""; position: absolute; right: -8px; bottom: 0;
+  width: 10px; height: 14px; background: #dcf8c6;
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+.wa-bubble .wa-stamp {
+  display: block; margin-top: 4px; text-align: right;
+  font-size: var(--fs-micro); color: rgba(16,36,15,0.68); letter-spacing: 0.01em;
 }
 .cta-fallback { margin-top: 14px; }
 .cta-fallback[hidden] { display: none; }
@@ -250,7 +273,7 @@ a { color: var(--gold); text-decoration: none; }
   .rung { min-height: 44px; padding: 6px 10px; }
   .offer-bonus { margin-bottom: 14px; }
   .form-title { margin-top: 14px; margin-bottom: 14px; }
-  .cta-main { min-height: 46px; }
+  .cta-main { min-height: 48px; }
 }
 
 /* WHAT YOU GET */
@@ -335,13 +358,13 @@ a { color: var(--gold); text-decoration: none; }
 .no-pressure strong { color: var(--text2); font-weight: 500; display: block; font-size: var(--fs-lead); margin-bottom: 6px; }
 
 /* FINAL CTA */
-.final-cta { padding: 16px 0 88px; text-align: center; }
+.final-cta { padding: 16px 0 calc(88px + env(safe-area-inset-bottom, 0px)); text-align: center; }
 .final-cta h2 { font-size: var(--fs-h2); font-weight: 300; letter-spacing: -0.015em; margin-bottom: 8px; }
 .final-cta p { color: var(--text2); font-size: var(--fs-body); margin-bottom: 24px; }
 
 /* FOOTER */
 footer {
-  padding: 32px 0; text-align: center; border-top: 1px solid var(--border);
+  padding: 32px 0 calc(32px + env(safe-area-inset-bottom, 0px)); text-align: center; border-top: 1px solid var(--border);
   font-size: var(--fs-small); color: var(--text3); font-weight: 400; line-height: 1.8;
 }
 
@@ -401,10 +424,10 @@ footer {
           <span class="rung-price">₹1,999</span>
         </div>
       </div>
-      <p class="ladder-note">Price rises as each block fills, and it does not fall. The first 50 seats are ₹999 because the people who move first take the early risk and shape the batch.</p>
+      <p class="ladder-note">Price rises as each block fills, and it does not fall. The first 50 seats are ₹999 because those buyers move first.</p>
       <p class="ladder-note">Paid once. Access is lifetime. 14 days to ask for the money back, one message, no reason asked.</p>
       <p class="ladder-note">15+ hours recorded · 10+ hours on day one · 50+ lessons · the psychology sequence is 5+ hours · companion book · two recorded live sessions</p>
-      <p class="offer-bonus">The first cohort also joins two live Talk To Tushar sessions. Joining the waitlist costs nothing.</p>
+      <p class="offer-bonus">Two recorded live sessions are included at every price. Joining the waitlist costs nothing.</p>
       <p class="form-title">Join the waitlist</p>
       <form class="capture-form" id="wlForm" autocomplete="on" novalidate>
         <div class="field">
@@ -415,24 +438,28 @@ footer {
         <div class="field">
           <label class="field-label" for="wlNum">Your WhatsApp number</label>
           <input type="tel" id="wlNum" name="whatsapp" placeholder="e.g. 919876543210" autocomplete="tel" inputmode="tel" required maxlength="15" aria-describedby="wlNumHint">
-          <p class="field-hint" id="wlNumHint">With country code. This is where the reply lands.</p>
+          <p class="field-hint" id="wlNumHint">With country code. The opening notice arrives here.</p>
           <p class="field-err" id="wlNumErr" role="alert"></p>
         </div>
-        <button type="submit" class="cta-main" id="wlBtn"><span class="btn-spin" aria-hidden="true"></span><span id="wlBtnLabel">Join the waitlist on WhatsApp</span></button>
+        <button type="submit" class="cta-main" id="wlBtn"><span class="btn-spin" aria-hidden="true"></span><span id="wlBtnLabel">Join the waitlist</span></button>
       </form>
-      <p class="cta-sub">One tap opens WhatsApp with your message ready. You press Send. Joining is free, nothing is charged, and I reply the moment doors open.</p>
+      <p class="cta-sub">One tap opens WhatsApp with your message ready. You press Send. Joining is free and nothing is charged.</p>
       <!-- JS-off fallback: a plain WhatsApp link with the same pre-filled
            message, so the waitlist works with no script at all. -->
-      <p class="cta-fallback" id="wlFallback"><a href="https://wa.me/919179222991?text=%5Bab2%3Awl%5D%20Waitlist%20for%20Aham%20Brahmasmi%202.0%0AName%3A%20(your%20name)%0AWhatsApp%3A%20(your%20number)%0A%0AFirst%2050%20seats%20are%20%E2%82%B9999.%20Please%20tell%20me%20when%20doors%20open." class="cta-main cta-link">Join the waitlist on WhatsApp</a></p>
-      <p class="cta-sub" id="wlFallbackNote">No script needed: this plain link opens WhatsApp with the same message ready. Nothing is charged, before or after.</p>
+      <p class="cta-fallback" id="wlFallback"><a href="https://wa.me/919179222991?text=%5Bab2%3Awl%5D%20Waitlist%20for%20Aham%20Brahmasmi%202.0%0AName%3A%20(your%20name)%0AWhatsApp%3A%20(your%20number)%0A%0AFirst%2050%20seats%20are%20%E2%82%B9999.%20Please%20tell%20me%20when%20doors%20open." class="cta-main cta-link"><span>Join the waitlist</span></a></p>
+      <p class="cta-sub" id="wlFallbackNote">No script needed: this plain link opens WhatsApp with the same message ready.</p>
       <p class="wl-status" id="wlStatus" role="status"></p>
       <div class="wl-success" id="wlDone" hidden>
         <p class="wl-success-title">Your message is ready in WhatsApp.</p>
         <p id="wlDoneMsg" role="status"></p>
-        <p>Press Send in the chat to join the waitlist. Nothing was sent from this page, and nothing is charged now.</p>
+        <p>Press Send in the chat to join the waitlist. Nothing was sent from this page.</p>
         <a href="#" class="wl-retry" id="wlRetry">WhatsApp did not open? Tap to try again</a>
       </div>
-      <p class="cta-sub">WhatsApp opens with this message already typed:<br><span class="wa-bubble">[ab2:wl] Waitlist for Aham Brahmasmi 2.0<br>Name: (your name)<br>WhatsApp: (your number)<br><br>First 50 seats are ₹999. Please tell me when doors open.</span><br>Press Send. That is the whole signup. Joining is free and nothing is charged, and I will write back when doors open.</p>
+      <p class="cta-sub">Press Send in WhatsApp. This is the message:<br><span class="wa-bubble" id="wlBubble">[ab2:wl] Waitlist for Aham Brahmasmi 2.0
+Name: (your name)
+WhatsApp: (your number)
+
+First 50 seats are ₹999. Please tell me when doors open.<span class="wa-stamp" aria-hidden="true">now ✓✓</span></span></p>
     </div>
     <p class="capture-or">Prefer Instagram? <a href="https://www.instagram.com/doalfaaz/" target="_blank" rel="noopener">message @doalfaaz directly</a></p>
   </div>
@@ -538,8 +565,8 @@ Main tumhare saath khada hoon.</span></div>
 <!-- NO PRESSURE -->
 <div class="no-pressure">
   <div class="container measure">
-    <strong>Take your time.</strong>
-    Faisla shaant dimaag se lena. Joining the waitlist is free and nothing is charged. The first 50 seats are ₹999 and the price steps up after that, so moving early also costs less. Decide when you are ready, not when you are pushed.</p>
+    <p><strong>Take your time.</strong>
+    Faisla shaant dimaag se lena. The first 50 seats are ₹999 and the price steps up after that, so moving early also costs less. Decide when you are ready, not when you are pushed.</p>
   </div>
 </div>
 
@@ -547,8 +574,8 @@ Main tumhare saath khada hoon.</span></div>
 <section class="final-cta">
   <div class="container">
     <h2>Ready when you are</h2>
-    <p>Join free. The first 50 seats are ₹999. Paid once, access is lifetime.</p>
-    <a href="#join" class="cta-main">Join the waitlist</a>
+    <p>The first 50 seats are ₹999. Paid once, access is lifetime.</p>
+    <a href="#join" class="cta-main"><span>Join the waitlist</span></a>
   </div>
 </section>
 
@@ -601,6 +628,7 @@ window.AB2 = { seatsClaimed: null, opensAt: null, step: 1 };
   var retry = document.getElementById('wlRetry');
   var fallback = document.getElementById('wlFallback');
   var fallbackNote = document.getElementById('wlFallbackNote');
+  var bubble = document.getElementById('wlBubble');
   var btnText = btnLabel.textContent;
   // JS is on: the form builds the same wa.me link itself, so the static
   // no-JS fallback link and its preview would duplicate the CTA. Hide both.
@@ -616,8 +644,25 @@ window.AB2 = { seatsClaimed: null, opensAt: null, step: 1 };
     errEl.textContent = '';
     input.removeAttribute('aria-invalid');
   }
-  nameEl.addEventListener('input', function(){ clearField(nameEl, nameErr); });
-  numEl.addEventListener('input', function(){ clearField(numEl, numErr); });
+  nameEl.addEventListener('input', function(){ clearField(nameEl, nameErr); liveBubble(); });
+  numEl.addEventListener('input', function(){ clearField(numEl, numErr); liveBubble(); });
+
+  // The builder exists once and serves both the preview and the payload, so the
+  // bubble can never show a message the button will not send. Blank fields keep
+  // the honest placeholders instead of inventing a name.
+  function buildMsg() {
+    var name = (nameEl.value || '').trim();
+    var num  = (numEl.value || '').replace(/[^\d]/g, '');
+    return '[ab2:wl] Waitlist for Aham Brahmasmi 2.0\n'
+         + 'Name: ' + (name || '(your name)') + '\n'
+         + 'WhatsApp: ' + (num || '(your number)') + '\n\n'
+         + 'First 50 seats are ₹999. Please tell me when doors open.';
+  }
+
+  function liveBubble() {
+    if (bubble) { bubble.firstChild.nodeValue = buildMsg(); }
+  }
+  liveBubble();
 
   form.addEventListener('submit', function(e){
     e.preventDefault();
@@ -636,11 +681,9 @@ window.AB2 = { seatsClaimed: null, opensAt: null, step: 1 };
       return;
     }
 
-    var msg = '[ab2:wl] Waitlist for Aham Brahmasmi 2.0\n'
-            + 'Name: ' + name + '\n'
-            + 'WhatsApp: ' + num + '\n\n'
-            + 'First 50 seats are ₹999. Please tell me when doors open.';
+    var msg = buildMsg();
     var url = 'https://wa.me/' + WL_NUMBER + '?text=' + encodeURIComponent(msg);
+    liveBubble();
 
     // Pending state: disable the button, paint the status, then hand off.
     // If the handoff fails silently (no WhatsApp installed, blocked popup),

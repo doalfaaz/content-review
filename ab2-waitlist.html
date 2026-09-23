@@ -14,6 +14,7 @@
 <meta name="theme-color" content="#f4efe4">
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<noscript><style>#wlForm { display: none; }</style></noscript>
 <style>
 /* Self-hosted faces from ./fonts (same files index.html uses) so the page
    works offline. Doalfaaz Slab is the variable display face; Poppins covers
@@ -42,6 +43,10 @@
   --fs-h2: clamp(1.375rem, 1.05rem + 1.7vw, 1.75rem);
   --fs-h1: clamp(2.25rem, 1.5rem + 4.4vw, 3.5rem);
   --fs-price: clamp(2.5rem, 1.7rem + 4.5vw, 3.75rem);
+  /* viewport-fit=cover opts into the notch area, so every surface touching a
+     screen edge carries its own inset. Zero on browsers without insets. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -54,7 +59,7 @@ a { color: var(--madder); }
 .wrap { max-width: 640px; margin: 0 auto; padding: 0 22px; }
 
 /* MASTHEAD: a printed masthead, not an app bar. */
-.masthead { padding-top: 26px; }
+.masthead { padding-top: calc(26px + var(--safe-top)); }
 .masthead-row {
   display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
   font-family: var(--sans); font-size: var(--fs-micro); font-weight: 600;
@@ -172,7 +177,7 @@ a { color: var(--madder); }
 }
 
 /* THE DOOR: one action, the ladder, and what happens next. */
-.door { padding: 56px 0 72px; }
+.door { padding: 56px 0 calc(72px + var(--safe-bottom)); }
 .door-rule { border-top: 2px solid var(--ink); padding-top: 30px; }
 .door h2 { font-size: var(--fs-h2); font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; margin-bottom: 14px; }
 .door-lead { font-size: var(--fs-lead); color: var(--ink2); line-height: 1.65; margin-bottom: 22px; max-width: 34rem; }
@@ -206,6 +211,11 @@ a { color: var(--madder); }
   letter-spacing: 0.02em; text-decoration: none; border: 0; border-radius: 2px;
   cursor: pointer; transition: background 0.15s ease;
 }
+.cta > span { white-space: nowrap; }
+/* The idle and busy labels are the only contents, so a 320px viewport must
+   hold either one on a single line inside the button's full-width box. */
+#wlBtn { overflow: hidden; }
+#wlBtnLabel { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .cta:hover { background: var(--madder-deep); }
 .cta:active { background: var(--madder-deep); }
 .cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
@@ -225,12 +235,25 @@ a { color: var(--madder); }
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3);
   margin-bottom: 10px;
 }
+/* Outgoing-right, so the preview reads as the message about to be sent. */
 .wa-bubble {
-  display: block; background: #dcf8c6; color: #10240f;
-  border-radius: 10px 10px 10px 2px; padding: 12px 14px;
+  display: block; position: relative; background: #dcf8c6; color: #10240f;
+  border-radius: 10px 10px 2px 10px; padding: 12px 14px 8px;
   font-family: var(--sans); font-size: var(--fs-small); line-height: 1.6;
   white-space: pre-wrap; word-break: break-word;
   box-shadow: 0 1px 1px rgba(35,31,24,0.15);
+  margin-left: auto; max-width: 34rem;
+}
+.wa-bubble::after {
+  content: ""; position: absolute; right: -8px; bottom: 0;
+  width: 10px; height: 14px; background: #dcf8c6;
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+.wa-bubble .wa-msg { display: block; }
+.wa-stamp {
+  display: block; text-align: right; font-family: var(--sans);
+  font-size: var(--fs-micro); color: rgba(16,36,15,0.55);
+  letter-spacing: 0.02em; margin-top: 4px;
 }
 .next-step {
   font-family: var(--sans); font-size: var(--fs-small); color: var(--ink2);
@@ -248,7 +271,8 @@ a { color: var(--madder); }
 .wl-retry { display: inline-flex; align-items: center; min-height: 48px; font-family: var(--sans); font-size: var(--fs-small); font-weight: 600; margin-top: 6px; }
 
 footer {
-  border-top: 1px solid var(--rule-strong); padding: 26px 0 34px;
+  border-top: 1px solid var(--rule-strong);
+  padding: 26px 0 calc(34px + var(--safe-bottom));
   font-family: var(--sans); font-size: var(--fs-micro); color: var(--ink3);
   letter-spacing: 0.08em; text-transform: uppercase; line-height: 2;
 }
@@ -258,6 +282,9 @@ footer {
   .hero { padding: 32px 0 8px; }
   .letter-body { padding-left: 16px; }
   .rung { padding: 14px 12px; }
+  /* Keep the full 54px touch target; buy the label its room from padding
+     and tracking, which is what pushes "Opening WhatsApp…" onto two lines. */
+  .cta { padding: 0 14px; letter-spacing: 0; font-size: var(--fs-small); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -308,7 +335,7 @@ footer {
         <span class="rung-price">₹1,999</span>
       </div>
     </div>
-    <p class="ladder-note"><strong>Joining the waitlist is free, and nothing is charged now.</strong> When doors open, your WhatsApp is where the message lands. The first 50 seats are ₹999 because the people who move first take the early risk and shape the batch. After that the price steps up to ₹1,499, then ₹1,999 standing. It rises as blocks fill; it does not fall.</p>
+    <p class="ladder-note"><strong>Joining the waitlist is free, and nothing is charged now.</strong> When doors open, your WhatsApp is where the message lands. The first 50 seats are ₹999 because those buyers move first. After that the price steps up to ₹1,499, then ₹1,999 standing. It rises as blocks fill; it does not fall.</p>
     <p class="ladder-note">Paid once. Access is lifetime. 14 days to ask for the money back, one message, no reason asked.</p>
   </div>
 </section>
@@ -317,7 +344,6 @@ footer {
 <section class="evidence" aria-labelledby="evidenceLabel">
   <div class="wrap">
     <h2 class="section-label" id="evidenceLabel">The record, with the working shown</h2>
-    <p class="evidence-lede">None of these are rounded up. Where a number is a floor or a quoted norm, it says so on the line, because that is the only way the strong ones mean anything.</p>
     <ul class="evidence-list">
       <li><strong>1,000+ students taught.</strong><span class="grade grade-counted">counted</span></li>
       <li><strong>5 live batches held.</strong><span class="grade grade-counted">counted</span></li>
@@ -403,25 +429,29 @@ Main tumhare saath khada hoon.</span></div>
       <div class="field">
         <label class="field-label" for="wlNum">Your WhatsApp number</label>
         <input type="tel" id="wlNum" name="whatsapp" placeholder="e.g. 919876543210" autocomplete="tel" inputmode="tel" required maxlength="15" aria-describedby="wlNumHint">
-        <p class="field-hint" id="wlNumHint">With country code. This is where the reply lands.</p>
+        <p class="field-hint" id="wlNumHint">With country code. The opening notice arrives here.</p>
         <p class="field-err" id="wlNumErr" role="alert"></p>
       </div>
-      <button type="submit" class="cta" id="wlBtn"><span class="btn-spin" aria-hidden="true"></span><span id="wlBtnLabel">Join the waitlist on WhatsApp</span></button>
+      <button type="submit" class="cta" id="wlBtn"><span class="btn-spin" aria-hidden="true"></span><span id="wlBtnLabel">Join the waitlist</span></button>
     </form>
 
-    <p class="cta-fallback" id="wlFallback"><a class="cta" href="https://wa.me/919179222991?text=%5Bab2%3Awl2%5D%20Waitlist%20for%20Aham%20Brahmasmi%202.0" id="wlFallbackLink">Join the waitlist on WhatsApp</a></p>
+    <p class="cta-fallback" id="wlFallback"><a class="cta" href="https://wa.me/919179222991?text=%5Bab2%3Awl2%5D%20Waitlist%20for%20Aham%20Brahmasmi%202.0%0AName%3A%20(your%20name)%0AWhatsApp%3A%20(your%20number)%0A%0AFirst%2050%20seats%20are%20%E2%82%B9999.%20Please%20tell%20me%20when%20doors%20open." id="wlFallbackLink">Join the waitlist</a></p>
 
     <div class="bubble-wrap">
       <p class="bubble-label" id="bubbleLabel">Your WhatsApp opens with this message already typed</p>
-      <p class="wa-bubble" id="wlBubble">[ab2:wl2] Waitlist for Aham Brahmasmi 2.0</p>
-      <p class="next-step" id="wlNext"><strong>What happens next:</strong> press Send in the chat. Nothing is sent from this page and nothing is charged now. I reply from this number with the details and the moment doors open.</p>
+      <p class="wa-bubble" id="wlBubble"><span class="wa-msg" id="wlBubbleMsg">[ab2:wl2] Waitlist for Aham Brahmasmi 2.0
+Name: your name
+WhatsApp: your number
+
+First 50 seats are ₹999. Please tell me when doors open.</span><span class="wa-stamp" aria-hidden="true">now ✓✓</span></p>
+      <p class="next-step" id="wlNext"><strong>What happens next:</strong> add your name and number above, then press Send in the WhatsApp chat that opens. Joining is free and nothing is charged. You are told when the doors open.</p>
     </div>
 
     <p class="wl-status" id="wlStatus" role="status"></p>
     <div class="wl-success" id="wlDone" hidden>
       <p class="wl-success-title">Your message is ready in WhatsApp.</p>
       <p id="wlDoneMsg" role="status"></p>
-      <p>Press Send in the chat to join. Nothing was sent from this page, and nothing is charged now.</p>
+      <p>Nothing was sent from this page.</p>
       <a href="#" class="wl-retry" id="wlRetry">WhatsApp did not open? Tap to try again</a>
     </div>
 
@@ -470,7 +500,7 @@ Main tumhare saath khada hoon.</span></div>
   var doneMsg = document.getElementById('wlDoneMsg');
   var retry = document.getElementById('wlRetry');
   var fallback = document.getElementById('wlFallback');
-  var bubble = document.getElementById('wlBubble');
+  var bubbleMsg = document.getElementById('wlBubbleMsg');
   var btnText = btnLabel.textContent;
   // JS is on: the form builds the same wa.me link itself, so the static
   // no-JS fallback button would duplicate the CTA. Hide it; keep the bubble
@@ -486,8 +516,22 @@ Main tumhare saath khada hoon.</span></div>
     errEl.textContent = '';
     input.removeAttribute('aria-invalid');
   }
-  nameEl.addEventListener('input', function(){ clearField(nameEl, nameErr); });
-  numEl.addEventListener('input', function(){ clearField(numEl, numErr); });
+  // The preview stays honest while typing: real values where entered, plain
+  // placeholders where not, so it always matches the message that will send.
+  function buildMessage(name, num) {
+    return '[ab2:wl2] Waitlist for Aham Brahmasmi 2.0\n'
+      + 'Name: ' + (name || 'your name') + '\n'
+      + 'WhatsApp: ' + (num || 'your number') + '\n\n'
+      + 'First 50 seats are ₹999. Please tell me when doors open.';
+  }
+  function paintBubble() {
+    if (!bubbleMsg) { return; }
+    var name = (nameEl.value || '').trim();
+    var num = (numEl.value || '').replace(/[^\d]/g, '');
+    bubbleMsg.textContent = buildMessage(name, num);
+  }
+  nameEl.addEventListener('input', function(){ clearField(nameEl, nameErr); paintBubble(); });
+  numEl.addEventListener('input', function(){ clearField(numEl, numErr); paintBubble(); });
 
   form.addEventListener('submit', function(e){
     e.preventDefault();
@@ -506,17 +550,14 @@ Main tumhare saath khada hoon.</span></div>
       return;
     }
 
-    var msg = '[ab2:wl2] Waitlist for Aham Brahmasmi 2.0\n'
-            + 'Name: ' + name + '\n'
-            + 'WhatsApp: ' + num + '\n\n'
-            + 'First 50 seats are ₹999. Please tell me when doors open.';
+    var msg = buildMessage(name, num);
     var url = 'https://wa.me/' + WL_NUMBER + '?text=' + encodeURIComponent(msg);
 
     // Pending state: disable the button, paint the status, then hand off.
     // If the handoff fails silently (no WhatsApp installed, blocked popup),
     // the success card doubles as the recovery path with the same link.
     retry.href = url;
-    bubble.textContent = msg;
+    paintBubble();
     btn.disabled = true;
     btn.classList.add('busy');
     btnLabel.textContent = 'Opening WhatsApp…';

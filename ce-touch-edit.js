@@ -36,6 +36,20 @@
   var armSweepTimer = 0;
   var dockEnsureTimer = 0;
 
+  function publishVisualViewport() {
+    var vv = window.visualViewport;
+    var height = vv ? vv.height : window.innerHeight;
+    var inset = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+    document.documentElement.style.setProperty('--ce-visual-viewport-height', Math.round(height) + 'px');
+    document.documentElement.style.setProperty('--ce-keyboard-inset', Math.round(inset) + 'px');
+  }
+  publishVisualViewport();
+  window.addEventListener('resize', publishVisualViewport, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', publishVisualViewport, { passive: true });
+    window.visualViewport.addEventListener('scroll', publishVisualViewport, { passive: true });
+  }
+
   /* The ONE resolution of "which stage may a touch edit attach to", shared by
      the arming pass and the teardown so the two can never look at different
      elements. Deliberately NOT a fallback to #studio: see the note on
@@ -182,6 +196,17 @@
        mine is still attached". Observers are disconnected for the same reason:
        one that outlives a teardown keeps scheduling sweeps that re-arm a stage
        nothing is editing. */
+    /* F-RX1 (touch-edit, 2026-09-23): the phone tools sheet is the layer's ONLY
+       portal (the inspector node is moved to `body > aside.ce-tools-sheet` at
+       z-sheet/50vh and only `reset()` sends it home), so a route teardown that
+       drained its listeners without calling reset() left a detached fixed panel
+       with no dismiss and no Escape — exactly the "next Studio item inherits a
+       fixed 'Close tools' panel" state ensureDockTools guards against. `reset()`
+       is idempotent (restore() no-ops when nothing is portaled), so calling it
+       here is safe when no sheet is open, and it runs BEFORE the listener and
+       observer drain below so the sheet can never be left attached to a dead
+       layer. closeStudio's own reset stays as the second owner. */
+    try { window.__CE_RESET_PHONE_TOOLS__ && window.__CE_RESET_PHONE_TOOLS__(); } catch (_rpt) {}
     for (var i = listeners.length - 1; i >= 0; i--) {
       var L = listeners[i];
       try { L.target.removeEventListener(L.type, L.fn, L.opts); } catch (_rl) {}
@@ -199,6 +224,19 @@
       } catch (_re) {}
     }
     if (ext.length) ext.length = 0;
+    /* F-TE20 (touch-edit, 2026-09-23): every flag that guards a listener
+       registration must be cleared in the SAME teardown that removes that
+       listener. The drain above removes the tools-sheet Escape handler and the
+       outside-tap dismiss handler, but those two are gated by flags that
+       outlive the removal, so the next re-arm reads "already bound" on a
+       listener that no longer exists: after the first tab change Escape was
+       dead forever, and the outside tap stayed dead whenever the same toggle
+       node was reused (its flag lives on `t`, not in `__ext`, so the drain
+       could not reach it). Reset both here so re-arming restores both gestures.
+       The observer flag is cleared further below for the same reason. */
+    window.__CE_TOOLS_ESC_BOUND__ = false;
+    var toggleNode = document.getElementById('ce-tools-toggle');
+    if (toggleNode) toggleNode.__ceToolsDismissBound = false;
     /* F-TE01 (touch-edit, 2026-09-23): the tools-sheet observer is the one
        extension that is SINGLETON PER SESSION rather than per install, because
        `window.__CE_DOCK_TOOLS_OBSERVER__` is the flag arm() uses to avoid
@@ -206,7 +244,13 @@
        the next `arm()` a no-op forever: the dock sweep then never runs again,
        which is exactly how the first open kept its toggle wired and every open
        after it did not. Clear the flag so the next route cycle re-arms. */
-    if (window.__CE_DOCK_TOOLS_OBSERVER__ && window.__CE_DOCK_TOOLS_OBS__) {
+    /* F-TE20 (touch-edit, 2026-09-23): same invariant as the two flags above —
+       the guard is cleared unconditionally, not only when a live observer
+       happened to be recorded, so a teardown can never leave the guard set on
+       an observer it did not actually install (the MutationObserver guard can
+       be set with `__CE_DOCK_TOOLS_OBS__` still null). "Arm once" must mean
+       "armed and installed", never "armed at some point in the past". */
+    if (window.__CE_DOCK_TOOLS_OBSERVER__) {
       window.__CE_DOCK_TOOLS_OBSERVER__ = false;
       window.__CE_DOCK_TOOLS_OBS__ = null;
     }
@@ -2287,10 +2331,11 @@
         shipbarH = parseFloat(getComputedStyle(document.documentElement)
           .getPropertyValue('--ce-shipbar-h')) || 0;
       } catch (_eShip) { shipbarH = 0; }
-      dock.style.setProperty('bottom', shipbarH + 'px', 'important');
-      dock.style.setProperty('height', 'min(50vh, 460px)', 'important');
-      dock.style.setProperty('max-height', 'min(50vh, 460px)', 'important');
-      dock.style.setProperty('min-height', '180px', 'important');
+      dock.style.setProperty('bottom', 'calc(' + shipbarH + 'px + var(--ce-keyboard-inset, 0px))', 'important');
+      dock.style.setProperty('--ce-tools-sheet-h', 'min(62dvh, 560px, calc(var(--ce-visual-viewport-height, 100dvh) - var(--ce-shipbar-h, 0px) - env(safe-area-inset-top, 0px) - 32px))');
+      dock.style.setProperty('height', 'var(--ce-tools-sheet-h)', 'important');
+      dock.style.setProperty('max-height', 'var(--ce-tools-sheet-h)', 'important');
+      dock.style.setProperty('min-height', 'min(180px, var(--ce-tools-sheet-h))', 'important');
       dock.style.setProperty('display', 'block', 'important');
       dock.style.setProperty('overflow-y', 'auto', 'important');
       dock.style.setProperty('overflow-x', 'hidden', 'important');
@@ -2349,7 +2394,7 @@
           }
         } catch (_ePinned) { pinnedH = 0; }
         if (!pinnedH) pinnedH = 96;   /* pre-layout fallback: the authored value */
-        scroll.style.setProperty('inset', '56px 0 ' + pinnedH + 'px 0', 'important');
+        scroll.style.setProperty('inset', '44px 0 ' + pinnedH + 'px 0', 'important');
         scroll.style.setProperty('display', 'block', 'important');
         scroll.style.setProperty('overflow-y', 'auto', 'important');
         scroll.style.setProperty('overflow-x', 'hidden', 'important');

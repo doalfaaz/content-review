@@ -1066,6 +1066,13 @@ body.bright-theme .ce-launch-board-cadence {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
+.ce-launch-insights.is-empty { grid-template-columns: minmax(0, 1fr); }
+.ce-launch-insights.is-empty span {
+  color: var(--muted);
+  font-size: var(--fs-secondary);
+  font-weight: 600;
+  line-height: 1.5;
+}
 .ce-launch-insight {
   min-width: 0;
   padding: 14px 16px 12px;

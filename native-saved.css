@@ -38,7 +38,10 @@
   padding: 0 5px;
   border-radius: 999px;
   background: var(--accent-tint);
-  color: var(--accent-text);
+  /* F-SV21 (saved-css, 2026-09-23, audit CONTRAST_TYPE_SCALE 2.3/2.4): --accent-text
+     on the accent TINT measured 1.67:1 bright / 3.13:1 dark for the shelf counts. The
+     badge is a number the owner reads, not accent chrome: --ink on the tint clears AA. */
+  color: var(--ink);
   font-size: var(--fs-overline);
   font-weight: 700;
   line-height: 1;
@@ -453,9 +456,13 @@
   min-width: 0;
 }
 .ce-type-pill {
-  background: transparent;
+  /* F-SV22 (saved-css, 2026-09-23): the inactive type pills shared the shelf
+     pills' row but not their shell; a transparent pill on a colour-mixed
+     hairline read as a different control family. Inactive now carries the
+     shelf-pill shell; the active pill keeps the accent. */
+  background: var(--card);
   border: 1px solid var(--border);
-  color: var(--muted);
+  color: var(--ink);
   /* F-SV03 (saved-css, 2026-09-23): "All / Posts / Carousels / Poems" are type
      filter labels — control text, not micro copy. At var(--fs-overline) they
      measured 11px in both themes, under the 13px readable floor; the token's
@@ -477,13 +484,29 @@
 }
 .ce-type-pill:hover {
   color: var(--ink);
-  border-color: rgba(255, 255, 255, 0.2);
+  /* F-SV22 (saved-css, 2026-09-23): the hardcoded white hover hairline was
+     invisible in the light theme. Ink pulled toward the accent keeps the hover
+     edge above the resting --border in both themes. */
+  border-color: color-mix(in srgb, var(--ink) 24%, var(--accent));
 }
 .ce-type-pill.active {
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   border-color: var(--accent);
   color: var(--accent-text);
 }
+/* L4 (phone-nav-library-saved, 2026-09-23): when the whole bank is empty the three
+   type pills are disabled and dimmed by design (a pill dies only when the bank has
+   none of that type). Without a line saying so, three dead chips read as a broken
+   surface. This note is the pill row's own status line and inherits the row's
+   right alignment so it lands under the pills it explains. */
+.ce-saved-type-note {
+  flex: 1 1 100%;
+  margin: 2px 0 0;
+  text-align: right;
+  font-size: var(--fs-secondary);
+  color: var(--muted);
+}
+html.ce-phone .ce-saved-type-note { text-align: left; }
 
 /* ── Saved Bank Grid & Pure Design Cards (No Clutter, No Labels) ── */
 .ce-saved-grid {
@@ -876,11 +899,13 @@
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.ce-shelf-switch .ce-shelf-pill .nav-count-badge { font-size: var(--fs-overline); opacity: 0.72; }
+/* F-SV21 (saved-css, 2026-09-23): the 0.72/0.9 opacity dims dragged an otherwise
+   legible badge under 4.5:1 (exactly the CONTRAST_TYPE_SCALE 2.3/2.4 cause). */
+.ce-shelf-switch .ce-shelf-pill .nav-count-badge { font-size: var(--fs-overline); }
 .ce-shelf-switch .ce-shelf-pill.active {
   background: var(--surface);
   border-color: var(--accent);
   color: var(--ink);
   font-weight: 700;
 }
-.ce-shelf-switch .ce-shelf-pill.active .nav-count-badge { opacity: 0.9; }
+.ce-shelf-switch .ce-shelf-pill.active .nav-count-badge { opacity: 1; }

@@ -21,9 +21,6 @@
      (POEM_TYPOGRAPHY.lineHeight); verse surfaces set 1.82 to give the
      shirorekha and the below-baseline matras visibly more air. */
   --deva-lh-verse: 1.82;
-  /* Vertical anchor for card verse: optics, not geometry — slightly above true
-     centre is where the eye expects a column of verse to start. */
-  --poem-verse-anchor: 46%;
   /* The signature sits on one fixed inset from the card's bottom edge. */
   --poem-sig-inset: 32px;
 }
@@ -658,7 +655,11 @@
 
 .ce-poem-typography > summary::-webkit-details-marker { display: none; }
 .ce-poem-typography > summary:hover { color: var(--ink); background: rgba(255, 255, 255, .05); }
-.ce-poem-typography > summary .ce-tool-icon { width: 15px; height: 15px; }
+/* F-S13 (cloud/ce-ui, 2026-09-23): the typography disclosure glyph was the one
+   Studio tool icon authored below the 17px tier every neighbouring tool icon in
+   the dock uses (`.ce-tool-icon`), so the row read as a second, weaker control
+   language. It sits in a 44px summary, so the tier costs no layout. */
+.ce-poem-typography > summary .ce-tool-icon { width: 17px; height: 17px; }
 .ce-poem-disclosure { margin-left: auto; transition: transform .15s ease; }
 .ce-poem-typography[open] .ce-poem-disclosure { transform: rotate(180deg); }
 /* The shared reset makes <details> children displayable in some WebKit
@@ -687,8 +688,11 @@
   flex-direction: column;
   gap: 6px;
   color: var(--faint);
-  /* Type floor 10px (law: a945bd1 "zero sub-10px fonts remain"). */
-  font-size: var(--fs-overline);
+  /* F-S13 (cloud/ce-ui, 2026-09-23): these field labels are read, not glanced at,
+     and 11px tracked caps under a 32px control is smaller than the control's own
+     value text. `--fs-secondary` (13px) is the file's small-text token; the grid
+     stays 2-up, so the denser gap/padding budget is untouched. */
+  font-size: var(--fs-secondary);
   font-weight: 700;
   letter-spacing: .055em;
   text-transform: uppercase;
@@ -817,6 +821,7 @@
    container, so the strip's height is always exactly one thumb row and no
    thumb can land on the tools door beneath it. */
 .studio-dock .photo-strip {
+  position: relative;
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
@@ -825,6 +830,44 @@
   max-width: none;
   overflow-x: auto;
   overflow-y: hidden;
+}
+
+/* F-S13 (cloud/ce-ui, 2026-09-23): six thumbs at a time means a seventh is
+   clipped with no sign that the row scrolls. The cue is an overlay, not a flex
+   item, so it never joins the nowrap row; it is driven by the strip's own inline
+   scroll timeline, so with no overflow (scroll range 0) the timeline is inactive
+   and the overlay stays at 0 opacity — the cue cannot advertise a scroll that
+   does not exist, and it clears again at the end of an overflowing row. No JS,
+   no markup, matching the file's existing mask-based rail affordance. */
+.studio-dock .photo-strip::after {
+  content: "";
+  position: sticky;
+  right: 0;
+  flex: 0 0 24px;
+  align-self: stretch;
+  margin-left: -24px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent 0, color-mix(in srgb, var(--card) 82%, transparent) 100%);
+  animation: ce-photo-strip-cue linear both;
+  animation-timeline: scroll(self inline);
+  animation-range: 0 24px;
+  animation-duration: 1ms;
+}
+
+@keyframes ce-photo-strip-cue {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@supports not (animation-timeline: scroll()) {
+  /* No scroll-driven timelines: fall back to the static mask the other rails use,
+     accepted only where the strip is genuinely wider than its box. */
+  .studio-dock .photo-strip::after { display: none; }
+  .studio-dock .photo-strip {
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 24px), transparent 100%);
+  }
 }
 
 .studio-dock .photo-thumb {
@@ -2047,6 +2090,14 @@
    and the .is-carousel-mode .ce-studio-inspector rules further down (the 248px bottom
    bar) could never apply. Hide the POEM sections the carousel does not use, never the
    dock that owns the inspector. */
+/* F-ST11 (studio-css, 2026-09-23): carousels render their tools into
+   #ce-studio-inspector; posts render into the dock's #carousel-dock-controls.
+   When the inspector holds the tools, the dock is a stale second copy (duplicate
+   control ids, collapsed look cards), so it steps aside. A post leaves the
+   inspector empty and keeps its dock. */
+.studio-workspace.is-carousel-mode:has(#ce-studio-inspector:not(:empty)) .studio-dock {
+  display: none !important;
+}
 .studio-workspace.is-carousel-mode .studio-dock > .dock-section:not(#dock-carousel-section),
 .studio-workspace.is-carousel-mode .studio-dock > [id^="dock-sep-"] {
   display: none !important;
@@ -4613,9 +4664,11 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 .ce-kanban-card .ce-poem-text-block,
 .ce-poem-preview-wrap .ce-poem-text-block,
 .ce-queue-card .ce-poem-text-block {
-  top: var(--poem-verse-anchor, 46%) !important;
-  transform: translateY(-50%) !important;
-  line-height: var(--deva-lh-verse, 1.82) !important;
+  /* F-ST22 (polish, 2026-09-23, audit M2): the forced 46% anchor and 1.82
+     line-height made every card show the verse where the export and the Studio do
+     not put it (card 38% vs Studio 9% on the parity oracle), which is the exact
+     preview-vs-Studio jump the owner reported. Fidelity outranks column rhythm:
+     cards keep the authored anchor and line-height; only wrapping is tuned. */
   text-wrap: pretty;
   overflow-wrap: normal;
 }
@@ -5982,9 +6035,13 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 /* Poem canvas geometry is an authored choice, not a hidden export setting. Keep
    the control quiet beside Style so Auto remains the default and square/story
    choices are one deliberate tap away. */
-.ce-poem-ratio-control { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; padding-top:9px; border-top:1px solid var(--border); }
+.ce-poem-ratio-control { display:flex; flex-direction:column; align-items:stretch; gap:8px; margin-top:10px; padding-top:9px; border-top:1px solid var(--border); }
 .ce-poem-ratio-label { color:var(--muted); font-size:var(--fs-overline); font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
-.ce-poem-ratio-pills { display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end; }
+/* F-ST20 (polish, 2026-09-23, audit D1): label and five pills shared one row in a
+   ~216px inspector, so 9:16 wrapped alone under the rest and CANVAS dropped below.
+   The label heads its own line and the five ratios are an even grid. */
+.ce-poem-ratio-pills { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:4px; width:100%; align-self:stretch; }
+.ce-poem-ratio-pill { justify-content:center; text-align:center; }
 /* F-ST03 (studio-css, 2026-09-23): 7px was the only control radius off the --r-ctl
    (8px) family, one pixel from its own .ce-poem-stepper neighbour. */
 .ce-poem-ratio-pill { min-height:26px; padding:4px 8px; border:1px solid var(--border); border-radius:var(--r-ctl, 8px); background:transparent; color:var(--muted); cursor:pointer; font-size:var(--fs-overline); font-weight:700; }
@@ -6074,11 +6131,18 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   border-color: var(--accent) !important;
   background: color-mix(in srgb, var(--accent) 14%, transparent) !important;
 }
+/* F-ST23 (studio-css, 2026-09-23, audit P0-1): the popover opened downward at its
+   full content height with no cap - 722px at 1024x768 overflowed the window by 3px
+   and left Short/Medium/Long(8+) below the fold with no scroll container. It scrolls
+   inside the viewport instead, so every filter is reachable at any window height. */
 .ce-sort-popover {
   position: absolute;
   z-index: var(--z-route-lo);
   top: calc(100% + 6px);
   left: 0;
+  max-height: min(72vh, calc(100vh - var(--topbar-h, 42px) - 24px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   min-width: 274px;
   max-width: min(340px, 92vw);
   padding: 6px;
@@ -6181,3 +6245,14 @@ html.ce-phone input#search { min-width: 44px !important; min-height: 44px !impor
   min-width: 0 !important;
   max-width: 100% !important;
 }
+
+/* F-ST12 (studio-css, 2026-09-23): the slide rail's inline padding is not part
+   of the scrollport for scrollIntoView({inline:'nearest'}), so the last card
+   stopped 65px past the right edge. scroll-padding makes the padding count. */
+.studio-workspace.is-carousel-mode #ce-carousel-slide-scroll { scroll-padding-inline: 16px; }
+
+/* F-ST21 (polish, 2026-09-23, audit S1/D2): Studio tool and history glyphs rendered
+   at 10-14px inside 32-44px controls and read as placeholders. They take one
+   readable size; the controls' boxes are unchanged. */
+.studio-history-controls .ce-ic { width:17px; height:17px; }
+.ce-compact-tool .ce-ic, .ce-text-tool-btn .ce-ic { width:16px; height:16px; }
