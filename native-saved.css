@@ -443,6 +443,12 @@
   background: var(--card);
   color: var(--ink);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  /* F-M50 (master-20260923, PHONE_LIBRARY_SAVED W-03): the active tab falls back
+     to the UA/probe `border` — full --ink at 1px, a 15.9:1 white rule on a 27,26,35
+     chip. The accent at the same 1px weight is how every other active indicator in
+     this app states "you are here" (shelf pill, type pill, first kanban column), and
+     the fill + shadow above already carry the state. */
+  border-color: var(--accent);
 }
 .ce-saved-type-filters {
   display: flex;
@@ -471,7 +477,12 @@
      at 11px, so the pill grew without becoming more readable. */
   font-size: var(--fs-secondary);
   font-weight: 600;
-  padding: 4px 10px;
+  /* F-M50 (master-20260923, PHONE_LIBRARY_SAVED W-02): the shelf pills in this
+     same column author 6x14 (6x11 at <=408px), so 4x10 read as a second, smaller
+     control family. One inset for both — the pill shell is shared, so its
+     padding is shared. The desktop box was already 24px on both sides from the
+     min-height floor; this aligns the label inset, it does not resize the pill. */
+  padding: 6px 14px;
   /* F-A3-DESK (cloud/ce-ui): measured 23px tall — 1px under the WCAG 2.2
      SC 2.5.8 24px floor (all four pills, both desktop widths). */
   min-height: 24px;
@@ -493,6 +504,23 @@
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   border-color: var(--accent);
   color: var(--accent-text);
+}
+/* F-M50 (master-20260923, PHONE_LIBRARY_SAVED W-01): a disabled pill was dimmed
+   as a whole element (index.html sets opacity:.4 inline), which multiplies the
+   label too — white ink on a white card measured 2.54:1 bright / 3.50:1 dark.
+   That inline opacity cannot be overridden from here, so the disabled skin is
+   stated as a colour instead: keep the surface, drop the label to the muted ink
+   (5.85:1 dark / 6.98:1 bright on --card, both over the 3:1 floor the pill needs),
+   make the border faint and dashed so the pill still reads as unavailable, and
+   give it the default cursor. `opacity:1` is the guard for any consumer that
+   dims the whole element. */
+.ce-type-pill:disabled,
+.ce-type-pill[disabled] {
+  color: var(--muted);
+  opacity: 1;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--ink) 20%, transparent);
+  cursor: default;
 }
 /* L4 (phone-nav-library-saved, 2026-09-23): when the whole bank is empty the three
    type pills are disabled and dimmed by design (a pill dies only when the bank has

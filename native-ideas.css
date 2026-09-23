@@ -58,6 +58,21 @@ body:not(.bright-theme) .ce-ideas-parity {
    !important escalation over a duplicate. index.html:3503 should still be
    deleted — see the report; while it exists these two declarations must agree
    or this one silently loses again. */
+/* F-M50 (master-20260923, DESIGN_TOKENS g-G7): the F-ID07 note above cites
+   `index.html:3503` for the rule it wants deleted, and that line number is
+   stale — index.html:3502-3503 sits inside the `--ideas-*` alias block
+   (index.html:3493-3510), so anyone acting on the note edits the wrong rule.
+   The rule it means — `.ce-ideas-parity .ce-ideas-card-actions .ce-ideas-action` —
+   is at **index.html:3649-3651** (DESIGN_TOKENS.md, section (g) G7, names the
+   same selector and the same line). Its surviving declaration is `padding:5px
+   10px;`: the `min-height:28px` and `font-size:var(--fs-overline)` halves the
+   note quotes were dropped by index.html's own 2026-09-23 polish pass, so the
+   equal-specificity tie F-ID07 was written against is gone and the 44px/13px
+   boxes below now win on their own.
+   **DECISION PENDING — this stylesheet does not delete it.** index.html is not
+   edited from this lane, and dropping another file's rule is not a change this
+   stylesheet can make. The depth-stated selectors below are the interim
+   agreement and should be revisited if index.html:3649 is removed. */
 .ce-ideas-parity .ce-ideas-card .ce-ideas-card-actions .ce-ideas-action{min-width:44px;min-height:44px;border-radius:8px;font-size:var(--fs-secondary)}
 .ce-ideas-parity .ce-ideas-action{min-width:44px;min-height:44px;border-radius:8px;font-size:var(--fs-secondary)}
 .ce-ideas-action.is-primary{background:var(--ideas-ink);border-color:var(--ideas-ink);color:var(--ideas-surface)}
@@ -358,8 +373,18 @@ body:not(.bright-theme) .ce-ideas-action.is-success { background: rgba(52, 211, 
   .ce-ideas-parity { padding: calc(52px + env(safe-area-inset-top, 0px)) 14px 54px; }
   .ce-ideas-section-head { grid-template-columns: 38px minmax(0, 1fr); gap: 10px; padding: 12px 14px; }
   .ce-ideas-section-meta { grid-column: 2; justify-content: space-between; }
-  .ce-ideas-section-title { font-size: var(--fs-section); }
+  /* F-M50 (master-20260923, EDGES_THEMES EDGES-02): the section title is 13px
+     uppercase here and read `--ideas-ink`, which index.html:3496 binds to `--ink`.
+     In the bright theme `--ink #18161b` is still the correct ink, but the title
+     sits in the section head's accent-tinted band: the head row carries
+     `--ideas-row-line rgba(217,106,124,.22)` under `--ideas-row
+     rgba(217,106,124,.09)` over `--bg #f8f6f0` (index.html:3501-3502/3507-3508,
+     painted at index.html:3586-3587), which lifts the row to roughly
+     rgb(240,222,219) and leaves the near-black ink at a measured 1.17:1 — the
+     only failing theme (EDGES-02 set-difference: bright-only). 13px uppercase
+     is label text, so it takes the token this surface already declares for
+     accent labels, `--ideas-accent-text` (#8e2f3d bright, 2.03:1 on the old ink
+     and 7.4:1 on the tinted row; dark keeps #ffffff). Weight is unchanged. */
+  .ce-ideas-section-title { font-size: var(--fs-section); color: var(--ideas-accent-text); }
   .ce-ideas-card-grid { grid-template-columns: 1fr; padding: 10px; }
 }
-
-

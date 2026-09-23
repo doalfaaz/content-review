@@ -523,6 +523,11 @@
     if (!list || !chromeOk) {
       view.innerHTML = controlsHtml() +
         '<div class="ce-ideas-summary"><span>' + summaryCounts + '</span>' + (structuredOnly ? '<span>structured outlines</span>' : '') + '</div>' +
+        /* A11Y-05 (master-20260923): the surface title is a real h2, so the topic
+           headers below it land at h3 with an h2 parent and the document keeps
+           one h1. Visually hidden — the shell has no painted Ideas h1, and the
+           count line is the visible owner of the surface name. */
+        '<h2 class="ce-visually-hidden">Ideas</h2>' +
         '<div class="ce-ideas-list"></div>';
       list = view.querySelector('.ce-ideas-list');
     } else {

@@ -37,13 +37,38 @@
   var dockEnsureTimer = 0;
 
   function publishVisualViewport() {
+    /* F-M40.a3 (master-20260923): the keyboard contract is ONE pair of variables
+       on documentElement, published from the live visualViewport so every Studio
+       mode reads the same number — post, poem, photo and carousel alike. It used
+       to be published unconditionally at load and on every viewport event, which
+       meant a phone keyboard outside the Studio wrote the inset globally with
+       nothing on the surface owning or clearing it. Publication is therefore
+       scoped to the Studio: one call while the Studio is open, and a clear on
+       close, so both variables are either a live measurement or absent (the
+       sheets' `var(--ce-keyboard-inset, 0px)` fallbacks). */
+    var root = document.documentElement;
+    if (!studioMounted()) {
+      root.style.removeProperty('--ce-visual-viewport-height');
+      root.style.removeProperty('--ce-keyboard-inset');
+      return;
+    }
     var vv = window.visualViewport;
     var height = vv ? vv.height : window.innerHeight;
     var inset = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
-    document.documentElement.style.setProperty('--ce-visual-viewport-height', Math.round(height) + 'px');
-    document.documentElement.style.setProperty('--ce-keyboard-inset', Math.round(inset) + 'px');
+    root.style.setProperty('--ce-visual-viewport-height', Math.round(height) + 'px');
+    root.style.setProperty('--ce-keyboard-inset', Math.round(inset) + 'px');
   }
-  publishVisualViewport();
+  /* The Studio's own mount test, in the same "is the surface live" vocabulary as
+     the dock sweep below: an EDITOR is present. Deliberately not a media query —
+     the phone layer is also active inside the native WKWebView at desktop width,
+     which is exactly where the keyboard inset matters. */
+  function studioMounted() {
+    try {
+      return !!document.getElementById('studio')
+        || document.documentElement.classList.contains('studio-open')
+        || !!document.querySelector('#studio.open, .studio-workspace');
+    } catch (_sm) { return false; }
+  }
   window.addEventListener('resize', publishVisualViewport, { passive: true });
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', publishVisualViewport, { passive: true });
@@ -237,6 +262,16 @@
     window.__CE_TOOLS_ESC_BOUND__ = false;
     var toggleNode = document.getElementById('ce-tools-toggle');
     if (toggleNode) toggleNode.__ceToolsDismissBound = false;
+    /* F-M40.s6 (master-20260923): the SAME invariant as the two flags above, for
+       the gesture S-7 added. The drag lane's per-node guard and its pointer
+       listeners are two halves of one registration, so the guard is cleared
+       wherever the listener could be, and any in-flight drag is dropped: a
+       teardown that lands mid-pull must not leave `touch-action: none` on a node
+       the next open will reuse. */
+    Array.prototype.forEach.call(document.querySelectorAll('#ce-tools-toggle'), function (tg) {
+      tg.__ceToolsDragBound = false;
+      try { tg.style.removeProperty('touch-action'); } catch (_dt) {}
+    });
     /* F-TE01 (touch-edit, 2026-09-23): the tools-sheet observer is the one
        extension that is SINGLETON PER SESSION rather than per install, because
        `window.__CE_DOCK_TOOLS_OBSERVER__` is the flag arm() uses to avoid
@@ -2154,6 +2189,37 @@
 // gallery's desktop stacking/flex context. That produced a toggled class with
 // Presentation painted above Tools and an empty-looking sheet. This owner
 // portals the whole inspector to body for the open state and restores it.
+//
+// F-M40 · SHEET CONTRACT (master-20260923). Written down because the sheet had
+// three implicit owners (this IIFE, index.html's renderCarouselDock and the
+// route machinery) and the owner met the disagreement as "sometimes it is up,
+// sometimes not". Four sentences, each implemented below and nowhere else:
+//   1. ALIVE — inside Studio, ANY re-render preserves the fully open sheet.
+//      The canvas swap re-mounts the dock nodes, so the freshly built node
+//      never carries the inline geometry `openSheet()` wrote. Every such render
+//      runs `ensureDockTools()`; when the editor still carries `ce-tools-open`
+//      it must re-apply everything `openSheet()` derives — portal home, height
+//      vars, scroll box, pinned band — not only the header words. (index.html
+//      runs the same re-apply for the poem/post surface's `ce-tools-open` on
+//      `.studio-workspace`; this sheet's state lives on the `.ce-carousel-editor`
+//      class, and the editor keeps its identity across a canvas re-render.)
+//   2. GONE ON LEAVE — leaving Studio or switching route closes the sheet AND
+//      returns the inspector node to its authored home. That is `reset()`, and
+//      it is reached from every route door: `closeStudio`
+//      (`__CE_RESET_PHONE_TOOLS__`), the layer teardown (same call, F-RX1) and
+//      `ensureDockTools`'s own reaping pass for any door nobody enumerated.
+//   3. IDEMPOTENT — closing twice, or closing when no sheet is open, is a
+//      no-op. `restore()` tests `portaled`, the class removal is a `classList`
+//      op and the listener drain is flag-gated, so no door has to ask whether
+//      the sheet is up before it may close it.
+//   4. ONE OWNER OF THE LABEL — the toggle's word, its `aria-expanded` and the
+//      class on the editor are one derivation. A re-render that re-emits the
+//      markup with the authored "Tools / aria-expanded=false" is re-synced from
+//      the class, never from a second copy of the open state.
+// Corollary of 1 (this file is the phone's single owner of the toggle):
+// index.html's renderCarouselDock assigns `#ce-tools-toggle.onclick` on every
+// render. The capture listener below runs FIRST, acts, then stops immediate
+// propagation, so the second owner can never re-toggle the class it just set.
 (function () {
   function ensureDockTools() {
     /* F-TE01 (touch-edit, 2026-09-23): a route switch (tab button, back button)
@@ -2201,15 +2267,48 @@
     var t = document.getElementById('ce-tools-toggle');
     var dock = document.querySelector('aside.ce-studio-inspector, .ce-studio-inspector');
     if (!t || !dock) return;
-    var syncToggleLabel = function (open) {
+    /* Every label twin — the real toggle (wherever it lives) and the dormant
+       `#ce-dock-tools-toggle` that renderStudioTools keeps as the node the poem
+       and post path may adopt — must read the same state. Indexing into the
+       NodeList keeps this valid before the button has children. */
+    var syncLabelTwins = function (open) {
       t.setAttribute('aria-expanded', open ? 'true' : 'false');
-      var label = t.querySelector('.ce-tools-toggle-label');
-      if (label) label.textContent = open ? 'Close tools' : 'Tools';
+      Array.prototype.forEach.call(document.querySelectorAll('.ce-tools-toggle'), function (btn) {
+        if (btn === t) return;
+        try {
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          btn.__open = open;
+        } catch (_tl) {}
+      });
+      var label = t.children[0];
+      if (label && label.classList && label.classList.contains('ce-tools-toggle-label')) {
+        label.textContent = open ? 'Close tools' : 'Tools';
+      }
     };
     if (t.parentElement !== dock || dock.firstElementChild !== t) dock.insertBefore(t, dock.firstElementChild);
     var editor = dock.closest('.ce-carousel-editor') || t.__ceToolsEditor || document.querySelector('.ce-carousel-editor');
     if (!editor) return;
+    /* F-M40.s2.1 (master-20260923): the toggle's word, its aria-expanded and the
+       class on the editor are ONE derivation, written from the live class and
+       never from a captured state. Two owners (this file's capture listener and
+       index.html's `onclick`) used to each carry their own copy, so a re-render
+       that re-emitted the authored "Tools / aria-expanded=false" markup left the
+       control claiming the sheet was down while it was up. `open` is passed only
+       where the class has not been flipped yet (the live toggle transition);
+       every other caller derives it from the class that drives the sheet. */
+    var toolsOpenNow = function () {
+      try { return !!(editor && editor.classList.contains('ce-tools-open')); } catch (_ton) { return false; }
+    };
     if (t.__ceToolsEditor === editor) {
+      /* F-M40.s2.3 (master-20260923): a canvas re-render swaps #studio-canvas,
+         which builds a FRESH dock node and drops every inline geometry write
+         `openSheet()` made — the class survives, the 44px header and the 96px
+         pinned band survive (ce-mobile.css:1812-1840), and the scroll body
+         collapses to height 0 under the CSS-only twin. So the open state is
+         re-applied from the class, in full, on every sweep that finds it set:
+         portal home, height vars, scroll box, pinned band. Idempotent — every
+         write below re-states the same declared value, so a sweep that runs
+         while nothing changed is a no-op in effect. */
       if (editor.classList.contains('ce-tools-open') && t.__ceToolsOpen) t.__ceToolsOpen();
       /* If some other path closed the sheet (class removed without the toggle),
          the portal must still come home — otherwise the dock stays a fixed
@@ -2220,7 +2319,8 @@
          and the "Tools" label even while the sheet is up, so the control lied
          about the state it owned. Re-sync it to the class that actually drives
          the sheet. */
-      syncToggleLabel(editor.classList.contains('ce-tools-open'));
+      syncLabelTwins(toolsOpenNow());
+      if (t.__ceToolsBindDrag) t.__ceToolsBindDrag();
       t.style.setProperty('position', 'static', 'important');
       t.style.setProperty('display', 'flex', 'important');
       t.style.setProperty('width', '100%', 'important');
@@ -2269,9 +2369,8 @@
          otherwise the detached editor remains the portal's owner and the
          next Studio item inherits a fixed "Close tools" panel. */
       try { editor.classList.remove('ce-tools-open'); } catch (_e) {}
-      try { t.setAttribute('aria-expanded', 'false'); } catch (_e2) {}
-      var label = t.querySelector('.ce-tools-toggle-label');
-      if (label) label.textContent = 'Tools';
+      try { t.style.removeProperty('--ce-tools-sheet-h'); } catch (_eH) {}
+      try { syncLabelTwins(false); } catch (_e2) {}
       restore();
     }
     function openSheet() {
@@ -2420,13 +2519,22 @@
       }
     }
     function toggle(event) {
+      /* F-M40.s2.2 (master-20260923): ONE owner for the tap on phone. This
+         handler is registered in the CAPTURE phase, so it always runs before
+         index.html's renderCarouselDock `onclick`; preventDefault() stops the
+         click doing the app's default work and stopImmediatePropagation() stops
+         that second owner from reaching the same node and re-toggling the class
+         it just set. Without the stop the two owners cancelled (the first tap
+         after reopening did nothing) and each wrote its own label/aria copy, so
+         the header desynced from the sheet.
+         A drag (see bindDragHandle) never dispatches a click, so this path stays
+         exactly the keyboard/tap behaviour it always was. */
       if (event) { event.preventDefault(); event.stopImmediatePropagation(); }
       var open = !editor.classList.contains('ce-tools-open');
       editor.classList.toggle('ce-tools-open', open);
-      t.setAttribute('aria-expanded', open ? 'true' : 'false');
-      var label = t.querySelector('.ce-tools-toggle-label');
-      if (label) label.textContent = open ? 'Close tools' : 'Tools';
-      if (open) openSheet(); else restore();
+      syncLabelTwins(open);
+      if (open) { openSheet(); } else { reset(); }
+      if (t.__ceToolsBindDrag) t.__ceToolsBindDrag();
       /* This capture-phase owner stopImmediatePropagation()s the app's own toggle
          handler, which used to run fitCarouselEditorSlides() — with it gone, the
          freshly-portal'd design-picker minis stayed unscaled 1080x1350 in 180x225
@@ -2435,6 +2543,159 @@
       try { if (window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__) requestAnimationFrame(window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__); } catch (_fitErr) {}
     }
     t.addEventListener('click', toggle, true);
+    /* F-M40.s7 (master-20260923): the sheet's header bar carried a grab-handle
+       affordance (ce-mobile.css's ::after chevron + the 44px band) and answered
+       no drag at all — a 120px pull left the sheet byte-identical. One pointer
+       lane on that node, three outcomes, all measured against the sheet's own
+       box so it works at every viewport:
+         · pull DOWN past 30% of the sheet's height, or release with an evident
+           downward speed  -> close (reset(), the same owner the tap uses);
+         · pull UP                     -> grow, clamped to the maximum height
+           (viewport - shipbar - safe-area-top - 32px, the clamp `openSheet()`
+           already publishes through `--ce-tools-sheet-h`);
+         · anything else on release    -> snap back to the resting height.
+       The height is written to `--ce-tools-sheet-h`, the one variable
+       openSheet() declares and ce-mobile.css reads, so "dragged" and "resting"
+       can never disagree. `touch-action: none` for the duration of the gesture
+       is what lets the pointer moves arrive instead of scrolling the sheet.
+       Reduced motion means an instant jump, never an animated snap; a plain tap
+       (under the slop radius) is left completely alone and still reaches the
+       capture-phase `toggle` above, so keyboard and tap behaviour are unchanged. */
+    var DRAG_SLOP = 6;         /* under this, the gesture is a tap, not a drag   */
+    var DRAG_DISMISS_FRAC = 0.3;  /* a pull past 30% of the sheet's height closes */
+    var DRAG_VELOCITY = 0.5;   /* px/ms of downward speed that also closes      */
+    var drag = null;
+    var reduceMotion = function () {
+      try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (_rm) { return false; }
+    };
+    var sheetHeight = function (node) {
+      try { var box = node.getBoundingClientRect().height; if (box) return box; } catch (_sh) {}
+      try {
+        var n = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ce-tools-sheet-h'));
+        if (n > 0) return n;
+      } catch (_sh2) {}
+      return Math.round(window.innerHeight * 0.5) || 240;
+    };
+    /* The clamp openSheet() declares, recomputed from the live viewport so a
+       rotation or a keyboard inset cannot leave the ceiling stale. The stylesheet
+       never names the floor: the fallback is the sheet's own pre-drag height. */
+    var maxSheetHeight = function () {
+      var unit = function (name) {
+        var v = 0;
+        try { v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)) || 0; } catch (_u) {}
+        return v;
+      };
+      var vv = (window.visualViewport && window.visualViewport.height) || window.innerHeight || 0;
+      var ceiling = vv - unit('--ce-shipbar-h') - unit('--ce-keyboard-inset') - unit('--ce-safe-top') - 32;
+      ceiling = Math.round(ceiling);
+      return (ceiling > 0) ? ceiling : Math.round(window.innerHeight || 0) || 0;
+    };
+    /* One writer for the dragged height. The transition is set only for the
+       release snap and cleared on the same timer that ends it, so an animated
+       snap cannot leak into the geometry `openSheet()` writes later. Reduced
+       motion gets a plain write with no duration at all. */
+    var settleTimer = 0;
+    var writeDragHeight = function (height, animate) {
+      var px = Math.round(height) + 'px';
+      if (animate && !reduceMotion()) {
+        try { t.style.transition = 'height 160ms ease'; } catch (_tr) {}
+      } else {
+        try { t.style.transition = 'none'; } catch (_tr2) {}
+      }
+      try { t.style.setProperty('--ce-tools-sheet-h', px); } catch (_wh) {}
+      /* The var is consumed by an inline `height`, so the animated snap also has
+         to be declared inline or the transition has nothing to interpolate. */
+      try {
+        dock.style.setProperty('height', px, 'important');
+        dock.style.setProperty('max-height', px, 'important');
+      } catch (_wh2) {}
+      if (settleTimer) clearTimeout(settleTimer);
+      if (animate && !reduceMotion()) {
+        settleTimer = setTimeout(function () {
+          settleTimer = 0;
+          try { t.style.removeProperty('transition'); } catch (_tr3) {}
+        }, 220);
+      } else {
+        try { t.style.removeProperty('transition'); } catch (_tr4) {}
+      }
+    };
+    function bindDragHandle() {
+      /* Re-renders replace the node, so the binding is per-node and re-applied
+         from the same sweep that re-applies the open state. */
+      if (t.__ceToolsDragBound) return;
+      t.__ceToolsDragBound = true;
+      var dragExt = window.ceTouchEdit.__ext || (window.ceTouchEdit.__ext = []);
+      var onDown = function (e) {
+        if (!portaled || !editor.classList.contains('ce-tools-open')) return;
+        /* A second finger (pinch/scroll) must not be read as a drag. */
+        if (drag) return;
+        if (e.button != null && e.button !== 0) return;
+        drag = {
+          id: e.pointerId,
+          startY: e.clientY,
+          startT: e.timeStamp || Date.now(),
+          lastY: e.clientY,
+          lastT: e.timeStamp || Date.now(),
+          startH: sheetHeight(dock),
+          height: 0,
+          moved: false,
+          cleanupTimer: 0
+        };
+      };
+      var onMove = function (e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        var dy = e.clientY - drag.startY;
+        if (!drag.moved && Math.abs(dy) < DRAG_SLOP) return;
+        if (!drag.moved) {
+          drag.moved = true;
+          /* The gesture is a resize now, not a scroll or a tap: take the touch
+             action for the duration and capture the pointer so a fast pull that
+             leaves the 44px band keeps delivering moves. */
+          try { t.setPointerCapture && t.setPointerCapture(drag.id); } catch (_cap) {}
+          try { t.style.setProperty('touch-action', 'none'); } catch (_ta) {}
+        }
+        e.preventDefault();
+        var h = drag.startH - dy;
+        var ceiling = maxSheetHeight();
+        if (h > ceiling) h = ceiling;
+        if (h < 120) h = 120;
+        drag.height = h;
+        drag.lastY = e.clientY;
+        drag.lastT = e.timeStamp || Date.now();
+        if (drag.heightTimer) cancelAnimationFrame(drag.heightTimer);
+        drag.heightTimer = requestAnimationFrame(function () { writeDragHeight(h, false); });
+      };
+      var onUp = function (e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        var d = drag;
+        drag = null;
+        if (d.heightTimer) cancelAnimationFrame(d.heightTimer);
+        try { t.releasePointerCapture && t.releasePointerCapture(d.id); } catch (_rel) {}
+        try { t.style.removeProperty('touch-action'); } catch (_ta2) {}
+        if (!d.moved) return;   /* a tap: leave it to the capture-phase toggle */
+        var dy = e.clientY - d.startY;
+        var dt = Math.max(1, (e.timeStamp || Date.now()) - d.startT);
+        var velocity = dy / dt;               /* px/ms, positive = downward */
+        var pastThreshold = dy > (d.startH * DRAG_DISMISS_FRAC);
+        if (pastThreshold || velocity > DRAG_VELOCITY) { reset(); return; }
+        var ceiling = maxSheetHeight();
+        var target = (dy < -DRAG_SLOP) ? ceiling : d.startH;
+        writeDragHeight(target, true);
+      };
+      t.addEventListener('pointerdown', onDown, true);
+      t.addEventListener('pointermove', onMove, true);
+      t.addEventListener('pointerup', onUp, true);
+      t.addEventListener('pointercancel', onUp, true);
+      /* This IIFE cannot see the layer's `listeners` array, so the lane rides
+         the same `__ext` handover the sheet's other listeners use and is
+         released by the one teardown. */
+      dragExt.push({ target: t, type: 'pointerdown', fn: onDown, opts: true });
+      dragExt.push({ target: t, type: 'pointermove', fn: onMove, opts: true });
+      dragExt.push({ target: t, type: 'pointerup', fn: onUp, opts: true });
+      dragExt.push({ target: t, type: 'pointercancel', fn: onUp, opts: true });
+    }
+    t.__ceToolsBindDrag = bindDragHandle;
+    bindDragHandle();
     t.__ceToolsEditor = editor;
     t.__ceToolsRestore = restore;
     t.__ceToolsOpen = openSheet;
@@ -2494,8 +2755,20 @@
       var escFn = function (e) {
         if (e.key !== 'Escape') return;
         if (typeof window.__CE_RESET_PHONE_TOOLS__ !== 'function') return;
-        if (!document.querySelector('.ce-carousel-editor.ce-tools-open')) return;
+        /* F-M40.s6 (master-20260923): one state test for both sheet families.
+           The carousel sheet's open state is the class on `.ce-carousel-editor`
+           (this layer's own portal, closed by reset()); the poem and post docks
+           carry `.studio-workspace.ce-tools-open` and `renderStudioTools`
+           re-opens them on the next render while the class stands. Escape must
+           dismiss whichever is up, so the test is the union of the two classes
+           and always runs the reset — the poem path then re-derives its own
+           geometry from the class it now finds removed. */
+        if (!document.querySelector('.ce-carousel-editor.ce-tools-open, .studio-workspace.ce-tools-open')) return;
         e.preventDefault();
+        try {
+          var poemWorkspace = document.querySelector('.studio-workspace.ce-tools-open');
+          if (poemWorkspace) poemWorkspace.classList.remove('ce-tools-open');
+        } catch (_escPoem) {}
         try { window.__CE_RESET_PHONE_TOOLS__(); } catch (_esc) {}
       };
       document.addEventListener('keydown', escFn, true);
