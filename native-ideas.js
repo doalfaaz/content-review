@@ -247,8 +247,12 @@
       (points.length ? '<div class="ce-ideas-points">' + points.map(pointHtml).join('') + '</div>' : '') +
       (pending ? '<div class="ce-ideas-card-pending">Structured outline pending for this idea.</div>' : '') +
       '<div class="ce-ideas-card-actions">' +
-      '<button type="button" class="ce-ideas-action is-primary" data-ce-idea-forward="' + esc(item.id || title) + '" data-ce-idea-label="Take forward">Take forward</button>' +
-      '<button type="button" class="ce-ideas-action" data-ce-idea-schedule="' + esc(item.id || title) + '" data-ce-idea-label="Schedule">Schedule</button>' +
+      /* F-ID10 (ideas-copy, 2026-09-23): "Take forward" named a destination only the
+         toast knew, and "Schedule" collided with Plan's Meta-clock meaning while
+         this button only writes a local draft row. Both labels now name the outcome,
+         and data-ce-idea-label matches so labelOf() restores the same text. */
+      '<button type="button" class="ce-ideas-action is-primary" data-ce-idea-forward="' + esc(item.id || title) + '" data-ce-idea-label="Draft in Write">Draft in Write</button>' +
+      '<button type="button" class="ce-ideas-action" data-ce-idea-schedule="' + esc(item.id || title) + '" data-ce-idea-label="Schedule draft">Schedule draft</button>' +
       '<button type="button" class="ce-ideas-action" data-ce-idea-copy="' + esc(item.id || title) + '" data-ce-idea-label="Copy">Copy</button>' +
       '<span class="ce-ideas-action-status" aria-live="polite"></span>' +
       '</div></article>';
@@ -282,7 +286,9 @@
       '<button type="button" class="ce-ideas-section-head" data-ce-ideas-group-toggle="' + esc(group.key) + '" aria-expanded="' + (isOpen ? 'true' : 'false') + '">' +
       '<span class="ce-ideas-section-number">' + String(index + 1).padStart(2, '0') + '</span>' +
       '<span class="ce-ideas-section-title">' + esc(group.topic) + '</span>' +
-      '<span class="ce-ideas-section-meta"><span class="ce-ideas-count">' + group.items.length + ' cards</span><span class="ce-ideas-chevron">⌄</span></span>' +
+      /* F-ID12 (ideas-copy, 2026-09-23): the badge said "1 cards"; the chevron is a
+         decoration and must not be announced. */
+      '<span class="ce-ideas-section-meta"><span class="ce-ideas-count">' + group.items.length + (group.items.length === 1 ? ' card' : ' cards') + '</span><span class="ce-ideas-chevron" aria-hidden="true">⌄</span></span>' +
       '</button>' +
       (isOpen ? '<div class="ce-ideas-card-grid">' + group.items.map(cardHtml).join('') + '</div>' : '') +
       '</section>';
@@ -348,11 +354,13 @@
       if (scheduleState) scheduleState.scheduleTarget = { id: String(item.id || ''), title: titleOf(item), date: today, time: '9:00 PM' };
     } catch (_scheduleState) {}
     modal.innerHTML = '<div class="ce-idea-schedule-card" role="dialog" aria-modal="true" aria-labelledby="ce-idea-schedule-title">' +
-      '<div class="ce-idea-schedule-head"><div><strong id="ce-idea-schedule-title">Schedule idea</strong><span>' + esc(titleOf(item)) + '</span></div><button type="button" data-ce-idea-schedule-close aria-label="Close">×</button></div>' +
-      '<p class="ce-idea-schedule-note">This creates a scheduled draft slot: a Draft in Plan for that date and time. Shape it in Write before publishing.</p>' +
+      /* F-ID11 (ideas-copy, 2026-09-23): one action was described by three nouns
+         (idea, draft slot, Draft). Title, note and button now all say draft. */
+      '<div class="ce-idea-schedule-head"><div><strong id="ce-idea-schedule-title">Schedule a draft</strong><span>' + esc(titleOf(item)) + '</span></div><button type="button" data-ce-idea-schedule-close aria-label="Close">×</button></div>' +
+      '<p class="ce-idea-schedule-note">This adds a draft slot to Plan for that date and time. Shape it in Write before publishing — nothing posts on its own.</p>' +
       '<label>Date<input type="date" data-ce-idea-schedule-date min="' + today + '" value="' + today + '"></label>' +
       '<label>Time<input type="time" data-ce-idea-schedule-time value="21:00"></label>' +
-      '<div class="ce-idea-schedule-actions"><button type="button" data-ce-idea-schedule-cancel>Cancel</button><button type="button" class="is-primary" data-ce-idea-schedule-save>Schedule draft</button></div>' +
+      '<div class="ce-idea-schedule-actions"><button type="button" data-ce-idea-schedule-cancel>Cancel</button><button type="button" class="is-primary" data-ce-idea-schedule-save>Add draft to Plan</button></div>' +
       '<p class="ce-idea-schedule-error" data-ce-idea-schedule-error role="alert" aria-live="assertive" hidden style="margin:8px 0 0;color:#ffb4b4;font-size:13px;line-height:1.35"></p>' +
       '</div>';
     document.body.appendChild(modal);
@@ -476,12 +484,12 @@
     var chromeOk = !!view.querySelector('.ce-ideas-controls') && !!view.querySelector('.ce-ideas-summary');
     if (!list || !chromeOk) {
       view.innerHTML = controlsHtml() +
-        '<div class="ce-ideas-summary"><span>' + visibleCount + ' ideas to explore</span>' + (structuredOnly ? '<span>structured outlines</span>' : '') + '</div>' +
+        '<div class="ce-ideas-summary"><span>' + visibleCount + (visibleCount === 1 ? ' idea to explore' : ' ideas to explore') + '</span>' + (structuredOnly ? '<span>structured outlines</span>' : '') + '</div>' +
         '<div class="ce-ideas-list"></div>';
       list = view.querySelector('.ce-ideas-list');
     } else {
       var summary = view.querySelector('.ce-ideas-summary');
-      var summaryHtml = '<span>' + visibleCount + ' ideas to explore</span>' + (structuredOnly ? '<span>structured outlines</span>' : '');
+      var summaryHtml = '<span>' + visibleCount + (visibleCount === 1 ? ' idea to explore' : ' ideas to explore') + '</span>' + (structuredOnly ? '<span>structured outlines</span>' : '');
       if (summary.innerHTML !== summaryHtml) summary.innerHTML = summaryHtml;
       var controls = view.querySelector('.ce-ideas-controls');
       var controlsFresh = controlsHtml();
@@ -492,7 +500,9 @@
       }
     }
     if (!list) return;
-    list.innerHTML = groups.length ? groups.map(sectionHtml).join('') : '<div class="ce-ideas-empty">No ideas match these filters yet — clear a filter, or search for another word.</div>';
+    /* F-ID13 (ideas-copy, 2026-09-23): the empty copy led with "filters" even when
+       the user had only typed a search and touched no filter. */
+    list.innerHTML = groups.length ? groups.map(sectionHtml).join('') : '<div class="ce-ideas-empty">' + (String(context.query || '').trim() ? 'No ideas match that search — try another word.' : 'No ideas match these filters yet — clear one and try again.') + '</div>';
   }
 
   function findItem(id) {

@@ -646,6 +646,18 @@
     overflow: hidden;
   }
 
+  /* F-M01 (tab-switch, 2026-09-23): <div class="studio-editor" id="studio"> is a
+     SIBLING of #view, and its closed state was only opacity:0 + pointer-events:
+     none. It therefore stayed a full-viewport (874px at 402x874) painted layer
+     keeping its box in the layout and its contents in the tab order over EVERY
+     later tab, and no rule honoured the `inert`/`aria-hidden` that closeStudio
+     and init() already set on it. One rule makes those existing attributes
+     authoritative, so the closed editor leaves the screen and the tab order.
+     Scoped to #studio: the covered-background contract (ceBlockBackground) puts
+     inert on chrome that a sheet covers WITHOUT hiding, and that must keep
+     painting. No band-aid: this is the property the closed state never set. */
+  #studio[aria-hidden="true"] { visibility: hidden; }
+
   /* Left Sidebar — Collapsible & macOS Inset */
   .sidebar {
     width: 220px;
@@ -2351,9 +2363,22 @@
   /* P0.3 — the More-moves disclosure must be a real hit target. */
   .ce-grow-more-moves > summary { min-height: 44px; }
 
-  /* P0.4 — Launch intelligence is a footnote, never a panel: hard cap, but the
-     capped content stays scrollable-reachable instead of clipped dead. */
-  .ce-launch-intelligence { max-height: 90px !important; overflow-y: auto !important; }
+  /* P0.4 — Launch intelligence is a footnote, never a panel: hard cap, and
+     F-11 (dashboards, 2026-09-23): the rhythm bar + legend now sit in the
+     header row (outside the cap), so the chart is never trapped behind the
+     panel's own scrollbar.
+     F-GL01 (grow-launch, 2026-09-23): the cap belongs on the INSIGHTS grid,
+     not on the section. Capping the section clipped the header, which now
+     carries the rhythm legend — the legend's own row was cut off at both
+     widths. The header is a fixed band, always fully visible; only the
+     instrument grid below it scrolls. */
+  .ce-launch-intelligence { max-height: none !important; overflow: visible !important; }
+  .ce-launch-intelligence .ce-launch-insights { max-height: 90px; overflow-y: auto; }
+  /* F-GL01: the rhythm legend lives in the header band and must read as one
+     wrapping row of swatch+label pairs, aligned with the header text (the
+     shared .ce-cont-legend carries 12px side padding for the continuum). */
+  .ce-launch-intelligence .ce-launch-intelligence-head .ce-cont-legend { padding: 0; margin-top: 5px; gap: 4px 12px; }
+  .ce-launch-intelligence .ce-launch-intelligence-head .ce-cont-legend > span { white-space: nowrap; }
 
   /* P0.9 / P0.14 — Day Receipt + morning contract strip. Launch alone owns the
      day verdict; WON is only painted on schedule-confirmation evidence. Quiet /
@@ -2429,6 +2454,17 @@
   .ce-launch-workbench .ce-cont-cell.is-future.is-covered { background: repeating-linear-gradient(45deg, var(--accent-border) 0 1px, transparent 1px 4px); }
   .ce-launch-workbench .ce-cont-cell.is-today { outline: 1.5px solid var(--accent); outline-offset: 0; }
   .ce-launch-workbench .ce-cont-cell.is-future.is-open { border: 1px dashed var(--card-border); }
+  /* F-03/F-04 (dashboards, 2026-09-23): the continuum and rhythm fills carried
+     meaning by colour only and named it in `title` (hover-only). This legend
+     decodes the fills for touch and AT; each swatch reuses the fill rules. */
+  .ce-cont-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; padding: 0 12px; color: var(--faint); font-size: var(--fs-overline); }
+  .ce-cont-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+  .ce-cont-legend > span::before { content: ''; width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+  .ce-cont-legend > span.is-won::before { background: var(--accent); }
+  .ce-cont-legend > span.is-quiet::before { border: 1px dashed var(--accent-border); }
+  .ce-cont-legend > span.is-unmeasured::before { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--faint) 26%, transparent) 0 1px, transparent 1px 4px); }
+  .ce-cont-legend > span.is-covered::before { background: repeating-linear-gradient(45deg, var(--accent-border) 0 1px, transparent 1px 4px); }
+  .ce-cont-legend > span.is-open::before { border: 1px dashed var(--card-border); }
 
   /* P1.1 — Quiet-mark gesture: the receipt lets the owner mark yesterday
      quiet — dashed, deliberate, never a miss. */
@@ -2495,6 +2531,9 @@
      the Undo/Redo/Copy/Add-to-Plan row stays reachable above the preview. */
   .ce-write-shell .ce-write-field textarea { height: auto; min-height: 240px; }
   html.ce-phone .ce-write-shell .ce-write-field textarea { min-height: 180px !important; max-height: 34vh; }
+  /* P1-16 (ui-copy, 2026-09-23): the blank-draft preview is a start state, not
+     a claim — the design rail below stays a chooser, this box states the ask. */
+  .ce-write-preview-empty { display: flex; align-items: center; justify-content: center; min-height: 220px; padding: 24px; color: var(--faint); font-size: var(--fs-overline); line-height: 1.5; text-align: center; }
 
   /* A disabled write control is a fact, not an alarm — flatten to muted. */
   .ce-write-shell .ce-write-actions button:disabled,
@@ -2522,6 +2561,9 @@
   /* the operative answer: what came back, at hero scale (spec: 48-64px/800) */
   .ce-grow-shell .ce-fort-num { font-size: var(--fs-display); font-weight: 700; letter-spacing: -.01em; line-height: 1; font-variant-numeric: tabular-nums; vertical-align: -6px; color: var(--ink); margin-right: 4px; }
   .ce-grow-shell .ce-fort-cap { margin-left: auto; color: var(--faint); font-size: var(--fs-overline); }
+  /* F-GL04: the Meta gap is a muted sub-line under the header facts, not part
+     of the heading sentence. */
+  .ce-grow-shell .ce-fort-sub { flex: 0 0 100%; margin-top: 2px; color: var(--faint); font-size: var(--fs-overline); }
   .ce-grow-shell .ce-fort-bars { position: relative; display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; height: 120px; margin-top: 12px; border-bottom: 1px solid var(--hairline); }
   .ce-grow-shell .ce-day-slot { position: relative; display: flex; align-items: flex-end; justify-content: center; gap: 2px; min-width: 0; }
   .ce-grow-shell .ce-day-slot.is-pre-ledger { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--faint) 14%, transparent) 0 1px, transparent 1px 5px); border-radius: 3px 3px 0 0; }
@@ -2539,9 +2581,20 @@
   .ce-grow-shell .ce-fort-gap { position: absolute; left: 0; top: 0; bottom: 0; z-index: var(--z-canvas-under); pointer-events: none; background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--faint) 16%, transparent) 0 1px, transparent 1px 6px); border: 1px dashed color-mix(in srgb, var(--faint) 30%, transparent); border-radius: 4px; }
   .ce-grow-shell .ce-fort-gap i { position: absolute; top: 3px; left: 50%; transform: translateX(-50%); font-style: normal; color: var(--faint); font-size: var(--fs-overline); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
   .ce-grow-shell .ce-fort-days { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; margin-top: 6px; }
-  .ce-grow-shell .ce-fort-days span { overflow: hidden; color: var(--faint); font-size: var(--fs-overline); text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ce-grow-shell .ce-fort-days span { overflow: visible; color: var(--faint); font-size: var(--fs-overline); text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .ce-grow-shell .ce-fort-days span.is-today { color: var(--accent-text); }
-  .ce-grow-shell .ce-fort-legend { margin-top: 8px; color: var(--faint); font-size: var(--fs-overline); letter-spacing: .02em; }
+  /* F-GL05 (grow-launch, 2026-09-23): the legend was a formula line
+     ("accent = landed on IG …"). It is now four swatch+label pairs; each swatch
+     reuses the exact fill rule of the bar it decodes (accent bar, bone bar,
+     dashed tick, hatched pre-ledger slot) so the legend cannot drift from the
+     chart. Wraps as one row of pairs at any width, no clipping. */
+  .ce-grow-shell .ce-fort-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 8px; color: var(--faint); font-size: var(--fs-overline); letter-spacing: .02em; }
+  .ce-grow-shell .ce-fort-legend > span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .ce-grow-shell .ce-fort-legend > span::before { content: ''; flex: 0 0 auto; width: 10px; height: 10px; border-radius: 3px; }
+  .ce-grow-shell .ce-fort-legend > span.is-landed::before { background: var(--accent); }
+  .ce-grow-shell .ce-fort-legend > span.is-work::before { background: rgba(237,232,223,.5); box-shadow: inset 0 0 0 1px rgba(237,232,223,.22); }
+  .ce-grow-shell .ce-fort-legend > span.is-neither::before { width: 12px; height: 0; border-radius: 0; border-bottom: 1px dashed var(--card-border); }
+  .ce-grow-shell .ce-fort-legend > span.is-before::before { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--faint) 14%, transparent) 0 1px, transparent 1px 5px); }
 
   /* The tide: two stored-snapshot lanes — name, giant endpoint, flat delta.
      The void zone is a real SVG hatch pattern (emitted inside the lane's own
@@ -2626,6 +2679,16 @@
   .ce-grow-shell .ce-unmeasured-acts .ce-surface-button, .ce-launch-workbench .ce-unmeasured-acts .ce-surface-button { min-height: 28px; padding: 0; border: 0; background: transparent; color: var(--accent-text); font-size: var(--fs-overline); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
   .ce-grow-shell .ce-unmeasured-acts .ce-surface-button:hover, .ce-launch-workbench .ce-unmeasured-acts .ce-surface-button:hover { transform: none; color: var(--accent-hover); }
   .ce-grow-shell .ce-provenance, .ce-launch-workbench .ce-provenance { padding-top: 8px; border-top: 1px solid var(--hairline); color: var(--faint); font-size: var(--fs-overline); line-height: 1.5; }
+  /* F-GL02 (grow-launch, 2026-09-23): provenance is evidence, not page copy —
+     a closed disclosure with a real 32px hit target. Open state shows the file
+     list inside the same hairline box the surface used before. */
+  .ce-grow-shell .ce-data-sources, .ce-launch-workbench .ce-data-sources { border-top: 1px solid var(--hairline); }
+  .ce-grow-shell .ce-data-sources > summary, .ce-launch-workbench .ce-data-sources > summary { display: flex; align-items: center; min-height: 32px; color: var(--faint); font-size: var(--fs-overline); font-weight: 600; letter-spacing: .04em; cursor: pointer; list-style: none; }
+  .ce-grow-shell .ce-data-sources > summary::-webkit-details-marker, .ce-launch-workbench .ce-data-sources > summary::-webkit-details-marker { display: none; }
+  .ce-grow-shell .ce-data-sources > summary::before, .ce-launch-workbench .ce-data-sources > summary::before { content: '\25B8'; margin-right: 6px; color: var(--faint); }
+  .ce-grow-shell .ce-data-sources[open] > summary::before, .ce-launch-workbench .ce-data-sources[open] > summary::before { content: '\25BE'; }
+  .ce-grow-shell .ce-data-sources > summary:hover, .ce-launch-workbench .ce-data-sources > summary:hover { color: var(--muted); }
+  .ce-grow-shell .ce-data-sources .ce-provenance, .ce-launch-workbench .ce-data-sources .ce-provenance { padding-top: 0; border-top: 0; }
 
   /* The receipt's evidence chain: chosen → acted → landed, each rung read off
      the day's proof — lit rungs accent, missing rungs dim + dashed. */
@@ -2678,14 +2741,20 @@
        Scoped under html.ce-phone so these beat the later-loading
        native-plan.css mobile rules on specificity, not on !important wars. */
     html.ce-phone .ce-launch-intelligence { padding: 4px 10px 5px !important; }
-    html.ce-phone .ce-launch-intelligence-head { display: flex !important; flex-direction: row !important; flex-wrap: nowrap; align-items: baseline; gap: 10px; padding-bottom: 2px !important; }
-    html.ce-phone .ce-launch-intelligence-head > div { display: flex !important; flex-wrap: nowrap; align-items: baseline; gap: 6px; flex: 0 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; }
+    /* F-GL01 (grow-launch, 2026-09-23): the phone override forced the head into
+       a single nowrap row with the legend as a no-overflow flex child, which
+       pushed the legend's swatch row past the right viewport edge (measured
+       right:412 at a 402px viewport) and clipped it. The eyebrow row stays a
+       line; the legend gets its own full-width wrapping row beneath it. */
+    html.ce-phone .ce-launch-intelligence-head { display: flex !important; flex-direction: column !important; flex-wrap: wrap !important; align-items: stretch !important; gap: 2px; padding-bottom: 2px !important; }
+    html.ce-phone .ce-launch-intelligence-head > div { display: flex !important; flex-wrap: nowrap; align-items: baseline; gap: 6px; flex: 0 1 auto; min-width: 0; white-space: nowrap; }
     html.ce-phone .ce-launch-intelligence-head > div > span,
     html.ce-phone .ce-launch-intelligence-head > div > strong { white-space: nowrap; }
-    html.ce-phone .ce-launch-intelligence-head small { display: block; flex: 1 1 auto; min-width: 0; margin-top: 0 !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+    html.ce-phone .ce-launch-intelligence-head .ce-cont-legend { flex-wrap: wrap; min-width: 0; white-space: normal; }
+    html.ce-phone .ce-launch-intelligence-head small { display: block; flex: 1 1 auto; min-width: 0; margin-top: 4px !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
     html.ce-phone .ce-launch-insight { padding: 3px 6px !important; }
     html.ce-phone .ce-launch-insight strong { font-size: var(--fs-body) !important; }
-    html.ce-phone .ce-launch-insight span { margin-top: 1px !important; font-size: var(--fs-overline) !important; }
+    html.ce-phone .ce-launch-insight span { margin-top: 1px !important; font-size: var(--fs-secondary) !important; }
     html.ce-phone .ce-launch-rhythm { height: 5px !important; margin-top: 1px !important; }
     /* P1 on phone (402px): the 14-cell continuum keeps shrinking on min-width:0,
        the proof ledger wraps, the readiness glance line stays a line. */
@@ -3167,7 +3236,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=1cb5e39920"></script>
-<script src="./deck_index.js?v=0835ea4fea"></script>
+<script src="./deck_index.js?v=0a3dbed2f2"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <script>
 /* d01 (b-core, 2026-09-19) — catalog-failure surface. The phone boots ONLY on
@@ -3219,16 +3288,16 @@
   }
 })();
 </script>
-<link rel="stylesheet" href="./native-ideas.css?v=e5ddd656c9" />
-<link rel="stylesheet" href="./native-plan.css?v=e2954b4fca" />
-<link rel="stylesheet" href="./native-saved.css?v=73f3339d79" />
-<link rel="stylesheet" href="./native-studio.css?v=92fafca348" />
+<link rel="stylesheet" href="./native-ideas.css?v=b90b6e2846" />
+<link rel="stylesheet" href="./native-plan.css?v=20e0476f87" />
+<link rel="stylesheet" href="./native-saved.css?v=4dcc604503" />
+<link rel="stylesheet" href="./native-studio.css?v=f6443bf597" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<script src="./ce-touch-edit.js?v=d53471f4c3"></script>
+<script src="./ce-touch-edit.js?v=501904dc70"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -3461,7 +3530,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   } catch (_) {}
 })();
 </script>
-<link rel="stylesheet" href="./ce-mobile.css?v=44d07a1b3b" />
+<link rel="stylesheet" href="./ce-mobile.css?v=f3296774fa" />
 <!-- Ideas surface density + crimson rebind (2026-09-17). The parity renderer
      ships tall outline cards and the catalog is ~600 ideas, so the tab read
      as pink-tinted text walls. Cards now render as compact rows that expand
@@ -3598,9 +3667,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     border: 0;
   }
   .ce-ideas-parity .ce-ideas-card-actions .ce-ideas-action {
-    min-height: 28px;
     padding: 5px 10px;
-    font-size: var(--fs-overline);
   }
   .ce-ideas-parity .ce-ideas-card:not(.is-open):not(:hover):not(:focus-within) .ce-ideas-action:not(.is-primary) { opacity: .45; }
   .ce-ideas-parity .ce-ideas-action-status { font-size: var(--fs-overline); color: var(--ideas-muted); }
@@ -3819,7 +3886,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   };
 })();
 </script>
-<script src="./native-ideas.js?v=8cd3804168"></script>
+<script src="./native-ideas.js?v=4017911ce3"></script>
 <script>
 /* Ideas rows expand/collapse companion: the parity renderer rebuilds
    #view innerHTML on every filter/group change, so row state lives in a
@@ -8395,7 +8462,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       st.error = err;
       st.at = Date.now();
       if (code === 'needs_connect') { window.__CE_META_HAS_TOKEN__ = false; ceSyncMetaConnectChrome(); }
+      /* P1-13 (ui-copy, 2026-09-23): a manual Refresh that came back empty must
+         say so — otherwise the click looks like it did nothing. */
+      if (window.__CE_META_INSIGHTS_REFRESH_TOAST__ && code !== 'needs_connect') {
+        window.__CE_META_INSIGHTS_REFRESH_TOAST__ = false;
+        if (typeof showAppToast === 'function') showAppToast('Could not refresh — Meta did not answer', { isError: true });
+      }
     }
+    if (ok) window.__CE_META_INSIGHTS_REFRESH_TOAST__ = false;
     // Plan renders the Meta-clock chips, so it must re-render when Meta's
     // authoritative scheduled_posts list actually CHANGES (2026-09-10 audit A-1).
     // E05 P0-1: only a real change may rebuild the surface — a cache echo must not.
@@ -8456,7 +8530,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     }
     if (st.status === 'error') {
       return '<div class="ce-aud-state is-error"><em>' + escapeHtml(st.error || 'Meta insights unavailable') + '</em>'
-        + '<button type="button" class="ce-surface-button" data-ce-insights-refresh>Retry sync</button></div>';
+        + '<button type="button" class="ce-surface-button" data-ce-insights-refresh>Refresh numbers</button></div>';
     }
     return '';
   }
@@ -8483,7 +8557,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         ? 'Synced ' + escapeHtml(st.data.fetchedAtIst || '') + (st.data.cached ? ' · cached' : '') + (st.data.stale ? ' · refresh failed, showing last sync' : '')
         : 'Not synced yet')
       + '</span>'
-      + (window.__CE_META_HAS_TOKEN__ ? '<button type="button" class="ce-surface-button" data-ce-insights-refresh style="margin-left:8px;">Refresh</button>' : '')
+      + (window.__CE_META_HAS_TOKEN__ ? '<button type="button" class="ce-surface-button" data-ce-insights-refresh style="margin-left:8px;">Refresh numbers</button>' : '')
       + '</div>';
     var vm = ceInsightsVm();
     if (!vm) return head + ceInsightStateHtml();
@@ -8578,7 +8652,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function ceBindInsightsActions(root) {
     if (!root) return;
     root.querySelectorAll('[data-ce-insights-refresh]').forEach(function (btn) {
-      btn.onclick = function () { ceRequestMetaInsights(true); if (typeof renderMain === 'function') renderMain(); };
+      /* P1-13 (ui-copy, 2026-09-23): the click fired a request and re-rendered
+         with no busy affordance. Say "Refreshing…" and disable while the
+         request is in flight; the surface's own Syncing state then carries it.
+         A forced refresh that fails raises one toast via the response handler. */
+      btn.onclick = function () {
+        btn.textContent = 'Refreshing…';
+        btn.disabled = true;
+        window.__CE_META_INSIGHTS_REFRESH_TOAST__ = true;
+        ceRequestMetaInsights(true);
+        if (typeof renderMain === 'function') renderMain();
+      };
     });
     root.querySelectorAll('[data-ce-insights-connect]').forEach(function (btn) {
       btn.onclick = function () { try { ceOpenSettingsModal(); } catch (_e) {} };
@@ -17725,7 +17809,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
     var actionClusterHtml = '<div class="ce-card-action-cluster" aria-label="Recommendation actions">'
       + '<button type="button" class="ce-action-save-btn' + (isSaved ? ' active' : '') + '" aria-label="' + (isSaved ? 'Saved in Bank' : 'Save to Bank') + '" title="' + (isSaved ? 'Saved in Bank' : 'Save to Bank (Shortlist)') + '">' + (isSaved ? '<span class="ce-ic ce-ic--star ce-ic--14"></span>' : '<span class="ce-ic ce-ic--check ce-ic--14"></span>') + '</button>'
-      + '<button type="button" class="ce-action-reject-btn" aria-label="Reject and move to Saved Bank archive" title="Reject and move to Saved Bank archive"><span class="ce-ic ce-ic--close ce-ic--12"></span></button>'
+      + '<button type="button" class="ce-action-reject-btn" aria-label="Move to Rejected" title="Move to Rejected — you can restore it from the Saved Bank"><span class="ce-ic ce-ic--close ce-ic--12"></span></button>'
       + '</div>';
 
     return { badgeHtml: badgeHtml, actionClusterHtml: actionClusterHtml, isSaved: isSaved, isQueued: isQueued };
@@ -17776,7 +17860,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
            keeps cePersistOrWarn's own failure message as the only word. */
         if (rejectToSavedBank(type, item, design) !== false) {
           ceDismissContentCard(card);
-          showAppToast('Archived to Rejected / Archive', { icon: 'delete' });
+          showAppToast('Moved to Rejected / Archive', { icon: 'delete' });
         }
       };
     }
@@ -18331,7 +18415,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         + '<span class="ce-next-best-badge">' + escapeHtml(cand.category) + '</span>'
         + '<div class="ce-next-best-name">' + escapeHtml(titleText) + '</div>'
         + '<div class="ce-next-best-actions">'
-        + '<button type="button" class="ce-nb-btn ce-nb-save" title="Save to Bank"><span class="ce-ic ce-ic--star ce-ic--12"></span> Save</button>'
+        + '<button type="button" class="ce-nb-btn ce-nb-save" title="Save to Bank"><span class="ce-ic ce-ic--star ce-ic--12"></span> Save to Bank</button>'
         + '<button type="button" class="ce-nb-btn ce-nb-pass" title="Pass / Reject"><span class="ce-ic ce-ic--xmark ce-ic--14"></span></button>'
         + '</div>'
         + '</div>';
@@ -18950,7 +19034,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         emptyMsg = activeFilter === 'rejected'
           ? 'Nothing archived.'
           : 'Save a piece from Library to keep it here.';
-        emptyTitle = activeFilter === 'rejected' ? 'No archived pieces' : 'No saved pieces';
+        emptyTitle = activeFilter === 'rejected' ? 'No archived pieces' : 'Nothing saved yet';
         if (bankNeedsKey) {
           emptyTitle = 'Saved Bank not paired yet';
           emptyMsg = 'This device has not been given the write key, so the bank on your Mac cannot be read from here.';
@@ -19112,11 +19196,106 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
 
   // Main Render View
+  /* ── F-M01 (tab-switch, 2026-09-23): ONE teardown/enter routine for the phone
+     route switch. Every route change in this app funnels through renderMain, so
+     this is the single place the invariant below can hold.
+
+     THE INVARIANT: a surface may only paint chrome and mounted furniture that
+     belongs to the surface now on screen. Measured at 402x874 (qa probe, all
+     7x6 ordered tab pairs + deep scroll + drawer + modal + studio):
+
+       1. SCROLL CARRIED ACROSS. #view.scrollTop from the departed tab survived
+          the new render, so Ideas opened at 6765px (mid-list, above a blank
+          band) after leaving a deeply scrolled Library. Render must land a
+          freshly entered surface at its own offset, which is the top — the
+          app's deliberate restoration of a remembered offset lives in
+          appNavigateBack and closeStudio and runs AFTER this pass.
+       2. MODE CLASSES CARRIED. The .ce-* mode classes other surfaces own
+          (native-ideas.js writes .ce-ideas-parity on #view; the library/saved
+          chrome keys on <html>) were cleared by whichever renderer happened to
+          run next, so #view kept 'view ce-ideas-parity' over every later
+          surface (measured: Library, Saved, Plan, Grow, Launch, Write all
+          painted inside the Ideas class) and the shelf row's clearance stayed
+          published for a bar that was no longer on screen.
+       3. FURNITURE CARRIED. Static, render-proof chrome kept painting on
+          surfaces it does not belong to. #poem-sections (Photo/Paper) is a
+          SIBLING of #view, hidden by CSS in every layout except the poem shelf,
+          so it survives a sidebar tab change and only its inline display ever
+          moves. The closed Studio is worse: a full-viewport fixed layer at
+          opacity 0 living over every tab, removed from paint and the tab order
+          only by the `#studio[aria-hidden="true"]` rule beside .app-container.
+
+     The drawer, sheets and route modals are already closed by
+     ceDismissRouteOverlays()/closeStudio() before this runs and were measured
+     clean inside their own tabs; this routine deliberately does not duplicate
+     them.
+
+     Teardown runs BEFORE the paint and only on a real tab change, so a
+     same-tab re-render (search, filters, saves, storage re-read) is untouched
+     and no in-tab handler loses state. */
+  function ceRouteTeardown(prevTab, nextTab) {
+    var view = document.getElementById('view');
+    if (!view) return;
+    if (prevTab && prevTab !== nextTab) {
+      view.scrollTop = 0;
+      document.documentElement.style.setProperty('--ce-shelf-row-h', '0px');
+    }
+    /* (2) every non-#view mode class is surface-owned: drop all of them, then
+       restore only the density mode, which IS a global preference, not a
+       surface's. #view.className is rebuilt by __ceRenderMainImpl anyway; the
+       .ce-view-from-* transition classes are re-added per switch by
+       ceApplySurfaceTransition and are deliberately not touched here. */
+    var modeCls = [];
+    for (var ci = 0; ci < document.documentElement.classList.length; ci++) {
+      var c = document.documentElement.classList[ci];
+      if (c.indexOf('ce-') === 0 && c !== 'ce-phone' && c !== 'ce-share' && c !== 'ce-native-app'
+          && c !== 'ce-native-ready' && c !== 'ce-embed' && c !== 'ce-desktop') modeCls.push(c);
+    }
+    modeCls.forEach(function (c) { document.documentElement.classList.remove(c); });
+    /* html.ce-poem-library reserves the poem-library top chrome (ce-mobile.css:
+       2165/2168). A surface that borrows the flag must re-add it on its own
+       render (the poem shelf does, in __ceRenderMainImpl); what this teardown
+       guarantees is that it can never LINGER from the shelf the owner left. */
+    document.documentElement.classList.toggle('ce-poem-library', nextTab === 'library' && state.libraryType === 'poems');
+    document.documentElement.classList.toggle('ce-shelf-on-html', nextTab === 'library');
+    if (state.shelfDensity === 'dense') view.classList.add('is-dense');
+    /* (3) furniture owned by another surface. #poem-sections is a render-proof
+       sibling of #view (see the F-M01 note above); the phone layer hides it by
+       CSS, so clearing the inline display the poem shelf wrote is the whole
+       teardown here — the shelf is the only writer and restores 'flex' on its
+       own next render. */
+    if (prevTab !== nextTab && nextTab !== 'library') {
+      var sections = document.getElementById('poem-sections');
+      if (sections && sections.style.display) sections.style.display = '';
+    }
+    if (nextTab !== 'library') {
+      var libRow = document.getElementById('ce-shelf-switch');
+      if (libRow) libRow.classList.remove('ce-shelf-on');
+      var poemEras = document.getElementById('poem-eras');
+      if (poemEras) poemEras.hidden = true;
+    }
+    /* A still-mounted closed Studio is the same class of furniture; its own
+       closer already owns the attributes, so only repair a torn-down state
+       (class gone, aria-hidden left behind), never a live open editor. */
+    var studioEl = document.getElementById('studio');
+    if (studioEl && !studioEl.classList.contains('open') && studioEl.getAttribute('aria-hidden') !== 'true') {
+      studioEl.setAttribute('aria-hidden', 'true');
+      try { studioEl.setAttribute('inert', ''); } catch (_studioInert) {}
+    }
+  }
+
   function renderMain() {
     /* Navigation history (owner law 2026-09-13): every surface switch in this app
        funnels through renderMain, so this single call is what makes Back a real
        step back instead of a jump to the Library root. See ceNavTrack above. */
     try { ceNavTrack(); } catch (_navTrack) {}
+    /* F-M01: the route switch from before, read once — the pass below has
+       already overwritten __CE_LAST_SURFACE__ and ceNavTrack() has already
+       banked its own snapshot, so neither is a usable "what was on screen". */
+    var __cePrevTab = window.__CE_RENDER_TAB__ || null;
+    var __ceNextTab = state.activeTab || 'library';
+    window.__CE_RENDER_TAB__ = __ceNextTab;
+    try { ceRouteTeardown(__cePrevTab, __ceNextTab); } catch (_routeTeardown) {}
     try { __ceRenderMainImpl(); } catch (_renderErr) { console.error('RENDER_MAIN_ERROR:', _renderErr); }
     // Slide fit sweep (owner 2026-09-10): .mid is a fixed 1049px box with
     // overflow:hidden, and the density relief that was meant to keep text inside
@@ -19917,7 +20096,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         <section class="ce-write-preview-panel">
           <div class="ce-section-heading"><h3>Preview</h3><span class="ce-data-note" id="write-design-note"></span></div>
           <div id="live-write-preview" class="ce-write-preview"></div>
-          <div class="ce-write-design-label"><span>Design options</span><small id="write-design-count"></small></div>
+          <div class="ce-write-design-label"><span>Design options</span><small id="write-design-count">Designs are still loading.</small></div>
           <div id="write-design-rail" class="ce-write-designs"></div>
         </section>
       `;
@@ -19953,7 +20132,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       const updatePreview = () => {
         const txt = (writeInput.value || defaultWriteText).trim();
         if (writeCount) writeCount.textContent = `${txt.length} character${txt.length === 1 ? '' : 's'}`;
-        if (state.writeType === 'poem') {
+        /* P1-16 (ui-copy, 2026-09-23): a blank draft still painted a full live
+           design, so the surface looked populated while the editor said 0
+           characters — read as "your post already exists". Show a quiet start
+           state; the design rail below stays visible (it is a chooser). */
+        if (!txt) {
+          writePreview.innerHTML = '<div class="ce-write-preview-empty">Start typing — your post preview appears here.</div>';
+        } else if (state.writeType === 'poem') {
           writePreview.innerHTML = state.writeDesignIdx % 2 === 0
             ? renderPhotoPoemHtml({ id: 'live_1', text: txt, theme: 'Custom' }, state.writeDesignIdx % PHOTO_PRESETS.length)
             : renderPaperPoemHtml({ id: 'live_1', text: txt, theme: 'Custom' }, state.writeDesignIdx % PAPER_PRESETS.length);
@@ -19995,11 +20180,20 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                 var face = state.writeType === 'poem'
                   ? (t.idx % 2 === 0 ? renderPhotoPoemHtml({ id: 'live_1', text: writeRailText, theme: 'Custom' }, t.idx % PHOTO_PRESETS.length) : renderPaperPoemHtml({ id: 'live_1', text: writeRailText, theme: 'Custom' }, t.idx % PAPER_PRESETS.length))
                   : renderPostCoreFallbackHtml(writeDraftItem(writeRailText), t.idx % __wCount, '');
-                return '<button type="button" data-ce-write-design="' + t.idx + '" data-ce-signature="' + t.sig + '" class="' + (t.sig === __wSelSig ? 'is-active' : '') + '" aria-label="Try design ' + (t.idx + 1) + '">' + face + '</button>';
+                return '<button type="button" data-ce-write-design="' + t.idx + '" data-ce-signature="' + t.sig + '" class="' + (t.sig === __wSelSig ? 'is-active' : '') + '" aria-label="Preview design ' + (t.idx + 1) + ' — ' + escapeHtml(g.label) + '">' + face + '</button>';
               }).join('') + '</div></div>';
           }).join('');
           var __wdc = document.getElementById('write-design-count');
-          if (__wdc) __wdc.textContent = __wTotal + ' designs · ' + __wFam + ' families';
+          /* P0-1/P2-1 (ui-copy, 2026-09-23): a bare "0 designs · 0 families" (or a
+             blank node mid-load) reads as a measured zero on a surface that
+             refuses to fake numbers. State the loading case in words and agree
+             singular/plural on both nouns. */
+          if (__wdc) {
+            __wdc.textContent = !__wTotal
+              ? 'Designs are still loading.'
+              : __wTotal + (__wTotal === 1 ? ' design' : ' designs')
+                + ' · ' + __wFam + (__wFam === 1 ? ' family' : ' families');
+          }
           writeDesignRail.querySelectorAll('[data-ce-write-design]').forEach(function (button) {
             button.onclick = function () {
               state.writeDesignIdx = Number(button.getAttribute('data-ce-write-design') || 0);
@@ -20147,7 +20341,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
              persisted claim as a toast — addToQueue now reports the write
              truth, so a quota-failed stage keeps the honest label. */
           var __addedOk = addToQueue(state.writeType, draft, { lookIndex: state.writeDesignIdx, presetIndex: state.writeDesignIdx, poemSection: state.writeDesignIdx % 2 === 0 ? 'photo' : 'paper' }) !== false;
-          writePlanBtn.textContent = __addedOk ? 'Added to Plan' : 'Save failed';
+          /* P1-15 (ui-copy, 2026-09-23): "Save failed" gave no reason. Name the
+             one failure this path can report, so the label is actionable. */
+          writePlanBtn.textContent = __addedOk ? 'Added to Plan' : "Not added — this Mac's storage is full";
           setTimeout(() => { writePlanBtn.textContent = 'Add to Plan'; }, 1500);
           /* W8-F5 (2026-09-21): the success path used to dead-end. The draft is
              staged as a compose_ row in ce_queue_items (the honest record type
@@ -20686,7 +20882,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             </div>
             <div class="ce-kanban-col-cards" data-col-id="${col.id}">
               ${itemsInCol.length === 0 ? `
-                <div class="ce-kanban-col-empty" style="display:flex; align-items:center; justify-content:center; min-height:86px; border:1px dashed var(--border); border-radius:10px; color:var(--muted); font-size:var(--fs-title); font-weight:400; opacity:0.4;" aria-label="Drop a piece here">+</div>
+                <div class="ce-kanban-col-empty" style="display:flex; align-items:center; justify-content:center; border-radius:10px; color:var(--muted); font-weight:400;" aria-label="Drop a piece here">+</div>
               ` : itemsInCol.map(entry => renderKanbanCard(entry.item, entry.originalIdx, col)).join('')}
             </div>
           </div>
@@ -20739,12 +20935,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               <h3 class="ce-plan-heading" style="margin:0; font-size:var(--fs-section); font-weight:700; color:var(--ink);">Plan & Queue</h3>
               <button id="plan-schedule-all-ready-btn" type="button" title="Place all Ready pieces a week+ out (owner law — Meta refuses sooner) with human-ish times between 9am and 9pm." style="background:var(--accent); color:#fff; border:1px solid transparent; padding:5px 14px; border-radius:7px; font-size:var(--fs-secondary); font-weight:700; cursor:pointer;">Schedule all ready</button>
               ${planFailedMeta > 0 ? `<button id="ce-plan-batch-meta-btn" type="button" title="Re-send the ${planFailedMeta} failed Ready piece${planFailedMeta === 1 ? '' : 's'} to Meta's clock (same confirm as Schedule)." style="background:rgba(217,106,124,0.16); color:#d96a7c; border:1px solid rgba(217,106,124,0.38); padding:5px 12px; border-radius:7px; font-size:var(--fs-secondary); font-weight:700; cursor:pointer;">Retry failed (${planFailedMeta})</button>` : ''}
-              <button id="plan-select-all-ready-btn" type="button" title="Tick every staged piece as Ready" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:var(--fs-secondary); font-weight:600; cursor:pointer;">Mark all Ready</button>
+              <button id="plan-select-all-ready-btn" type="button" title="Tick every staged piece as Ready" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:var(--fs-secondary); font-weight:600; cursor:pointer;">Mark all ready</button>
               <button id="plan-auto-schedule-btn" type="button" title="Pull from Saved Bank / library into empty day slots." style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); padding:5px 12px; border-radius:7px; font-size:var(--fs-secondary); font-weight:600; cursor:pointer;">Fill week</button>
-              <button id="plan-open-meta-btn" type="button" aria-label="Open Meta Creator Studio" title="Open Meta Creator Studio / Business Suite in your browser" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); width:28px; height:26px; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
+              <button id="plan-open-meta-btn" type="button" aria-label="Open Meta tools" title="Open Meta Business Suite in your browser" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); width:28px; height:26px; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
                 <span class="ce-ic ce-ic--arrow-up-right ce-ic--12"></span>
               </button>
-              <button id="plan-open-calendar-btn" type="button" aria-label="Open Meta Content Calendar" title="Open Meta Content Calendar in your browser" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); width:28px; height:26px; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
+              <button id="plan-open-calendar-btn" type="button" aria-label="Open Meta content calendar" title="Open Meta's content calendar in your browser" style="background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.14); width:28px; height:26px; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
                 <span class="ce-ic ce-ic--calendar ce-ic--12"></span>
               </button>
               ${state.queueItems.length ? `
@@ -20757,10 +20953,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               ` : ''}
               <div class="plan-view-toggle" style="display:flex; background:var(--card); border:1px solid var(--card-border); border-radius:7px; padding:2px; gap:2px; margin-left:4px;">
                 <button id="plan-view-kanban-btn" type="button" style="border:none; background:${planMode !== 'list' ? 'rgba(255,255,255,0.14)' : 'transparent'}; color:${planMode !== 'list' ? 'var(--ink)' : 'var(--muted)'}; padding:4px 9px; border-radius:5px; font-size:var(--fs-secondary); font-weight:${planMode !== 'list' ? '700' : '500'}; cursor:pointer; display:flex; align-items:center; gap:4px;">
-                  <span>⊞</span> Board
+                  <span aria-hidden="true">⊞</span> Board
                 </button>
                 <button id="plan-view-list-btn" type="button" style="border:none; background:${planMode === 'list' ? 'rgba(255,255,255,0.14)' : 'transparent'}; color:${planMode === 'list' ? 'var(--ink)' : 'var(--muted)'}; padding:4px 9px; border-radius:5px; font-size:var(--fs-secondary); font-weight:${planMode === 'list' ? '700' : '500'}; cursor:pointer; display:flex; align-items:center; gap:4px;">
-                  <span>☰</span> List
+                  <span aria-hidden="true">☰</span> List
                 </button>
               </div>
             </div>
@@ -20793,9 +20989,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           ${state.queueItems.length === 0 ? `
             <div class="ce-plan-empty-banner ce-plan-empty">
               <strong style="display:block; font-size:var(--fs-section); font-weight:700; margin-bottom:6px; color:var(--ink);">Nothing staged yet</strong>
-              <span style="display:block; color:var(--muted); font-size:var(--fs-secondary); max-width:480px; margin:0 auto 16px; line-height:1.5;">Save poems, posts, or carousels from the Library. Tick Ready, pick a day, and scheduling places them at sensible hours from tomorrow.</span>
+              <span style="display:block; color:var(--muted); font-size:var(--fs-secondary); max-width:480px; margin:0 auto 16px; line-height:1.5;">Nothing is staged yet. Open the Library and stage a piece, or use Fill week to place whatever is already ready.</span>
               <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-                <button type="button" class="pill-btn primary-action-btn" id="plan-fill-week-empty" style="cursor:pointer; padding:8px 16px; border-radius:8px; font-weight:600; font-size:var(--fs-secondary);">Fill week</button>
+                <button type="button" class="pill-btn primary-action-btn" id="plan-fill-week-empty" disabled aria-disabled="true" title="Nothing is ready to place yet — stage a piece first" style="cursor:not-allowed; padding:8px 16px; border-radius:8px; font-weight:600; font-size:var(--fs-secondary); opacity:.7;">Fill week</button>
                 <button type="button" class="pill-btn" id="plan-browse-library" style="cursor:pointer; padding:8px 16px; border-radius:8px; font-weight:600; font-size:var(--fs-secondary);">Browse Library</button>
               </div>
             </div>
@@ -20868,10 +21064,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                   </div>
                 </div>`).join('')}
             </div>
-          /* List mode owns the pane. Only a genuinely empty queue still shows the
-             Inbox drop tile (the banner above already names that cause); silently
-             falling through to the 9-column Board made the Board/List toggle look
-             broken whenever the search matched no calendar piece. */
           ` : '') : `
             <div class="ce-kanban-board${ceBoardEmpty ? ' is-empty' : ''}">
               ${kanbanColsHtml}
@@ -21021,7 +21213,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var __readyN = (state.queueItems || []).filter(function (q) { return q && q.readyToPost; }).length;
       var __eligibleN = (state.queueItems || []).filter(ceQueueShipEligible).length;
       [['plan-schedule-all-ready-btn', __readyN, 'Schedule all ready', 'Place all Ready pieces a week+ out (owner law — Meta refuses sooner) with human-ish times between 9am and 9pm.'],
-       ['plan-select-all-ready-btn', __eligibleN, 'Mark all Ready', 'Tick every staged piece as Ready']
+       ['plan-select-all-ready-btn', __eligibleN, 'Mark all ready', 'Tick every staged piece as Ready']
       ].forEach(function (pair) {
         var el = document.getElementById(pair[0]);
         if (!el) return;
@@ -21582,11 +21774,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var __growDecks = __corpus.decks;
       var __growPosts = __corpus.posts;
       var __growIdeas = __corpus.ideas;
-      var __corpusSrcNote = __corpus.anyCatalog
-        ? (__corpus.catalogKinds.length === 4
-            ? ' · static catalog'
-            : ' · ' + __corpus.catalogKinds.join(' + ') + ' from static catalog')
-        : '';
+      /* F-07 (dashboards, 2026-09-23): the catalog-provenance note ("… from
+         static catalog") was internal plumbing appended to the owner's ledger
+         sentence. Provenance lives in ceProvenanceHtml() at the foot of the
+         surface; the ledger states counts only. */
       var __growTotal = __growPoems + __growDecks + __growPosts + __growIdeas;
       /* WL0716 / F04-05 (2026-09-19): the hero sentence used to read "the
          Library holds <total> finished pieces". The total is the CORPUS
@@ -21701,6 +21892,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
          since it — never the whole fortnight's flat average. */
       var __returnInfo = (__gMeta.live && typeof ceReturnInfo === 'function') ? ceReturnInfo() : null;
       var __heroLine;
+      var __heroSub = '';
       if (__gMeta.live) {
         __heroLine = __landedN + ' landed → <b class="ce-fort-num">' + ceGrowFmtN(__engSum) + '</b> came back';
         if (__returnInfo) {
@@ -21731,9 +21923,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           }
         }
       } else if (!window.__CE_META_HAS_TOKEN__) {
-        __heroLine = 'local work only · the answer half needs Meta';
+        /* F-GL04 (grow-launch, 2026-09-23): the heading was a formula sentence
+           ("local work only · the answer half needs Meta"). The heading is now
+           the plain window name; the Meta gap is a muted sub-line that states
+           what is missing without pretending a zero is a result. */
+        __heroLine = '';
+        __heroSub = 'Instagram results appear once Meta is connected.';
       } else {
-        __heroLine = 'syncing Meta · the answer half lands with the first fetch';
+        __heroLine = '';
+        __heroSub = 'Instagram results appear with the first fetch.';
       }
       var __heroCap = [];
       if (__ledgerYoung) __heroCap.push('counting since ' + __workMap.firstDay);
@@ -21751,7 +21949,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
           + gapHtml + cols + '</div>';
       }).join('');
       var __fortDaysHtml = __fortSlots.map(function (s, i) {
-        return '<span' + (i === __fortSlots.length - 1 ? ' class="is-today"' : '') + '>' + s.label + '</span>';
+        /* F-01 (dashboards, 2026-09-23): 14 columns at 402px give each label
+           18px; "9/13" needs 28px, so overflow:hidden cut it to "9/1" — a
+           wrong date, not a short one. On phone the axis prints the day number
+           alone; the month is already in the hero eyebrow and the gap label.
+           Desktop keeps "9/13". */
+        var dayLabel = document.documentElement.classList.contains('ce-phone')
+          ? String(s.key ? Number(String(s.key).slice(-2)) : s.label)
+          : s.label;
+        return '<span' + (i === __fortSlots.length - 1 ? ' class="is-today"' : '') + '>' + escapeHtml(dayLabel) + '</span>';
       }).join('');
 
       /* The tide: dual follower lanes, snapshots only. Disconnected collapses
@@ -21760,7 +21966,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var __tideHtml;
       if (!window.__CE_META_HAS_TOKEN__) {
         __tideHtml = '<div class="ce-tide-lane is-empty"><div class="ce-tide-head"><span class="ce-tide-name">Audience unmeasured</span></div>'
-          + '<div class="ce-tide-void">connect Meta once — the follower snapshots start storing from the first sync</div>'
+          + '<div class="ce-tide-void">no follower snapshots yet — see the Meta note above</div>'
           + '<div class="ce-unmeasured-acts"><button type="button" class="ce-surface-button" data-ce-insights-connect>Open Publishing handoff</button></div></div>';
       } else {
         __tideHtml = ceTideLaneHtml('Instagram', 'igFollowers', 14) + ceTideLaneHtml('Facebook Page', 'fbFollowers', 14);
@@ -21834,7 +22040,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         : (__ansTrend === 'cooling' ? 'the newest answers came in under your usual — the return is still being written' : '')));
       var __ansInner;
       if (!__gMeta.live) {
-        __ansInner = '<div class="ce-ans-empty">' + (window.__CE_META_HAS_TOKEN__ ? 'syncing Meta…' : 'unmeasured — connect Meta and the last posts line up against your usual') + '</div>';
+        __ansInner = '<div class="ce-ans-empty">' + (window.__CE_META_HAS_TOKEN__ ? 'syncing Meta…' : 'no posts measured yet — see the Meta note above') + '</div>';
       } else if (!__ansShown.length) {
         __ansInner = '<div class="ce-ans-empty">no posts in the window Meta returned — the next landing starts the ledger</div>';
       } else {
@@ -21847,26 +22053,30 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       /* The proof ledger as ONE footer sentence — every inventory count lives
          here and nowhere else on the fold. */
       var __postedWeek = __igRows.filter(function (m) { return m.ts > Date.now() / 1000 - 7 * 86400; }).length;
+      /* F-08 (dashboards, 2026-09-23): the two Meta-side counts printed as bare
+         zeros directly behind "IG week unmeasured", reading as measured results.
+         They are gated on the same live truth as the first clause; unmeasured
+         weeks print words. __growExported stays — it is a local queue fact. */
       var __ledgerLine = (__gMeta.live
           ? '<b>' + __postedWeek + '</b> posted this week on IG'
-          : 'IG week unmeasured — connect Meta')
-        + ' · <b>' + __growMetaClock + '</b> on Meta\u2019s clock'
+            + ' · <b>' + __growMetaClock + '</b> on Meta\u2019s clock'
+          : 'IG week unmeasured · nothing has reached Meta\u2019s clock')
         + ' · <b>' + __growExported + '</b> exported'
-        + ' · library: <b>' + ceGrowFmtN(__growDecks) + '</b> designed carousels · <b>' + ceGrowFmtN(__growPoems) + '</b> poems · <b>' + ceGrowFmtN(__growPosts) + '</b> authored posts · <b>' + ceGrowFmtN(__growIdeas) + '</b> ideas'
-        + (__corpusSrcNote ? '<span class="ce-ledger-src">' + escapeHtml(__corpusSrcNote) + '</span>' : '');
+        + ' · library: <b>' + ceGrowFmtN(__growDecks) + '</b> designed carousels · <b>' + ceGrowFmtN(__growPoems) + '</b> poems · <b>' + ceGrowFmtN(__growPosts) + '</b> authored posts · <b>' + ceGrowFmtN(__growIdeas) + '</b> ideas';
 
       const growBox = document.createElement('div');
       growBox.className = 'ce-ops-shell ce-grow-shell';
       growBox.innerHTML = `
         <section class="ce-grow-hero" aria-label="The fortnight" data-ready="${__growReady}" data-total="${ceQueuePendingCount()}">
           <div class="ce-fort-head">
-            <span class="ce-grow-eyebrow">The fortnight · last 14 days</span>
-            <strong class="ce-fort-line">${__heroLine}</strong>
+            <span class="ce-grow-eyebrow">Your last 14 days</span>
+            ${__heroLine ? '<strong class="ce-fort-line">' + __heroLine + '</strong>' : ''}
             <span class="ce-fort-cap">${escapeHtml(__heroCap.join(' · '))}</span>
+            ${__heroSub ? '<small class="ce-fort-sub">' + escapeHtml(__heroSub) + '</small>' : ''}
           </div>
           <div class="ce-fort-bars" role="img" aria-label="Posts landed vs local work per day, last 14 days">${__fortSlotsHtml}</div>
           <div class="ce-fort-days" aria-hidden="true">${__fortDaysHtml}</div>
-          <div class="ce-fort-legend">accent = landed on IG (likes+comments) · bone = local work · dashed tick = a day with neither${__workMap.firstDay && !__ledgerYoung ? '' : ' · shaded = before the day ledger'}</div>
+          <div class="ce-fort-legend"><span class="is-landed">Landed on Instagram</span><span class="is-work">Local work</span><span class="is-neither">Neither</span>${__workMap.firstDay && !__ledgerYoung ? '' : '<span class="is-before">Before tracking began</span>'}</div>
         </section>
 
         <section class="ce-grow-answers" aria-label="The answers">
@@ -21885,7 +22095,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             <div class="ce-grow-next-art${__growReadyPreview ? '' : ' is-empty'}">${__growReadyPreview || '<span class="ce-grow-empty-mark">+</span>'}</div>
             <div class="ce-grow-next-copy">
               <span class="ce-grow-eyebrow">Next move</span>
-              <h2>${escapeHtml(__growReadyTitle || (__growTotal > 0 ? 'Your next piece is already made' : 'Design your first piece'))}</h2>
+              <h2>${escapeHtml(__growReadyTitle || (__growTotal > 0 ? 'Your next piece is in the Library' : 'Design your first piece'))}</h2>
               <p>${__growReady ? 'This piece is ready in your Plan. Open it once, then decide.' : (__growTotal > 0 ? 'Nothing is queued yet — your corpus holds ' + ceGrowFmtN(__growTotal) + ' pieces (' + __growTotalParts + '). Pick one from the Library and approve the week.' : 'Nothing is ready yet. Start from your Library and keep the next decision small.')}</p>
               ${__growDaysSafe >= 3 ? '<span class="ce-grow-rested-note">Rest is stamped - the week is safe.</span>' : ''}
               ${__growReady
@@ -22310,14 +22520,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             : __cv.verdict === 'Stopped' ? 'is-stopped'
             : __cv.verdict === 'Scheduled-unconfirmed' ? 'is-unconfirmed'
             : 'is-unmeasured';
-          __contCells.push('<span class="ce-cont-cell ' + __ccls + '" data-verdict="' + escapeHtml(__cv.verdict) + '" title="' + escapeHtml(__clabel + ' \u00b7 ' + __cv.verdict) + '"></span>');
+          /* F-03 (dashboards, 2026-09-23): the fills are colour-only and title
+             is hover-only, so touch and AT got 14 unnamed spans. Give every
+             cell a real accessible name; the legend below decodes the fills. */
+          __contCells.push('<span class="ce-cont-cell ' + __ccls + '" data-verdict="' + escapeHtml(__cv.verdict) + '" role="img" aria-label="' + escapeHtml(__clabel + ' — ' + __cv.verdict) + '" title="' + escapeHtml(__clabel + ' \u00b7 ' + __cv.verdict) + '"></span>');
         } else if (__ci === 0) {
           var __tv = { verdict: 'Unmeasured' };
           try { __tv = ceDayVerdict(__ck) || __tv; } catch (_tvErr) { __tv = { verdict: 'Unmeasured' }; }
-          __contCells.push('<span class="ce-cont-cell is-today" data-verdict="' + escapeHtml(__tv.verdict) + '" title="' + escapeHtml('Today \u00b7 ' + __tv.verdict) + '"><span class="ce-floor-tick" aria-hidden="true"></span></span>');
+          __contCells.push('<span class="ce-cont-cell is-today" data-verdict="' + escapeHtml(__tv.verdict) + '" role="img" aria-label="' + escapeHtml('Today — ' + __tv.verdict) + '" title="' + escapeHtml('Today \u00b7 ' + __tv.verdict) + '"><span class="ce-floor-tick" aria-hidden="true"></span></span>');
         } else {
           var __cov = !!(__safeMeta[__ck] || __safeLocal[__ck]);
-          __contCells.push('<span class="ce-cont-cell is-future ' + (__cov ? 'is-covered' : 'is-open') + '" data-verdict="' + (__cov ? 'covered' : 'open') + '" title="' + escapeHtml(__clabel + ' \u00b7 ' + (__cov ? 'On the rail' : 'Open')) + '"></span>');
+          __contCells.push('<span class="ce-cont-cell is-future ' + (__cov ? 'is-covered' : 'is-open') + '" data-verdict="' + (__cov ? 'covered' : 'open') + '" role="img" aria-label="' + escapeHtml(__clabel + ' — ' + (__cov ? 'On the rail' : 'Open')) + '" title="' + escapeHtml(__clabel + ' \u00b7 ' + (__cov ? 'On the rail' : 'Open')) + '"></span>');
         }
       }
       /* P2 §0 — the move hero's art face + queue depth note, and the queue
@@ -22385,7 +22598,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       __launchLb.innerHTML = `
         <section class="ce-launch-contract" aria-label="Morning contract">
           <span><em>Yesterday</em><b>${escapeHtml(__receipt.verdict)}</b></span>
-          <span><em>Today</em><b>${escapeHtml(__contractToday || (__todayPiece ? String(__todayPiece.title || 'Today\u2019s piece') : 'Nothing on the rail yet'))}</b></span>
+          <span><em>Today</em><b>${escapeHtml(__contractToday || (__todayPiece ? String(__todayPiece.title || 'Today\u2019s piece') : 'Not set yet'))}</b></span>
           <span class="ce-contract-move"><em>One move</em><b>${escapeHtml(__oneMove)}</b></span>
         </section>
 
@@ -22407,10 +22620,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                 <span class="ce-launch-move-depth">${escapeHtml(__railReachNote)} · schedule only · never posts live</span>
               </div>
               <button class="ce-surface-button is-primary" data-ce-launch-tomorrow-stage="${escapeHtml(__todayPiece.id)}" title="Stage on the schedule rail — never posts live" type="button">Schedule →</button>
-          ` : `<div class="ce-launch-board-cand ce-launch-board-cand--empty"><span class="ce-launch-board-eyebrow">Today</span><strong>Nothing ready yet</strong><span class="ce-launch-rail-note">schedule only · never posts live</span></div>`}
+          ` : `<div class="ce-launch-board-cand ce-launch-board-cand--empty"><span class="ce-launch-board-eyebrow">Today</span><strong>Nothing ready yet</strong></div>`}
         </section>
 
         <section class="ce-launch-continuum ce-launch-week" aria-label="Two-week day continuum">${__contCells.join('')}</section>
+        <div class="ce-cont-legend" aria-hidden="true"><span class="is-won">landed</span><span class="is-quiet">quiet</span><span class="is-unmeasured">unmeasured</span><span class="is-covered">on the rail</span><span class="is-open">open</span></div>
 
         <div class="ce-launch-board-cadence" aria-label="Board length">
           ${/* M5-polish (2026-09-21): this comment used to sit as raw text INSIDE
@@ -22437,9 +22651,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             // full name in the tooltip (vision audit: "FAQ & OBJE…" truncation).
             var PILLAR_CHIP = { 'Truth & Mirror': 'Truth', 'FAQ & Objections': 'FAQ', 'Bridge & Proof': 'Bridge', 'Sales & Launch': 'Sales', 'Engagement': 'Engage', 'Teaching': 'Teaching', 'Story': 'Story', 'Unfiled': 'Unfiled' };
             var pillarChip = PILLAR_CHIP[pillarName] || pillarName;
-            // "why this" = its honest rank inside its own rail (Grok §4.7).
+            // "why this" = its honest rank inside its own pillar. F-06 (dashboards,
+            // 2026-09-23): "#1 in rail" named an internal design rail the owner
+            // never sees on this board; state the ranking in the surface's words.
             var __rr = piece && window.__CE_LAUNCH_ID_RAIL_RANK ? window.__CE_LAUNCH_ID_RAIL_RANK[String(piece.id)] : null;
-            var whyLine = __rr ? '#' + __rr + ' in rail' : '';
+            var whyLine = __rr ? (__rr === 1 ? 'top of this pillar' : '#' + __rr + ' in this pillar') : '';
             return '<article class="ce-launch-day' + (day.isDrop ? ' is-drop' : '') + '" data-day-idx="' + day.idx + '">'
               + '<div class="ce-launch-day-head">'
               +   '<span class="ce-launch-day-label">' + (escapeHtml(day.label)) + '</span>'
@@ -22461,20 +22677,47 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         </section>
 
         <div class="ce-launch-daysafe" aria-label="Days safe" data-confirmed="${__daysSafeMeta}" data-staged="${__daysSafeLocal}">
-          <strong>${__daysSafe} day${__daysSafe === 1 ? '' : 's'} safe</strong>
-          <span>${__daysSafeMeta} on Meta\u2019s clock${__daysSafeLocal ? ' \u00b7 ' + __daysSafeLocal + ' staged locally' : ''}</span>
+          ${/* F-09/P2-6 (dashboards + ui-copy, 2026-09-23): "0 days safe" + "0 on
+                Meta's clock" read as a broken streak and a measured Meta zero.
+                When nothing is on the rail, print the state in words instead. */ ''}
+          ${__daysSafe > 0
+            ? '<strong>' + __daysSafe + ' day' + (__daysSafe === 1 ? '' : 's') + ' safe</strong>'
+              + '<span>' + __daysSafeMeta + ' on Meta\u2019s clock' + (__daysSafeLocal ? ' \u00b7 ' + __daysSafeLocal + ' staged locally' : '') + '</span>'
+            : '<strong>No piece staged yet</strong><span>Place one and the safe days start counting</span>'}
           ${__daysSafeLocal ? '<span class="ce-local-tag">Local only until Meta confirms</span>' : ''}
           <span style="margin-left:auto">A missed day never doubles tomorrow.</span>
         </div>
 
         <section class="ce-launch-queue" aria-label="Schedule rail">
-          <div class="ce-launch-queue-head"><span class="ce-launch-board-eyebrow">The rail</span><span class="ce-launch-queue-note">${__lqRows.length} row${__lqRows.length === 1 ? '' : 's'} · schedule only · never posts live</span></div>
+          ${/* F-GL03 (grow-launch, 2026-09-23): this screen printed "Nothing on
+                the rail" and "schedule only · never posts live" 3-4 times each.
+                The rail section now owns exactly ONE empty-state sentence
+                (ce-lq-empty, in the body below) and ONE never-posts-live line
+                (the rail head), so the honesty claim reads as a promise, not
+                boilerplate. Other sections state their own state in words. */ ''}
+          <div class="ce-launch-queue-head"><span class="ce-launch-board-eyebrow">The rail</span><span class="ce-launch-queue-note">${__lqRows.length ? __lqRows.length + ' row' + (__lqRows.length === 1 ? '' : 's') + ' \u00b7 ' : ''}schedule only \u00b7 never posts live</span></div>
+          ${/* P2-5 (ui-copy, 2026-09-23): a bare "0 rows" before any staging read
+                as a failure metric; the empty rail states the state in words. */ ''}
           ${__lqHtml}
         </section>
 
         <section class="ce-launch-intelligence" aria-label="Launch board intelligence">
           <div class="ce-launch-intelligence-head">
-            <div><span>This week</span><strong>${__planLen}-day posting rhythm</strong></div>
+            <div><span>This week</span><strong>${__planLen}-day posting rhythm</strong>
+              <div class="ce-launch-rhythm" aria-label="Posting rhythm by day">
+                ${__planDays.map(function (day) {
+                  var piece = day.piece || {};
+                  var pillar = (window.__CE_LAUNCH_ID_PILLAR && window.__CE_LAUNCH_ID_PILLAR[String(piece.id)]) || 'Open';
+                  /* F-04 (dashboards, 2026-09-23): the segments were colour-only and
+                     named in `title` (hover-only). Each segment carries its own
+                     accessible name; the legend below decodes the fills. */
+                  return '<span class="ce-launch-rhythm-segment is-' + escapeHtml(day.phase || 'open') + (piece.id ? '' : ' is-empty')
+                    + '" role="img" aria-label="' + escapeHtml(day.label + ' · ' + pillar + (piece.id ? '' : ' · open'))
+                    + '" title="' + escapeHtml(day.label + ' · ' + pillar) + '"></span>';
+                }).join('')}
+              </div>
+              <div class="ce-cont-legend" aria-hidden="true"><span class="is-won">drop</span><span class="is-covered">evergreen</span><span class="is-open">open</span></div>
+            </div>
             <small>${(__boardPieces.length || __boardStaged) ? "Local only · live from your board · nothing estimated" : "Nothing staged yet · pick pieces from Library and the week fills in"}</small>
           </div>
           <div class="ce-launch-insights">
@@ -22482,13 +22725,6 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             <div class="ce-launch-insight${Object.keys(__boardPillars).length ? "" : " is-zero"}"><strong>${Object.keys(__boardPillars).length}</strong><span>pillars this week</span></div>
             <div class="ce-launch-insight${Object.keys(__boardLooks).length ? "" : " is-zero"}"><strong>${Object.keys(__boardLooks).length}</strong><span>looks used</span></div>
             <div class="ce-launch-insight${__boardStaged ? "" : " is-zero"}"><strong>${__boardStaged}</strong><span>staged in Plan</span></div>
-          </div>
-          <div class="ce-launch-rhythm" aria-label="Posting rhythm by day">
-            ${__planDays.map(function (day) {
-              var piece = day.piece || {};
-              var pillar = (window.__CE_LAUNCH_ID_PILLAR && window.__CE_LAUNCH_ID_PILLAR[String(piece.id)]) || 'Open';
-              return '<span class="ce-launch-rhythm-segment is-' + escapeHtml(day.phase || 'open') + (piece.id ? '' : ' is-empty') + '" title="' + escapeHtml(day.label + ' · ' + pillar) + '"></span>';
-            }).join('')}
           </div>
         </section>
 
@@ -23881,7 +24117,15 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     bits.push('ce_day_events · ' + work.count + ' events' + (work.firstDay ? ' · counting since ' + work.firstDay : ''));
     bits.push('local only · measured on this Mac');
     if (extra) bits.push(extra);
-    return '<div class="ce-provenance">' + escapeHtml(bits.join(' · ')) + '</div>';
+    /* F-GL02 (grow-launch, 2026-09-23): the raw provenance file list
+       (ce_meta_insights.json · … ) sat as page copy at the foot of Grow and
+       Launch, reading as noise. It is real evidence, not a headline: keep it
+       reachable, collapse it into a closed disclosure so the surface ends on
+       the ledger, not on file names. */
+    return '<details class="ce-data-sources">'
+      + '<summary>Data sources</summary>'
+      + '<div class="ce-provenance">' + escapeHtml(bits.join(' · ')) + '</div>'
+      + '</details>';
   }
 
   function ceGetKanbanWeekDays() {
@@ -25465,6 +25709,21 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (!__ceNavBusy.lastMs[tab] && !CE_NAV_SHELL_ALWAYS[tab]) return;
     var view = document.getElementById('view');
     if (!view) return;
+    /* F-M01 (tab-switch, 2026-09-23): this paint runs in the tap's own frame,
+       BEFORE renderMain, so it is the first thing the owner sees after the tap.
+       It therefore owes the same route teardown — without it the shell was
+       written at the departed tab's scroll offset (measured: a shell painted
+       at 6765px showed as an empty band above a blank page) while root-level
+       classes such as ce-poem-library were still the old surface's. */
+    var prevTab = window.__CE_RENDER_TAB__ || null;
+    if (prevTab && prevTab !== tab) {
+      try {
+        view.scrollTop = 0;
+        document.documentElement.style.setProperty('--ce-shelf-row-h', '0px');
+        document.documentElement.classList.remove('ce-poem-library');
+        document.documentElement.classList.toggle('ce-shelf-on-html', tab === 'library');
+      } catch (_shellTeardown) {}
+    }
     view.innerHTML = '';
     var wrap = document.createElement('div');
     wrap.id = 'ce-nav-shell';
@@ -25511,6 +25770,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
 
   function navigateTo(tab) {
+    /* F-TE01 (touch-edit, 2026-09-23): a live phone text edit owns a caret,
+       an outside-tap listener and a tools sheet; the route change must end it
+       (blur commits) before overlays and the Studio are dismissed. */
+    try { if (window.ceTouchEdit && window.ceTouchEdit.teardown) window.ceTouchEdit.teardown('tab'); } catch (_) {}
     ceDismissRouteOverlays();
     if (closeStudio() === false) return false;
     /* WL1149 / wl10109 (2026-09-19): state.searchQuery is ONE field shared by

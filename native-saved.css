@@ -95,8 +95,14 @@
   color: var(--muted);
   border-radius: 8px;
   padding: 4px 10px;
-  font-size: var(--fs-overline);
+  /* F-SV12 (saved-css, 2026-09-23): the rail's refresh control was 11px in a
+     ~24px box; the rail header is the only place the owner re-scores, so the
+     target and the label both matter. */
+  font-size: var(--fs-secondary);
   font-weight: 600;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
   cursor: pointer;
   transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s, border-color 0.15s, background-color 0.15s ease;
 }
@@ -188,10 +194,17 @@
 }
 .ce-nb-btn {
   flex: 1;
-  padding: 5px 6px;
+  padding: 7px 6px;
   border-radius: 6px;
-  font-size: var(--fs-overline);
+  /* F-SV11 (saved-css, 2026-09-23): Save / Pass in the Next-Best rail are
+     the two decisions the rail exists to collect; at 11px in a 24px box they
+     were below both the readable and the target floor. */
+  font-size: var(--fs-secondary);
   font-weight: 700;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   border: 1px solid transparent;
   cursor: pointer;
@@ -392,7 +405,19 @@
   border: 1px solid var(--border);
   padding: 3px;
   border-radius: 10px;
+  /* F-SV01 (saved-css, 2026-09-23): the strip is a three-way switch and was
+     the only control row on the surface with no stated wrap contract. On the
+     phone the tabs need 328px inside a 320px strip and, with wrap inherited,
+     the row broke into a 2+1 stack with a 143px gap between the first two
+     tabs — a single switch reading as two groups. flex:0 0 auto on each tab
+     plus nowrap keeps them one measured line; ce-mobile.css owns the phone
+     gutters that make it fit. */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
 }
+.ce-saved-subtabs::-webkit-scrollbar { display: none; }
 .ce-saved-tab-btn {
   background: transparent;
   border: none;
@@ -402,6 +427,10 @@
   padding: 6px 14px;
   border-radius: 7px;
   cursor: pointer;
+  /* F-SV01 (saved-css, 2026-09-23): a tab that can shrink is a tab whose label
+     can break mid-word, so tabs never flex and never wrap their own text. */
+  flex: 0 0 auto;
+  white-space: nowrap;
   transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s, border-color 0.15s, background-color 0.15s ease;
 }
 .ce-saved-tab-btn:hover {
@@ -416,12 +445,24 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  /* F-SV02 (saved-css, 2026-09-23): four type filters over a 13px floor: the
+     row must wrap as a unit rather than push the last pill past the content
+     edge, and it stayed nowrap while the labels grew. */
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
 }
 .ce-type-pill {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--muted);
-  font-size: var(--fs-overline);
+  /* F-SV03 (saved-css, 2026-09-23): "All / Posts / Carousels / Poems" are type
+     filter labels — control text, not micro copy. At var(--fs-overline) they
+     measured 11px in both themes, under the 13px readable floor; the token's
+     own contract reserves overline for micro/uppercase labels. The previous
+     F-A3-DESK pass raised the box to the 24px WCAG floor but left the label
+     at 11px, so the pill grew without becoming more readable. */
+  font-size: var(--fs-secondary);
   font-weight: 600;
   padding: 4px 10px;
   /* F-A3-DESK (cloud/ce-ui): measured 23px tall — 1px under the WCAG 2.2
@@ -492,10 +533,14 @@
   pointer-events: auto;
 }
 .ce-action-promote-pill {
-  height: 24px;
-  padding: 0 10px;
+  /* F-SV10 (saved-css, 2026-09-23): "Take forward" / "Restore" is an action
+     control, not a status chip — at 24px with an 11px label it was the
+     smallest and shortest control in the card cluster, and the cluster sits
+     over artwork where a thumb lands. 13px label, 32px box. */
+  height: 32px;
+  padding: 0 12px;
   border-radius: 999px;
-  font-size: var(--fs-overline);
+  font-size: var(--fs-secondary);
   font-weight: 700;
   border: 1px solid var(--accent-border);
   background: var(--accent-tint);
@@ -586,6 +631,17 @@
   padding: 7px 16px;
   border-radius: 999px;
   cursor: pointer;
+  /* F-SV04 (saved-css, 2026-09-23): the empty-state pair ("Clear search" +
+     "Open Library", or "Show all types" + "Open Library") is wrapped by JS with
+     a print-only inline style, so the two CTAs had no shared gravity and sat
+     on whatever the text produced — 32px at desktop, 40px before the phone
+     layer raised them. The empty state is the surface's only real call to
+     action; it carries the 44px control floor at every width now, not just
+     under a coarse pointer. */
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: background 0.15s ease;
 }
 .ce-saved-empty-cta:hover {
@@ -626,14 +682,21 @@
   line-height: 1;
 }
 .ce-saved-section-title {
+  /* F-SV09 (saved-css, 2026-09-23): the section title is the row's heading and
+     the badge beside it is now its meta size; without a floor the two sat on
+     a 16px line box inside a 41px header, reading as one squashed label. */
   font-size: var(--fs-secondary);
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--ink);
   margin: 0;
+  line-height: 1.3;
 }
 .ce-saved-section-badge {
-  font-size: var(--fs-overline);
+  /* F-SV06 (saved-css, 2026-09-23): a section count beside a 13px section
+     title is metadata, not micro copy; at var(--fs-overline) it made the
+     quietest text on the row the number that explains the row. */
+  font-size: var(--fs-secondary);
   font-weight: 600;
   color: var(--muted);
   background: rgba(255, 255, 255, 0.05);
@@ -675,8 +738,14 @@
   gap: 6px;
   padding: 6px 12px;
   border-radius: 8px;
-  font-size: var(--fs-overline);
+  /* F-SV05 (saved-css, 2026-09-23): "Schedule" / "Clear" in the staging bar
+     are the surface's primary destructive and primary commit actions. At
+     var(--fs-overline) they were the smallest text on the bar while carrying
+     its weight; the box was 32px with no floor. Both now match the app
+     contract: 13px label, 44px target. */
+  font-size: var(--fs-secondary);
   font-weight: 700;
+  min-height: 44px;
   cursor: pointer;
   border: 1px solid var(--border);
   background: var(--surface);
@@ -707,9 +776,14 @@
   top: 8px;
   left: 8px;
   z-index: var(--z-dock);
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
+  /* F-SV07 (saved-css, 2026-09-23): this is the multi-select handle for
+     staging a batch — the one control on a saved card that a thumb has to
+     find without a hover state. Measured 22x22, half the 44px phone floor;
+     the header rule in ce-mobile.css only lifts it in the phone layer, so a
+     touch laptop or tablet kept the 22px box. It carries the floor itself. */
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
   background: rgba(0, 0, 0, 0.65);
   border: 1.5px solid rgba(255, 255, 255, 0.4);
   color: #fff;
@@ -717,7 +791,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: var(--fs-overline);
+  font-size: var(--fs-secondary);
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 .ce-card-select-toggle:hover {
@@ -734,7 +808,11 @@
 .ce-cap-chip, .ce-hook-chip {
   appearance:none; border:1px solid var(--border, rgba(255,255,255,0.12));
   background: var(--surface, rgba(255,255,255,0.04)); color: var(--ink, inherit);
-  border-radius:999px; padding:4px 10px; font-size:var(--fs-overline); font-weight:600; cursor:pointer;
+  /* F-SV08 (saved-css, 2026-09-23): caption and hook chips are selectable
+     values a finger has to hit on a wrapped row; 11px text in a ~24px pill
+     failed both the readable floor and the target floor. */
+  border-radius:999px; padding:6px 12px; font-size:var(--fs-secondary); font-weight:600; cursor:pointer;
+  min-height:32px; display:inline-flex; align-items:center;
 }
 .ce-cap-chip:hover, .ce-hook-chip:hover { border-color: var(--accent); }
 .ce-cap-chip.is-active, .ce-hook-chip.is-active { background: var(--accent); border-color: var(--accent); color:#fff; }

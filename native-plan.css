@@ -55,9 +55,36 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
 .ce-plan-empty{grid-column:1/-1;min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1px dashed var(--card-border);border-radius:18px;color:var(--muted);text-align:center}
 /* F-S15 (cloud/ce-ui): Plan's empty banner left a 182px dead band below it.
    Reclaim it by letting the banner breathe to a viewport-relative floor —
-   copy unchanged, the CTA just stops floating high on an empty board. */
-.ce-plan-empty-banner.ce-plan-empty{min-height:max(360px,60vh);min-height:max(360px,60dvh);padding:28px 24px}
-.ce-plan-empty strong{color:var(--ink);font-size:var(--fs-section)}.ce-plan-empty span{max-width:360px;font-size:var(--fs-secondary)}
+   copy unchanged, the CTA just stops floating high on an empty board.
+   F-PL01 (plan-css, 2026-09-23) SUPERSEDES that floor: it was measured at
+   1440x900 and solved the dead band by making the banner 540px tall
+   (max(360px,60dvh)) with its copy dead-centred, which then overshot on every
+   surface it also governs — measured 540px desk / 524px phone (402x874), pushing
+   the working Board (the thing the empty state is inviting you to use) to y=671
+   and y=791, below the fold on both. An empty state should be the size of its own
+   content, not a viewport: the min-height floor is gone and `max-width:620px`
+   keeps the measure readable on a wide shell. The one thing kept from F-S15 is
+   that the box must not collapse to a thin strip on a tall window (the 34px
+   block padding is what holds it open). Measured after: 207px desk / 204px phone,
+   Board at y=338 / y=471. */
+.ce-plan-empty-banner.ce-plan-empty{min-height:0;padding:34px 24px;max-width:620px;margin-inline:auto}
+/* F-PL02 (plan-css, 2026-09-23): `.ce-plan-empty strong`/`span` were the only
+   typographic owners of this banner's copy, and the markup overrides both with
+   inline styles. The real rule lives with its siblings further down this block
+   (see F-PL02) so there is one owner, not two. */
+/* F-PL03 (plan-css, 2026-09-23): the intro carried `padding-bottom:18px` PLUS a
+   1px border-bottom, and `.ce-staged-queue` opens its own 1px border-top 12px
+   below it — two hairlines and a 12px void stacked between one header and its
+   board. The intro's rule is the separator that matters (every other shell uses
+   the same pattern); drop its extra 6px of padding so the head sits on its rule
+   instead of floating above it. */
+.ce-plan-shell .ce-plan-intro{padding-bottom:12px}
+/* F-PL02 (plan-css, 2026-09-23): this is the durable type owner for every Plan
+   empty state. The banner's own copy is overridden by inline styles in the
+   markup, so these tokens only bind the variants that do NOT inline their
+   sizes (the search and empty-calendar panels); the line-heights here are what
+   give those two a readable block instead of a cramped one. */
+.ce-plan-empty strong{color:var(--ink);font-size:var(--fs-section);line-height:1.3}.ce-plan-empty span{max-width:400px;font-size:var(--fs-secondary);line-height:1.55}
 .ce-saved-design-grid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
 .ce-saved-design-card .ce-queue-footer{min-height:72px}
 .ce-staged-queue{margin-top:34px;padding-top:12px;border-top:1px solid var(--card-border)} /* Owner 2026-09-13: was padding-top:28px, which stacked on the intro's 12px margin-bottom and the board's own padding to leave ~58px of air between the "Plan & Queue" header row and the column heads. The border-top is the separator; it needs 12px under it, not 28. */
@@ -1057,8 +1084,11 @@ body.bright-theme .ce-launch-board-cadence {
 }
 /* 2026-09-06 audit: crimson-on-zero reads as a false alert — zeros go muted */
 .ce-launch-insight.is-zero strong {
-  color: var(--ink-3, var(--muted, #8b8b94));
-  opacity: .55;
+  /* F-02 (dashboards audit, 2026-09-23): opacity .55 put the zero numeral at
+     2.61:1 (dark) / 2.49:1 (bright). Keep the muted colour, remove the alpha —
+     a zero must recede, not disappear. */
+  color: var(--muted);
+  opacity: 1;
 }
 .ce-launch-insight span {
   display: block;
@@ -1379,4 +1409,73 @@ body.bright-theme .ce-launch-board-cadence {
   .ce-launch-insight strong { font-size: var(--fs-section); }
   .ce-launch-insight span { font-size: var(--fs-overline); letter-spacing: 0; }
   .ce-launch-empty-card { width: 100%; min-height: 170px; }
+}
+
+/* ---------------------------------------------------------------------------
+   F-PL04 (plan-css, 2026-09-23): the Plan header on a phone.
+   Measured at 402x874: `.ce-plan-intro` was 154px tall against 31px at 1440x900.
+   The action strip is one flex-wrap row, so the five controls broke into
+   "Schedule all ready" alone, then Mark all Ready / Fill week / Meta / Calendar,
+   then the Board-List toggle on a third line — three ragged rows that then had
+   to clear the fixed 55px topbar. Nothing was wrong with any individual control;
+   the row simply had no phone composition. Give the primary action its own full
+   width and let the four secondary controls share one row between them, so the
+   header is two deliberate rows instead of three accidental ones.
+   NOTE: this only re-flows the header. The 44px touch floors and the 13px type
+   floor for these controls live in ce-mobile.css and are untouched. */
+@media (max-width: 700px) {
+  .ce-plan-shell .ce-plan-intro > div { gap: 8px; }
+  /* Heading and the primary CTA share row one; the heading may shrink (no
+     `flex-basis:100%`, which pushed a third row and measured the header BACK UP
+     to 192px), and the CTA takes the rest of the line. */
+  .ce-plan-shell .ce-plan-heading { flex: 0 1 auto; }
+  .ce-plan-shell #plan-schedule-all-ready-btn { flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; }
+  .ce-plan-shell #plan-select-all-ready-btn { flex: 1 1 auto; }
+  .ce-plan-shell .plan-view-toggle { margin-left: auto; }
+  /* The summary pills are a right-aligned desktop rail ("staged / ready / on
+     calendar / exported"). On a 326px column, right-alignment leaves them
+     hugging the right edge under a full-width CTA; they are a left-reading
+     ledger here. */
+  .ce-plan-shell .ce-plan-summary { justify-content: flex-start; max-width: 100%; }
+}
+
+/* F-PL05 (plan-css, 2026-09-23): the empty Board.
+   When nothing is staged the panel renders the dashed empty banner AND a board
+   containing a single empty "Inbox" column (measured: 1 column, 217px at desk /
+   80px on phone, every day column collapsed to zero). The banner already names
+   the cause and offers the two actions, so a second empty container below it is
+   duplicated chrome that pushes nothing useful. Attribute the board honestly
+   instead of hiding it: a board with no pieces is a drop target, so it keeps a
+   real (if short) dashed drop rail rather than disappearing — that preserves the
+   drag-to-a-day path the Inbox column is the entry point for. This is a
+   height/skin change on an existing element, not a display:none removal. */
+.ce-kanban-board.is-empty {
+  min-height: 132px;
+  align-items: stretch;
+  padding: 10px 4px 14px;
+  border: 1px dashed var(--card-border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card) 40%, transparent);
+}
+.ce-kanban-board.is-empty .ce-kanban-col {
+  background: transparent;
+  border-color: transparent;
+}
+.ce-kanban-board.is-empty .ce-kanban-col-cards { min-height: 0; }
+/* F-PL06 (plan-css, 2026-09-23): the empty column's placeholder nests a SECOND
+   dashed box inside the now-dashed board — the template ships it as
+   style="border:1px dashed var(--border); min-height:86px; font-size:var(--fs-title)"
+   (index.html:20353), so one dashed boundary became two, and the 20px display
+   `+` read as a headline for a drop hint. An inline declaration beats a class
+   rule, so !important is the only lever that reaches it from the stylesheet
+   (same precedent as the .kanban-time-select note above); the alternative is a
+   template edit, which is a markup change and stays in the report. Scope it to
+   the empty board only so the populated-column placeholder keeps its authored
+   skin. */
+.ce-kanban-board.is-empty .ce-kanban-col-empty {
+  border: 0 !important;
+  min-height: 0 !important;
+  padding: 10px 14px 12px !important;
+  font-size: var(--fs-secondary) !important;
+  opacity: 1 !important;
 }

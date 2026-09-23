@@ -17,6 +17,238 @@
 
   var LONG_PRESS_MS = 430;
 
+  /* ── F-TE01 · the touch-edit session, and its ONE teardown ────────────────
+     Every fix below hangs off this state. The layer had no teardown at all:
+     a long-press armed `contenteditable="true"`, marked the node
+     `.ce-canvas-editing-active` and left it focused, and NOTHING in this file
+     owned the way out. index.html's tab handlers, the back button, the drawer,
+     the Escape key and the studio close each had their own idea of what
+     "leave this screen" means, so a mid-edit tab switch stranded all of it.
+     `outsideTap` is registered LAZILY on the entry into a real edit (not at
+     load), which is the whole reason this is idempotent: there is exactly one
+     live listener per edit session, and teardown() always removes it. */
+  var session = { el: null, outsideTap: null };
+  var listeners = [];
+  /* Observe targets bound by THIS layer, recorded at registration, so teardown
+     never has to guess the instrument panel's selector from the inside. */
+  var observerTargets = [];
+  var observers = [];
+  var armSweepTimer = 0;
+  var dockEnsureTimer = 0;
+
+  /* The ONE resolution of "which stage may a touch edit attach to", shared by
+     the arming pass and the teardown so the two can never look at different
+     elements. Deliberately NOT a fallback to #studio: see the note on
+     armTouchEditing below.
+
+     F-TE01 (touch-edit, 2026-09-23): scope is load-bearing, and a bare
+     `document.querySelector` gets it WRONG. The library and the filmstrip render
+     30+ `.ce-poem-stage` preview nodes, so the first document-wide match is a
+     thumbnail — arming it would put `touch-action:none` on a preview card and
+     write the long-press into `state.currentSlideIdx` (the selected slide, not
+     the thumbnail's slide), which is the exact bug the note below describes.
+     Resolve from the LIVE STUDIO ROOT down, and only accept a stage that
+     actually contains the editable the caller is asking about. */
+  function activeTouchStage(root, el) {
+    var scope = root || document.getElementById('studio') || document;
+    var stages = scope.querySelectorAll('#ce-real-stage, .ce-carousel-slide-stage, .ce-postcore-stage, .ce-poem-stage, .ce-studio-post-frame, #active-studio-canvas');
+    if (!stages.length) return null;
+    if (!el) return stages[0];
+    for (var i = 0; i < stages.length; i++) {
+      if (stages[i].contains(el)) return stages[i];
+    }
+    return null;
+  }
+
+  /* A shared 'is this ours' test for an outside tap: the element, its grip, the
+     studio's own edit affordances (drag handle / block grip) and the draggable
+     boxes all count as inside. Kept as one predicate so the dismiss handler and
+     the teardown can never disagree about what a tap-outside is. */
+  function touchEditInside(el, t) {
+    if (!el || !t) return false;
+    if (el === t || (el.contains && el.contains(t))) return true;
+    return !!(t.closest && t.closest('.ce-block-drag-grip, .ce-drag-handle-bar, .ce-draggable-box'));
+  }
+
+  /* F-TE01 (touch-edit, 2026-09-23): the reasons that genuinely DROP an edit.
+     'outside' is deliberately NOT one of them — an outside tap is how the blur
+     commits on a phone, so it takes the save path, not the warning path. */
+  var DROPPING_REASONS = { tab: 1, unmount: 1, close: 1, 'losing-text': 1 };
+
+  /* F-TE01 (touch-edit, 2026-09-23): the honest notice. An abandoned edit is a
+     LOSS, and the layer used to lose it in total silence — the node was left
+     dirty-looking in the DOM and the record was never written, so the canvas
+     showed text a reload would not bring back. The caller says WHY (`reason`),
+     this turns that into one sentence naming what happened and what is left.
+     A teardown with nothing typed says nothing, because nothing was lost. */
+  function notifyEditDrop(el, reason, changed) {
+    if (!changed) return;
+    if (!window.showAppToast) return;
+    if (reason === 'tab') {
+      window.showAppToast('Edit discarded — you left the Studio before saving it');
+    } else if (reason === 'losing-text') {
+      /* The 'input' listener could not be attached, so the 500ms live-save was
+         never armed: the text exists only in the DOM node. Discarding is the
+         only honest option, and it has to be said out loud. */
+      window.showAppToast('Edit discarded — the canvas was replaced before it could be saved');
+    } else {
+      window.showAppToast('Edit kept in the canvas only — it was not saved before you left');
+    }
+  }
+
+  /* ── F-TE01 · window.ceTouchEdit.teardown(reason) ────────────────────────
+     Safe to call at ANY time, from anywhere, any number of times. It is a
+     no-op when no edit is live (so a caller never has to test first), and it
+     is the only place that releases what a touch edit acquires:
+       1. the pending long-press timer (an in-flight press must not arm a
+          contenteditable on a screen the user has already left),
+       2. the live contenteditable + .ce-canvas-editing-active class + focus,
+       3. the lazily-registered outside-tap dismiss listener,
+       4. the armed/dirty bookkeeping on every node of the ACTIVE stage.
+     `reason` is 'tab' | 'close' | 'unmount' | anything else — it only decides
+     the wording of the notice, never whether the release happens.
+
+     WHAT IT INTENTIONALLY DOES NOT DO: roll back text the user already typed.
+     The commit path (scheduleCommit → el.__cePendingText) exists precisely so a
+     canvas re-render cannot eat keystrokes, so tearing that down would be the
+     data loss this function exists to prevent. If an edit is still dirty the
+     drop is REPORTED (notifyEditDrop) rather than silently swallowed — but the
+     'input' handler is a listener on the node itself and therefore empty at
+     this point; re-reading innerText here would write DOM text back over a
+     record that closeStudio is about to save (the poison slideHTML warns about
+     at index.html:13054). Honest notice over a silent overwrite. */
+  function ceTouchEditTeardown(reason) {
+    var el = session.el;
+    if (el) {
+      if (el.__ceTouchLpTimer) { clearTimeout(el.__ceTouchLpTimer); el.__ceTouchLpTimer = 0; }
+      if (el.__ceTouchCommitTimer) { clearTimeout(el.__ceTouchCommitTimer); el.__ceTouchCommitTimer = 0; }
+      var wasEditing = el.getAttribute('contenteditable') === 'true';
+      /* F-TE01 (touch-edit, 2026-09-23): "changed" is read from the live text,
+         NOT from __cePendingText. A keydown Escape commits immediately and
+         CLEARS the pending payload before blur ever runs, so a pending-based
+         test read every Escape as "nothing was typed" and stayed silent about a
+         real edit that was about to be thrown away. */
+      var startText = String(el.__ceTouchStartText || '');
+      var liveText = '';
+      try { if (el.isConnected) liveText = String(el.innerText || el.textContent || '').trim(); } catch (_lt) { liveText = ''; }
+      var changed = wasEditing && startText !== liveText;
+      /* Blur BEFORE releasing the caret: the 'blur' listener is what commits the
+         500ms pending payload, and it is also what lets the OUTSIDE-TAP path
+         classify this as an ordinary commit instead of a lost edit. Removing
+         `contenteditable` first (the old order) meant blur fired against a node
+         that was no longer editable, so `commit()` bailed on its recovery
+         branch and a dismissed edit produced no save at all. */
+      if (wasEditing) {
+        try { el.blur(); } catch (_bl) {}
+      }
+      el.removeAttribute('contenteditable');
+      el.classList.remove('ce-canvas-editing-active');
+      if (wasEditing && document.activeElement === el) {
+        /* Blur alone leaves WebKit's caret session alive on some iOS builds, so
+           the on-screen keyboard outlives the edit; moving focus to the body is
+           what dismisses it. */
+        try { document.body && document.body.focus({ preventScroll: true }); } catch (_bf) {}
+      }
+      /* Only a reason that actually DROPS the edit earns a warning. An outside
+         tap is the normal way to finish on a phone: the blur above already
+         committed it, so warning there would be the layer crying wolf about a
+         save it just performed. */
+      if (wasEditing && DROPPING_REASONS[reason]) notifyEditDrop(el, reason, changed);
+    }
+    if (session.outsideTap) {
+      document.removeEventListener('pointerdown', session.outsideTap, true);
+      session.outsideTap = null;
+    }
+    session.el = null;
+    /* Release the bookkeeping on every node of the LIVE studio root. The arming
+       marker is what made this layer refuse to re-arm a node, so a stale marker
+       is how a node comes back from another tab as a touch-action:none box that
+       answers no gesture at all. Scope matters: the library renders 30+ stage
+       previews whose text nodes were never armed, and walking those from the
+       document would clear markers this layer never set. */
+    var scope = document.getElementById('studio') || document;
+    scope.querySelectorAll('[data-ce-block], .kickline[data-ce-edit], #studio-editable-text').forEach(function (n) {
+      n.__ceTouchArmed = false;
+      n.__ceTouchDirty = false;
+      n.__cePendingText = null;
+      n.__ceTouchStartText = '';
+      if (n.__ceTouchLpTimer) { clearTimeout(n.__ceTouchLpTimer); n.__ceTouchLpTimer = 0; }
+      if (n.__ceTouchCommitTimer) { clearTimeout(n.__ceTouchCommitTimer); n.__ceTouchCommitTimer = 0; }
+    });
+    /* F-TE01 (touch-edit, 2026-09-23): the extension list. Everything this
+       layer installs outside its own closures — the sync-discovery pair, the
+       tools sheet's Escape/outside-tap pair, the tools observer — is recorded
+       at install time and released here, so a teardown really is "nothing of
+       mine is still attached". Observers are disconnected for the same reason:
+       one that outlives a teardown keeps scheduling sweeps that re-arm a stage
+       nothing is editing. */
+    for (var i = listeners.length - 1; i >= 0; i--) {
+      var L = listeners[i];
+      try { L.target.removeEventListener(L.type, L.fn, L.opts); } catch (_rl) {}
+    }
+    listeners.length = 0;
+    /* The tools-sheet IIFE is a separate closure and cannot see `listeners`, so
+       it hands its pair over through `window.ceTouchEdit.__ext`. Drain it here:
+       one teardown, one behaviour, no second copy of the removal logic. */
+    var ext = (window.ceTouchEdit && window.ceTouchEdit.__ext) || [];
+    for (var k = ext.length - 1; k >= 0; k--) {
+      var E = ext[k];
+      try {
+        if (E.observer) E.observer.disconnect();
+        else E.target.removeEventListener(E.type, E.fn, E.opts);
+      } catch (_re) {}
+    }
+    if (ext.length) ext.length = 0;
+    /* F-TE01 (touch-edit, 2026-09-23): the tools-sheet observer is the one
+       extension that is SINGLETON PER SESSION rather than per install, because
+       `window.__CE_DOCK_TOOLS_OBSERVER__` is the flag arm() uses to avoid
+       stacking a second one. Disconnecting it without clearing that flag makes
+       the next `arm()` a no-op forever: the dock sweep then never runs again,
+       which is exactly how the first open kept its toggle wired and every open
+       after it did not. Clear the flag so the next route cycle re-arms. */
+    if (window.__CE_DOCK_TOOLS_OBSERVER__ && window.__CE_DOCK_TOOLS_OBS__) {
+      window.__CE_DOCK_TOOLS_OBSERVER__ = false;
+      window.__CE_DOCK_TOOLS_OBS__ = null;
+    }
+    for (var j = observers.length - 1; j >= 0; j--) {
+      try { observers[j].disconnect(); } catch (_ro) {}
+    }
+    observers.length = 0;
+    observerTargets.length = 0;
+    /* F-TE01 (touch-edit, 2026-09-23): the document observer above is the
+       layer's ONLY re-arm signal, so `armSweep` has to be re-armed by hand or
+       teardown permanently disables the feature it is meant to clean up after.
+       The observer is rebuilt here rather than left running, because a
+       teardown that leaves the render signal attached is not a teardown — and
+       a teardown that removes it and does not put it back is how the SECOND
+       studio open came back with `__ceTouchArmed` undefined and a poem text box
+       that answered no long-press at all. */
+    armBaseObserver();
+    if (armSweepTimer) { clearTimeout(armSweepTimer); armSweepTimer = 0; }
+    if (dockEnsureTimer) { clearTimeout(dockEnsureTimer); dockEnsureTimer = 0; }
+    return true;
+  }
+  window.ceTouchEdit = window.ceTouchEdit || {};
+  window.ceTouchEdit.teardown = ceTouchEditTeardown;
+  window.__CE_TEARDOWN_TOUCH_EDIT__ = ceTouchEditTeardown;
+
+  /* The one-outside-tap dismiss. Registered on ENTRY into an edit and removed
+     by teardown(), so it is never stacked: before this, `blur` was the only way
+     out on the phone and nothing said where "outside" is, so an edit survived
+     until the user happened to tap a control that stole focus. Capture phase,
+     so the tap reaches the editor before any studio handler moves the slide.
+     An INSIDE tap is left completely alone — it is what places the caret. */
+  function armOutsideTap() {
+    if (session.outsideTap) return;
+    session.outsideTap = function (e) {
+      var el = session.el;
+      if (!el) { ceTouchEditTeardown('outside'); return; }
+      if (touchEditInside(el, e.target)) return;
+      ceTouchEditTeardown('outside');
+    };
+    document.addEventListener('pointerdown', session.outsideTap, true);
+  }
+
   function bridge() {
     return window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
   }
@@ -28,23 +260,32 @@
        text blocks then received touch-action:none and a long-press wrote into
        state.currentSlideIdx (the selected slide, not the thumbnail's slide).
        A missing stage is safer than arming a preview node. */
-    var stage = container.querySelector('#ce-real-stage, .ce-carousel-slide-stage, .ce-postcore-stage, .ce-poem-stage, .ce-studio-post-frame, #active-studio-canvas');
+    var stage = activeTouchStage(container);
     if (!stage) return;
     var editables = stage.querySelectorAll('[data-ce-block="content"], [data-ce-block="hook"], [data-ce-block="body"], .kickline[data-ce-edit], #studio-editable-text');
     editables.forEach(function (el) {
+      /* Belt and braces: an authored stage can nest previews of its own, so
+         re-check containment against the stage that will actually be edited. */
+      if (!stage.contains(el)) return;
       if (el.__ceTouchArmed) return;
       el.__ceTouchArmed = true;
       el.style.touchAction = 'none';
 
-      var lpTimer = 0, lpFired = false, downPt = null;
+      var lpFired = false, downPt = null;
 
+      /* F-TE01 (touch-edit, 2026-09-23): the long-press timer lives on the NODE
+         (`el.__ceTouchLpTimer`), not in a closure the node's marker cannot
+         reach. The closure copy was unreachable from outside, so a press still
+         counting down when the user switched tabs had no way to be cancelled
+         and armed a contenteditable on a screen the user had already left. */
       el.addEventListener('pointerdown', function (e) {
         if (el.getAttribute('contenteditable') === 'true') return;
         if (e.pointerType === 'mouse') return; // desktop keeps dblclick
         lpFired = false;
         downPt = { x: e.clientX, y: e.clientY };
-        clearTimeout(lpTimer);
-        lpTimer = setTimeout(function () {
+        clearTimeout(el.__ceTouchLpTimer);
+        el.__ceTouchLpTimer = setTimeout(function () {
+          el.__ceTouchLpTimer = 0;
           lpFired = true;
           try { navigator.vibrate && navigator.vibrate(12); } catch (_) {}
           var before = window.studioSnapshot ? window.studioSnapshot() : null;
@@ -58,26 +299,33 @@
             if (range && sel) { sel.removeAllRanges(); sel.addRange(range); }
           } catch (_) {}
           el.__ceTouchBefore = before;
+          el.__ceTouchStartText = String(el.innerText || el.textContent || '').trim();
+          /* F-TE01 (touch-edit, 2026-09-23): the entry marker the teardown
+             reads, set exactly once per edit session, then the one outside-tap
+             dismiss is armed. */
+          session.el = el;
+          armOutsideTap();
         }, LONG_PRESS_MS);
       });
 
       var cancelLP = function (e) {
-        if (lpTimer && downPt && e.clientX != null &&
+        if (el.__ceTouchLpTimer && downPt && e.clientX != null &&
             Math.abs(e.clientX - downPt.x) + Math.abs(e.clientY - downPt.y) > 12) {
-          clearTimeout(lpTimer); lpTimer = 0;
+          clearTimeout(el.__ceTouchLpTimer); el.__ceTouchLpTimer = 0;
         }
       };
       el.addEventListener('pointermove', cancelLP);
-      el.addEventListener('pointercancel', function () { clearTimeout(lpTimer); lpTimer = 0; });
+      el.addEventListener('pointercancel', function () { clearTimeout(el.__ceTouchLpTimer); el.__ceTouchLpTimer = 0; });
 
       el.addEventListener('pointerup', function () {
-        clearTimeout(lpTimer); lpTimer = 0;
+        clearTimeout(el.__ceTouchLpTimer); el.__ceTouchLpTimer = 0;
       });
 
       // Commit on input (debounced) — the canvas can re-render mid-edit and
       // replace this node, which kills blur; live-save is also Canva-style.
       var commitTimer = 0;
       var commit = function () {
+        el.__ceTouchCommitTimer = 0;
         if (window.__CE_TOUCH_TRACE__) console.log('[ce-touch] commit fire', { attr: el.getAttribute('contenteditable'), pending: el.__cePendingText != null });
         commitTimer = 0;
         if (el.getAttribute('contenteditable') !== 'true') {
@@ -103,9 +351,11 @@
       };
       var scheduleCommit = function () {
         if (el.getAttribute('contenteditable') !== 'true') return;
+        el.__ceTouchDirty = true;
         el.__cePendingText = (el.innerText || '').trim();
         clearTimeout(commitTimer);
         commitTimer = setTimeout(commit, 500);
+        el.__ceTouchCommitTimer = commitTimer;
       };
       el.addEventListener('input', scheduleCommit);
       el.addEventListener('blur', function () {
@@ -177,7 +427,16 @@
          wins on a healthy boot, short enough that a broken boot still
          reveals the app. */
       setTimeout(function () { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); }, 6000);
-      window.addEventListener('load', function () { setTimeout(function () { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); }, 3500); });
+      /* F-TE01 (touch-edit, 2026-09-23): the backstop only exists to catch a
+         boot whose data-driven lift never ran. Leaving it attached means it
+         fires on a `load` that can happen long after boot — i.e. it re-lifts a
+         veil that has nothing to do with it. Self-removing, and recorded in the
+         extension list so nothing this layer installs is invisible to it. */
+      var veilLoadBackstop = function () {
+        setTimeout(function () { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); }, 3500);
+        window.removeEventListener('load', veilLoadBackstop);
+      };
+      window.addEventListener('load', veilLoadBackstop);
     }
   } catch (_) {}
   /* iOS-style edge gesture (owner 2026-09-11: "I want to move back… put my
@@ -418,8 +677,19 @@
     findSyncEndpoint(function (base) { if (base) window.__CE_SYNC_ENDPOINT__ = base; });
   }
   window.__CE_ARM_SYNC__ = armSyncDiscovery;
-  document.addEventListener('pointerdown', armSyncDiscovery, { once: true, passive: true });
-  document.addEventListener('keydown', armSyncDiscovery, { once: true, passive: true });
+  /* F-TE01 (touch-edit, 2026-09-23): `{ once: true, passive: true }` on a
+     listener registry that is never torn down. `once` removes the listener
+     after the first invocation, but a listener that has NOT yet fired keeps
+     its slot for the life of the page — and armSyncDiscovery is made
+     idempotent by its own flag below, so the `once` was never load-bearing.
+     Recorded through on() so the teardown has one list to walk. */
+  var on = function (target, type, fn, opts) {
+    if (!target || !target.addEventListener) return;
+    target.addEventListener(type, fn, opts);
+    listeners.push({ target: target, type: type, fn: fn, opts: opts });
+  };
+  on(document, 'pointerdown', armSyncDiscovery, { passive: true });
+  on(document, 'keydown', armSyncDiscovery, { passive: true });
   // A stale cached endpoint is still revalidated lazily, on the same trigger.
   // Owner sync is different from public-visitor discovery: when this device
   // already holds the write key and an endpoint cache, pull once on boot so
@@ -1365,13 +1635,34 @@
     armScheduleButton();
     armPackLabel();
   }
-  var armTimer = 0;
+  /* F-TE01 (touch-edit, 2026-09-23): `armTimer`/`dockEnsureTimer` and the two
+     MutationObservers are now declared ONCE at the top of the IIFE and stored,
+     because an arm()/armSweep() pass that ran twice used to install a SECOND
+     live observer per call — each with its own debounce timer, each scheduling
+     its own sweep. Idempotency here is the load-bearing part: the arming pass
+     is what sets `__ceTouchArmed`, and duplicate observers made "attached
+     once" impossible to reason about from the outside. */
   var scheduleArmSweep = function () {
-    if (armTimer) return;
-    armTimer = setTimeout(function () { armTimer = 0; armSweep(); }, 120);
+    if (armSweepTimer) return;
+    armSweepTimer = setTimeout(function () { armSweepTimer = 0; armSweep(); }, 240);
   };
-  var mo = new MutationObserver(scheduleArmSweep);
-  mo.observe(document.documentElement, { childList: true, subtree: true });
+  /* Extracted so the teardown can rebuild it: see the note in
+     ceTouchEditTeardown. Declared as a function so it is hoisted above the
+     teardown that calls it. */
+  function armBaseObserver() {
+    if (typeof MutationObserver !== 'function') return;
+    var mo = new MutationObserver(scheduleArmSweep);
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+    observers.push(mo);
+    observerTargets.push(document.documentElement);
+  }
+  armBaseObserver();
+  /* `tick` polls for the first real shelf face so the veil can lift. It used to
+     be `setInterval(armSweep, 2500)` — a permanent re-entry point that re-armed
+     whatever node happened to be in the stage 2.5s later. That is the sweep's
+     own bug class: re-entry must be triggered by a RENDER, and the observer
+     above is the render signal. The poll stops as soon as the veil is lifted,
+     which is the only thing it was ever for. */
   var veilPoll = setInterval(function () {
     /* A7-P1-6: skeletons are .pure-card.deck-card too (aria-hidden) — the
        poll must match REAL faces only, or the veil lifts over spinners. */
@@ -1382,7 +1673,6 @@
   }, 200);
   setTimeout(function () { clearInterval(veilPoll); }, 6000);
   setTimeout(armSweep, 800);
-  setInterval(armSweep, 2500); // safety net for replaced nodes
 })();
 /* ==========================================================================
    "Download for phone" on a POEM (owner 2026-09-11)
@@ -1822,6 +2112,21 @@
 // portals the whole inspector to body for the open state and restores it.
 (function () {
   function ensureDockTools() {
+    /* F-TE01 (touch-edit, 2026-09-23): a route switch (tab button, back button)
+       destroys or empties the editor while the inspector is portaled to <body>.
+       The dock's own reset() already handles "the editor is still here", but
+       nothing ran when the editor was GONE — the detached 50vh fixed panel then
+       hung over whatever tab the user landed on. Reap it by the same rule that
+       defines a live dock: its toggle must still point at a CONNECTED editor. */
+    Array.prototype.forEach.call(document.querySelectorAll('body > aside.ce-studio-inspector.ce-tools-sheet'), function (d) {
+      var tg = d.querySelector('#ce-tools-toggle');
+      if (tg && tg.__ceToolsEditor && tg.__ceToolsEditor.isConnected) return;
+      var editors = document.querySelectorAll('.ce-carousel-editor');
+      for (var i = 0; i < editors.length; i++) {
+        if (editors[i].contains(d)) return;
+      }
+      try { d.remove(); } catch (_orph) {}
+    });
     /* P0 W3-P2 (2026-09-19): any in-sheet action that re-renders the studio
        canvas (design pick, font tool, move/duplicate/delete slide, typo slider,
        add slide) swaps #studio-canvas.innerHTML. That swap builds a FRESH
@@ -1956,6 +2261,14 @@
          canvas while tools are open. 62vh left the hero a ~180px sliver on a 874px
          phone; 50vh keeps ~430px of editor. The grid scrolls inside its own viewport.
 
+         F-TE01 (touch-edit, 2026-09-23): and it must not eat the whole screen
+         either. A 50vh sheet whose band holds a textarea, the design grid and the
+         caption footer is taller than 50vh of CONTENT, so the sheet itself has to
+         be scrollable or its lower rows are simply unreachable on a 402x874 phone.
+         `overscroll-behavior: contain` keeps that scroll from chaining into the
+         library underneath, and `touch-action: manipulation` stops the 300ms
+         double-tap-zoom delay on every control inside the sheet.
+
          MO-SHEET (fix/mobile-overhaul, 2026-09-21): the sheet is anchored `bottom: 0`
          and 50vh tall, so it covered the SHIPBAR — the in-flow band at the bottom of
          the studio column that owns the primary "Send to Plan" control. MEASURED
@@ -1979,7 +2292,11 @@
       dock.style.setProperty('max-height', 'min(50vh, 460px)', 'important');
       dock.style.setProperty('min-height', '180px', 'important');
       dock.style.setProperty('display', 'block', 'important');
-      dock.style.setProperty('overflow', 'hidden', 'important');
+      dock.style.setProperty('overflow-y', 'auto', 'important');
+      dock.style.setProperty('overflow-x', 'hidden', 'important');
+      dock.style.setProperty('overscroll-behavior', 'contain', 'important');
+      dock.style.setProperty('touch-action', 'manipulation', 'important');
+      dock.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
       /* MO-LADDER (fix/mobile-overhaul, 2026-09-21): this was the literal 500 while the
          ladder already defines --z-sheet: 500 for exactly this element. A second copy of
          the number is how the two drift apart, so read the rung. */
@@ -2079,6 +2396,31 @@
     t.__ceToolsReset = reset;
     t.__ceToolsCaptureHome = captureHome;
     window.__CE_RESET_PHONE_TOOLS__ = reset;
+    /* F-TE01 (touch-edit, 2026-09-23): Escape, outside-tap and the route
+       boundary. The sheet is portaled to <body> at z-sheet (500) and covered
+       the slide and shipbar at 50vh; the ONLY way out was tapping the 44px
+       "Close tools" pill. Escape is the keyboard parity the rest of the app
+       already honours, the outside tap is the phone's natural one, and the
+       route boundary closes it when the studio itself is being left. All three
+       call reset(), which is the function that restores the portal home — so
+       they cannot leave an orphaned fixed panel behind. */
+    if (!t.__ceToolsDismissBound) {
+      t.__ceToolsDismissBound = true;
+      var dismissOnOutside = function (e) {
+        if (!portaled || !editor.classList.contains('ce-tools-open')) return;
+        var tgt = e.target;
+        if (tgt && (dock.contains(tgt) || t.contains(tgt) || (tgt.closest && tgt.closest('.ce-tools-toggle')))) return;
+        reset();
+      };
+      document.addEventListener('pointerdown', dismissOnOutside, true);
+      /* F-TE01 (touch-edit, 2026-09-23): this sheet lives in its own IIFE, so the
+         teardown's listener list is not in scope — pass the extension through
+         the one shared teardown the layer publishes. The pair is therefore
+         released by `window.ceTouchEdit.teardown()` exactly like everything the
+         other IIFE installs. */
+      var sheetExt = window.ceTouchEdit.__ext || (window.ceTouchEdit.__ext = []);
+      sheetExt.push({ target: document, type: 'pointerdown', fn: dismissOnOutside, opts: true });
+    }
     t.style.setProperty('position', 'static', 'important');
     t.style.setProperty('display', 'flex', 'important');
     t.style.setProperty('align-items', 'center', 'important');
@@ -2087,7 +2429,7 @@
     t.style.setProperty('height', '44px', 'important');
     t.style.setProperty('pointer-events', 'auto', 'important');
   }
-  var dockEnsureTimer = 0;
+  var dockEnsureTimer = 0;   /* declared once at the top of the IIFE */
   var scheduleDockEnsure = function () {
     if (dockEnsureTimer) return;
     dockEnsureTimer = setTimeout(function () {
@@ -2096,14 +2438,46 @@
     }, 80);
   };
   function arm() {
-    if (window.__CE_DOCK_TOOLS_OBSERVER__) {
-      ensureDockTools();
-      return;
+    /* F-TE01 (touch-edit, 2026-09-23): Escape is registered at the ARM level,
+       not inside ensureDockTools(). The dock does not exist on a poem route, so
+       a sheet-scoped Escape listener could never be installed there, and the
+       previous location meant the key the rest of the app already treats as
+       "dismiss" was dead on exactly the surfaces it matters most. Idempotent by
+       the same flag pattern as the observer below. */
+    if (!window.__CE_TOOLS_ESC_BOUND__) {
+      window.__CE_TOOLS_ESC_BOUND__ = true;
+      var escFn = function (e) {
+        if (e.key !== 'Escape') return;
+        if (typeof window.__CE_RESET_PHONE_TOOLS__ !== 'function') return;
+        if (!document.querySelector('.ce-carousel-editor.ce-tools-open')) return;
+        e.preventDefault();
+        try { window.__CE_RESET_PHONE_TOOLS__(); } catch (_esc) {}
+      };
+      document.addEventListener('keydown', escFn, true);
+      (window.ceTouchEdit.__ext || (window.ceTouchEdit.__ext = []))
+        .push({ target: document, type: 'keydown', fn: escFn, opts: true });
     }
-    window.__CE_DOCK_TOOLS_OBSERVER__ = true;
+    /* The observer runs the dock sweep unconditionally — it is created before
+       the dock is resolved because `ensureDockTools()` returns early whenever
+       the surface has no `.ce-studio-inspector` at all, and poems have none.
+       Installing the render signal only after a successful dock resolution
+       meant a poem-only route never got one, so nothing re-armed after the
+       studio was rebuilt. The observer only schedules a debounced sweep; the
+       sweep is what decides whether there is a dock to wire. */
+    if (!window.__CE_DOCK_TOOLS_OBSERVER__) {
+      window.__CE_DOCK_TOOLS_OBSERVER__ = true;
+      var target = document.body || document.documentElement;
+      if (target && typeof MutationObserver === 'function') {
+        var ob = new MutationObserver(scheduleDockEnsure);
+        ob.observe(target, { childList: true, subtree: true });
+        (window.ceTouchEdit.__ext || (window.ceTouchEdit.__ext = []))
+          .push({ observer: ob });
+        /* Remember the LIVE observer so a later teardown disconnects exactly
+           this one, and only this one. */
+        window.__CE_DOCK_TOOLS_OBS__ = ob;
+      }
+    }
     ensureDockTools();
-    var target = document.body || document.documentElement;
-    if (target) new MutationObserver(scheduleDockEnsure).observe(target, { childList: true, subtree: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm); else arm();
 })();

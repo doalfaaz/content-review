@@ -3,360 +3,345 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Aham Brahmasmi 2.0 · recorded course</title>
-<meta name="description" content="A recorded course on the gap between knowing and doing. ₹1,999 once, lifetime access, 14-day refund, no deadline.">
+<title>Aham Brahmasmi 2.0 · a letter with the working shown</title>
+<meta name="description" content="A waitlist-first launch. The first 50 seats are ₹999, then ₹1,499, then ₹1,999 standing. 15+ hours, 50+ lessons, a companion book. Joining the waitlist is free and nothing is charged.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Aham Brahmasmi 2.0 · recorded course">
-<meta property="og:description" content="A recorded course on the gap between knowing and doing. ₹1,999 once, lifetime access, 14-day refund, no deadline.">
+<meta property="og:title" content="Aham Brahmasmi 2.0 · a letter with the working shown">
+<meta property="og:description" content="A waitlist-first launch. The first 50 seats are ₹999, then ₹1,499, then ₹1,999 standing. 15+ hours, 50+ lessons, a companion book. Joining the waitlist is free and nothing is charged.">
 <meta property="og:image" content="https://doalfaaz.github.io/content-review/apple-touch-icon.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://doalfaaz.github.io/content-review/apple-touch-icon.png">
-<meta name="theme-color" content="#09090c">
+<meta name="theme-color" content="#f4efe4">
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
 <style>
+/* Self-hosted faces from ./fonts (same files index.html uses) so the page
+   works offline. Doalfaaz Slab is the variable display face; Poppins covers
+   small caps and meta; Mukta covers the Devanagari block and the ₹ sign. */
+@font-face{font-family:'Doalfaaz Slab';font-style:normal;font-weight:400 900;font-display:swap;src:url('./fonts/slab-var.woff2') format('woff2');}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:400;font-display:swap;src:url('./fonts/poppins-400.woff2') format('woff2');}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:500;font-display:swap;src:url('./fonts/poppins-500.woff2') format('woff2');}
+@font-face{font-family:'Poppins';font-style:normal;font-weight:600;font-display:swap;src:url('./fonts/poppins-600.woff2') format('woff2');}
+@font-face{font-family:'Mukta';font-style:normal;font-weight:300 700;font-display:swap;src:url('./fonts/mukta-300-deva.woff2') format('woff2');unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20A8,U+20B9,U+20F0,U+25CC,U+A830-A839,U+A8E0-A8FF,U+11B00-11B09;}
+
 :root {
-  --bg: #09090c; --bg2: #0f1014; --bg3: #161619; --bg4: #1c1c21;
-  --surface: #18181d; --surface2: #1e1e24;
-  --gold: #c8a96e; --gold-dim: #a08550; --gold-pale: #e8d5a8;
-  --gold-glow: rgba(200,169,110,0.10); --gold-glow2: rgba(200,169,110,0.18);
-  --green: #4ade80; --green-bg: rgba(74,222,128,0.08);
-  --text: #ede9e2; --text2: #a8a098; --text3: #918a82;
-  --border: rgba(255,255,255,0.06); --border-gold: rgba(200,169,110,0.22);
-  --radius: 8px; --radius-lg: 12px;
-  --sans: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  --paper: #f4efe4;
+  --ink: #231f18; --ink2: #57503f; --ink3: #6f6855;
+  --madder: #8e3b26; --madder-deep: #74301f;
+  --green: #2f6b41;
+  --rule: rgba(35,31,24,0.18); --rule-strong: rgba(35,31,24,0.55);
+  --serif: 'Doalfaaz Slab', 'Mukta', Georgia, 'Times New Roman', serif;
+  --sans: 'Poppins', 'Mukta', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* 15px floor for phone body copy, per the mobile spec. */
+  /* Eyebrows/meta caps stay 12px (tracked uppercase labels, not running copy).
+     Every sentence-level small style uses --fs-small at 15px. */
+  --fs-micro: 0.75rem;
+  --fs-small: 0.9375rem;
+  --fs-body: 1rem;
+  --fs-lead: 1.1875rem;
+  --fs-h2: clamp(1.375rem, 1.05rem + 1.7vw, 1.75rem);
+  --fs-h1: clamp(2.25rem, 1.5rem + 4.4vw, 3.5rem);
+  --fs-price: clamp(2.5rem, 1.7rem + 4.5vw, 3.75rem);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
 body {
-  background: var(--bg); color: var(--text);
-  font-family: var(--sans); font-size: 15px; font-weight: 300;
-  line-height: 1.7; min-height: 100vh; overflow-x: hidden;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--serif); font-size: var(--fs-body); font-weight: 400;
+  line-height: 1.7; min-height: 100svh; overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
-a { color: var(--gold); text-decoration: none; }
-.container { max-width: 680px; margin: 0 auto; padding: 0 24px; }
+a { color: var(--madder); }
+.wrap { max-width: 640px; margin: 0 auto; padding: 0 22px; }
 
-/* NAV */
-.nav {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(9,9,12,0.92); backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--border); height: 52px;
-  display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+/* MASTHEAD: a printed masthead, not an app bar. */
+.masthead { padding-top: 26px; }
+.masthead-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  font-family: var(--sans); font-size: var(--fs-micro); font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink2);
+  padding-bottom: 10px; border-bottom: 2px solid var(--ink);
 }
-.nav-brand { font-size: 0.7rem; font-weight: 500; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; }
-.nav-status {
-  font-size: 0.6rem; font-weight: 500; color: var(--green); letter-spacing: 0.1em;
-  text-transform: uppercase; padding: 2px 0 2px 12px; border-left: 1px solid rgba(74,222,128,0.35);
-  background: transparent;
+.masthead-sub {
+  font-family: var(--sans); font-size: var(--fs-micro); font-weight: 400;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3);
+  padding: 7px 0 0; border-bottom: 1px solid var(--ink);
 }
 
-/* HERO */
-.hero { padding: 22px 0 16px; text-align: center; }
-.hero-eyebrow {
-  display: inline-block; font-size: 0.62rem; font-weight: 600;
-  letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dim);
-  margin-bottom: 14px; padding: 0 0 9px; border-bottom: 1px solid var(--border-gold);
-  background: transparent;
+/* HERO: the honest fact first, the ask last. */
+.hero { padding: 46px 0 10px; }
+.hero-kicker {
+  font-family: var(--sans); font-size: var(--fs-micro); font-weight: 600;
+  letter-spacing: 0.24em; text-transform: uppercase; color: var(--madder);
+  margin-bottom: 20px;
 }
 .hero h1 {
-  font-size: clamp(2rem, 5vw, 3rem); font-weight: 300; letter-spacing: -0.02em;
-  line-height: 1.18; margin-bottom: 12px;
+  font-size: var(--fs-h1); font-weight: 600; letter-spacing: -0.01em;
+  line-height: 1.12; margin-bottom: 22px;
 }
-.hero h1 em { font-style: italic; color: var(--gold); }
-.hero-sub { font-size: 0.98rem; color: var(--text2); max-width: 500px; margin: 0 auto 12px; line-height: 1.5; }
-.hero-voice {
-  font-size: 0.86rem; color: var(--text2); max-width: 480px; margin: 0 auto;
-  font-style: italic; line-height: 1.55;
-}
-
-/* OFFER */
-.offer-section { padding: 18px 0; }
-.offer-card {
-  background: var(--surface); border: 1px solid var(--border-gold);
-  border-radius: var(--radius-lg); padding: 24px 26px; text-align: center;
-  position: relative; overflow: hidden;
-}
-.offer-card::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 0%, var(--gold-glow2) 0%, transparent 60%);
-  pointer-events: none;
-}
-.offer-label {
-  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.22em;
-  text-transform: uppercase; color: var(--gold-dim); margin-bottom: 10px;
-}
-.offer-facts { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 18px; position:relative; }
-.offer-facts span { color:var(--text2); font-size:.82rem; }
-.offer-price { position:relative; margin:4px 0 10px; font-size:clamp(2.1rem,7vw,3.2rem); line-height:1; color:var(--gold); font-weight:600; font-variant-numeric:tabular-nums; }
-.offer-note { position:relative; color:var(--text2); font-size:.83rem; margin-top:10px; }
-.offer-cta { position:relative; display:inline-flex; align-items:center; justify-content:center; min-height:50px; margin-top:14px; padding:0 28px; border-radius:6px; background:var(--gold); color:var(--bg); font-size:.86rem; font-weight:600; letter-spacing:.04em; box-shadow:0 4px 20px rgba(200,169,110,.24); }
-.offer-cta:focus-visible,.cta-main:focus-visible { outline:3px solid var(--gold-pale); outline-offset:3px; }
-@media (max-width: 560px) { .offer-cta { display:flex; width:100%; } }
-/* Small phones (320-360px): the hero stack plus a 24px-padded offer card pushed the CTA
-   to top=727px, i.e. BELOW a real 390x700 fold — measured live at 320x700 on
-   2026-09-18. Tighten the padding and the hero rhythm so the primary action stays
-   reachable without a scroll. The action must never be the thing that falls off. */
-@media (max-width: 360px) {
-  .offer-section { padding: 12px 0; }
-  .offer-card { padding: 18px 18px; }
-  .offer-price { margin: 2px 0 8px; }
-  .hero { padding-top: 4px; }
-  .hero-sub { margin-bottom: 9px; }
-  .hero-voice { font-size: 0.82rem; line-height: 1.45; }
-}
-/* Very short screens (<=600px tall, e.g. 320x568 SE): the hero stack alone is ~390px,
-   so the whole offer has to compress to keep the action above such a fold. The action
-   leads; supporting prose follows it rather than pushing it down. */
-@media (max-height: 600px) and (max-width: 400px) {
-  .hero { padding: 26px 0 20px; }
-  .hero h1 { font-size: clamp(1.7rem, 7.6vw, 2.1rem); margin-bottom: 8px; }
-  .hero-sub { font-size: 0.9rem; margin-bottom: 7px; }
-  .hero-voice { font-size: 0.78rem; line-height: 1.4; }
-  .offer-section { padding: 8px 0; }
-  .offer-card { padding: 14px 16px; }
-  .offer-price { font-size: clamp(1.8rem, 9vw, 2.3rem); margin: 2px 0 6px; }
-  .offer-facts { gap: 6px 14px; }
-  .offer-note { font-size: 0.82rem; }
-  .offer-cta { margin-top: 10px; min-height: 46px; }
+.hero h1 em { font-style: italic; font-weight: 500; color: var(--madder); }
+.hero-sub { font-size: var(--fs-lead); color: var(--ink2); line-height: 1.65; max-width: 34rem; }
+.hero-sub strong { color: var(--ink); font-weight: 600; }
+.hero-route {
+  margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--rule);
+  font-family: var(--sans); font-size: var(--fs-micro); font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink3);
+  line-height: 1.9;
 }
 
-/* WAITLIST CTA */
-.cta-section { padding: 48px 0; text-align: center; }
-.cta-main {
-  display: inline-block; padding: 16px 44px; background: var(--gold); color: var(--bg);
-  font-family: var(--sans); font-size: 0.9rem; font-weight: 600;
-  letter-spacing: 0.06em; border: none; border-radius: 6px; cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 24px rgba(200,169,110,0.3);
-  text-decoration: none;
+/* OPENING: the ladder stated up front, before anything is asked. */
+.opening { padding: 44px 0 8px; }
+.section-label {
+  font-family: var(--sans); font-size: var(--fs-micro); font-weight: 600;
+  letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink3);
+  margin-bottom: 14px;
 }
-.cta-main:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,169,110,0.4); opacity: 1; }
-.cta-sub { font-size: 0.78rem; color: var(--text3); margin-top: 14px; line-height: 1.5; }
-/* L31-FAILURE-STATE-MATRIX (WL2490): the invalid-submit message must be painted,
-   not swallowed. Own class so it can never be mistaken for the reassurance line. */
-#wlErr[hidden] { display: none; }
-#wlErr { font-size: 0.8rem; color: #ff9a8a; margin-top: 12px; line-height: 1.55; }
-.capture-form input[aria-invalid="true"] { border-color: #ff9a8a; }
-.cta-promise {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;
-  padding: 8px 18px; border: 1px solid rgba(74,222,128,0.2);
-  border-radius: 100px; background: var(--green-bg);
-  font-size: 0.75rem; font-weight: 500; color: var(--green);
+.ladder { border: 2px solid var(--ink); border-radius: 2px; }
+.rung {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  padding: 16px 18px; border-bottom: 1px solid var(--rule-strong);
 }
+.rung:last-child { border-bottom: 0; }
+.rung-who { font-family: var(--sans); font-size: var(--fs-small); font-weight: 500; color: var(--ink2); }
+.rung-who .rung-tag {
+  display: block; font-size: var(--fs-micro); font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--madder); margin-top: 2px;
+}
+.rung-price { font-size: var(--fs-h2); font-weight: 700; color: var(--ink); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rung.rung-live { background: rgba(142,59,38,0.07); }
+.rung.rung-live .rung-price { color: var(--madder); }
+.ladder-note {
+  font-size: var(--fs-small); color: var(--ink2); line-height: 1.7;
+  margin-top: 14px; max-width: 34rem;
+}
+.ladder-note strong { color: var(--ink); font-weight: 600; }
 
-/* CAPTURE FORM — name + WhatsApp number -> wa.me deep link */
-.capture-form { max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-/* L24-01 / WL9729 (2026-09-19): the fields were identified only by a 1.1:1 fill
-   and a 1.28:1 hairline against the page, so neither boundary met the 3:1
-   non-text floor (WCAG 1.4.11) — the inputs read as unlabelled voids on the
-   conversion page. The fill stays a dark theme surface; the BOUNDARY is promoted
-   to a solid #6a6a6a: 3.68:1 against the page (--bg #09090c) and 3.34:1 against
-   the field's own fill (#161619), both measured in headless Chrome at 390x844
-   DPR3. Focus is unchanged and still reads louder (gold-dim border + 3px
-   gold-pale outline, 8.86:1). */
-.capture-form input {
-  width: 100%; padding: 14px 18px; background: var(--bg3); color: var(--text);
-  border: 1px solid #6a6a6a; border-radius: 6px;
-  font-family: var(--sans); font-size: 0.92rem; font-weight: 300;
-  outline: none; transition: border-color 0.15s;
+/* EVIDENCE: each claim carries its grade. Nothing is rounded up. */
+.evidence { padding: 48px 0 8px; }
+.evidence-lede { font-size: var(--fs-lead); color: var(--ink2); line-height: 1.7; max-width: 34rem; margin-bottom: 22px; }
+.evidence-list { list-style: none; border-top: 2px solid var(--ink); }
+.evidence-list li {
+  padding: 16px 0; border-bottom: 1px solid var(--rule);
+  color: var(--ink2); line-height: 1.65;
 }
-.capture-form input:focus { border-color: var(--gold-dim); }
-.capture-form input:focus-visible { outline:3px solid var(--gold-pale); outline-offset:2px; border-color:var(--gold); }
-.capture-form input::placeholder { color: var(--text3); }
-.capture-form .cta-main { width: 100%; margin-top: 4px; }
-.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-.capture-or {
-  margin-top: 26px; font-size: 0.78rem; color: var(--text3);
+.evidence-list strong { color: var(--ink); font-weight: 600; }
+.grade {
+  display: inline-block; font-family: var(--sans); font-size: var(--fs-micro);
+  font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 2px; margin-left: 6px; vertical-align: 1px;
+  white-space: nowrap;
 }
-.capture-or a { color: var(--gold-dim); text-decoration: underline; text-underline-offset: 3px; }
+.grade-counted { background: rgba(47,107,65,0.12); color: var(--green); }
+.grade-floor, .grade-quoted { background: rgba(142,59,38,0.1); color: var(--madder); }
+.evidence-foot { font-size: var(--fs-small); color: var(--ink2); font-style: italic; margin-top: 16px; max-width: 34rem; }
 
-/* WHAT YOU GET TEASER */
-.teaser { padding: 60px 0; }
-.teaser-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
-@media (max-width: 560px) { .teaser-grid { grid-template-columns: 1fr; } }
-.teaser-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 22px 20px;
-}
-.teaser-card .icon { font-size: 1.4rem; margin-bottom: 10px; }
-.teaser-card h3 { font-size: 0.9rem; font-weight: 500; margin-bottom: 6px; }
-.teaser-card p { font-size: 0.8rem; color: var(--text2); line-height: 1.6; }
+/* WHY A POET: the specific paragraph the brief asks for. */
+.why { padding: 48px 0 8px; }
+.why-body { font-size: var(--fs-lead); line-height: 1.7; max-width: 34rem; }
+.why-body strong { font-weight: 600; }
 
-/* LETTER (shortened) */
-.letter { padding: 60px 0; }
-.letter-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 36px 32px;
-  position: relative;
+/* LETTER: the confession set as an actual letter. */
+.letter { padding: 52px 0 8px; }
+.letter-body {
+  font-size: var(--fs-lead); line-height: 1.85; white-space: pre-wrap;
+  border-left: 3px solid var(--madder); padding-left: 22px;
 }
-.letter-card::before {
-  content: '\201C'; position: absolute; top: 12px; left: 20px;
-  font-size: 3.5rem; color: var(--gold-dim); opacity: 0.25;
-  font-family: Georgia, serif; line-height: 1;
+.letter-body::first-letter {
+  float: left; font-size: 2.9em; font-weight: 700; color: var(--madder);
+  line-height: 0.85; padding-right: 8px; padding-top: 4px;
 }
-.letter-text {
-  font-size: 0.95rem; line-height: 1.9; color: var(--text);
-  white-space: pre-wrap; margin-top: 20px;
-}
-.letter-text .hl { color: var(--gold); font-weight: 400; }
+.letter-body .hl { color: var(--madder); font-weight: 600; }
 .letter-sig {
-  margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);
-  font-size: 0.82rem; color: var(--text2);
+  margin-top: 18px; font-family: var(--sans); font-size: var(--fs-small);
+  font-weight: 500; letter-spacing: 0.06em; color: var(--ink2);
 }
-.letter-sig strong { color: var(--text); font-weight: 500; }
 
-/* WHAT IT IS / IS NOT */
-.what { padding: 48px 0; }
-.what-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
-@media (max-width: 560px) { .what-grid { grid-template-columns: 1fr; } }
-.what-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px 18px;
+/* IS / ISN'T */
+.honest { padding: 48px 0 8px; }
+.honest-grid { display: grid; grid-template-columns: 1fr; gap: 28px; }
+@media (min-width: 600px) { .honest-grid { grid-template-columns: 1fr 1fr; } }
+.honest-col h3 {
+  font-size: 1.0625rem; font-weight: 700; padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink); margin-bottom: 4px;
 }
-.what-card h3 { font-size: 0.88rem; font-weight: 500; margin-bottom: 12px; }
-.what-card ul { list-style: none; }
-.what-card li {
-  font-size: 0.78rem; color: var(--text2); padding: 5px 0;
-  border-top: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px;
+.honest-col.is h3 { color: var(--green); }
+.honest-col.isnt h3 { color: var(--madder); }
+.honest-col ul { list-style: none; }
+.honest-col li {
+  font-family: var(--sans); font-size: var(--fs-small); color: var(--ink2);
+  padding: 8px 0; border-bottom: 1px solid var(--rule); line-height: 1.55;
 }
-.what-card li:first-child { border-top: none; }
-.what-card .ic { flex-shrink: 0; font-size: 0.7rem; margin-top: 2px; }
 
-/* PROOF */
-.proof-row {
-  display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
-  margin: 32px 0; padding: 20px 0; border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+/* THE DOOR: one action, the ladder, and what happens next. */
+.door { padding: 56px 0 72px; }
+.door-rule { border-top: 2px solid var(--ink); padding-top: 30px; }
+.door h2 { font-size: var(--fs-h2); font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; margin-bottom: 14px; }
+.door-lead { font-size: var(--fs-lead); color: var(--ink2); line-height: 1.65; margin-bottom: 22px; max-width: 34rem; }
+.door-price { font-size: var(--fs-price); font-weight: 700; color: var(--madder); letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.door-facts { color: var(--ink2); margin-bottom: 10px; max-width: 34rem; line-height: 1.65; }
+.door-note {
+  font-size: var(--fs-lead); font-style: italic; color: var(--ink);
+  margin: 18px 0 26px;
 }
-.proof-item { text-align: center; }
-.proof-item .num { font-size: 1.3rem; font-weight: 600; color: var(--gold); letter-spacing: -0.02em; }
-.proof-item .lbl { font-size: 0.65rem; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 2px; }
-.proof-note { text-align: center; font-size: 0.72rem; color: var(--text3); line-height: 1.6; margin: -16px 0 32px; }
 
-/* NO-PRESSURE */
-.no-pressure {
-  text-align: center; padding: 40px 0;
-  font-size: 0.85rem; color: var(--text3); line-height: 1.7;
+/* FORM */
+.capture-form { display: grid; gap: 16px; margin-bottom: 18px; max-width: 30rem; }
+.field { display: grid; gap: 6px; }
+.field-label { font-family: var(--sans); font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
+.field input {
+  width: 100%; min-height: 52px; padding: 0 14px;
+  background: #fffdf7; color: var(--ink); border: 1.5px solid rgba(35,31,24,0.45);
+  border-radius: 2px; font-family: var(--sans); font-size: 1rem; font-weight: 400;
 }
-.no-pressure strong { color: var(--text2); font-weight: 400; }
+.field input::placeholder { color: var(--ink3); }
+.field input:focus-visible { outline: 3px solid var(--madder); outline-offset: 2px; border-color: var(--madder); }
+.field input[aria-invalid="true"] { border-color: var(--madder-deep); }
+.field-hint { font-family: var(--sans); font-size: var(--fs-micro); color: var(--ink3); line-height: 1.5; }
+.field-err { font-family: var(--sans); font-size: var(--fs-small); font-weight: 500; color: var(--madder-deep); line-height: 1.5; }
 
-/* FOOTER */
+.cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 54px; padding: 0 30px; width: 100%;
+  background: var(--madder); color: var(--paper);
+  font-family: var(--sans); font-size: 1rem; font-weight: 600;
+  letter-spacing: 0.02em; text-decoration: none; border: 0; border-radius: 2px;
+  cursor: pointer; transition: background 0.15s ease;
+}
+.cta:hover { background: var(--madder-deep); }
+.cta:active { background: var(--madder-deep); }
+.cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.cta[disabled] { opacity: 0.75; cursor: progress; }
+.btn-spin {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(244,239,228,0.4); border-top-color: var(--paper);
+  animation: spin 0.7s linear infinite; display: none;
+}
+.cta.busy .btn-spin { display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* WHATSAPP BUBBLE PREVIEW: the exact message, shown before the tap. */
+.bubble-wrap { margin-top: 18px; max-width: 34rem; }
+.bubble-label {
+  font-family: var(--sans); font-size: var(--fs-micro); font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3);
+  margin-bottom: 10px;
+}
+.wa-bubble {
+  display: block; background: #dcf8c6; color: #10240f;
+  border-radius: 10px 10px 10px 2px; padding: 12px 14px;
+  font-family: var(--sans); font-size: var(--fs-small); line-height: 1.6;
+  white-space: pre-wrap; word-break: break-word;
+  box-shadow: 0 1px 1px rgba(35,31,24,0.15);
+}
+.next-step {
+  font-family: var(--sans); font-size: var(--fs-small); color: var(--ink2);
+  line-height: 1.65; margin-top: 12px; max-width: 34rem;
+}
+.next-step strong { color: var(--ink); font-weight: 600; }
+.cta-fallback { margin-top: 18px; }
+.wl-status { font-family: var(--sans); font-size: var(--fs-small); color: var(--ink2); margin-top: 12px; }
+.wl-success {
+  margin-top: 16px; padding: 16px; border: 1.5px solid var(--green);
+  border-radius: 2px; background: rgba(47,107,65,0.07); max-width: 34rem;
+}
+.wl-success-title { font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.wl-success p { font-family: var(--sans); font-size: var(--fs-small); color: var(--ink2); line-height: 1.65; }
+.wl-retry { display: inline-flex; align-items: center; min-height: 48px; font-family: var(--sans); font-size: var(--fs-small); font-weight: 600; margin-top: 6px; }
+
 footer {
-  padding: 32px 0; text-align: center; border-top: 1px solid var(--border);
-  font-size: 0.7rem; color: var(--text3);
+  border-top: 1px solid var(--rule-strong); padding: 26px 0 34px;
+  font-family: var(--sans); font-size: var(--fs-micro); color: var(--ink3);
+  letter-spacing: 0.08em; text-transform: uppercase; line-height: 2;
 }
 
-/* ANIMATIONS */
-@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-.fade-up { animation: fadeUp 0.5s ease-out forwards; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
-.pulse { animation: pulse 2.5s ease-in-out infinite; }
+@media (max-width: 360px) {
+  .wrap { padding: 0 16px; }
+  .hero { padding: 32px 0 8px; }
+  .letter-body { padding-left: 16px; }
+  .rung { padding: 14px 12px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .fade-up, .pulse { animation: none; }
-  .cta-main, .teaser-card { transition: none; }
+  .cta { transition: none; }
+  .btn-spin { animation: none; }
 }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="nav">
-  <div class="nav-brand">Aham Brahmasmi 2.0</div>
-  <div class="nav-status">Doors open</div>
-</nav>
+<header class="masthead">
+  <div class="wrap">
+    <div class="masthead-row">
+      <span>Do Alfaaz</span>
+      <span>Aham Brahmasmi 2.0</span>
+    </div>
+    <p class="masthead-sub">Banaras · A recorded course · waitlist first</p>
+  </div>
+</header>
+
+<main>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="container">
-    <div class="hero-eyebrow">One recorded course · no deadline</div>
-    <h1>You are not broken.<br><em>You are entangled.</em></h1>
-    <p class="hero-sub">Advaita Vedanta + modern psychology. For the mind that argues with itself all night.</p>
-  <p class="hero-voice">"Main 3 saal ke liye gayab ho gaya tha. Apne peak par. Ab wapas aa raha hoon. Jo seekha hai, wo ek structured path mein samet diya hai."</p>
+  <div class="wrap">
+    <p class="hero-kicker">A letter before the door</p>
+    <h1>I went quiet for three years. <em>This is what I came back with.</em></h1>
+    <p class="hero-sub">Aham Brahmasmi 2.0 is that time turned into a recorded course in Advaita inquiry and modern psychology, for the gap between knowing something and living it. <strong>I am opening it as a waitlist first, and I want to show you the working before I ask you for anything.</strong></p>
+    <p class="hero-route">The ladder up front · the evidence graded · the letter · one word</p>
   </div>
 </section>
 
-<!-- OFFER -->
-<section class="offer-section">
-  <div class="container">
-    <div class="offer-card">
-      <div class="offer-label">The offer, stated once</div>
-      <div class="offer-price">₹1,999</div>
-      <div class="offer-facts"><span>15+ hours</span><span>50+ lessons</span><span>Lifetime access</span><span>14-day refund</span></div>
-      <a class="offer-cta" href="#join">Ask for course details</a>
-      <p class="offer-note">Recorded, self-paced, and evergreen. No clock, no tiers, no pressure.</p>
-    </div>
-  </div>
-</section>
-
-<!-- MAIN CTA — WhatsApp capture -->
-<section class="cta-section" id="join">
-  <div class="container">
-    <form class="capture-form" id="wlForm" autocomplete="on">
-      <label class="sr-only" for="wlName">Your name</label>
-      <input type="text" id="wlName" name="name" placeholder="Your name" autocomplete="name" required maxlength="60">
-      <label class="sr-only" for="wlNum">Your WhatsApp number</label>
-      <input type="tel" id="wlNum" name="whatsapp" placeholder="Your WhatsApp number" autocomplete="tel" inputmode="tel" required maxlength="15">
-      <button type="submit" class="cta-main">Ask for course details on WhatsApp →</button>
-    </form>
-    <div class="cta-promise">₹1,999 · lifetime access · 14-day refund</div>
-    <p class="cta-sub" id="wlErr" role="alert" aria-live="polite" hidden></p>
-    <p class="cta-sub">Your WhatsApp opens with the message ready.<br>Nothing is sent until you press Send.</p>
-    <p class="capture-or">Prefer Instagram? <a href="https://www.instagram.com/doalfaaz/" target="_blank" rel="noopener">message @doalfaaz directly</a>.</p>
-  </div>
-</section>
-
-<!-- PROOF -->
-<div class="container">
-  <div class="proof-row">
-    <div class="proof-item"><div class="num">3 years</div><div class="lbl">Of Study</div></div>
-    <div class="proof-item"><div class="num">15+ hrs</div><div class="lbl">Recorded</div></div>
-    <div class="proof-item"><div class="num">50+</div><div class="lbl">Lessons</div></div>
-    <div class="proof-item"><div class="num">1</div><div class="lbl">Price, No Tiers</div></div>
-  </div>
-  <p class="proof-note">Figures describe the recorded course itself. No student counts or outcome claims are listed here because none are on record.</p>
-</div>
-
-<!-- WHAT YOU GET (teaser, no price) -->
-<section class="teaser">
-  <div class="container">
-    <div style="text-align:center;margin-bottom:8px">
-      <h2 style="font-size:1.3rem;font-weight:300">What's inside</h2>
-    </div>
-    <div class="teaser-grid">
-      <div class="teaser-card">
-        <div class="icon" aria-hidden="true">01</div>
-        <h3>15+ Hours · 50+ Lessons</h3>
-        <p>Vedanta + modern psychology. Recorded, self-paced, and built for the move from pattern recognition to lived integration.</p>
+<!-- OPENING: ladder restated plainly, joining is free -->
+<section class="opening" aria-labelledby="ladderLabel">
+  <div class="wrap">
+    <h2 class="section-label" id="ladderLabel">The ladder, before anything else</h2>
+    <div class="ladder" role="list">
+      <div class="rung rung-live" id="rung1" role="listitem">
+        <span class="rung-who">The first 50 seats<span class="rung-tag">opens here</span></span>
+        <span class="rung-price">₹999</span>
       </div>
-      <div class="teaser-card">
-        <div class="icon" aria-hidden="true">02</div>
-        <h3>Live "Talk To Tushar" Sessions</h3>
-        <p>Two live interactive sessions are recorded and added later. The course remains self-paced.</p>
+      <div class="rung" id="rung2" role="listitem">
+        <span class="rung-who">The next block</span>
+        <span class="rung-price">₹1,499</span>
       </div>
-      <div class="teaser-card">
-        <div class="icon" aria-hidden="true">03</div>
-        <h3>Per-Lecture Notes + Workbook</h3>
-        <p>Every lesson comes with structured notes and reflection prompts. Not just watching. Sitting with it.</p>
-      </div>
-      <div class="teaser-card">
-        <div class="icon" aria-hidden="true">04</div>
-        <h3>Lifetime Access</h3>
-        <p>No rush. No cohort pace. Come back whenever you want. The course waits for you.</p>
+      <div class="rung" id="rung3" role="listitem">
+        <span class="rung-who">Standing price</span>
+        <span class="rung-price">₹1,999</span>
       </div>
     </div>
+    <p class="ladder-note"><strong>Joining the waitlist is free, and nothing is charged now.</strong> When doors open, your WhatsApp is where the message lands. The first 50 seats are ₹999 because the people who move first take the early risk and shape the batch. After that the price steps up to ₹1,499, then ₹1,999 standing. It rises as blocks fill; it does not fall.</p>
+    <p class="ladder-note">Paid once. Access is lifetime. 14 days to ask for the money back, one message, no reason asked.</p>
   </div>
 </section>
 
-<!-- PERSONAL LETTER (shortened) -->
-<section class="letter">
-  <div class="container">
-    <div class="letter-card">
-      <div class="letter-text">Ek confession.
+<!-- EVIDENCE: every claim carries its grade -->
+<section class="evidence" aria-labelledby="evidenceLabel">
+  <div class="wrap">
+    <h2 class="section-label" id="evidenceLabel">The record, with the working shown</h2>
+    <p class="evidence-lede">None of these are rounded up. Where a number is a floor or a quoted norm, it says so on the line, because that is the only way the strong ones mean anything.</p>
+    <ul class="evidence-list">
+      <li><strong>1,000+ students taught.</strong><span class="grade grade-counted">counted</span></li>
+      <li><strong>5 live batches held.</strong><span class="grade grade-counted">counted</span></li>
+      <li><strong>81% finished the internal run.</strong><span class="grade grade-counted">counted</span></li>
+      <li>The usual completion figure for online courses is about 10%.<span class="grade grade-quoted">quoted norm</span> It is a general figure, not something measured here.</li>
+      <li><strong>450+ books</strong> sit behind the work.<span class="grade grade-floor">floor</span> That is a floor, not a count.</li>
+      <li><strong>15+ hours recorded</strong> across <strong>50+ lessons</strong>, with a <strong>5+ hour psychology sequence</strong> and a companion book. <strong>10+ hours</strong> are ready the day you start.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- WHY A POET -->
+<section class="why" aria-labelledby="whyLabel">
+  <div class="wrap">
+    <h2 class="section-label" id="whyLabel">Why a poet teaches this</h2>
+    <p class="why-body">I write poetry to a quarter of a million readers, and I have taught <strong>5 live batches to 1,000+ students</strong>, with <strong>81% of them finishing</strong> the internal run. The poems name the feeling; the course does the work underneath it. It is the same voice in both, which is the only reason it holds together.</p>
+  </div>
+</section>
+
+<!-- LETTER -->
+<section class="letter" aria-labelledby="letterLabel">
+  <div class="wrap">
+    <h2 class="section-label" id="letterLabel">The letter</h2>
+    <div class="letter-body">Ek confession.
 
 Main bhi wahi karta tha jo tum karte ho: <span class="hl">raat bhar apne hi saath behas.</span>
 
@@ -368,60 +353,88 @@ Shayad tum bhi yahi karte ho.
 <span class="hl">Main tumhe fix karne nahi aaya.
 Main tumhare upar nahi khada.
 Main tumhare saath khada hoon.</span></div>
-      <div class="letter-sig"><strong>· Tushar</strong> · Do Alfaaz · Banaras</div>
+    <p class="letter-sig">Tushar · Do Alfaaz · Banaras</p>
+  </div>
+</section>
+
+<!-- IS / ISN'T -->
+<section class="honest" aria-labelledby="honestLabel">
+  <div class="wrap">
+    <h2 class="section-label" id="honestLabel">What it is, honestly</h2>
+    <div class="honest-grid">
+      <div class="honest-col is">
+        <h3>Ye hai</h3>
+        <ul>
+          <li>Advaita Vedanta as inquiry, not belief</li>
+          <li>Modern psychology as observation</li>
+          <li>Practices for ordinary life</li>
+          <li>Lifetime access</li>
+        </ul>
+      </div>
+      <div class="honest-col isnt">
+        <h3>Ye nahi hai</h3>
+        <ul>
+          <li>Therapy ka replacement nahi</li>
+          <li>Religion ya guru worship nahi</li>
+          <li>Motivation ya fake positivity nahi</li>
+          <li>Instant fix nahi</li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- WHAT IT IS / IS NOT -->
-<section class="what">
-  <div class="container">
-    <div class="what-grid">
-      <div class="what-card">
-        <h3 style="color:var(--green)">Ye hai</h3>
-        <ul>
-          <li><span class="ic">◆</span> Advaita Vedanta as inquiry, not belief</li>
-          <li><span class="ic">◆</span> Modern psychology as observation</li>
-          <li><span class="ic">◆</span> Practices for ordinary life</li>
-          <li><span class="ic">◆</span> Lifetime access</li>
-        </ul>
+<!-- THE DOOR -->
+<section class="door" aria-labelledby="doorTitle">
+  <div class="wrap door-rule">
+    <p class="section-label">One door</p>
+    <h2 id="doorTitle">Take your time. Then say one word.</h2>
+    <p class="door-lead">That is all of it: the ladder, the hours, the book, the sessions, the refund. If the letter above sounded like your own 2:17 a.m., you already know what this is for. What is left is one word.</p>
+    <p class="door-price">₹999</p>
+    <p class="door-facts">For the first 50 seats. Then ₹1,499, then ₹1,999 standing. Paid once. Lifetime access. 14 days to change your mind.</p>
+    <p class="door-note">Faisla shaant dimaag se lena.</p>
+
+    <form class="capture-form" id="wlForm" autocomplete="on" novalidate>
+      <div class="field">
+        <label class="field-label" for="wlName">Your name</label>
+        <input type="text" id="wlName" name="name" placeholder="e.g. Aarav" autocomplete="name" required maxlength="60">
+        <p class="field-err" id="wlNameErr" role="alert"></p>
       </div>
-      <div class="what-card">
-        <h3 style="color:#f87171">Ye nahi hai</h3>
-        <ul>
-          <li><span class="ic" style="color:#f87171">✕</span> Therapy ka replacement nahi</li>
-          <li><span class="ic" style="color:#f87171">✕</span> Religion ya guru worship nahi</li>
-          <li><span class="ic" style="color:#f87171">✕</span> Motivation ya fake positivity nahi</li>
-          <li><span class="ic" style="color:#f87171">✕</span> Instant fix nahi</li>
-        </ul>
+      <div class="field">
+        <label class="field-label" for="wlNum">Your WhatsApp number</label>
+        <input type="tel" id="wlNum" name="whatsapp" placeholder="e.g. 919876543210" autocomplete="tel" inputmode="tel" required maxlength="15" aria-describedby="wlNumHint">
+        <p class="field-hint" id="wlNumHint">With country code. This is where the reply lands.</p>
+        <p class="field-err" id="wlNumErr" role="alert"></p>
       </div>
+      <button type="submit" class="cta" id="wlBtn"><span class="btn-spin" aria-hidden="true"></span><span id="wlBtnLabel">Join the waitlist on WhatsApp</span></button>
+    </form>
+
+    <p class="cta-fallback" id="wlFallback"><a class="cta" href="https://wa.me/919179222991?text=%5Bab2%3Awl2%5D%20Waitlist%20for%20Aham%20Brahmasmi%202.0" id="wlFallbackLink">Join the waitlist on WhatsApp</a></p>
+
+    <div class="bubble-wrap">
+      <p class="bubble-label" id="bubbleLabel">Your WhatsApp opens with this message already typed</p>
+      <p class="wa-bubble" id="wlBubble">[ab2:wl2] Waitlist for Aham Brahmasmi 2.0</p>
+      <p class="next-step" id="wlNext"><strong>What happens next:</strong> press Send in the chat. Nothing is sent from this page and nothing is charged now. I reply from this number with the details and the moment doors open.</p>
     </div>
+
+    <p class="wl-status" id="wlStatus" role="status"></p>
+    <div class="wl-success" id="wlDone" hidden>
+      <p class="wl-success-title">Your message is ready in WhatsApp.</p>
+      <p id="wlDoneMsg" role="status"></p>
+      <p>Press Send in the chat to join. Nothing was sent from this page, and nothing is charged now.</p>
+      <a href="#" class="wl-retry" id="wlRetry">WhatsApp did not open? Tap to try again</a>
+    </div>
+
+    <p class="next-step">No WhatsApp on this device? Send the same message to <strong>+91 91792 22991</strong> from any phone, or message <a href="https://www.instagram.com/doalfaaz/" target="_blank" rel="noopener">@doalfaaz on Instagram</a>.</p>
   </div>
 </section>
 
-<!-- NO PRESSURE -->
-<div class="no-pressure">
-  <div class="container">
-    <strong>Take your time.</strong><br>
-    Faisla shaant dimaag se lena. There is no deadline and no commitment here.<br>
-    Read the terms and decide when you are ready.
-  </div>
-</div>
-
-<!-- FINAL CTA -->
-<section class="cta-section" style="padding-bottom:80px">
-  <div class="container">
-    <h2 style="font-size:1.2rem;font-weight:300;margin-bottom:6px">Ready when you are</h2>
-    <p style="color:var(--text2);margin-bottom:24px;font-size:0.9rem">One price. Lifetime access. No deadline.</p>
-    <a href="#join" class="cta-main">Ask for course details →</a>
-    <p class="cta-sub">The message opens ready to send.</p>
-  </div>
-</section>
+</main>
 
 <footer>
-  <div class="container">
+  <div class="wrap">
     <p>Aham Brahmasmi 2.0 · Do Alfaaz · Banaras</p>
-    <p style="margin-top:4px">Ye therapy nahi, religion nahi, motivation nahi. Ye inquiry hai.</p>
+    <p>Ye therapy nahi, religion nahi, motivation nahi. Ye inquiry hai.</p>
   </div>
 </footer>
 
@@ -429,44 +442,100 @@ Main tumhare saath khada hoon.</span></div>
 (function(){
   "use strict";
 
+  // Ladder highlight follows AB2.step so the live rung is never guessed by
+  // the visitor. Defaults to the first rung (₹999) and changes nothing if
+  // the config is absent.
+  var cfg = window.AB2 || {};
+  var step = cfg.step === 2 || cfg.step === 3 ? cfg.step : 1;
+  [1, 2, 3].forEach(function(n){
+    var rung = document.getElementById('rung' + n);
+    if (rung) { rung.classList.toggle('rung-live', n === step); }
+  });
 
-  // WhatsApp capture: name + number -> wa.me deep link.
-  // The visitor's own WhatsApp opens with the join message pre-filled to
-  // Tushar's number; hitting send delivers name + number in one message.
-  // This local-first handoff opens WhatsApp; nothing is sent until the visitor submits it.
+  // WhatsApp handoff: name + number -> wa.me deep link with the [ab2:wl2] tag.
+  // The visitor's own WhatsApp opens with the message pre-filled to Tushar's
+  // number; nothing is sent until they press send in the chat.
   var WL_NUMBER = '919179222991'; // Tushar's WhatsApp in international wa.me format
   var form = document.getElementById('wlForm');
-  if (form) {
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      var name = (document.getElementById('wlName').value || '').trim();
-      var num  = (document.getElementById('wlNum').value || '').replace(/[^\d]/g, '');
-      var numEl = document.getElementById('wlNum');
-      var nameEl = document.getElementById('wlName');
-      var errEl = document.getElementById('wlErr');
-      // L31-FAILURE-STATE-MATRIX (WL2490): an invalid submit used to be a silent
-      // focus()+return — zero painted message in any language, so the visitor
-      // believed the join had failed at random. Paint the reason, mark the field.
-      function reject(el, msg) {
-        if (errEl) { errEl.textContent = msg; errEl.hidden = false; }
-        el.focus();
-        el.setAttribute('aria-invalid', 'true');
-      }
-      if (errEl) { errEl.hidden = true; errEl.textContent = ''; }
-      nameEl.removeAttribute('aria-invalid');
-      numEl.removeAttribute('aria-invalid');
-      if (!name) { reject(nameEl, 'Please enter your name so the message can be addressed.'); return; }
-      if (num.length < 10 || num.length > 13) {
-        reject(numEl, 'Please enter a WhatsApp number with country code and at least 10 digits — e.g. 91XXXXXXXXXX.');
-        return;
-      }
-      var msg = 'Interested in Aham Brahmasmi 2.0\n'
-              + 'Name: ' + name + '\n'
-              + 'WhatsApp: ' + num + '\n\n'
-              + 'Please send me the course details.';
-      window.location.href = 'https://wa.me/' + WL_NUMBER + '?text=' + encodeURIComponent(msg);
-    });
+  if (!form) { return; }
+
+  var nameEl = document.getElementById('wlName');
+  var numEl  = document.getElementById('wlNum');
+  var nameErr = document.getElementById('wlNameErr');
+  var numErr  = document.getElementById('wlNumErr');
+  var btn = document.getElementById('wlBtn');
+  var btnLabel = document.getElementById('wlBtnLabel');
+  var status = document.getElementById('wlStatus');
+  var done = document.getElementById('wlDone');
+  var doneMsg = document.getElementById('wlDoneMsg');
+  var retry = document.getElementById('wlRetry');
+  var fallback = document.getElementById('wlFallback');
+  var bubble = document.getElementById('wlBubble');
+  var btnText = btnLabel.textContent;
+  // JS is on: the form builds the same wa.me link itself, so the static
+  // no-JS fallback button would duplicate the CTA. Hide it; keep the bubble
+  // preview visible because it is filled with the live message.
+  if (fallback) { fallback.hidden = true; }
+
+  function reject(input, errEl, msg) {
+    errEl.textContent = msg;
+    input.setAttribute('aria-invalid', 'true');
+    input.focus();
   }
+  function clearField(input, errEl) {
+    errEl.textContent = '';
+    input.removeAttribute('aria-invalid');
+  }
+  nameEl.addEventListener('input', function(){ clearField(nameEl, nameErr); });
+  numEl.addEventListener('input', function(){ clearField(numEl, numErr); });
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = (nameEl.value || '').trim();
+    var num  = (numEl.value || '').replace(/[^\d]/g, '');
+    clearField(nameEl, nameErr);
+    clearField(numEl, numErr);
+    status.textContent = '';
+
+    if (!name) {
+      reject(nameEl, nameErr, 'Please enter your name so the message can be addressed.');
+      return;
+    }
+    if (num.length < 10 || num.length > 13) {
+      reject(numEl, numErr, 'Enter your WhatsApp number with country code, 10 to 13 digits, e.g. 919876543210.');
+      return;
+    }
+
+    var msg = '[ab2:wl2] Waitlist for Aham Brahmasmi 2.0\n'
+            + 'Name: ' + name + '\n'
+            + 'WhatsApp: ' + num + '\n\n'
+            + 'First 50 seats are ₹999. Please tell me when doors open.';
+    var url = 'https://wa.me/' + WL_NUMBER + '?text=' + encodeURIComponent(msg);
+
+    // Pending state: disable the button, paint the status, then hand off.
+    // If the handoff fails silently (no WhatsApp installed, blocked popup),
+    // the success card doubles as the recovery path with the same link.
+    retry.href = url;
+    bubble.textContent = msg;
+    btn.disabled = true;
+    btn.classList.add('busy');
+    btnLabel.textContent = 'Opening WhatsApp…';
+    status.textContent = 'Opening WhatsApp with your message ready.';
+    window.location.href = url;
+
+    setTimeout(function(){
+      btn.disabled = false;
+      btn.classList.remove('busy');
+      btnLabel.textContent = btnText;
+      status.textContent = '';
+      done.hidden = false;
+      // Fill the polite live region a tick after the panel is visible so the
+      // announcement fires reliably instead of being swallowed while hidden.
+      setTimeout(function(){
+        doneMsg.textContent = 'WhatsApp opened with your waitlist message ready to send.';
+      }, 60);
+    }, 1400);
+  });
 
 })();
 </script>

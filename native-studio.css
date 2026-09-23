@@ -428,12 +428,20 @@
 }
 .studio-topbar button::before,
 .studio-dock button::before,
+.studio-dock summary::before,
 .studio-left-rail button::before {
   content: "";
   position: absolute;
   inset: min(0px, calc(50% - 22px));
   min-width: 44px;
   min-height: 44px;
+}
+/* F-ST05 (studio-css, 2026-09-23): the floor above listed only `button`, so the
+   carousel's own disclosures (.ce-add-slide-btn, .ce-add-slide-disclosure summary)
+   are <summary> elements and kept a 93x30 visual box with NO tap area — the one
+   family the H01-2 census could not reach. */
+.studio-dock summary {
+  position: relative;
 }
 .ce-poem-ratio-pills { align-items: stretch; }
 
@@ -658,6 +666,12 @@
    otherwise its Weight/Spacing controls paint over the Style swatches at the
    owner's 1440×900 window. */
 .ce-poem-typography:not([open]) > .ce-poem-typography-panel { display: none; }
+/* F-ST02 (studio-css, 2026-09-23): this summary was the ONE Studio control under the
+   file's own H01-2 44px floor — measured 297x34 in the dock. It toggles the weight /
+   spacing / colour panel, so the miss was on the most-used disclosure in the panel. */
+.ce-poem-typography > summary {
+  min-height: 44px;
+}
 
 .ce-poem-typography-panel {
   display: grid;
@@ -2027,8 +2041,29 @@
   overflow: hidden !important;
 }
 
-.studio-workspace.is-carousel-mode .studio-dock {
+/* F-ST01 (studio-css, 2026-09-23): this hid the WHOLE dock in carousel mode, and
+   #carousel-dock-controls.ce-studio-inspector lives INSIDE that dock (index.html:3127) —
+   so every carousel tool panel measured 0x0 (1450 chars of real content, unreachable),
+   and the .is-carousel-mode .ce-studio-inspector rules further down (the 248px bottom
+   bar) could never apply. Hide the POEM sections the carousel does not use, never the
+   dock that owns the inspector. */
+.studio-workspace.is-carousel-mode .studio-dock > .dock-section:not(#dock-carousel-section),
+.studio-workspace.is-carousel-mode .studio-dock > [id^="dock-sep-"] {
   display: none !important;
+}
+.studio-workspace.is-carousel-mode .studio-dock {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-left: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .studio-workspace.is-carousel-mode .studio-stage {
@@ -2164,10 +2199,6 @@
   height: 100% !important;
   max-height: 100% !important;
   overflow: hidden !important;
-}
-
-.studio-workspace.is-carousel-mode .studio-dock {
-  display: none !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-studio-inspector {
@@ -3068,6 +3099,18 @@
 .ce-drag-handle-bar:active {
   cursor: grabbing;
 }
+/* F-ST10 (studio-css, 2026-09-23): the handle bar is the only drag affordance
+   for a block and measured 22px tall, under the phone 44px floor. ::after is
+   free here, so it carries an empty centred 44x44 box (the file's tap-slop
+   pattern) without changing the 22px visible pill. The bar is absolutely
+   positioned, so the pseudo anchors to it. */
+.ce-drag-handle-bar::after {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc(50% - 22px));
+  min-width: 44px;
+  min-height: 44px;
+}
 
 /* ==========================================================================
    Slide Mini-Map Timeline Strip & Creator Productivity Suite
@@ -3524,6 +3567,18 @@
   -webkit-user-select: none;
 }
 .ce-block-drag-grip::before { content: '\2807\2807'; letter-spacing: -1px; }
+/* F-ST10 (studio-css, 2026-09-23): the 30x20 grip was under the phone 44px
+   floor. ::before already paints the glyph, so ::after carries the empty
+   centred 44x44 hit box (file tap-slop pattern); the visible pill keeps its
+   30x20 authored size. The grip is position:absolute, so the pseudo anchors
+   to it. */
+.ce-block-drag-grip::after {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc(50% - 22px));
+  min-width: 44px;
+  min-height: 44px;
+}
 [data-ce-block]:hover .ce-block-drag-grip,
 [data-ce-block].is-selected .ce-block-drag-grip {
   opacity: 1;
@@ -3808,12 +3863,16 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 .studio-workspace.is-carousel-mode select#ce-font-family,
 .studio-workspace.is-carousel-mode .ce-inspector-font-row select {
   flex: 1 !important;
-  height: 25px !important;
+  /* F-ST04 (studio-css, 2026-09-23): 25px was the shortest control in the whole
+     Studio and the font select is the one control whose VALUE the owner reads —
+     11px on 25px both missed the 44px tap floor and the phone 11px body floor. */
+  height: 44px !important;
+  min-height: 44px !important;
   background: rgba(255, 255, 255, 0.06) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 8px!important;
   color: #fff !important;
-  font-size: var(--fs-overline) !important;
+  font-size: var(--fs-secondary) !important;
   font-weight: 500 !important;
   padding: 0 8px !important;
   outline: none !important;
@@ -5926,7 +5985,9 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
 .ce-poem-ratio-control { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; padding-top:9px; border-top:1px solid var(--border); }
 .ce-poem-ratio-label { color:var(--muted); font-size:var(--fs-overline); font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
 .ce-poem-ratio-pills { display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end; }
-.ce-poem-ratio-pill { min-height:26px; padding:4px 8px; border:1px solid var(--border); border-radius:7px; background:transparent; color:var(--muted); cursor:pointer; font-size:var(--fs-overline); font-weight:700; }
+/* F-ST03 (studio-css, 2026-09-23): 7px was the only control radius off the --r-ctl
+   (8px) family, one pixel from its own .ce-poem-stepper neighbour. */
+.ce-poem-ratio-pill { min-height:26px; padding:4px 8px; border:1px solid var(--border); border-radius:var(--r-ctl, 8px); background:transparent; color:var(--muted); cursor:pointer; font-size:var(--fs-overline); font-weight:700; }
 .ce-poem-ratio-pill:hover, .ce-poem-ratio-pill.is-active { border-color:var(--accent); background:var(--accent-tint); color:var(--ink); }
 @media (max-width:700px) {
   .ce-poem-ratio-control { align-items:flex-start; flex-direction:column; }
