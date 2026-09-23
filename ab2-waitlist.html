@@ -236,10 +236,11 @@ a { color: var(--madder); }
   cursor: pointer; transition: background 0.15s ease;
 }
 .cta > span { white-space: nowrap; }
-/* The idle and busy labels are the only contents, so a 320px viewport must
-   hold either one on a single line inside the button's full-width box. */
+/* The idle and busy labels are the only contents. On the widest labels the
+   box holds them on one line; at 320px the label is allowed to wrap so the
+   54px touch height is never traded for a single line. */
 #wlBtn { overflow: hidden; }
-#wlBtnLabel { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+#wlBtnLabel { max-width: 100%; }
 .cta:hover { background: var(--madder-deep); }
 .cta:active { background: var(--madder-deep); }
 .cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
@@ -314,6 +315,10 @@ footer {
   /* Keep the full 54px touch target; buy the label its room from padding
      and tracking, which is what pushes "Opening WhatsApp…" onto two lines. */
   .cta { padding: 0 14px; letter-spacing: 0; font-size: var(--fs-small); }
+  /* At 320px the fuller CTA label is allowed to wrap rather than shrink the
+     touch target, and the anchor variant gets the same treatment. */
+  .cta, .cta > span { white-space: normal; }
+  .cta { min-height: 54px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -352,11 +357,11 @@ footer {
     <h2 class="section-label" id="ladderLabel">The ladder, before anything else</h2>
     <div class="ladder" role="list">
       <div class="rung rung-live" id="rung1" role="listitem">
-        <span class="rung-who">The first 50 seats<span class="rung-tag">opens here</span></span>
+        <span class="rung-who">The first 50 seats<span class="rung-tag">when doors open</span></span>
         <span class="rung-price">₹999</span>
       </div>
       <div class="rung" id="rung2" role="listitem">
-        <span class="rung-who">The next block</span>
+        <span class="rung-who">The next block, after 50</span>
         <span class="rung-price">₹1,499</span>
       </div>
       <div class="rung" id="rung3" role="listitem">
@@ -364,8 +369,8 @@ footer {
         <span class="rung-price">₹1,999</span>
       </div>
     </div>
-    <p class="ladder-note"><strong>Joining the waitlist is free, and nothing is charged now.</strong> When doors open, your WhatsApp is where the message lands. The first 50 seats are ₹999 because those buyers move first.</p>
-    <p class="ladder-note">Paid once. Access is lifetime. 14 days to ask for the money back, one message, no reason asked.</p>
+    <p class="ladder-note">Joining the waitlist is free, and it does not hold or reserve a seat. When doors open, your WhatsApp is where the message lands. The first 50 seats are ₹999 because those buyers move first.</p>
+    <p class="ladder-note">The price rises as each step fills, and it never falls. Paid once. Access is lifetime. 14 days to ask for the money back, one message, no reason asked.</p>
   </div>
 </section>
 
@@ -444,10 +449,10 @@ Main tumhare saath khada hoon.</span></div>
   <div class="wrap door-rule">
     <p class="section-label">One door</p>
     <h2 id="doorTitle">Take your time. Then say one word.</h2>
-    <p class="door-lead">That is all of it: the ladder, the hours, the book, the sessions, the refund. If the letter above sounded like your own 2:17 a.m., you already know what this is for. What is left is one word.</p>
+    <p class="door-lead">That is all of it: the ladder, the hours, the book, the sessions, the refund. If the letter above sounded like your own 2:17 a.m., you already know what this is for. What is left is one message, and it holds nothing.</p>
     <p class="door-price">₹999</p>
     <p class="door-facts">For the first 50 seats. Then ₹1,499, then ₹1,999 standing. Paid once. Lifetime access. 14 days to change your mind.</p>
-    <p class="door-note">Faisla shaant dimaag se lena.</p>
+    <p class="door-note">Faisla shaant dimaag se lena. The waitlist holds nothing, so nothing is lost by waiting.</p>
 
     <form class="capture-form" id="wlForm" autocomplete="on" novalidate>
       <div class="field">
@@ -461,10 +466,10 @@ Main tumhare saath khada hoon.</span></div>
         <p class="field-hint" id="wlNumHint">With country code. The opening notice arrives here.</p>
         <p class="field-err" id="wlNumErr" role="alert"></p>
       </div>
-      <button type="submit" class="cta" id="wlBtn"><span class="btn-spin" aria-hidden="true"></span><span id="wlBtnLabel">Join the waitlist</span></button>
+      <button type="submit" class="cta" id="wlBtn"><span class="btn-spin" aria-hidden="true"></span><span id="wlBtnLabel">Join the waitlist on WhatsApp</span></button>
     </form>
 
-    <p class="cta-fallback" id="wlFallback"><a class="cta" href="https://wa.me/919179222991?text=%5Bab2%3Awl2%5D%20Waitlist%20for%20Aham%20Brahmasmi%202.0%0AName%3A%20(your%20name)%0AWhatsApp%3A%20(your%20number)%0A%0AFirst%2050%20seats%20are%20%E2%82%B9999.%20Please%20tell%20me%20when%20doors%20open." id="wlFallbackLink">Join the waitlist</a></p>
+    <p class="cta-fallback" id="wlFallback"><a class="cta" href="https://wa.me/919179222991?text=%5Bab2%3Awl2%5D%20Waitlist%20for%20Aham%20Brahmasmi%202.0%0AName%3A%20(your%20name)%0AWhatsApp%3A%20(your%20number)%0A%0AFirst%2050%20seats%20are%20%E2%82%B9999.%20Please%20tell%20me%20when%20doors%20open." id="wlFallbackLink">Join the waitlist on WhatsApp</a></p>
 
     <div class="bubble-wrap">
       <p class="bubble-label" id="bubbleLabel">Your WhatsApp opens with this message already typed</p>
@@ -473,14 +478,14 @@ Name: your name
 WhatsApp: your number
 
 First 50 seats are ₹999. Please tell me when doors open.</span><span class="wa-stamp" aria-hidden="true">now ✓✓</span></p>
-      <p class="next-step" id="wlNext"><strong>What happens next:</strong> add your name and number above, then press Send in the WhatsApp chat that opens. Joining is free and nothing is charged.</p>
+      <p class="next-step" id="wlNext"><strong>What happens next:</strong> add your name and number above, then press Send in the WhatsApp chat that opens. Joining is free; nothing is charged and no seat is held.</p>
     </div>
 
     <p class="wl-status" id="wlStatus" role="status"></p>
     <div class="wl-success" id="wlDone" hidden>
-      <p class="wl-success-title">Your message is ready in WhatsApp.</p>
+      <p class="wl-success-title">Press Send in WhatsApp.</p>
       <p id="wlDoneMsg" role="status"></p>
-      <p>Nothing was sent from this page.</p>
+      <p>Nothing was sent from this page. You are on the list once you press Send there.</p>
       <a href="#" class="wl-retry" id="wlRetry">WhatsApp did not open? Tap to try again</a>
     </div>
 
