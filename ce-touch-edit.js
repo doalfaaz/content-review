@@ -17,6 +17,317 @@
 
   var LONG_PRESS_MS = 430;
 
+  /* ── F-TE01 · the touch-edit session, and its ONE teardown ────────────────
+     Every fix below hangs off this state. The layer had no teardown at all:
+     a long-press armed `contenteditable="true"`, marked the node
+     `.ce-canvas-editing-active` and left it focused, and NOTHING in this file
+     owned the way out. index.html's tab handlers, the back button, the drawer,
+     the Escape key and the studio close each had their own idea of what
+     "leave this screen" means, so a mid-edit tab switch stranded all of it.
+     `outsideTap` is registered LAZILY on the entry into a real edit (not at
+     load), which is the whole reason this is idempotent: there is exactly one
+     live listener per edit session, and teardown() always removes it. */
+  var session = { el: null, outsideTap: null };
+  var listeners = [];
+  /* Observe targets bound by THIS layer, recorded at registration, so teardown
+     never has to guess the instrument panel's selector from the inside. */
+  var observerTargets = [];
+  var observers = [];
+  var armSweepTimer = 0;
+  var dockEnsureTimer = 0;
+
+  function publishVisualViewport() {
+    /* F-M40.a3 (master-20260923): the keyboard contract is ONE pair of variables
+       on documentElement, published from the live visualViewport so every Studio
+       mode reads the same number — post, poem, photo and carousel alike. It used
+       to be published unconditionally at load and on every viewport event, which
+       meant a phone keyboard outside the Studio wrote the inset globally with
+       nothing on the surface owning or clearing it. Publication is therefore
+       scoped to the Studio: one call while the Studio is open, and a clear on
+       close, so both variables are either a live measurement or absent (the
+       sheets' `var(--ce-keyboard-inset, 0px)` fallbacks). */
+    var root = document.documentElement;
+    if (!studioMounted()) {
+      root.style.removeProperty('--ce-visual-viewport-height');
+      root.style.removeProperty('--ce-keyboard-inset');
+      return;
+    }
+    var vv = window.visualViewport;
+    var height = vv ? vv.height : window.innerHeight;
+    var inset = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+    root.style.setProperty('--ce-visual-viewport-height', Math.round(height) + 'px');
+    root.style.setProperty('--ce-keyboard-inset', Math.round(inset) + 'px');
+  }
+  /* The Studio's own mount test, in the same "is the surface live" vocabulary as
+     the dock sweep below: an EDITOR is present. Deliberately not a media query —
+     the phone layer is also active inside the native WKWebView at desktop width,
+     which is exactly where the keyboard inset matters. */
+  function studioMounted() {
+    try {
+      return !!document.getElementById('studio')
+        || document.documentElement.classList.contains('studio-open')
+        || !!document.querySelector('#studio.open, .studio-workspace');
+    } catch (_sm) { return false; }
+  }
+  window.addEventListener('resize', publishVisualViewport, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', publishVisualViewport, { passive: true });
+    window.visualViewport.addEventListener('scroll', publishVisualViewport, { passive: true });
+  }
+
+  /* The ONE resolution of "which stage may a touch edit attach to", shared by
+     the arming pass and the teardown so the two can never look at different
+     elements. Deliberately NOT a fallback to #studio: see the note on
+     armTouchEditing below.
+
+     F-TE01 (touch-edit, 2026-09-23): scope is load-bearing, and a bare
+     `document.querySelector` gets it WRONG. The library and the filmstrip render
+     30+ `.ce-poem-stage` preview nodes, so the first document-wide match is a
+     thumbnail — arming it would put `touch-action:none` on a preview card and
+     write the long-press into `state.currentSlideIdx` (the selected slide, not
+     the thumbnail's slide), which is the exact bug the note below describes.
+     Resolve from the LIVE STUDIO ROOT down, and only accept a stage that
+     actually contains the editable the caller is asking about. */
+  function activeTouchStage(root, el) {
+    var scope = root || document.getElementById('studio') || document;
+    var stages = scope.querySelectorAll('#ce-real-stage, .ce-carousel-slide-stage, .ce-postcore-stage, .ce-poem-stage, .ce-studio-post-frame, #active-studio-canvas');
+    if (!stages.length) return null;
+    if (!el) return stages[0];
+    for (var i = 0; i < stages.length; i++) {
+      if (stages[i].contains(el)) return stages[i];
+    }
+    return null;
+  }
+
+  /* A shared 'is this ours' test for an outside tap: the element, its grip, the
+     studio's own edit affordances (drag handle / block grip) and the draggable
+     boxes all count as inside. Kept as one predicate so the dismiss handler and
+     the teardown can never disagree about what a tap-outside is. */
+  function touchEditInside(el, t) {
+    if (!el || !t) return false;
+    if (el === t || (el.contains && el.contains(t))) return true;
+    return !!(t.closest && t.closest('.ce-block-drag-grip, .ce-drag-handle-bar, .ce-draggable-box'));
+  }
+
+  /* F-TE01 (touch-edit, 2026-09-23): the reasons that genuinely DROP an edit.
+     'outside' is deliberately NOT one of them — an outside tap is how the blur
+     commits on a phone, so it takes the save path, not the warning path. */
+  var DROPPING_REASONS = { tab: 1, unmount: 1, close: 1, 'losing-text': 1 };
+
+  /* F-TE01 (touch-edit, 2026-09-23): the honest notice. An abandoned edit is a
+     LOSS, and the layer used to lose it in total silence — the node was left
+     dirty-looking in the DOM and the record was never written, so the canvas
+     showed text a reload would not bring back. The caller says WHY (`reason`),
+     this turns that into one sentence naming what happened and what is left.
+     A teardown with nothing typed says nothing, because nothing was lost. */
+  function notifyEditDrop(el, reason, changed) {
+    if (!changed) return;
+    if (!window.showAppToast) return;
+    if (reason === 'tab') {
+      window.showAppToast('Edit discarded — you left the Studio before saving it');
+    } else if (reason === 'losing-text') {
+      /* The 'input' listener could not be attached, so the 500ms live-save was
+         never armed: the text exists only in the DOM node. Discarding is the
+         only honest option, and it has to be said out loud. */
+      window.showAppToast('Edit discarded — the canvas was replaced before it could be saved');
+    } else {
+      window.showAppToast('Edit kept in the canvas only — it was not saved before you left');
+    }
+  }
+
+  /* ── F-TE01 · window.ceTouchEdit.teardown(reason) ────────────────────────
+     Safe to call at ANY time, from anywhere, any number of times. It is a
+     no-op when no edit is live (so a caller never has to test first), and it
+     is the only place that releases what a touch edit acquires:
+       1. the pending long-press timer (an in-flight press must not arm a
+          contenteditable on a screen the user has already left),
+       2. the live contenteditable + .ce-canvas-editing-active class + focus,
+       3. the lazily-registered outside-tap dismiss listener,
+       4. the armed/dirty bookkeeping on every node of the ACTIVE stage.
+     `reason` is 'tab' | 'close' | 'unmount' | anything else — it only decides
+     the wording of the notice, never whether the release happens.
+
+     WHAT IT INTENTIONALLY DOES NOT DO: roll back text the user already typed.
+     The commit path (scheduleCommit → el.__cePendingText) exists precisely so a
+     canvas re-render cannot eat keystrokes, so tearing that down would be the
+     data loss this function exists to prevent. If an edit is still dirty the
+     drop is REPORTED (notifyEditDrop) rather than silently swallowed — but the
+     'input' handler is a listener on the node itself and therefore empty at
+     this point; re-reading innerText here would write DOM text back over a
+     record that closeStudio is about to save (the poison slideHTML warns about
+     at index.html:13054). Honest notice over a silent overwrite. */
+  function ceTouchEditTeardown(reason) {
+    var el = session.el;
+    if (el) {
+      if (el.__ceTouchLpTimer) { clearTimeout(el.__ceTouchLpTimer); el.__ceTouchLpTimer = 0; }
+      if (el.__ceTouchCommitTimer) { clearTimeout(el.__ceTouchCommitTimer); el.__ceTouchCommitTimer = 0; }
+      var wasEditing = el.getAttribute('contenteditable') === 'true';
+      /* F-TE01 (touch-edit, 2026-09-23): "changed" is read from the live text,
+         NOT from __cePendingText. A keydown Escape commits immediately and
+         CLEARS the pending payload before blur ever runs, so a pending-based
+         test read every Escape as "nothing was typed" and stayed silent about a
+         real edit that was about to be thrown away. */
+      var startText = String(el.__ceTouchStartText || '');
+      var liveText = '';
+      try { if (el.isConnected) liveText = String(el.innerText || el.textContent || '').trim(); } catch (_lt) { liveText = ''; }
+      var changed = wasEditing && startText !== liveText;
+      /* Blur BEFORE releasing the caret: the 'blur' listener is what commits the
+         500ms pending payload, and it is also what lets the OUTSIDE-TAP path
+         classify this as an ordinary commit instead of a lost edit. Removing
+         `contenteditable` first (the old order) meant blur fired against a node
+         that was no longer editable, so `commit()` bailed on its recovery
+         branch and a dismissed edit produced no save at all. */
+      if (wasEditing) {
+        try { el.blur(); } catch (_bl) {}
+      }
+      el.removeAttribute('contenteditable');
+      el.classList.remove('ce-canvas-editing-active');
+      if (wasEditing && document.activeElement === el) {
+        /* Blur alone leaves WebKit's caret session alive on some iOS builds, so
+           the on-screen keyboard outlives the edit; moving focus to the body is
+           what dismisses it. */
+        try { document.body && document.body.focus({ preventScroll: true }); } catch (_bf) {}
+      }
+      /* Only a reason that actually DROPS the edit earns a warning. An outside
+         tap is the normal way to finish on a phone: the blur above already
+         committed it, so warning there would be the layer crying wolf about a
+         save it just performed. */
+      if (wasEditing && DROPPING_REASONS[reason]) notifyEditDrop(el, reason, changed);
+    }
+    if (session.outsideTap) {
+      document.removeEventListener('pointerdown', session.outsideTap, true);
+      session.outsideTap = null;
+    }
+    session.el = null;
+    /* Release the bookkeeping on every node of the LIVE studio root. The arming
+       marker is what made this layer refuse to re-arm a node, so a stale marker
+       is how a node comes back from another tab as a touch-action:none box that
+       answers no gesture at all. Scope matters: the library renders 30+ stage
+       previews whose text nodes were never armed, and walking those from the
+       document would clear markers this layer never set. */
+    var scope = document.getElementById('studio') || document;
+    scope.querySelectorAll('[data-ce-block], .kickline[data-ce-edit], #studio-editable-text').forEach(function (n) {
+      n.__ceTouchArmed = false;
+      n.__ceTouchDirty = false;
+      n.__cePendingText = null;
+      n.__ceTouchStartText = '';
+      if (n.__ceTouchLpTimer) { clearTimeout(n.__ceTouchLpTimer); n.__ceTouchLpTimer = 0; }
+      if (n.__ceTouchCommitTimer) { clearTimeout(n.__ceTouchCommitTimer); n.__ceTouchCommitTimer = 0; }
+    });
+    /* F-TE01 (touch-edit, 2026-09-23): the extension list. Everything this
+       layer installs outside its own closures — the sync-discovery pair, the
+       tools sheet's Escape/outside-tap pair, the tools observer — is recorded
+       at install time and released here, so a teardown really is "nothing of
+       mine is still attached". Observers are disconnected for the same reason:
+       one that outlives a teardown keeps scheduling sweeps that re-arm a stage
+       nothing is editing. */
+    /* F-RX1 (touch-edit, 2026-09-23): the phone tools sheet is the layer's ONLY
+       portal (the inspector node is moved to `body > aside.ce-tools-sheet` at
+       z-sheet/50vh and only `reset()` sends it home), so a route teardown that
+       drained its listeners without calling reset() left a detached fixed panel
+       with no dismiss and no Escape — exactly the "next Studio item inherits a
+       fixed 'Close tools' panel" state ensureDockTools guards against. `reset()`
+       is idempotent (restore() no-ops when nothing is portaled), so calling it
+       here is safe when no sheet is open, and it runs BEFORE the listener and
+       observer drain below so the sheet can never be left attached to a dead
+       layer. closeStudio's own reset stays as the second owner. */
+    try { window.__CE_RESET_PHONE_TOOLS__ && window.__CE_RESET_PHONE_TOOLS__(); } catch (_rpt) {}
+    for (var i = listeners.length - 1; i >= 0; i--) {
+      var L = listeners[i];
+      try { L.target.removeEventListener(L.type, L.fn, L.opts); } catch (_rl) {}
+    }
+    listeners.length = 0;
+    /* The tools-sheet IIFE is a separate closure and cannot see `listeners`, so
+       it hands its pair over through `window.ceTouchEdit.__ext`. Drain it here:
+       one teardown, one behaviour, no second copy of the removal logic. */
+    var ext = (window.ceTouchEdit && window.ceTouchEdit.__ext) || [];
+    for (var k = ext.length - 1; k >= 0; k--) {
+      var E = ext[k];
+      try {
+        if (E.observer) E.observer.disconnect();
+        else E.target.removeEventListener(E.type, E.fn, E.opts);
+      } catch (_re) {}
+    }
+    if (ext.length) ext.length = 0;
+    /* F-TE20 (touch-edit, 2026-09-23): every flag that guards a listener
+       registration must be cleared in the SAME teardown that removes that
+       listener. The drain above removes the tools-sheet Escape handler and the
+       outside-tap dismiss handler, but those two are gated by flags that
+       outlive the removal, so the next re-arm reads "already bound" on a
+       listener that no longer exists: after the first tab change Escape was
+       dead forever, and the outside tap stayed dead whenever the same toggle
+       node was reused (its flag lives on `t`, not in `__ext`, so the drain
+       could not reach it). Reset both here so re-arming restores both gestures.
+       The observer flag is cleared further below for the same reason. */
+    window.__CE_TOOLS_ESC_BOUND__ = false;
+    var toggleNode = document.getElementById('ce-tools-toggle');
+    if (toggleNode) toggleNode.__ceToolsDismissBound = false;
+    /* F-M40.s6 (master-20260923): the SAME invariant as the two flags above, for
+       the gesture S-7 added. The drag lane's per-node guard and its pointer
+       listeners are two halves of one registration, so the guard is cleared
+       wherever the listener could be, and any in-flight drag is dropped: a
+       teardown that lands mid-pull must not leave `touch-action: none` on a node
+       the next open will reuse. */
+    Array.prototype.forEach.call(document.querySelectorAll('#ce-tools-toggle'), function (tg) {
+      tg.__ceToolsDragBound = false;
+      try { tg.style.removeProperty('touch-action'); } catch (_dt) {}
+    });
+    /* F-TE01 (touch-edit, 2026-09-23): the tools-sheet observer is the one
+       extension that is SINGLETON PER SESSION rather than per install, because
+       `window.__CE_DOCK_TOOLS_OBSERVER__` is the flag arm() uses to avoid
+       stacking a second one. Disconnecting it without clearing that flag makes
+       the next `arm()` a no-op forever: the dock sweep then never runs again,
+       which is exactly how the first open kept its toggle wired and every open
+       after it did not. Clear the flag so the next route cycle re-arms. */
+    /* F-TE20 (touch-edit, 2026-09-23): same invariant as the two flags above —
+       the guard is cleared unconditionally, not only when a live observer
+       happened to be recorded, so a teardown can never leave the guard set on
+       an observer it did not actually install (the MutationObserver guard can
+       be set with `__CE_DOCK_TOOLS_OBS__` still null). "Arm once" must mean
+       "armed and installed", never "armed at some point in the past". */
+    if (window.__CE_DOCK_TOOLS_OBSERVER__) {
+      window.__CE_DOCK_TOOLS_OBSERVER__ = false;
+      window.__CE_DOCK_TOOLS_OBS__ = null;
+    }
+    for (var j = observers.length - 1; j >= 0; j--) {
+      try { observers[j].disconnect(); } catch (_ro) {}
+    }
+    observers.length = 0;
+    observerTargets.length = 0;
+    /* F-TE01 (touch-edit, 2026-09-23): the document observer above is the
+       layer's ONLY re-arm signal, so `armSweep` has to be re-armed by hand or
+       teardown permanently disables the feature it is meant to clean up after.
+       The observer is rebuilt here rather than left running, because a
+       teardown that leaves the render signal attached is not a teardown — and
+       a teardown that removes it and does not put it back is how the SECOND
+       studio open came back with `__ceTouchArmed` undefined and a poem text box
+       that answered no long-press at all. */
+    armBaseObserver();
+    if (armSweepTimer) { clearTimeout(armSweepTimer); armSweepTimer = 0; }
+    if (dockEnsureTimer) { clearTimeout(dockEnsureTimer); dockEnsureTimer = 0; }
+    return true;
+  }
+  window.ceTouchEdit = window.ceTouchEdit || {};
+  window.ceTouchEdit.teardown = ceTouchEditTeardown;
+  window.__CE_TEARDOWN_TOUCH_EDIT__ = ceTouchEditTeardown;
+
+  /* The one-outside-tap dismiss. Registered on ENTRY into an edit and removed
+     by teardown(), so it is never stacked: before this, `blur` was the only way
+     out on the phone and nothing said where "outside" is, so an edit survived
+     until the user happened to tap a control that stole focus. Capture phase,
+     so the tap reaches the editor before any studio handler moves the slide.
+     An INSIDE tap is left completely alone — it is what places the caret. */
+  function armOutsideTap() {
+    if (session.outsideTap) return;
+    session.outsideTap = function (e) {
+      var el = session.el;
+      if (!el) { ceTouchEditTeardown('outside'); return; }
+      if (touchEditInside(el, e.target)) return;
+      ceTouchEditTeardown('outside');
+    };
+    document.addEventListener('pointerdown', session.outsideTap, true);
+  }
+
   function bridge() {
     return window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
   }
@@ -28,23 +339,32 @@
        text blocks then received touch-action:none and a long-press wrote into
        state.currentSlideIdx (the selected slide, not the thumbnail's slide).
        A missing stage is safer than arming a preview node. */
-    var stage = container.querySelector('#ce-real-stage, .ce-carousel-slide-stage, .ce-postcore-stage, .ce-poem-stage, .ce-studio-post-frame, #active-studio-canvas');
+    var stage = activeTouchStage(container);
     if (!stage) return;
-    var editables = stage.querySelectorAll('[data-ce-block="content"], [data-ce-block="hook"], [data-ce-block="body"], .kickline[data-ce-edit]');
+    var editables = stage.querySelectorAll('[data-ce-block="content"], [data-ce-block="hook"], [data-ce-block="body"], .kickline[data-ce-edit], #studio-editable-text');
     editables.forEach(function (el) {
+      /* Belt and braces: an authored stage can nest previews of its own, so
+         re-check containment against the stage that will actually be edited. */
+      if (!stage.contains(el)) return;
       if (el.__ceTouchArmed) return;
       el.__ceTouchArmed = true;
       el.style.touchAction = 'none';
 
-      var lpTimer = 0, lpFired = false, downPt = null;
+      var lpFired = false, downPt = null;
 
+      /* F-TE01 (touch-edit, 2026-09-23): the long-press timer lives on the NODE
+         (`el.__ceTouchLpTimer`), not in a closure the node's marker cannot
+         reach. The closure copy was unreachable from outside, so a press still
+         counting down when the user switched tabs had no way to be cancelled
+         and armed a contenteditable on a screen the user had already left. */
       el.addEventListener('pointerdown', function (e) {
         if (el.getAttribute('contenteditable') === 'true') return;
         if (e.pointerType === 'mouse') return; // desktop keeps dblclick
         lpFired = false;
         downPt = { x: e.clientX, y: e.clientY };
-        clearTimeout(lpTimer);
-        lpTimer = setTimeout(function () {
+        clearTimeout(el.__ceTouchLpTimer);
+        el.__ceTouchLpTimer = setTimeout(function () {
+          el.__ceTouchLpTimer = 0;
           lpFired = true;
           try { navigator.vibrate && navigator.vibrate(12); } catch (_) {}
           var before = window.studioSnapshot ? window.studioSnapshot() : null;
@@ -58,26 +378,33 @@
             if (range && sel) { sel.removeAllRanges(); sel.addRange(range); }
           } catch (_) {}
           el.__ceTouchBefore = before;
+          el.__ceTouchStartText = String(el.innerText || el.textContent || '').trim();
+          /* F-TE01 (touch-edit, 2026-09-23): the entry marker the teardown
+             reads, set exactly once per edit session, then the one outside-tap
+             dismiss is armed. */
+          session.el = el;
+          armOutsideTap();
         }, LONG_PRESS_MS);
       });
 
       var cancelLP = function (e) {
-        if (lpTimer && downPt && e.clientX != null &&
+        if (el.__ceTouchLpTimer && downPt && e.clientX != null &&
             Math.abs(e.clientX - downPt.x) + Math.abs(e.clientY - downPt.y) > 12) {
-          clearTimeout(lpTimer); lpTimer = 0;
+          clearTimeout(el.__ceTouchLpTimer); el.__ceTouchLpTimer = 0;
         }
       };
       el.addEventListener('pointermove', cancelLP);
-      el.addEventListener('pointercancel', function () { clearTimeout(lpTimer); lpTimer = 0; });
+      el.addEventListener('pointercancel', function () { clearTimeout(el.__ceTouchLpTimer); el.__ceTouchLpTimer = 0; });
 
       el.addEventListener('pointerup', function () {
-        clearTimeout(lpTimer); lpTimer = 0;
+        clearTimeout(el.__ceTouchLpTimer); el.__ceTouchLpTimer = 0;
       });
 
       // Commit on input (debounced) — the canvas can re-render mid-edit and
       // replace this node, which kills blur; live-save is also Canva-style.
       var commitTimer = 0;
       var commit = function () {
+        el.__ceTouchCommitTimer = 0;
         if (window.__CE_TOUCH_TRACE__) console.log('[ce-touch] commit fire', { attr: el.getAttribute('contenteditable'), pending: el.__cePendingText != null });
         commitTimer = 0;
         if (el.getAttribute('contenteditable') !== 'true') {
@@ -103,9 +430,11 @@
       };
       var scheduleCommit = function () {
         if (el.getAttribute('contenteditable') !== 'true') return;
+        el.__ceTouchDirty = true;
         el.__cePendingText = (el.innerText || '').trim();
         clearTimeout(commitTimer);
         commitTimer = setTimeout(commit, 500);
+        el.__ceTouchCommitTimer = commitTimer;
       };
       el.addEventListener('input', scheduleCommit);
       el.addEventListener('blur', function () {
@@ -177,7 +506,16 @@
          wins on a healthy boot, short enough that a broken boot still
          reveals the app. */
       setTimeout(function () { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); }, 6000);
-      window.addEventListener('load', function () { setTimeout(function () { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); }, 3500); });
+      /* F-TE01 (touch-edit, 2026-09-23): the backstop only exists to catch a
+         boot whose data-driven lift never ran. Leaving it attached means it
+         fires on a `load` that can happen long after boot — i.e. it re-lifts a
+         veil that has nothing to do with it. Self-removing, and recorded in the
+         extension list so nothing this layer installs is invisible to it. */
+      var veilLoadBackstop = function () {
+        setTimeout(function () { window.__CE_LIFT_VEIL__ && window.__CE_LIFT_VEIL__(); }, 3500);
+        window.removeEventListener('load', veilLoadBackstop);
+      };
+      window.addEventListener('load', veilLoadBackstop);
     }
   } catch (_) {}
   /* iOS-style edge gesture (owner 2026-09-11: "I want to move back… put my
@@ -262,11 +600,26 @@
   // webviews deny Local-Network-Access, Mac asleep, cellular), never leave a
   // silent dead button. Surface the manual route once and record the mode.
   window.__CE_SYNC_UNREACHABLE__ = false;
+  /* F-DUR (hank/ce-touch-edit, 2026-09-22): the toast latch is separate from
+     the unreachable STATE. The state is refreshed on every failure (so
+     ce_last_sync_error always names the newest cause); the toast fires once
+     per outage and the latch resets only when a sync actually succeeds, so
+     a NEW outage is reported instead of being swallowed by the last one's. */
+  var unreachableToastShown = false;
   function markUnreachable(mode) {
-    if (window.__CE_SYNC_UNREACHABLE__) return;
     window.__CE_SYNC_UNREACHABLE__ = true;
     try { localStorage.setItem('ce_last_sync_error', mode + ' @ ' + new Date().toISOString()); } catch (_) {}
-    if (window.showAppToast) window.showAppToast('Mac unreachable — open in Safari or use Download-for-phone');
+    if (unreachableToastShown) return;
+    unreachableToastShown = true;
+    /* Queued edits are named in the failure toast — a count that exists but
+       is never surfaced is the same lie as the count not existing. */
+    var queued = 0;
+    try { queued = countUnsyncedEdits(); } catch (_q) { queued = 0; }
+    window.__CE_UNSYNCED_EDITS__ = queued;
+    if (window.showAppToast) window.showAppToast(
+      queued > 0
+        ? 'Mac unreachable — ' + queued + (queued === 1 ? ' edit' : ' edits') + ' queued'
+        : 'Mac unreachable — open in Safari or use Download-for-phone');
     console.warn('[ce-sync] unreachable:', mode);
   }
   var reachFlapGuard = 0;
@@ -274,10 +627,24 @@
     // flap guard (audit 9.14): only clear when actually flagged, and not
     // more than once a minute.
     if (!window.__CE_SYNC_UNREACHABLE__) return;
+    /* F-05 (cloud/ce-ui, 2026-09-21): a single successful call is NOT proof the
+       phone is in sync — edits can still be queued behind it. Only report
+       healthy when nothing is waiting; otherwise name the real pending count
+       so the surface cannot claim a sync it has not performed. */
+    var pending = 0;
+    try { pending = countUnsyncedEdits(); } catch (_c) { pending = 0; }
+    if (pending > 0) {
+      window.__CE_UNSYNCED_EDITS__ = pending;
+      try { localStorage.setItem('ce_last_sync_error', 'pending-edits @ ' + new Date().toISOString()); } catch (_) {}
+      if (window.showAppToast) window.showAppToast(pending === 1 ? '1 edit still waiting for your Mac' : pending + ' edits still waiting for your Mac');
+      return;
+    }
+    window.__CE_UNSYNCED_EDITS__ = 0;
     var now = Date.now();
     if (now - reachFlapGuard < 60000) return;
     reachFlapGuard = now;
     window.__CE_SYNC_UNREACHABLE__ = false;
+    unreachableToastShown = false;   /* proven reachability re-arms the one-toast-per-outage latch */
     try { localStorage.removeItem('ce_last_sync_error'); } catch (_) {}
   }
   function findSyncEndpoint(cb) {
@@ -389,8 +756,19 @@
     findSyncEndpoint(function (base) { if (base) window.__CE_SYNC_ENDPOINT__ = base; });
   }
   window.__CE_ARM_SYNC__ = armSyncDiscovery;
-  document.addEventListener('pointerdown', armSyncDiscovery, { once: true, passive: true });
-  document.addEventListener('keydown', armSyncDiscovery, { once: true, passive: true });
+  /* F-TE01 (touch-edit, 2026-09-23): `{ once: true, passive: true }` on a
+     listener registry that is never torn down. `once` removes the listener
+     after the first invocation, but a listener that has NOT yet fired keeps
+     its slot for the life of the page — and armSyncDiscovery is made
+     idempotent by its own flag below, so the `once` was never load-bearing.
+     Recorded through on() so the teardown has one list to walk. */
+  var on = function (target, type, fn, opts) {
+    if (!target || !target.addEventListener) return;
+    target.addEventListener(type, fn, opts);
+    listeners.push({ target: target, type: type, fn: fn, opts: opts });
+  };
+  on(document, 'pointerdown', armSyncDiscovery, { passive: true });
+  on(document, 'keydown', armSyncDiscovery, { passive: true });
   // A stale cached endpoint is still revalidated lazily, on the same trigger.
   // Owner sync is different from public-visitor discovery: when this device
   // already holds the write key and an endpoint cache, pull once on boot so
@@ -412,7 +790,8 @@
 
   /* ---- Write key (P0-2) ---------------------------------------------------
      Writes on the sync server require the shared write key (X-CE-Sync-Key
-     header / ?k= param). The owner pastes it ONCE via prompt(); it lives in
+     header, always — never a URL param, see the 2026-09-22 note below).
+     The owner pastes it ONCE via prompt(); it lives in
      localStorage `ce_sync_key`. This helper is for WRITES: the server now
      key-gates the data reads too (/bank, /schedule-requests, /decks), so a
      caller that needs one of those must send the same key — see
@@ -434,6 +813,7 @@
      copy of the pairing flow. One pairing path, one place to fix it. */
   window.__CE_ENSURE_WRITE_KEY__ = ensureWriteKey;
 
+  var persistFailToastShown = false;
   window.__CE_PERSIST_DECK_EDIT__ = function (deck) {
     if (!deck || !deck.id) return;
     var store = {};
@@ -444,41 +824,85 @@
       slides: deck.slides,
       updatedAt: Date.now()
     };
+    var persistFailed = false;
     try { localStorage.setItem('ce_deck_edits', JSON.stringify(store)); } catch (_) {
+      persistFailed = true;
       /* BO: a failed localStorage write meant the edit lived only in memory —
          a reload silently lost it while the UI read as if it were kept. Record
          the state so a surface can warn. */
       window.__CE_PERSIST_LAST_ERROR__ = 'localstorage-write-failed @ ' + new Date().toISOString();
       try { console.warn('[ce-sync] deck edit persisted in memory only — localStorage write failed'); } catch (_w) {}
+      /* F-DUR (hank/ce-touch-edit, 2026-09-22): the diagnostic flag above was
+         written for nothing to read — the user saw a normal save while the
+         edit could not survive a reload. This is NOT a Mac-reachability
+         failure, so it gets its own honest line, once per failure episode
+         (a later successful write re-arms it). */
+      if (!persistFailToastShown) {
+        persistFailToastShown = true;
+        /* F-DUR (hank/ce-touch-edit, 2026-09-22): __CE_PERSIST_LAST_ERROR__ was
+           WRITTEN above and read by NOTHING in the repo (grep: 1 live write,
+           0 reads) — a diagnostic the owner never sees is the silent failure
+           it was meant to expose. Surface it on the SAME toast, not a new
+           mechanism: the recorded cause is appended so the user sees WHY the
+           edit will not survive a reload. */
+        var persistCause = window.__CE_PERSIST_LAST_ERROR__ || 'localstorage-write-failed';
+        if (window.showAppToast) window.showAppToast('Edit kept in memory only — storage full; it will not survive a reload (' + persistCause + ')');
+      }
     }
+    if (!persistFailed) persistFailToastShown = false;
     if (!window.__CE_SYNC_ENDPOINT__) {
       /* BO: no endpoint meant the edit stayed local with no signal at all —
          expose the count of pushed-but-unsynced edits so the shelf surface can
-         say "N edits waiting for your Mac". */
-      window.__CE_UNSYNCED_EDITS__ = (window.__CE_UNSYNCED_EDITS__ || 0) + 1;
+         say "N edits waiting for your Mac".
+         F-B04: this used to be `+= 1`, an INCREMENT — so the number was a count
+         of write ATTEMPTS, not of records still waiting, and it could never go
+         down when a drain succeeded. It is now recomputed from the store, which
+         is the thing the claim is actually about. */
+      window.__CE_UNSYNCED_EDITS__ = countUnsyncedEdits();
       return;
     }
-    var payload = { deckId: deck.id, deck: store[deck.id] };
+    /* F-08 (cloud/ce-ui, 2026-09-21): an oversize-guard + 403-retry `attempt`
+       chain and its `send`/payload scaffolding used to sit here and were NEVER
+       called — this path delegates to pushDeckEdit (below), which owns the same
+       guard chain for both the write and the drain. Dead protection reads as
+       protection, so it is gone rather than left unreachable. */
+    pushDeckEdit(deck.id, store[deck.id], null);
+  };
+
+  /* ── F-B04 · the push chain, extracted so the DRAIN can reuse it ───────────
+     `done(status)` is called with:
+        'ok'     the server took this edit
+        'stale'  the server kept an OLDER copy (LWW loss) — still waiting
+        'fail'   rejected or unreachable — still waiting
+     The counter is refreshed from the store in every terminal branch, so no
+     single write can clear a count that belongs to other records. */
+  function pushDeckEdit(deckId, record, done) {
+    var payload = { deckId: deckId, deck: record };
     var base = window.__CE_SYNC_ENDPOINT__;
     function send(key, viaGet) {
-      // Resolves {status} on any HTTP response, null on network failure
-      // (WebKit/Safari blocks public->private POST bodies at the network
-      // level — that is a rejection, so the GET /set?d= fallback exists).
       var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-      var req = viaGet
-        ? fetch(base + '/set?d=' + encodeURIComponent(b64) + (key ? '&k=' + encodeURIComponent(key) : ''))
-        : fetch(base + '/decks', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key },
-            body: JSON.stringify(payload)
-          });
-      return req.then(
+      /* F-SEC (audit 2026-09-22): the GET fallback carried the write key as `&k=`
+         in the URL, so every fallback write put a live credential into browser
+         history, the server request line and any proxy log. The server accepts
+         `X-CE-Sync-Key` on GET (ce-lan-serve.py advertises it in
+         Access-Control-Allow-Headers and _proxy forwards it), so the key travels
+         as a header on BOTH verbs and never in the URL. */
+      /* F-DUR (hank/ce-touch-edit, 2026-09-22): a fetch whose promise never
+         settled used to wedge the whole chain — neither .then nor .catch
+         ran, drainInFlight stayed true, and every later retry was blocked
+         while the edit looked saved. Every write is now capped at 15s: the
+         AbortController cancels the request where supported, and the race
+         settles the promise even where it is not. A timeout resolves to a
+         marked result ({timeout:true}) so the caller records the real cause
+         and treats it exactly like a network failure — GET fallback, edit
+         stays queued, drain releases. */
+      var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+      var reqOpts = viaGet
+        ? { headers: key ? { 'X-CE-Sync-Key': key } : {} }
+        : { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key }, body: JSON.stringify(payload) };
+      if (ctrl) reqOpts.signal = ctrl.signal;
+      var req = fetch(base + (viaGet ? '/set?d=' + encodeURIComponent(b64) : '/decks'), reqOpts).then(
         function (r) {
-          /* WL0498 (2026-09-19): the body was discarded, so a losing LWW write
-             (200 {ok:true, stale:true}) looked exactly like a win — the phone
-             reported the edit as synced while the server had kept the older
-             copy. Read the body so the caller can tell the two apart; a body
-             that is not JSON (or empty) leaves stale=false, unchanged. */
           return r.text().then(
             function (txt) {
               var body = null;
@@ -488,22 +912,24 @@
             function () { return { status: r.status, body: null }; }
           );
         },
-        function () { return null; }
+        function (err) {
+          if (ctrl && ctrl.signal && ctrl.signal.aborted) return { status: 0, timeout: true };
+          if (err && err.name === 'AbortError') return { status: 0, timeout: true };
+          return null;
+        }
       );
+      var timeoutP = new Promise(function (resolve) {
+        var t = setTimeout(function () {
+          try { if (ctrl) ctrl.abort(); } catch (_ab) {}
+          resolve({ status: 0, timeout: true });
+        }, 15000);
+        req.then(function () { clearTimeout(t); }, function () { clearTimeout(t); });
+      });
+      return Promise.race([req, timeoutP]);
     }
-    /* R14-05 (2026-09-19): the GET /set fallback carries the deck base64 in the
-       request LINE; the sync server's stdlib readline ceiling (65537) answers
-       414 BEFORE any handler runs, and the old code called markReachable() for
-       every non-403 status — so an oversize deck "synced" green into the void.
-       Cap the raw deck JSON at 44 KB (44*1024*4/3 ≈ 58.7 KB b64 + path/key/query
-       stays under 64 KB) and say so honestly instead of firing a doomed 414. */
-    var GET_SET_MAX_JSON_BYTES = 45056;   // 44 KB deck JSON ceiling for GET fallback
+    var GET_SET_MAX_JSON_BYTES = 45056;
     function attempt(key, viaGet) {
       if (viaGet) {
-        /* Byte length, not .length: the app's content is Devanagari — each
-           Hindi char is 1 UTF-16 unit but 3 UTF-8 bytes, and b64 encodes the
-           UTF-8 form, so a code-unit count under-reads the request line by up
-           to 3x. TextEncoder where available, escaped-length fallback. */
         var jsonBytes = 0;
         try {
           var json = JSON.stringify(payload);
@@ -512,13 +938,12 @@
             : encodeURIComponent(json).replace(/%[0-9A-Fa-f]{2}/g, 'x').length;
         } catch (_b) {}
         if (jsonBytes > GET_SET_MAX_JSON_BYTES) {
-          markUnreachable('deck-too-large-for-phone-sync');   // toast: "edit this deck on the Mac"
+          markUnreachable('deck-too-large-for-phone-sync');
           return Promise.resolve({ status: 0, oversize: true });
         }
       }
       return send(key, viaGet).then(function (res) {
         if (res && res.status === 403) {
-          // Wrong/missing write key — clear it, prompt once, retry same verb.
           try { localStorage.removeItem('ce_sync_key'); } catch (_) {}
           return new Promise(function (resolve) {
             ensureWriteKey(function (newKey) {
@@ -527,27 +952,91 @@
             });
           });
         }
-        if (!res && !viaGet) return attempt(key || getWriteKey(), true); // POST blocked → GET write
+        if ((!res || res.timeout) && !viaGet) return attempt(key || getWriteKey(), true);
         return res;
       });
     }
     attempt(getWriteKey(), false).then(function (res) {
-      // A 4xx/5xx (or the client-side oversize refusal, status 0) is a
-      // REJECTION, not reachability — the old `!res ? unreachable : reachable`
-      // marked 414/413/429 green. Only a real 2xx/3xx means the write landed.
-      if (!res || !res.status || res.status >= 400) { markUnreachable('write-rejected-' + (res && res.status ? res.status : 'network')); return; }
-      /* WL0498: 200 {stale:true} means the server KEPT THE OLDER COPY — this
-         edit was discarded, so reporting it as synced is a false claim. Say so
-         and keep the local copy (it is still in ce_deck_edits) so the next
-         write can win once the server copy advances. */
+      if (!res || !res.status || res.status >= 400) {
+        /* The oversize branch already recorded its precise cause; do not
+           overwrite 'deck-too-large-for-phone-sync' with a generic miss. */
+        if (!(res && res.oversize)) {
+          markUnreachable(res && res.timeout ? 'timeout' : 'write-rejected-' + (res && res.status ? res.status : 'network'));
+        }
+        if (done) done('fail');
+        return;
+      }
       if (res.body && res.body.stale === true) {
         markUnreachable('edit-superseded-by-newer-remote-copy');
+        if (done) done('stale');
         return;
       }
       markReachable();
-      window.__CE_UNSYNCED_EDITS__ = 0;
-    }).catch(function () { markUnreachable('write-failed'); });
-  };
+      window.__CE_UNSYNCED_EDITS__ = countUnsyncedEdits();
+      if (done) done('ok');
+    }).catch(function () {
+      markUnreachable('write-failed');
+      if (done) done('fail');
+    });
+  }
+
+  /* How many records in ce_deck_edits are NOT yet known to the Mac. The pull
+     path records what the server last served in `ce_deck_synced_at` (id ->
+     updatedAt), so "waiting" is local.updatedAt > synced[id] — the same
+     comparison the drain uses, so the number and the action can never disagree. */
+  function countUnsyncedEdits() {
+    var store = {}, synced = {};
+    try { store = JSON.parse(localStorage.getItem('ce_deck_edits') || '{}'); } catch (_) { return 0; }
+    try { synced = JSON.parse(localStorage.getItem('ce_deck_synced_at') || '{}'); } catch (_) {}
+    var n = 0;
+    Object.keys(store).forEach(function (id) {
+      var mine = (store[id] && store[id].updatedAt) || 0;
+      if (mine > (synced[id] || 0)) n++;
+    });
+    return n;
+  }
+
+  /* The drain. Walks every waiting record and re-pushes it, oldest first, and
+     STOPS at the first failure — an unreachable Mac must not be hammered, and a
+     partially-drained queue is reported honestly rather than zeroed. Runs only
+     on the reachability transition (see pullRemoteEdits), which is the moment
+     the endpoint is proven live. */
+  var drainInFlight = false;
+  function drainUnsyncedEdits() {
+    if (drainInFlight || !window.__CE_SYNC_ENDPOINT__) return;
+    var store = {}, synced = {};
+    try { store = JSON.parse(localStorage.getItem('ce_deck_edits') || '{}'); } catch (_) { return; }
+    try { synced = JSON.parse(localStorage.getItem('ce_deck_synced_at') || '{}'); } catch (_) {}
+    var waiting = Object.keys(store).filter(function (id) {
+      return ((store[id] && store[id].updatedAt) || 0) > (synced[id] || 0);
+    }).sort(function (a, b) { return (store[a].updatedAt || 0) - (store[b].updatedAt || 0); });
+    if (!waiting.length) { window.__CE_UNSYNCED_EDITS__ = 0; return; }
+    drainInFlight = true;
+    var i = 0;
+    (function next() {
+      if (i >= waiting.length) {
+        drainInFlight = false;
+        window.__CE_UNSYNCED_EDITS__ = countUnsyncedEdits();
+        return;
+      }
+      var id = waiting[i++];
+      pushDeckEdit(id, store[id], function (status) {
+        if (status !== 'ok') {
+          /* Stopped — the Mac is not taking writes right now. Leave the rest
+             queued; the next successful pull tries again. */
+          drainInFlight = false;
+          window.__CE_UNSYNCED_EDITS__ = countUnsyncedEdits();
+          return;
+        }
+        try {
+          synced[id] = store[id].updatedAt;
+          localStorage.setItem('ce_deck_synced_at', JSON.stringify(synced));
+        } catch (_) {}
+        next();
+      });
+    })();
+  }
+  window.__CE_DRAIN_UNSYNCED_EDITS__ = drainUnsyncedEdits;
 
   // Boot: re-apply locally-edited decks over the static payload so the site
   // shows YOUR version, and keep the arm hook attached to every canvas render.
@@ -584,12 +1073,18 @@
     if (pullFailures < 3) return;
     try { localStorage.removeItem('ce_sync_endpoint'); } catch (_) {}
     window.__CE_SYNC_ENDPOINT__ = null;
-    pullFailures = 0;
+    /* F-06 (cloud/ce-ui, 2026-09-21): this used to reset pullFailures to 0
+       BEFORE the caller tested `pullFailures === 0`, so a third consecutive
+       failed pull made the app declare the unreachable Mac reachable and
+       delete its own error record. Reset the counter only AFTER the caller has
+       decided reachability from the pre-heal value; the error record stays in
+       place until a genuinely successful pull clears it. */
     /* BO-P8: the silent re-discovery could leave the owner staring at a stale
        deck with no error state — name it once per heal. */
     if (window.showAppToast) window.showAppToast('Mac still unreachable — showing your last synced copy');
     findSyncEndpoint(function (b) { if (b) window.__CE_SYNC_ENDPOINT__ = b; });
   }
+  function healResetPullFailures() { pullFailures = 0; }
   function pullRemoteEdits() {
     // F-02: reads are key-gated. Share visitors (no key) skip silently —
     // they read the static share-decks payload, never the private store.
@@ -597,14 +1092,41 @@
     var key = getWriteKey();
     if (!key) return;
     var base = window.__CE_SYNC_ENDPOINT__;
-    fetch(base + '/decks', { headers: { 'X-CE-Sync-Key': key } })
-      .then(function (r) { return r.ok ? r.json() : null; })
+    /* F-DUR (hank/ce-touch-edit, 2026-09-22, sibling of the write-path fix): a
+       pull whose fetch never settles left the phone on a stale deck with NO
+       signal — `pullFailures` stayed flat, `markUnreachable` never fired, and
+       the UI read as if the copy were current. Every pull is now capped at 15s:
+       the AbortController cancels the request where supported (the same pattern
+       as pushDeckEdit's send), and the abort lands in the existing .catch below,
+       so it takes the normal failure path (name the cause, heal, retry). The
+       success path is unchanged. */
+    var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+    var pullOpts = { headers: { 'X-CE-Sync-Key': key } };
+    if (ctrl) pullOpts.signal = ctrl.signal;
+    var pullTimer = setTimeout(function () { try { if (ctrl) ctrl.abort(); } catch (_ab) {} }, 15000);
+    fetch(base + '/decks', pullOpts)
+      .then(function (r) { clearTimeout(pullTimer); return r.ok ? r.json() : null; })
       .then(function (data) {
-        if (!data || !data.decks) { pullFailures++; healEndpointIfDead(); if (pullFailures === 0) markReachable(); else markUnreachable('pull-' + pullFailures); return; }
+        if (!data || !data.decks) { pullFailures++; markUnreachable('pull-' + pullFailures); healEndpointIfDead(); healResetPullFailures(); return; }
         pullFailures = 0;
         markReachable();
         var local = {};
         try { local = JSON.parse(localStorage.getItem('ce_deck_edits') || '{}'); } catch (_) {}
+        /* F-B04: a pull that SUCCEEDED is proof the Mac is reachable — the one
+           moment a stranded edit can be expected to land. Record what the server
+           just served (so "waiting" has a real baseline) and drain the queue.
+           This is the path that did not exist: before it, a phone edit made
+           while the Mac was away waited forever. */
+        try {
+          var syncedNow = {};
+          try { syncedNow = JSON.parse(localStorage.getItem('ce_deck_synced_at') || '{}'); } catch (_) {}
+          Object.keys(data.decks).forEach(function (id) {
+            var r = data.decks[id];
+            if (r && (r.updatedAt || 0) > (syncedNow[id] || 0)) syncedNow[id] = r.updatedAt || 0;
+          });
+          localStorage.setItem('ce_deck_synced_at', JSON.stringify(syncedNow));
+        } catch (_) {}
+        drainUnsyncedEdits();
         Object.keys(data.decks).forEach(function (id) {
           var remote = data.decks[id];
           var mine = local[id];
@@ -629,10 +1151,12 @@
         });
         try { localStorage.setItem('ce_deck_edits', JSON.stringify(local)); } catch (_) {}
       })
-      .catch(function () {
+      .catch(function (err) {
+        clearTimeout(pullTimer);
         pullFailures++;
-        markUnreachable('pull-network');
+        markUnreachable((err && err.name === 'AbortError') ? 'pull-timeout' : 'pull-network');
         healEndpointIfDead();
+        healResetPullFailures();
       });
   }
   // test/probe hook (final refinement): deterministic pull for E2E checks
@@ -673,7 +1197,13 @@
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
         var rows = ((j && j.requests) || []).filter(function (row) { return row && (row.state === 'failed' || row.state === 'needs_verification'); });
-        if (!rows.length) return;
+        if (!rows.length) {
+          /* F-11 (cloud/ce-ui, 2026-09-21): this was an early return, so the
+             normal "nothing failed" case said nothing and the probe result
+             vanished. It is information, not a failure: state it calmly. */
+          if (window.showAppToast) window.showAppToast('All clear: no schedules are waiting to be retried.', { tone: 'info' });
+          return;
+        }
         window.__CE_SCHED_FAILED__ = rows;
         var n = rows.length;
         var verifyCount = rows.filter(function (row) { return row.state === 'needs_verification'; }).length;
@@ -737,12 +1267,12 @@
             retryEl.disabled = false;
             if (out.s === 200) {
               retryEl.style.display = 'none';
-              statusEl.textContent = 'Re-queued. Your Mac will try Meta again within ~30s.';
+              statusEl.textContent = 'Re-queued \u2014 waiting for your Mac to pick it up (it must be running).';
               ceScheduleWatch(key, id, statusEl, retryEl);
             } else {
-              statusEl.textContent = (out.j && out.j.error) ? out.j.error : 'Retry did not go through.';
+              statusEl.textContent = (out.j && out.j.error) ? out.j.error : 'Retry did not go through \u2014 the row could not be re-queued on your Mac. Re-open this sheet to check its state.';
             }
-          }, function () { retryEl.disabled = false; statusEl.textContent = 'Network failed on retry.'; });
+          }, function () { retryEl.disabled = false; statusEl.textContent = 'Network failed on retry \u2014 the retry never reached your Mac. Check the Wi-Fi and tap Retry again.'; });
       };
     };
     var tick = function () {
@@ -752,15 +1282,25 @@
         var st = String(row.state || '');
         if (st === 'pending' || st === 'queued' || st === 'scheduling') {
           statusEl.textContent = waited() < 45
-            ? 'Queued \u2014 your Mac picks it up within ~30s (it must be running).'
-            : 'Still working on your Mac \u2014 ' + waited() + 's so far, last checked just now.';
+            ? 'Queued \u2014 your Mac has not picked it up yet (it must be running).'
+            : 'Still waiting on your Mac \u2014 ' + waited() + 's so far, last checked just now.';
           keepWatching();
           return;
         }
+        /* F-S-NNR (cloud/ce-ui, 2026-09-21): the Mac books a phone row with
+           publishNow false (App/CEMetaPublisher.swift:936), so even a row the
+           Mac reports back as 'scheduled' is booked on Meta's clock and may
+           still be hours or days from going live. The old 'it landed' line
+           read as proof the post was up. Only the row's own state is claimed
+           here; the scheduled minute is named when the row carries one. */
         if (st === 'scheduled' || st === 'published') {
-          statusEl.textContent = 'Confirmed: on Meta\u2019s clock. Your Mac reported it landed.';
+          var booked = '';
+          if (row.scheduleUnixMs) {
+            try { booked = ' for ' + new Date(Number(row.scheduleUnixMs)).toLocaleString(); } catch (_b) {}
+          }
+          statusEl.textContent = 'Booked on Meta\u2019s clock' + booked + ' \u2014 that is the time it should go live. Your Mac cannot confirm the actual publish here.';
           if (retryEl) retryEl.style.display = 'none';
-          if (window.showAppToast) window.showAppToast('Schedule confirmed by your Mac');
+          if (window.showAppToast) window.showAppToast('Your Mac booked it on Meta\u2019s clock' + booked);
           if (typeof onDone === 'function') onDone('scheduled');
           return;
         }
@@ -786,29 +1326,76 @@
     if (!deck || !deck.slides || !deck.slides.length) { if (window.showAppToast) window.showAppToast('Open a deck first'); return; }
     var old = document.getElementById('ce-sched-sheet');
     if (old) old.remove();
+    var returnFocus = document.activeElement;
     var sheet = document.createElement('div');
     sheet.id = 'ce-sched-sheet';
+    /* A11y (cloud/ce-ui, 2026-09-21): this was a bare div — a screen reader
+       saw no dialog at all. Name it, mark it modal, trap focus inside and give
+       Escape a close path; focus returns to whatever opened it. */
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'true');
+    sheet.setAttribute('aria-label', 'Schedule');
     sheet.style.cssText = 'position:fixed;inset:0;z-index:var(--z-toast-hi);background:rgba(0,0,0,.55);display:flex;align-items:flex-end;';
     var slides = deck.slides.length;
+    function esc(v) {
+      return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    var safeTitle = esc(String(deck.title || deck.id).slice(0, 40));
+    var safeMin = esc(istFloorPlus7DateStr());
+    var safeTime = esc((window.CE_SCHEDULE_DEFAULTS || {}).timeValue || '11:30');
     sheet.innerHTML =
       '<div style="width:100%;background:#1c1a24;color:#fff;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));font-family:-apple-system,system-ui,sans-serif;">' +
-      '<div style="font-weight:700;font-size:var(--fs-body);margin-bottom:10px">Schedule \u201C' + String(deck.title || deck.id).slice(0, 40) + '\u201D on Meta\u2019s clock</div>' +
+      '<div id="ce-sched-title" style="font-weight:700;font-size:var(--fs-body);margin-bottom:10px">Schedule \u201C' + safeTitle + '\u201D on Meta\u2019s clock</div>' +
       '<label style="font-size:var(--fs-overline);opacity:.75" for="ce-sched-platform">Platform</label>' +
       '<select id="ce-sched-platform" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
       '<option value="facebook">Facebook — fully automatic, holds on Meta\u2019s clock</option>' +
       '<option value="instagram">Instagram — fires from the Mac at its minute (\u226410 slides)</option></select>' +
       '<label style="font-size:var(--fs-overline);opacity:.75" id="ce-sched-datelabel" for="ce-sched-date">Date (a week+ out — owner law)</label>' +
-      '<input id="ce-sched-date" type="date" min="' + istFloorPlus7DateStr() + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
+      '<input id="ce-sched-date" type="date" min="' + safeMin + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
       '<label style="font-size:var(--fs-overline);opacity:.75" for="ce-sched-time">Time (IST)</label>' +
-      '<input id="ce-sched-time" type="time" value="' + ((window.CE_SCHEDULE_DEFAULTS||{}).timeValue || '11:30') + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
+      '<input id="ce-sched-time" type="time" value="' + safeTime + '" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444">' +
       '<label style="font-size:var(--fs-overline);opacity:.75" for="ce-sched-caption">Caption</label>' +
       '<textarea id="ce-sched-caption" rows="3" style="width:100%;padding:10px;margin:4px 0 12px;border-radius:8px;background:#2a2733;color:#fff;border:1px solid #444;box-sizing:border-box"></textarea>' +
       '<div style="display:flex;gap:8px">' +
       '<button id="ce-sched-go" style="flex:1;padding:12px;border:0;border-radius:10px;font-weight:700;background:var(--accent);color:#fff;font-size:var(--fs-body)">Schedule (week+ out)</button>' +
       '<button id="ce-sched-cancel" style="padding:12px 18px;border:1px solid #555;border-radius:10px;background:transparent;color:#fff;font-weight:700">Cancel</button></div>' +
-      '<div id="ce-sched-status" style="font-size:var(--fs-overline);opacity:.8;margin-top:8px;min-height:16px"></div>' +
+      '<div id="ce-sched-status" role="status" aria-live="polite" aria-atomic="true" style="font-size:var(--fs-overline);opacity:.8;margin-top:8px;min-height:16px"></div>' +
       '<button id="ce-sched-retry" type="button" style="display:none;width:100%;margin-top:8px;padding:11px;border:1px solid var(--accent);border-radius:10px;background:transparent;color:var(--accent-text);font-weight:700;font-size:var(--fs-secondary)">Retry this schedule</button></div>';
     document.body.appendChild(sheet);
+    /* A11y: Escape closes, focus is trapped while the dialog is open, and the
+       trigger regains focus on close. Hostile/refused messages stay until the
+       user acts — a 1.1s self-clear cannot be read. */
+    var onKeydown = function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closeSheet(); return; }
+      if (e.key !== 'Tab') return;
+      var focusables = sheet.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      var list = [];
+      for (var i = 0; i < focusables.length; i++) {
+        var f = focusables[i];
+        if (!f.disabled && f.offsetParent !== null) list.push(f);
+      }
+      if (!list.length) return;
+      var first = list[0], last = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    function clearPending() {
+      if (sheet.__ceStatusTimer) { clearTimeout(sheet.__ceStatusTimer); sheet.__ceStatusTimer = 0; }
+    }
+    function closeSheet() {
+      clearPending();
+      document.removeEventListener('keydown', onKeydown, true);
+      sheet.remove();
+      try { if (returnFocus && returnFocus.focus) returnFocus.focus(); } catch (_rf) {}
+    }
+    sheet.__ceClose = closeSheet;
+    document.addEventListener('keydown', onKeydown, true);
+    setTimeout(function () {
+      var firstField = sheet.querySelector('#ce-sched-platform');
+      if (firstField) try { firstField.focus(); } catch (_ff) {}
+    }, 0);
     /* Production consent (owner 2026-09-10): the SERVER is the floor's single
        truth — when its ce_allow_soon marker is on, near dates are legitimate
        production schedules, so the min follows the live floor instead of the
@@ -832,7 +1419,7 @@
     var cap = '';
     try { cap = ((window.state && window.state.igCaption) || (deck.slides[0] && (deck.slides[0].html || deck.slides[0].text)) || '').replace(/<[^>]+>/g, ''); } catch (_) {}
     sheet.querySelector('#ce-sched-caption').value = cap;
-    sheet.querySelector('#ce-sched-cancel').onclick = function () { sheet.remove(); };
+    sheet.querySelector('#ce-sched-cancel').onclick = function () { closeSheet(); };
     // Owner 2026-09-11: a schedule that failed on the Mac used to be invisible on
     // the phone. Ask the relay on open and say it out loud.
     try { ensureWriteKey(function (k) { ceScheduleMount(k); }); } catch (_mm) {}
@@ -842,17 +1429,17 @@
       var time = sheet.querySelector('#ce-sched-time').value || (window.CE_SCHEDULE_DEFAULTS||{}).poemMorningValue || '11:30';
       var caption = sheet.querySelector('#ce-sched-caption').value.trim();
       var status = sheet.querySelector('#ce-sched-status');
-      if (!date) { status.textContent = 'Pick a date first.'; return; }
-      if (platform === 'instagram' && slides > 10) { status.textContent = 'IG carousels cap at 10 slides (Meta API). Use Download-for-phone + manual posting.'; return; }
-      if (!caption) { status.textContent = 'Add a caption.'; return; }
+      if (!date) { status.textContent = 'Date is missing \u2014 pick the day this should go on Meta, then tap Schedule again.'; return; }
+      if (platform === 'instagram' && slides > 10) { status.textContent = 'This deck has ' + slides + ' slides, over Instagram\u2019s 10-slide API cap \u2014 use Download-for-phone and post it by hand.'; return; }
+      if (!caption) { status.textContent = 'Caption is empty \u2014 Meta needs one, so nothing was queued. Add it and tap Schedule again.'; return; }
       var unixMs = new Date(date + 'T' + time + ':00' + SYNC_IST).getTime();
       var payload = { deckId: deck.id, platform: platform, caption: caption, scheduleUnixMs: unixMs, slidesCount: slides };
       var btn = sheet.querySelector('#ce-sched-go');
-      if (window.__CE_SYNC_UNREACHABLE__) { status.textContent = 'Mac unreachable — open in Safari or use Download-for-phone.'; return; }
+      if (window.__CE_SYNC_UNREACHABLE__) { status.textContent = 'Mac unreachable \u2014 nothing was queued. Open this in Safari, or use Download-for-phone.'; return; }
       btn.disabled = true; status.textContent = 'Sending to your Mac\u2026';
       function submit(key) {
         var ep = window.__CE_SYNC_ENDPOINT__;
-        if (!ep) { status.textContent = 'Sync endpoint not discovered yet — check the Mac is reachable.'; btn.disabled = false; return Promise.resolve(null); }
+        if (!ep) { status.textContent = 'Sync endpoint not found \u2014 nothing was queued. Make sure the Mac app is open on the same Wi-Fi, then tap Schedule again.'; btn.disabled = false; return Promise.resolve(null); }
         return fetch(ep + '/schedule', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key },
@@ -860,13 +1447,13 @@
         }).then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); });
       }
       ensureWriteKey(function (key) {
-        if (!key) { status.textContent = 'Write key needed for scheduling.'; btn.disabled = false; return; }
+        if (!key) { status.textContent = 'Write key missing \u2014 nothing was queued. Pair this phone with your Mac again, then tap Schedule.'; btn.disabled = false; return; }
         submit(key).then(function (res) {
           if (res && res.status === 403) {
             try { localStorage.removeItem('ce_sync_key'); } catch (_) {}
             ensureWriteKey(function (k2) {
-              if (!k2) { status.textContent = 'Write key needed.'; btn.disabled = false; return; }
-              submit(k2).then(function (r2) { finish(r2, k2); }, function () { status.textContent = 'Network failed.'; btn.disabled = false; });
+              if (!k2) { status.textContent = 'Write key missing \u2014 nothing was queued. Pair this phone with your Mac again, then tap Schedule.'; btn.disabled = false; return; }
+              submit(k2).then(function (r2) { finish(r2, k2); }, function () { status.textContent = 'Network dropped \u2014 nothing was queued. Check the Wi-Fi and tap Schedule again.'; btn.disabled = false; });
             });
             return;
           }
@@ -881,14 +1468,14 @@
         if (res && res.status === 409) {
           btn.disabled = true;
           statusEl.textContent = 'Already scheduled for that time'
-            + (res.body && res.body.state ? ' (' + res.body.state + ')' : '')
+            + (res.body && res.body.state ? ' (row state: ' + res.body.state + ')' : '')
             + ' \u2014 it was not queued twice.';
           if (window.showAppToast) window.showAppToast('Already scheduled for that time');
           return;
         }
         btn.disabled = false;
         if (res && res.status === 200 && res.body && res.body.ok) {
-          status.textContent = 'Queued \u2014 your Mac schedules it on Meta\u2019s clock within ~30s (must be running).';
+          status.textContent = 'Queued \u2014 waiting for your Mac to pick it up and book it on Meta\u2019s clock (the Mac must be running; the phone cannot confirm the booking).';
           if (window.showAppToast) window.showAppToast('Schedule queued to your Mac');
           // Owner 2026-09-11: the sheet used to close 2.6s after "Queued", so the
           // real outcome (landed / refused) was never seen. It now stays open and
@@ -902,7 +1489,7 @@
             });
           }
         } else {
-          status.textContent = (res && res.body && res.body.error) ? res.body.error : 'Could not queue the schedule.';
+          status.textContent = (res && res.body && res.body.error) ? res.body.error : 'Nothing queued: the Mac could not create the schedule row. Check that it is running and reachable, then tap Schedule again.';
         }
       }
     };
@@ -923,7 +1510,19 @@
         if (!row) { if (tries < 30) setTimeout(tick, 4000); return; }
         var st = String(row.state || '');
         if (st === 'scheduled' || st === 'published') {
-          say('Armed on your Mac — @doalfaaz goes live within ~3 min.');
+          /* F-S-NNR (cloud/ce-ui, 2026-09-21): this said '@doalfaaz goes live
+             within ~3 min'. Nothing in this row supports that: the Mac books
+             phone rows with publishNow false (App/CEMetaPublisher.swift:936),
+             so 'scheduled' means a booking on Meta's clock, and for a post-now
+             row that minute is the one the sync server stamped
+             (now + 150s, ops/ce_deck_sync.py). The phone still receives no
+             confirmation that anything reached Meta's feed, so it says queued
+             and names the booked minute instead of inventing a live window. */
+          var booked = '';
+          if (row.scheduleUnixMs) {
+            try { booked = ' for ' + new Date(Number(row.scheduleUnixMs)).toLocaleString(); } catch (_b) {}
+          }
+          say('Queued on your Mac' + booked + ' \u2014 it cannot confirm the post went live.');
           return;
         }
         if (st === 'failed' || st === 'needs_verification' || st === 'superseded') {
@@ -963,7 +1562,7 @@
     var payload = { deckId: deckId, caption: caption, slidesCount: slides, platform: 'instagram', kind: 'post_now', type: type };
     var submit = function (key) {
       var ep = window.__CE_SYNC_ENDPOINT__;
-      if (!ep) { say('Mac unreachable — sync endpoint not found. Nothing was sent.'); return Promise.resolve(null); }
+      if (!ep) { say('Mac unreachable — sync endpoint not found, so nothing was sent. Open this in Safari, or use Download-for-phone.'); return Promise.resolve(null); }
       return fetch(ep + '/post-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CE-Sync-Key': key },
@@ -972,28 +1571,31 @@
     };
     var finish = function (res, usedKey) {
       if (res && res.s === 200 && res.j && res.j.ok) {
-        say('Posting from your Mac within ~3 min — @doalfaaz goes live.');
+        // F-S18 (cloud/ce-ui, 2026-09-20): HTTP 200 means the request row is
+        // queued, not that the post is live — only cePostNowWatch's row state
+        // may say live/scheduled.
+        say('Queued on your Mac - waiting for it to pick the row up\u2026');
         if (res.j.id && usedKey) cePostNowWatch(usedKey, res.j.id);
         return;
       }
-      say((res && res.j && res.j.error) ? res.j.error : 'The Mac refused the post — nothing was sent.');
+      say((res && res.j && res.j.error) ? res.j.error : 'Nothing queued: the Mac could not create the request row. Check that it is running and signed in to Meta, then try again.');
     };
-    if (window.__CE_SYNC_UNREACHABLE__) { say('Mac unreachable — nothing was sent.'); return; }
+    if (window.__CE_SYNC_UNREACHABLE__) { say('Mac unreachable \u2014 nothing was sent. Open this in Safari, or use Download-for-phone.'); return; }
     findSyncEndpoint(function (base) {
       if (base) window.__CE_SYNC_ENDPOINT__ = base;
       ensureWriteKey(function (key) {
-        if (!key) { say('Write key needed — nothing was sent.'); return; }
+        if (!key) { say('Write key missing \u2014 nothing was sent. Pair this phone with your Mac again.'); return; }
         submit(key).then(function (res) {
           if (res && res.s === 403) {
             try { localStorage.removeItem('ce_sync_key'); } catch (_) {}
             ensureWriteKey(function (k2) {
-              if (!k2) { say('Write key needed — nothing was sent.'); return; }
-              submit(k2).then(function (r2) { finish(r2, k2); }, function () { say('Network failed — nothing was sent.'); });
+              if (!k2) { say('Write key missing \u2014 nothing was sent. Pair this phone with your Mac again.'); return; }
+              submit(k2).then(function (r2) { finish(r2, k2); }, function () { say('Network dropped \u2014 nothing was sent. Check the Wi-Fi and tap Post now again.'); });
             });
             return;
           }
           finish(res, key);
-        }, function () { say('Mac unreachable — nothing was sent.'); });
+        }, function () { say('Mac unreachable \u2014 nothing was sent. Open this in Safari, or use Download-for-phone.'); });
       });
     });
   };
@@ -1023,27 +1625,37 @@
       btn.type = 'button';
       btn.id = 'ce-web-schedule-btn';
       btn.textContent = 'Schedule';
-      btn.title = 'Queue this piece on Meta\u2019s clock (a week+ out)';
+      btn.title = 'Queue this piece for your Mac to book on Meta\u2019s clock (a week+ out)';
       btn.style.cssText = 'display:inline-flex; align-items:center; min-height:40px; padding:8px 14px; font-weight:700; border-radius:10px; color:#fff; background:#2e6f5e; border:1px solid rgba(255,255,255,0.14); cursor:pointer;';
       // H01-7 FIX (2026-09-15, lane H01_DEEP_PANEL_AUDIT): this control was a COMPLETELY silent
       // no-op on the phone web bundle - measured "threw: null, and no toast, no status text, no
       // error". The phone surface is a REVIEW surface served publicly, so a control that looks
       // live and does nothing is the worst combination: the owner cannot tell a refusal from a
-      // success. Mirror the pattern the codebase already uses for exactly this case
-      // (studioSavePoem, index.html:8772, which DOES say "Save unavailable outside the native
-      // Studio bridge") instead of being mute. Short-circuit only on a provably absent bridge,
-      // so a real dispatch can never be falsely reported as unsent.
+      // success.
+      // F-04 (cloud/ce-ui, 2026-09-21): the old handler short-circuited on an absent ceBridge,
+      // but __CE_PHONE_SCHEDULE__ does NOT need the native bridge — it queues through the sync
+      // server (POST /schedule) on the web/LAN surface too. Gating on ceBridge made a working
+      // path a dead no-op there. Call it whenever it is callable; the sync layer itself reports
+      // "Mac unreachable / write key needed" honestly when it cannot reach the Mac.
       btn.onclick = function () {
-        var br = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge;
-        if (!br) {
-          if (window.showAppToast) window.showAppToast('Scheduling needs the Mac app \u2014 nothing was sent to Meta.');
+        if (typeof window.__CE_PHONE_SCHEDULE__ === 'function') {
+          try { window.__CE_PHONE_SCHEDULE__(); } catch (e) {
+            if (window.showAppToast) window.showAppToast('Schedule failed: ' + ((e && e.message) || String(e)) + ' \u2014 nothing was queued for Meta. Reload the page and try again.');
+          }
           return;
         }
-        try { window.__CE_PHONE_SCHEDULE__(); } catch (e) {
-          if (window.showAppToast) window.showAppToast('Schedule failed: ' + ((e && e.message) || String(e)) + ' \u2014 nothing was sent to Meta.');
-        }
+        if (window.showAppToast) window.showAppToast('Scheduling needs the Mac app \u2014 nothing was queued. Open the studio on your Mac, or use Download-for-phone.');
       };
       justCreated = true;
+    }
+    /* No surface can schedule without the real path (native bridge or the sync
+       server). Never present a visible control that cannot perform its action. */
+    var hasBridge = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ceBridge);
+    var hasSchedulePath = typeof window.__CE_PHONE_SCHEDULE__ === 'function' &&
+      (hasBridge || !!window.__CE_SYNC_ENDPOINT__);
+    if (!hasSchedulePath) {
+      if (btn) btn.remove();
+      return;
     }
     if (btn.parentElement !== home) {
       home.insertBefore(btn, (pack && pack.parentElement === home) ? pack : home.firstChild);
@@ -1102,13 +1714,34 @@
     armScheduleButton();
     armPackLabel();
   }
-  var armTimer = 0;
+  /* F-TE01 (touch-edit, 2026-09-23): `armTimer`/`dockEnsureTimer` and the two
+     MutationObservers are now declared ONCE at the top of the IIFE and stored,
+     because an arm()/armSweep() pass that ran twice used to install a SECOND
+     live observer per call — each with its own debounce timer, each scheduling
+     its own sweep. Idempotency here is the load-bearing part: the arming pass
+     is what sets `__ceTouchArmed`, and duplicate observers made "attached
+     once" impossible to reason about from the outside. */
   var scheduleArmSweep = function () {
-    if (armTimer) return;
-    armTimer = setTimeout(function () { armTimer = 0; armSweep(); }, 120);
+    if (armSweepTimer) return;
+    armSweepTimer = setTimeout(function () { armSweepTimer = 0; armSweep(); }, 240);
   };
-  var mo = new MutationObserver(scheduleArmSweep);
-  mo.observe(document.documentElement, { childList: true, subtree: true });
+  /* Extracted so the teardown can rebuild it: see the note in
+     ceTouchEditTeardown. Declared as a function so it is hoisted above the
+     teardown that calls it. */
+  function armBaseObserver() {
+    if (typeof MutationObserver !== 'function') return;
+    var mo = new MutationObserver(scheduleArmSweep);
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+    observers.push(mo);
+    observerTargets.push(document.documentElement);
+  }
+  armBaseObserver();
+  /* `tick` polls for the first real shelf face so the veil can lift. It used to
+     be `setInterval(armSweep, 2500)` — a permanent re-entry point that re-armed
+     whatever node happened to be in the stage 2.5s later. That is the sweep's
+     own bug class: re-entry must be triggered by a RENDER, and the observer
+     above is the render signal. The poll stops as soon as the veil is lifted,
+     which is the only thing it was ever for. */
   var veilPoll = setInterval(function () {
     /* A7-P1-6: skeletons are .pure-card.deck-card too (aria-hidden) — the
        poll must match REAL faces only, or the veil lifts over spinners. */
@@ -1119,7 +1752,6 @@
   }, 200);
   setTimeout(function () { clearInterval(veilPoll); }, 6000);
   setTimeout(armSweep, 800);
-  setInterval(armSweep, 2500); // safety net for replaced nodes
 })();
 /* ==========================================================================
    "Download for phone" on a POEM (owner 2026-09-11)
@@ -1528,19 +2160,22 @@
         : (dataUrls.length + ' images (' + first + ' \u2026)');
       /* P1-phone-download: the end state names the step that is left instead of
          claiming a save the sheet has not performed, and a refused sheet keeps
-         the rendered file so the next tap costs nothing. */
+         the rendered file so the next tap costs nothing. Every branch below
+         states only what this code has actually observed: 'Saved' is shown only
+         after saveImages reported the plain download outcome, and the Photos
+         branches say the save is still the user's tap. */
       if (res.outcome === 'needs-tap') {
-        say('Rendered ' + label + ' \u2014 tap Save to Photos once more and it lands in Photos' +
+        say('Rendered ' + label + ' \u2014 not in Photos yet; tap Save to Photos once more and it lands there' +
           (copied ? ' (poem text copied).' : '.'));
       } else if (res.outcome === 'shared') {
-        say('Poem rendered \u2014 tap Save Image once and ' + label + ' lands in Photos (' + W + '\u00d7' + H + ')' +
-          (copied ? ' \u2014 poem text copied.' : '.'));
+        say('Rendered ' + label + ' (' + W + '\u00d7' + H + ') \u2014 not in Photos yet; tap Save Image in the share sheet and it lands there' +
+          (copied ? ' (poem text copied).' : '.'));
       } else {
         say('Saved ' + label + ' (' + W + '\u00d7' + H + ')' + (copied ? ' \u2014 poem text copied.' : '.'));
       }
       return true;
     } catch (err) {
-      say('Poem download failed: ' + (err && err.message ? err.message : err));
+      say('Download failed: ' + (err && err.message ? err.message : err) + ' \u2014 nothing was saved or shared. Check the Wi-Fi and try again.');
       return true;
     } finally {
       holder.remove();
@@ -1554,8 +2189,54 @@
 // gallery's desktop stacking/flex context. That produced a toggled class with
 // Presentation painted above Tools and an empty-looking sheet. This owner
 // portals the whole inspector to body for the open state and restores it.
+//
+// F-M40 · SHEET CONTRACT (master-20260923). Written down because the sheet had
+// three implicit owners (this IIFE, index.html's renderCarouselDock and the
+// route machinery) and the owner met the disagreement as "sometimes it is up,
+// sometimes not". Four sentences, each implemented below and nowhere else:
+//   1. ALIVE — inside Studio, ANY re-render preserves the fully open sheet.
+//      The canvas swap re-mounts the dock nodes, so the freshly built node
+//      never carries the inline geometry `openSheet()` wrote. Every such render
+//      runs `ensureDockTools()`; when the editor still carries `ce-tools-open`
+//      it must re-apply everything `openSheet()` derives — portal home, height
+//      vars, scroll box, pinned band — not only the header words. (index.html
+//      runs the same re-apply for the poem/post surface's `ce-tools-open` on
+//      `.studio-workspace`; this sheet's state lives on the `.ce-carousel-editor`
+//      class, and the editor keeps its identity across a canvas re-render.)
+//   2. GONE ON LEAVE — leaving Studio or switching route closes the sheet AND
+//      returns the inspector node to its authored home. That is `reset()`, and
+//      it is reached from every route door: `closeStudio`
+//      (`__CE_RESET_PHONE_TOOLS__`), the layer teardown (same call, F-RX1) and
+//      `ensureDockTools`'s own reaping pass for any door nobody enumerated.
+//   3. IDEMPOTENT — closing twice, or closing when no sheet is open, is a
+//      no-op. `restore()` tests `portaled`, the class removal is a `classList`
+//      op and the listener drain is flag-gated, so no door has to ask whether
+//      the sheet is up before it may close it.
+//   4. ONE OWNER OF THE LABEL — the toggle's word, its `aria-expanded` and the
+//      class on the editor are one derivation. A re-render that re-emits the
+//      markup with the authored "Tools / aria-expanded=false" is re-synced from
+//      the class, never from a second copy of the open state.
+// Corollary of 1 (this file is the phone's single owner of the toggle):
+// index.html's renderCarouselDock assigns `#ce-tools-toggle.onclick` on every
+// render. The capture listener below runs FIRST, acts, then stops immediate
+// propagation, so the second owner can never re-toggle the class it just set.
 (function () {
   function ensureDockTools() {
+    /* F-TE01 (touch-edit, 2026-09-23): a route switch (tab button, back button)
+       destroys or empties the editor while the inspector is portaled to <body>.
+       The dock's own reset() already handles "the editor is still here", but
+       nothing ran when the editor was GONE — the detached 50vh fixed panel then
+       hung over whatever tab the user landed on. Reap it by the same rule that
+       defines a live dock: its toggle must still point at a CONNECTED editor. */
+    Array.prototype.forEach.call(document.querySelectorAll('body > aside.ce-studio-inspector.ce-tools-sheet'), function (d) {
+      var tg = d.querySelector('#ce-tools-toggle');
+      if (tg && tg.__ceToolsEditor && tg.__ceToolsEditor.isConnected) return;
+      var editors = document.querySelectorAll('.ce-carousel-editor');
+      for (var i = 0; i < editors.length; i++) {
+        if (editors[i].contains(d)) return;
+      }
+      try { d.remove(); } catch (_orph) {}
+    });
     /* P0 W3-P2 (2026-09-19): any in-sheet action that re-renders the studio
        canvas (design pick, font tool, move/duplicate/delete slide, typo slider,
        add slide) swaps #studio-canvas.innerHTML. That swap builds a FRESH
@@ -1586,15 +2267,61 @@
     var t = document.getElementById('ce-tools-toggle');
     var dock = document.querySelector('aside.ce-studio-inspector, .ce-studio-inspector');
     if (!t || !dock) return;
-    var syncToggleLabel = function (open) {
+    /* Every label twin — the real toggle (wherever it lives) and the dormant
+       `#ce-dock-tools-toggle` that renderStudioTools keeps as the node the poem
+       and post path may adopt — must read the same state. Indexing into the
+       NodeList keeps this valid before the button has children. */
+    var syncLabelTwins = function (open) {
       t.setAttribute('aria-expanded', open ? 'true' : 'false');
-      var label = t.querySelector('.ce-tools-toggle-label');
-      if (label) label.textContent = open ? 'Close tools' : 'Tools';
+      Array.prototype.forEach.call(document.querySelectorAll('.ce-tools-toggle'), function (btn) {
+        if (btn === t) return;
+        try {
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          btn.__open = open;
+        } catch (_tl) {}
+      });
+      var label = t.children[0];
+      if (label && label.classList && label.classList.contains('ce-tools-toggle-label')) {
+        label.textContent = open ? 'Close tools' : 'Tools';
+      }
     };
     if (t.parentElement !== dock || dock.firstElementChild !== t) dock.insertBefore(t, dock.firstElementChild);
     var editor = dock.closest('.ce-carousel-editor') || t.__ceToolsEditor || document.querySelector('.ce-carousel-editor');
     if (!editor) return;
+    /* F-M40.s2.7 (ce-tools-owner, 2026-09-24): HEAL the persistent flag against
+       the class that actually drives the sheet. A re-render is the scenario the
+       flag exists for — renderCarouselDock rebuilds the editor carrying
+       `ce-tools-open` from `state.studioToolsOpen` — so whenever this sweep
+       finds the sheet up while the state says down (or the reverse), the state
+       is the copy that is wrong and the class is the truth. One direction only:
+       the state is never allowed to close a sheet the user has open, so a
+       re-render can never move the shelf out from under them. */
+    try {
+      if (typeof window.__CE_SET_STUDIO_TOOLS_OPEN__ === 'function') {
+        window.__CE_SET_STUDIO_TOOLS_OPEN__(editor.classList.contains('ce-tools-open'));
+      }
+    } catch (_heal) {}
+    /* F-M40.s2.1 (master-20260923): the toggle's word, its aria-expanded and the
+       class on the editor are ONE derivation, written from the live class and
+       never from a captured state. Two owners (this file's capture listener and
+       index.html's `onclick`) used to each carry their own copy, so a re-render
+       that re-emitted the authored "Tools / aria-expanded=false" markup left the
+       control claiming the sheet was down while it was up. `open` is passed only
+       where the class has not been flipped yet (the live toggle transition);
+       every other caller derives it from the class that drives the sheet. */
+    var toolsOpenNow = function () {
+      try { return !!(editor && editor.classList.contains('ce-tools-open')); } catch (_ton) { return false; }
+    };
     if (t.__ceToolsEditor === editor) {
+      /* F-M40.s2.3 (master-20260923): a canvas re-render swaps #studio-canvas,
+         which builds a FRESH dock node and drops every inline geometry write
+         `openSheet()` made — the class survives, the 44px header and the 96px
+         pinned band survive (ce-mobile.css:1812-1840), and the scroll body
+         collapses to height 0 under the CSS-only twin. So the open state is
+         re-applied from the class, in full, on every sweep that finds it set:
+         portal home, height vars, scroll box, pinned band. Idempotent — every
+         write below re-states the same declared value, so a sweep that runs
+         while nothing changed is a no-op in effect. */
       if (editor.classList.contains('ce-tools-open') && t.__ceToolsOpen) t.__ceToolsOpen();
       /* If some other path closed the sheet (class removed without the toggle),
          the portal must still come home — otherwise the dock stays a fixed
@@ -1605,7 +2332,8 @@
          and the "Tools" label even while the sheet is up, so the control lied
          about the state it owned. Re-sync it to the class that actually drives
          the sheet. */
-      syncToggleLabel(editor.classList.contains('ce-tools-open'));
+      syncLabelTwins(toolsOpenNow());
+      if (t.__ceToolsBindDrag) t.__ceToolsBindDrag();
       t.style.setProperty('position', 'static', 'important');
       t.style.setProperty('display', 'flex', 'important');
       t.style.setProperty('width', '100%', 'important');
@@ -1654,9 +2382,21 @@
          otherwise the detached editor remains the portal's owner and the
          next Studio item inherits a fixed "Close tools" panel. */
       try { editor.classList.remove('ce-tools-open'); } catch (_e) {}
-      try { t.setAttribute('aria-expanded', 'false'); } catch (_e2) {}
-      var label = t.querySelector('.ce-tools-toggle-label');
-      if (label) label.textContent = 'Tools';
+      /* F-M40.s2.6 (ce-tools-owner, 2026-09-24): ONE writer for the persistent
+         flag. index.html derives the freshly built editor's `ce-tools-open`
+         class from `state.studioToolsOpen` (index.html:15076) and gates
+         "a new piece opens closed" on the same variable (index.html:17093), so
+         a reset that only removed the class would be undone by the next canvas
+         re-render — the sheet the user just dismissed would come back. Every
+         close door in this file funnels through reset(), so this is the one
+         place the persistent state has to be cleared. */
+      try {
+        if (typeof window.__CE_SET_STUDIO_TOOLS_OPEN__ === 'function') {
+          window.__CE_SET_STUDIO_TOOLS_OPEN__(false);
+        }
+      } catch (_eState) {}
+      try { t.style.removeProperty('--ce-tools-sheet-h'); } catch (_eH) {}
+      try { syncLabelTwins(false); } catch (_e2) {}
       restore();
     }
     function openSheet() {
@@ -1690,6 +2430,14 @@
          canvas while tools are open. 62vh left the hero a ~180px sliver on a 874px
          phone; 50vh keeps ~430px of editor. The grid scrolls inside its own viewport.
 
+         F-TE01 (touch-edit, 2026-09-23): and it must not eat the whole screen
+         either. A 50vh sheet whose band holds a textarea, the design grid and the
+         caption footer is taller than 50vh of CONTENT, so the sheet itself has to
+         be scrollable or its lower rows are simply unreachable on a 402x874 phone.
+         `overscroll-behavior: contain` keeps that scroll from chaining into the
+         library underneath, and `touch-action: manipulation` stops the 300ms
+         double-tap-zoom delay on every control inside the sheet.
+
          MO-SHEET (fix/mobile-overhaul, 2026-09-21): the sheet is anchored `bottom: 0`
          and 50vh tall, so it covered the SHIPBAR — the in-flow band at the bottom of
          the studio column that owns the primary "Send to Plan" control. MEASURED
@@ -1708,18 +2456,46 @@
         shipbarH = parseFloat(getComputedStyle(document.documentElement)
           .getPropertyValue('--ce-shipbar-h')) || 0;
       } catch (_eShip) { shipbarH = 0; }
-      dock.style.setProperty('bottom', shipbarH + 'px', 'important');
-      dock.style.setProperty('height', 'min(50vh, 460px)', 'important');
-      dock.style.setProperty('max-height', 'min(50vh, 460px)', 'important');
-      dock.style.setProperty('min-height', '180px', 'important');
+      dock.style.setProperty('bottom', 'calc(' + shipbarH + 'px + var(--ce-keyboard-inset, 0px))', 'important');
+      dock.style.setProperty('--ce-tools-sheet-h', 'min(62dvh, 560px, calc(var(--ce-visual-viewport-height, 100dvh) - var(--ce-shipbar-h, 0px) - env(safe-area-inset-top, 0px) - 32px))');
+      dock.style.setProperty('height', 'var(--ce-tools-sheet-h)', 'important');
+      dock.style.setProperty('max-height', 'var(--ce-tools-sheet-h)', 'important');
+      dock.style.setProperty('min-height', 'min(180px, var(--ce-tools-sheet-h))', 'important');
       dock.style.setProperty('display', 'block', 'important');
-      dock.style.setProperty('overflow', 'hidden', 'important');
+      dock.style.setProperty('overflow-y', 'auto', 'important');
+      dock.style.setProperty('overflow-x', 'hidden', 'important');
+      dock.style.setProperty('overscroll-behavior', 'contain', 'important');
+      dock.style.setProperty('touch-action', 'manipulation', 'important');
+      dock.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
       /* MO-LADDER (fix/mobile-overhaul, 2026-09-21): this was the literal 500 while the
          ladder already defines --z-sheet: 500 for exactly this element. A second copy of
          the number is how the two drift apart, so read the rung. */
       dock.style.setProperty('z-index', 'var(--z-sheet)', 'important');
       dock.style.setProperty('box-sizing', 'border-box', 'important');
-      dock.style.setProperty('background', 'rgba(12, 13, 18, 0.98)', 'important');
+      /* D-05 (2026-09-21, manager): this inline write is the LAST word on the
+         sheet's ground — it is what an actual tap produces, and an inline
+         `!important` beats every stylesheet rule that is not itself `!important`
+         on the same property. The literal rgba(12,13,18,0.98) was authored for
+         the dark studio with the theme never asked, so on cream the sheet stayed
+         near-black under near-black text: measured 402x874, light theme,
+         `#ce-studio-inspector .ce-tools-toggle` rgba-composited rgb(24,22,27)
+         on rgb(17,18,22) = 1.04:1 (invisible) and `.ce-inspector-label`
+         rgb(107,101,119) on rgb(17,18,22) = 3.35:1 (sub-AA). Dark measured
+         17.20:1 / 5.38:1 and is correct, so only the bright branch moves.
+         The ground is asked of the same body class the rest of the app toggles
+         (`document.body.classList.contains('bright-theme')`, set by
+         applyTheme / the boot script from localStorage `ce_theme`), and the
+         cream value is the bright chrome's own rgba(248,246,240,.78) glass at
+         the sheet's authored 0.98 alpha — not a new color. ce-mobile.css
+         re-states the same pair so the sheet is correct whether or not this
+         function ran (the sheet also exists in the `:906` /
+         `.ce-carousel-editor` CSS path); the two can never disagree because the
+         theme test is the same one. */
+      var brightSheet = false;
+      try { brightSheet = document.body.classList.contains('bright-theme'); } catch (_eBright) { }
+      dock.style.setProperty('background',
+        brightSheet ? 'rgba(248, 246, 240, 0.98)' : 'rgba(12, 13, 18, 0.98)', 'important');
+      dock.style.setProperty('color', brightSheet ? '#18161b' : '#f3f1ec', 'important');
       var scroll = dock.querySelector('.ce-inspector-scroll');
       var pinned = dock.querySelector('.ce-inspector-pinned');
       if (scroll) {
@@ -1743,7 +2519,7 @@
           }
         } catch (_ePinned) { pinnedH = 0; }
         if (!pinnedH) pinnedH = 96;   /* pre-layout fallback: the authored value */
-        scroll.style.setProperty('inset', '56px 0 ' + pinnedH + 'px 0', 'important');
+        scroll.style.setProperty('inset', '44px 0 ' + pinnedH + 'px 0', 'important');
         scroll.style.setProperty('display', 'block', 'important');
         scroll.style.setProperty('overflow-y', 'auto', 'important');
         scroll.style.setProperty('overflow-x', 'hidden', 'important');
@@ -1769,13 +2545,34 @@
       }
     }
     function toggle(event) {
+      /* F-M40.s2.2 (master-20260923): ONE owner for the tap on phone. This
+         handler is registered in the CAPTURE phase, so it always runs before
+         index.html's renderCarouselDock `onclick`; preventDefault() stops the
+         click doing the app's default work and stopImmediatePropagation() stops
+         that second owner from reaching the same node and re-toggling the class
+         it just set. Without the stop the two owners cancelled (the first tap
+         after reopening did nothing) and each wrote its own label/aria copy, so
+         the header desynced from the sheet.
+         A drag (see bindDragHandle) never dispatches a click, so this path stays
+         exactly the keyboard/tap behaviour it always was. */
       if (event) { event.preventDefault(); event.stopImmediatePropagation(); }
       var open = !editor.classList.contains('ce-tools-open');
       editor.classList.toggle('ce-tools-open', open);
-      t.setAttribute('aria-expanded', open ? 'true' : 'false');
-      var label = t.querySelector('.ce-tools-toggle-label');
-      if (label) label.textContent = open ? 'Close tools' : 'Tools';
-      if (open) openSheet(); else restore();
+      /* F-M40.s2.6 (ce-tools-owner, 2026-09-24): this layer is the phone's
+         SINGLE toggle owner (renderCarouselDock no longer assigns the second
+         `onclick`), so the class it just flipped has to be written to the
+         persistent flag too — index.html rebuilds the editor from that flag on
+         every canvas re-render. The narrow writer also re-paints the toggle
+         from the same value, so the header, aria-expanded and the sheet can
+         never disagree. */
+      try {
+        if (typeof window.__CE_SET_STUDIO_TOOLS_OPEN__ === 'function') {
+          window.__CE_SET_STUDIO_TOOLS_OPEN__(open);
+        }
+      } catch (_tState) {}
+      syncLabelTwins(open);
+      if (open) { openSheet(); } else { reset(); }
+      if (t.__ceToolsBindDrag) t.__ceToolsBindDrag();
       /* This capture-phase owner stopImmediatePropagation()s the app's own toggle
          handler, which used to run fitCarouselEditorSlides() — with it gone, the
          freshly-portal'd design-picker minis stayed unscaled 1080x1350 in 180x225
@@ -1784,12 +2581,190 @@
       try { if (window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__) requestAnimationFrame(window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__); } catch (_fitErr) {}
     }
     t.addEventListener('click', toggle, true);
+    /* F-M40.s7 (master-20260923): the sheet's header bar carried a grab-handle
+       affordance (ce-mobile.css's ::after chevron + the 44px band) and answered
+       no drag at all — a 120px pull left the sheet byte-identical. One pointer
+       lane on that node, three outcomes, all measured against the sheet's own
+       box so it works at every viewport:
+         · pull DOWN past 30% of the sheet's height, or release with an evident
+           downward speed  -> close (reset(), the same owner the tap uses);
+         · pull UP                     -> grow, clamped to the maximum height
+           (viewport - shipbar - safe-area-top - 32px, the clamp `openSheet()`
+           already publishes through `--ce-tools-sheet-h`);
+         · anything else on release    -> snap back to the resting height.
+       The height is written to `--ce-tools-sheet-h`, the one variable
+       openSheet() declares and ce-mobile.css reads, so "dragged" and "resting"
+       can never disagree. `touch-action: none` for the duration of the gesture
+       is what lets the pointer moves arrive instead of scrolling the sheet.
+       Reduced motion means an instant jump, never an animated snap; a plain tap
+       (under the slop radius) is left completely alone and still reaches the
+       capture-phase `toggle` above, so keyboard and tap behaviour are unchanged. */
+    var DRAG_SLOP = 6;         /* under this, the gesture is a tap, not a drag   */
+    var DRAG_DISMISS_FRAC = 0.3;  /* a pull past 30% of the sheet's height closes */
+    var DRAG_VELOCITY = 0.5;   /* px/ms of downward speed that also closes      */
+    var drag = null;
+    var reduceMotion = function () {
+      try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (_rm) { return false; }
+    };
+    var sheetHeight = function (node) {
+      try { var box = node.getBoundingClientRect().height; if (box) return box; } catch (_sh) {}
+      try {
+        var n = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ce-tools-sheet-h'));
+        if (n > 0) return n;
+      } catch (_sh2) {}
+      return Math.round(window.innerHeight * 0.5) || 240;
+    };
+    /* The clamp openSheet() declares, recomputed from the live viewport so a
+       rotation or a keyboard inset cannot leave the ceiling stale. The stylesheet
+       never names the floor: the fallback is the sheet's own pre-drag height. */
+    var maxSheetHeight = function () {
+      var unit = function (name) {
+        var v = 0;
+        try { v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)) || 0; } catch (_u) {}
+        return v;
+      };
+      var vv = (window.visualViewport && window.visualViewport.height) || window.innerHeight || 0;
+      var ceiling = vv - unit('--ce-shipbar-h') - unit('--ce-keyboard-inset') - unit('--ce-safe-top') - 32;
+      ceiling = Math.round(ceiling);
+      return (ceiling > 0) ? ceiling : Math.round(window.innerHeight || 0) || 0;
+    };
+    /* One writer for the dragged height. The transition is set only for the
+       release snap and cleared on the same timer that ends it, so an animated
+       snap cannot leak into the geometry `openSheet()` writes later. Reduced
+       motion gets a plain write with no duration at all. */
+    var settleTimer = 0;
+    var writeDragHeight = function (height, animate) {
+      var px = Math.round(height) + 'px';
+      if (animate && !reduceMotion()) {
+        try { t.style.transition = 'height 160ms ease'; } catch (_tr) {}
+      } else {
+        try { t.style.transition = 'none'; } catch (_tr2) {}
+      }
+      try { t.style.setProperty('--ce-tools-sheet-h', px); } catch (_wh) {}
+      /* The var is consumed by an inline `height`, so the animated snap also has
+         to be declared inline or the transition has nothing to interpolate. */
+      try {
+        dock.style.setProperty('height', px, 'important');
+        dock.style.setProperty('max-height', px, 'important');
+      } catch (_wh2) {}
+      if (settleTimer) clearTimeout(settleTimer);
+      if (animate && !reduceMotion()) {
+        settleTimer = setTimeout(function () {
+          settleTimer = 0;
+          try { t.style.removeProperty('transition'); } catch (_tr3) {}
+        }, 220);
+      } else {
+        try { t.style.removeProperty('transition'); } catch (_tr4) {}
+      }
+    };
+    function bindDragHandle() {
+      /* Re-renders replace the node, so the binding is per-node and re-applied
+         from the same sweep that re-applies the open state. */
+      if (t.__ceToolsDragBound) return;
+      t.__ceToolsDragBound = true;
+      var dragExt = window.ceTouchEdit.__ext || (window.ceTouchEdit.__ext = []);
+      var onDown = function (e) {
+        if (!portaled || !editor.classList.contains('ce-tools-open')) return;
+        /* A second finger (pinch/scroll) must not be read as a drag. */
+        if (drag) return;
+        if (e.button != null && e.button !== 0) return;
+        drag = {
+          id: e.pointerId,
+          startY: e.clientY,
+          startT: e.timeStamp || Date.now(),
+          lastY: e.clientY,
+          lastT: e.timeStamp || Date.now(),
+          startH: sheetHeight(dock),
+          height: 0,
+          moved: false,
+          cleanupTimer: 0
+        };
+      };
+      var onMove = function (e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        var dy = e.clientY - drag.startY;
+        if (!drag.moved && Math.abs(dy) < DRAG_SLOP) return;
+        if (!drag.moved) {
+          drag.moved = true;
+          /* The gesture is a resize now, not a scroll or a tap: take the touch
+             action for the duration and capture the pointer so a fast pull that
+             leaves the 44px band keeps delivering moves. */
+          try { t.setPointerCapture && t.setPointerCapture(drag.id); } catch (_cap) {}
+          try { t.style.setProperty('touch-action', 'none'); } catch (_ta) {}
+        }
+        e.preventDefault();
+        var h = drag.startH - dy;
+        var ceiling = maxSheetHeight();
+        if (h > ceiling) h = ceiling;
+        if (h < 120) h = 120;
+        drag.height = h;
+        drag.lastY = e.clientY;
+        drag.lastT = e.timeStamp || Date.now();
+        if (drag.heightTimer) cancelAnimationFrame(drag.heightTimer);
+        drag.heightTimer = requestAnimationFrame(function () { writeDragHeight(h, false); });
+      };
+      var onUp = function (e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        var d = drag;
+        drag = null;
+        if (d.heightTimer) cancelAnimationFrame(d.heightTimer);
+        try { t.releasePointerCapture && t.releasePointerCapture(d.id); } catch (_rel) {}
+        try { t.style.removeProperty('touch-action'); } catch (_ta2) {}
+        if (!d.moved) return;   /* a tap: leave it to the capture-phase toggle */
+        var dy = e.clientY - d.startY;
+        var dt = Math.max(1, (e.timeStamp || Date.now()) - d.startT);
+        var velocity = dy / dt;               /* px/ms, positive = downward */
+        var pastThreshold = dy > (d.startH * DRAG_DISMISS_FRAC);
+        if (pastThreshold || velocity > DRAG_VELOCITY) { reset(); return; }
+        var ceiling = maxSheetHeight();
+        var target = (dy < -DRAG_SLOP) ? ceiling : d.startH;
+        writeDragHeight(target, true);
+      };
+      t.addEventListener('pointerdown', onDown, true);
+      t.addEventListener('pointermove', onMove, true);
+      t.addEventListener('pointerup', onUp, true);
+      t.addEventListener('pointercancel', onUp, true);
+      /* This IIFE cannot see the layer's `listeners` array, so the lane rides
+         the same `__ext` handover the sheet's other listeners use and is
+         released by the one teardown. */
+      dragExt.push({ target: t, type: 'pointerdown', fn: onDown, opts: true });
+      dragExt.push({ target: t, type: 'pointermove', fn: onMove, opts: true });
+      dragExt.push({ target: t, type: 'pointerup', fn: onUp, opts: true });
+      dragExt.push({ target: t, type: 'pointercancel', fn: onUp, opts: true });
+    }
+    t.__ceToolsBindDrag = bindDragHandle;
+    bindDragHandle();
     t.__ceToolsEditor = editor;
     t.__ceToolsRestore = restore;
     t.__ceToolsOpen = openSheet;
     t.__ceToolsReset = reset;
     t.__ceToolsCaptureHome = captureHome;
     window.__CE_RESET_PHONE_TOOLS__ = reset;
+    /* F-TE01 (touch-edit, 2026-09-23): Escape, outside-tap and the route
+       boundary. The sheet is portaled to <body> at z-sheet (500) and covered
+       the slide and shipbar at 50vh; the ONLY way out was tapping the 44px
+       "Close tools" pill. Escape is the keyboard parity the rest of the app
+       already honours, the outside tap is the phone's natural one, and the
+       route boundary closes it when the studio itself is being left. All three
+       call reset(), which is the function that restores the portal home — so
+       they cannot leave an orphaned fixed panel behind. */
+    if (!t.__ceToolsDismissBound) {
+      t.__ceToolsDismissBound = true;
+      var dismissOnOutside = function (e) {
+        if (!portaled || !editor.classList.contains('ce-tools-open')) return;
+        var tgt = e.target;
+        if (tgt && (dock.contains(tgt) || t.contains(tgt) || (tgt.closest && tgt.closest('.ce-tools-toggle')))) return;
+        reset();
+      };
+      document.addEventListener('pointerdown', dismissOnOutside, true);
+      /* F-TE01 (touch-edit, 2026-09-23): this sheet lives in its own IIFE, so the
+         teardown's listener list is not in scope — pass the extension through
+         the one shared teardown the layer publishes. The pair is therefore
+         released by `window.ceTouchEdit.teardown()` exactly like everything the
+         other IIFE installs. */
+      var sheetExt = window.ceTouchEdit.__ext || (window.ceTouchEdit.__ext = []);
+      sheetExt.push({ target: document, type: 'pointerdown', fn: dismissOnOutside, opts: true });
+    }
     t.style.setProperty('position', 'static', 'important');
     t.style.setProperty('display', 'flex', 'important');
     t.style.setProperty('align-items', 'center', 'important');
@@ -1798,7 +2773,7 @@
     t.style.setProperty('height', '44px', 'important');
     t.style.setProperty('pointer-events', 'auto', 'important');
   }
-  var dockEnsureTimer = 0;
+  var dockEnsureTimer = 0;   /* declared once at the top of the IIFE */
   var scheduleDockEnsure = function () {
     if (dockEnsureTimer) return;
     dockEnsureTimer = setTimeout(function () {
@@ -1806,15 +2781,117 @@
       ensureDockTools();
     }, 80);
   };
+  /* F-M103 (master-20260924): the phone Studio ••• menu is positioned in
+     native-studio.css (fixed, under the 55px bar). This guard is the last word
+     for the case CSS cannot express — a menu whose own height cannot fit from
+     the bar's bottom edge to the shipbar band. Then it is capped, never lifted:
+     the 4px gap under the trigger is the anchor, and the sheet below the canvas
+     keeps the rest. Desktop and any width without the phone class are left
+     exactly as the stylesheet authored them. One rAF, only while a menu is open;
+     the observer that already re-arms the dock sweep drives it, so no second
+     observer and no polling loop is added. */
+  var moreMenuClampTimer = 0;
+  var clampStudioMoreMenu = function () {
+    if (moreMenuClampTimer) return;
+    moreMenuClampTimer = setTimeout(function () {
+      moreMenuClampTimer = 0;
+      var root = document.documentElement;
+      if (!root.classList.contains('ce-phone')) return;
+      var details = document.querySelector('.studio-topbar .studio-more-actions[open]');
+      if (!details) return;
+      var menu = details.querySelector('.studio-more-menu');
+      if (!menu) return;
+      var bar = details.closest('.studio-topbar');
+      var cs = bar ? getComputedStyle(bar) : null;
+      var top = (bar ? bar.getBoundingClientRect().bottom : 0) + 4;
+      var bottomBound = window.innerHeight;
+      try {
+        var ship = parseFloat(getComputedStyle(root).getPropertyValue('--ce-shipbar-h')) || 0;
+        if (ship > 0) bottomBound = window.innerHeight - ship;
+      } catch (_cShip) {}
+      var gutter = parseFloat(cs && cs.getPropertyValue('--ph-gutter')) || 20;
+      /* Height measured with the CSS max-height still in force: a value that
+         already fits is left alone, so no scrollbar and no reflow appear that
+         the stylesheet did not ask for. */
+      var h = menu.getBoundingClientRect().height;
+      var avail = Math.max(120, bottomBound - top - 12);
+      menu.style.removeProperty('max-height');
+      if (h > avail) {
+        menu.style.setProperty('max-height', avail + 'px', 'important');
+        menu.style.setProperty('overflow-y', 'auto', 'important');
+      }
+      var w = menu.getBoundingClientRect().width;
+      var maxW = Math.max(120, window.innerWidth - 2 * gutter);
+      if (w > maxW) menu.style.setProperty('max-width', maxW + 'px', 'important');
+    }, 0);
+  };
+  window.__CE_CLAMP_MORE_MENU__ = clampStudioMoreMenu;
   function arm() {
-    if (window.__CE_DOCK_TOOLS_OBSERVER__) {
-      ensureDockTools();
-      return;
+    /* F-TE01 (touch-edit, 2026-09-23): Escape is registered at the ARM level,
+       not inside ensureDockTools(). The dock does not exist on a poem route, so
+       a sheet-scoped Escape listener could never be installed there, and the
+       previous location meant the key the rest of the app already treats as
+       "dismiss" was dead on exactly the surfaces it matters most. Idempotent by
+       the same flag pattern as the observer below. */
+    if (!window.__CE_TOOLS_ESC_BOUND__) {
+      window.__CE_TOOLS_ESC_BOUND__ = true;
+      var escFn = function (e) {
+        if (e.key !== 'Escape') return;
+        if (typeof window.__CE_RESET_PHONE_TOOLS__ !== 'function') return;
+        /* F-M40.s6 (master-20260923): one state test for both sheet families.
+           The carousel sheet's open state is the class on `.ce-carousel-editor`
+           (this layer's own portal, closed by reset()); the poem and post docks
+           carry `.studio-workspace.ce-tools-open` and `renderStudioTools`
+           re-opens them on the next render while the class stands. Escape must
+           dismiss whichever is up, so the test is the union of the two classes
+           and always runs the reset — the poem path then re-derives its own
+           geometry from the class it now finds removed. */
+        if (!document.querySelector('.ce-carousel-editor.ce-tools-open, .studio-workspace.ce-tools-open')) return;
+        e.preventDefault();
+        try {
+          var poemWorkspace = document.querySelector('.studio-workspace.ce-tools-open');
+          if (poemWorkspace) poemWorkspace.classList.remove('ce-tools-open');
+        } catch (_escPoem) {}
+        try { window.__CE_RESET_PHONE_TOOLS__(); } catch (_esc) {}
+      };
+      document.addEventListener('keydown', escFn, true);
+      (window.ceTouchEdit.__ext || (window.ceTouchEdit.__ext = []))
+        .push({ target: document, type: 'keydown', fn: escFn, opts: true });
     }
-    window.__CE_DOCK_TOOLS_OBSERVER__ = true;
+    /* The observer runs the dock sweep unconditionally — it is created before
+       the dock is resolved because `ensureDockTools()` returns early whenever
+       the surface has no `.ce-studio-inspector` at all, and poems have none.
+       Installing the render signal only after a successful dock resolution
+       meant a poem-only route never got one, so nothing re-armed after the
+       studio was rebuilt. The observer only schedules a debounced sweep; the
+       sweep is what decides whether there is a dock to wire. */
+    if (!window.__CE_DOCK_TOOLS_OBSERVER__) {
+      window.__CE_DOCK_TOOLS_OBSERVER__ = true;
+      var target = document.body || document.documentElement;
+      if (target && typeof MutationObserver === 'function') {
+        /* F-M103 (master-20260924): the same render signal also re-measures the
+           phone ••• menu — an [open] toggle IS a subtree mutation, so the clamp
+           rides the observer that already exists instead of growing a second
+           one. `toggle` does not bubble, hence the capture-phase listener: it is
+           the only event that fires before the menu's first paint. */
+        var onBodyMutation = function () {
+          scheduleDockEnsure();
+          clampStudioMoreMenu();
+        };
+        var ob = new MutationObserver(onBodyMutation);
+        ob.observe(target, { childList: true, subtree: true });
+        (window.ceTouchEdit.__ext || (window.ceTouchEdit.__ext = []))
+          .push({ observer: ob });
+        document.addEventListener('toggle', clampStudioMoreMenu, true);
+        (window.ceTouchEdit.__ext || (window.ceTouchEdit.__ext = []))
+          .push({ target: document, type: 'toggle', fn: clampStudioMoreMenu, opts: true });
+        /* Remember the LIVE observer so a later teardown disconnects exactly
+           this one, and only this one. */
+        window.__CE_DOCK_TOOLS_OBS__ = ob;
+      }
+    }
     ensureDockTools();
-    var target = document.body || document.documentElement;
-    if (target) new MutationObserver(scheduleDockEnsure).observe(target, { childList: true, subtree: true });
+    clampStudioMoreMenu();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm); else arm();
 })();

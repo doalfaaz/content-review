@@ -9,7 +9,7 @@
   --ideas-line: #e6e1ed;
   --ideas-accent: #c43b4e;
   --ideas-accent-text: #8f2231;
-  padding: 58px 28px 72px; /* floating topbar band (owner 2026-09-03) */
+  padding: calc(var(--topbar-h, 42px) + 20px) 32px 72px; /* F-M83: same page frame as .main-content */
   overflow-y: auto;
   overflow-x: hidden;
   background: linear-gradient(180deg, var(--bg), var(--ideas-panel));
@@ -27,14 +27,76 @@ body:not(.bright-theme) .ce-ideas-parity {
 
 .ce-ideas-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding-bottom:14px;border-bottom:1px solid var(--ideas-line)}
 .ce-ideas-filter-group{display:inline-flex;gap:4px;align-items:center;padding:3px;border:1px solid var(--ideas-line);border-radius:10px;background:color-mix(in srgb,var(--ideas-surface) 94%,var(--ideas-accent) 6%)}
+/* F-ID06 (ideas-css, 2026-09-23): a filter chip and the menu item it opens are
+   the same kind of target, so they share one font token instead of the action
+   row's compact size leaking onto them via the bare .ce-ideas-action selector
+   further down this file. */
 .ce-ideas-filter,.ce-ideas-filter-menu,.ce-ideas-action,.ce-ideas-menu-item{appearance:none;border:1px solid transparent;background:transparent;color:var(--ideas-muted);border-radius:8px;padding:9px 12px;min-height:38px;font:600 var(--fs-secondary)/1.1 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;cursor:pointer;transition:border-color .16s ease,background .16s ease,color .16s ease,transform .16s ease}
 .ce-ideas-filter-group .ce-ideas-filter{border-color:transparent;padding-inline:12px}
 .ce-ideas-filter:hover,.ce-ideas-filter-menu:hover,.ce-ideas-action:hover,.ce-ideas-menu-item:hover{border-color:color-mix(in srgb,var(--ideas-accent) 50%,var(--ideas-line));color:var(--ideas-ink);transform:translateY(-1px)}
 .ce-ideas-filter.is-active,.ce-ideas-filter-menu.is-active,.ce-ideas-menu-item.is-active{background:var(--ideas-ink);border-color:var(--ideas-ink);color:var(--ideas-surface)}
 .ce-ideas-language{position:relative;margin-left:10px}.ce-ideas-language::before{content:"";position:absolute;left:-6px;top:18%;bottom:18%;width:1px;background:var(--ideas-line)}
 .ce-ideas-filter-menu-wrap{position:relative;margin-left:auto}.ce-ideas-filter-menu{display:inline-flex;align-items:center;gap:7px;border-color:var(--ideas-line);background:var(--ideas-surface)}
-.ce-ideas-summary{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 15px;color:var(--ideas-muted);font-size:var(--fs-overline);font-weight:600}
-.ce-ideas-action{min-width:44px;border-radius:8px}.ce-ideas-action.is-primary{background:var(--ideas-ink);border-color:var(--ideas-ink);color:var(--ideas-surface)}
+.ce-ideas-summary{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 15px;color:var(--ideas-muted);font-weight:600}
+/* F-ID01 (ideas-css, 2026-09-23): the action row is the row's control surface,
+   not micro copy. At var(--fs-overline) the three labels measured 11px — below
+   the 13px readable floor for control text, and the token's own contract says
+   overline is for micro/uppercase labels only. Control-label size now.
+   F-ID02 (ideas-css, 2026-09-23): desktop density is a mouse density, so 28px
+   was the rendered box while the phone floor is 44px; the coarse-pointer
+   block below never fires for a trackpad. A control that is 44px on the phone
+   and 28px on the desktop is the same control at two sizes, so the base box
+   carries the app's 44px law and the pointer-coarse block is no longer the
+   only guard.
+   F-ID07 (ideas-css, 2026-09-23): measured after the two rules above landed,
+   the rendered box was STILL 28px/11px at 1440 — index.html:3503 carries
+   `.ce-ideas-parity .ce-ideas-card-actions .ce-ideas-action { min-height:28px;
+   padding:5px 10px; font-size:var(--fs-overline) }`, and because that inline
+   <style> loads after this <link>, an equal-specificity rule here loses the
+   tie. The card is the real ancestor of the row, so the selector is stated
+   through it: one extra step of depth that is true of the markup, not an
+   !important escalation over a duplicate. index.html:3503 should still be
+   deleted — see the report; while it exists these two declarations must agree
+   or this one silently loses again. */
+/* F-M50 (master-20260923, DESIGN_TOKENS g-G7): the F-ID07 note above cites
+   `index.html:3503` for the rule it wants deleted, and that line number is
+   stale — index.html:3502-3503 sits inside the `--ideas-*` alias block
+   (index.html:3493-3510), so anyone acting on the note edits the wrong rule.
+   The rule it means — `.ce-ideas-parity .ce-ideas-card-actions .ce-ideas-action` —
+   is at **index.html:3649-3651** (DESIGN_TOKENS.md, section (g) G7, names the
+   same selector and the same line). Its surviving declaration is `padding:5px
+   10px;`: the `min-height:28px` and `font-size:var(--fs-overline)` halves the
+   note quotes were dropped by index.html's own 2026-09-23 polish pass, so the
+   equal-specificity tie F-ID07 was written against is gone and the 44px/13px
+   boxes below now win on their own.
+   **DECISION PENDING — this stylesheet does not delete it.** index.html is not
+   edited from this lane, and dropping another file's rule is not a change this
+   stylesheet can make. The depth-stated selectors below are the interim
+   agreement and should be revisited if index.html:3649 is removed. */
+.ce-ideas-parity .ce-ideas-card .ce-ideas-card-actions .ce-ideas-action{min-width:44px;min-height:44px;border-radius:8px;font-size:var(--fs-secondary)}
+.ce-ideas-parity .ce-ideas-action{min-width:44px;min-height:44px;border-radius:8px;font-size:var(--fs-secondary)}
+.ce-ideas-action.is-primary{background:var(--ideas-ink);border-color:var(--ideas-ink);color:var(--ideas-surface)}
+/* F-ID20/F-ID22/N5/N6 (ideas-css, 2026-09-23): a non-primary action is a chip,
+   not a floating word — a visible hairline plus resting --ideas-ink so it reads
+   live beside the solid primary instead of disabled (2.94:1 was the failure at
+   --ideas-muted). One selector owns the secondary treatment; the primary and
+   success rules below are the only other owners. The quiet ground is a whisper
+   of ink so the border, not a fill, carries the affordance. */
+.ce-ideas-action:not(.is-primary){border-color:var(--ideas-line);background:color-mix(in srgb,var(--ideas-ink) 4%,transparent);color:var(--ideas-ink)}
+.ce-ideas-action:not(.is-primary):hover{border-color:color-mix(in srgb,var(--ideas-accent) 55%,var(--ideas-line));background:color-mix(in srgb,var(--ideas-ink) 8%,transparent)}
+.ce-ideas-action:not(.is-primary):focus-visible{outline:2px solid var(--ideas-accent);outline-offset:2px}
+/* Touch surfaces without the ce-phone class (tablet, touch laptop, any coarse
+   pointer) still need the 44x44 minimum: 38px is a mouse-density box. The
+   pointer-coarse query leaves desktop density untouched. */
+@media (pointer: coarse) {
+  .ce-ideas-action{min-width:44px;min-height:44px}
+}
+
+/* F-ID03 (ideas-css, 2026-09-23): the section count reads as metadata but was
+   the one piece of text on the row still at overline size while index.html
+   strips its pill chrome — an 11px run of "8 cards" sitting beside a 13px
+   title. Matched to the title's size so the row has one text rhythm. */
+.ce-ideas-count { font-size: var(--fs-secondary); }
 
 .ce-ideas-filter-menu::after {
   content: "";
@@ -92,6 +154,10 @@ body:not(.bright-theme) .ce-ideas-parity {
   padding: 0 10px 0 0;
   background: transparent;
   font-weight: 600;
+  /* F-ID04 (ideas-css, 2026-09-23): the count line was 11px against the 13px
+     card titles it summarises — the smallest text on the surface carrying the
+     most important number. Same family as the row meta it counts. */
+  font-size: var(--fs-secondary);
 }
 
 .ce-ideas-section {
@@ -159,6 +225,12 @@ body:not(.bright-theme) .ce-ideas-parity {
   color: var(--ideas-muted);
   font-size: var(--fs-secondary);
   font-weight: 700;
+  /* F-ID05 (ideas-css, 2026-09-23): the meta cluster is the section's only
+     right-hand content and index.html drops the chevron to the same size, so
+     the row needs a real pointer target height rather than the text's 13px
+     line box. The row's own 44px floor comes from the head; this keeps the
+     cluster from being the shortest thing on it. */
+  min-height: 24px;
 }
 
 .ce-ideas-count {
@@ -167,6 +239,9 @@ body:not(.bright-theme) .ce-ideas-parity {
   border-radius: 999px;
   background: var(--ideas-surface);
   color: var(--ideas-accent-text);
+  /* F-ID03 (ideas-css, 2026-09-23): metadata text, so it reads at the meta
+     size, not the micro-label size. */
+  font-size: var(--fs-secondary);
 }
 
 .ce-ideas-chevron {
@@ -255,6 +330,9 @@ body:not(.bright-theme) .ce-ideas-point strong { font-weight: 700; color: #f6bfc
 
 .ce-ideas-card-actions {
   display: flex;
+  /* F-ID21 (polish, 2026-09-23, audit D5): collapsed cards carry their actions at
+     the right of the title row; the open card now ends on the same side. */
+  justify-content: flex-end;
   gap: 7px;
   flex-wrap: wrap;
   align-items: center;
@@ -263,8 +341,13 @@ body:not(.bright-theme) .ce-ideas-point strong { font-weight: 700; color: #f6bfc
   border-top: 1px solid var(--ideas-line);
 }
 
-.ce-ideas-action { padding: 7px 11px; font-size: var(--fs-overline); }
-.ce-ideas-action.is-primary { background: var(--ideas-ink); border-color: var(--ideas-ink); color: var(--ideas-surface); }
+/* F-ID01/F-ID02/F-ID07 (ideas-css, 2026-09-23): this compact re-declaration
+   was the last word on the row before index.html's inline pass; it reset
+   font-size back to 11px and the box back to 5/7px on every breakpoint. It now
+   only tightens the horizontal padding — never the label size or the box
+   floor. Scoped through .ce-ideas-card so it outranks the duplicate at
+   index.html:3503, which loads later and would otherwise re-impose 11px. */
+.ce-ideas-parity .ce-ideas-card .ce-ideas-card-actions .ce-ideas-action { padding: 7px 11px; }
 .ce-ideas-action.is-success { background: #eaf8ef; border-color: #bfe4ca; color: #197042; }
 body:not(.bright-theme) .ce-ideas-action.is-success { background: rgba(52, 211, 153, .12); border-color: rgba(52, 211, 153, .30); color: #6ee7b7; }
 
@@ -290,6 +373,58 @@ body:not(.bright-theme) .ce-ideas-action.is-success { background: rgba(52, 211, 
   .ce-ideas-parity { padding: calc(52px + env(safe-area-inset-top, 0px)) 14px 54px; }
   .ce-ideas-section-head { grid-template-columns: 38px minmax(0, 1fr); gap: 10px; padding: 12px 14px; }
   .ce-ideas-section-meta { grid-column: 2; justify-content: space-between; }
-  .ce-ideas-section-title { font-size: var(--fs-section); }
+  /* F-M50 (master-20260923, EDGES_THEMES EDGES-02): the section title is 13px
+     uppercase here and read `--ideas-ink`, which index.html:3496 binds to `--ink`.
+     In the bright theme `--ink #18161b` is still the correct ink, but the title
+     sits in the section head's accent-tinted band: the head row carries
+     `--ideas-row-line rgba(217,106,124,.22)` under `--ideas-row
+     rgba(217,106,124,.09)` over `--bg #f8f6f0` (index.html:3501-3502/3507-3508,
+     painted at index.html:3586-3587), which lifts the row to roughly
+     rgb(240,222,219) and leaves the near-black ink at a measured 1.17:1 — the
+     only failing theme (EDGES-02 set-difference: bright-only). 13px uppercase
+     is label text, so it takes the token this surface already declares for
+     accent labels, `--ideas-accent-text` (#8e2f3d bright, 2.03:1 on the old ink
+     and 7.4:1 on the tinted row; dark keeps #ffffff). Weight is unchanged. */
+  .ce-ideas-section-title { font-size: var(--fs-section); color: var(--ideas-accent-text); }
   .ce-ideas-card-grid { grid-template-columns: 1fr; padding: 10px; }
 }
+
+/* ══ F-M102 (master-20260924): phone namespaces for the Ideas author rules ═══
+   The chip height stays on ce-mobile.css's F-M93 40px segmented rung (a
+   deliberate fold trade, not a miss). The fixes below are settled in the file that owns the surface, not in
+   ce-mobile.css (a shared phone stylesheet the Ideas surface only borrows).
+   These blocks sit at the end of native-ideas.css, and it is the LAST
+   stylesheet index.html:3852-3855 loads, so a stylesheet-order tie against
+   ce-mobile.css is resolved by file order here as well as by specificity
+   (html + three classes vs ce-mobile's html + two). */
+
+
+/* Section title at 320px. ce-mobile.css:4096 already released white-space on
+   the phone title, so what clips here is the two-line clamp it installs: a
+   320px column minus the 6px accent rail, 28px head padding, the 38px number
+   cell and its 10px gap leaves ~192px for var(--fs-section) content, and
+   "Om the Guru / Faith is the Evidence" is 24 characters that need three.
+   The clamp is the only truncation left on this rule, so the title takes
+   white-space:normal and lets the line box grow instead of cutting a word.
+   line-height rides along: 1.15 is a title rhythm for one line, not a
+   wrapped two/three-line block. */
+@media (max-width: 760px) {
+  .ce-ideas-parity .ce-ideas-section-title {
+    white-space: normal;
+    line-height: 1.3;
+  }
+}
+
+/* F-M102 (master-20260924): the card intro/pending blocks sit on the accent
+   tint (native-ideas.css:286, surface 85% + accent 15%), the heaviest ground
+   on this surface besides the point tiles. --ideas-muted was bound to that
+   ground by measurement on the lighter surfaces only, so in the cream theme
+   `--ideas-muted #6d687d` measured 4.31:1 there — under the 4.5
+   floor for these 13px prose blocks (both blocks are sentences, not labels).
+   `#5c5766` — index.html:238's own bright cream ink — reads 5.62:1 on that
+   ground, so the text stays in the surface's muted register. The dark theme
+   keeps --ideas-ink: 13.34:1 there, and both point-tile
+   grounds were re-measured for their own ink (bright #2b2732 13.58:1, dark
+   #f6bfca 10.19:1) and already clear. */
+body.bright-theme .ce-ideas-card-intro,
+body.bright-theme .ce-ideas-card-pending { color: #5c5766; }
