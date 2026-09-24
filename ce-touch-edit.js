@@ -2288,6 +2288,19 @@
     if (t.parentElement !== dock || dock.firstElementChild !== t) dock.insertBefore(t, dock.firstElementChild);
     var editor = dock.closest('.ce-carousel-editor') || t.__ceToolsEditor || document.querySelector('.ce-carousel-editor');
     if (!editor) return;
+    /* F-M40.s2.7 (ce-tools-owner, 2026-09-24): HEAL the persistent flag against
+       the class that actually drives the sheet. A re-render is the scenario the
+       flag exists for — renderCarouselDock rebuilds the editor carrying
+       `ce-tools-open` from `state.studioToolsOpen` — so whenever this sweep
+       finds the sheet up while the state says down (or the reverse), the state
+       is the copy that is wrong and the class is the truth. One direction only:
+       the state is never allowed to close a sheet the user has open, so a
+       re-render can never move the shelf out from under them. */
+    try {
+      if (typeof window.__CE_SET_STUDIO_TOOLS_OPEN__ === 'function') {
+        window.__CE_SET_STUDIO_TOOLS_OPEN__(editor.classList.contains('ce-tools-open'));
+      }
+    } catch (_heal) {}
     /* F-M40.s2.1 (master-20260923): the toggle's word, its aria-expanded and the
        class on the editor are ONE derivation, written from the live class and
        never from a captured state. Two owners (this file's capture listener and
@@ -2369,6 +2382,19 @@
          otherwise the detached editor remains the portal's owner and the
          next Studio item inherits a fixed "Close tools" panel. */
       try { editor.classList.remove('ce-tools-open'); } catch (_e) {}
+      /* F-M40.s2.6 (ce-tools-owner, 2026-09-24): ONE writer for the persistent
+         flag. index.html derives the freshly built editor's `ce-tools-open`
+         class from `state.studioToolsOpen` (index.html:15076) and gates
+         "a new piece opens closed" on the same variable (index.html:17093), so
+         a reset that only removed the class would be undone by the next canvas
+         re-render — the sheet the user just dismissed would come back. Every
+         close door in this file funnels through reset(), so this is the one
+         place the persistent state has to be cleared. */
+      try {
+        if (typeof window.__CE_SET_STUDIO_TOOLS_OPEN__ === 'function') {
+          window.__CE_SET_STUDIO_TOOLS_OPEN__(false);
+        }
+      } catch (_eState) {}
       try { t.style.removeProperty('--ce-tools-sheet-h'); } catch (_eH) {}
       try { syncLabelTwins(false); } catch (_e2) {}
       restore();
@@ -2532,6 +2558,18 @@
       if (event) { event.preventDefault(); event.stopImmediatePropagation(); }
       var open = !editor.classList.contains('ce-tools-open');
       editor.classList.toggle('ce-tools-open', open);
+      /* F-M40.s2.6 (ce-tools-owner, 2026-09-24): this layer is the phone's
+         SINGLE toggle owner (renderCarouselDock no longer assigns the second
+         `onclick`), so the class it just flipped has to be written to the
+         persistent flag too — index.html rebuilds the editor from that flag on
+         every canvas re-render. The narrow writer also re-paints the toggle
+         from the same value, so the header, aria-expanded and the sheet can
+         never disagree. */
+      try {
+        if (typeof window.__CE_SET_STUDIO_TOOLS_OPEN__ === 'function') {
+          window.__CE_SET_STUDIO_TOOLS_OPEN__(open);
+        }
+      } catch (_tState) {}
       syncLabelTwins(open);
       if (open) { openSheet(); } else { reset(); }
       if (t.__ceToolsBindDrag) t.__ceToolsBindDrag();
@@ -2743,6 +2781,51 @@
       ensureDockTools();
     }, 80);
   };
+  /* F-M103 (master-20260924): the phone Studio ••• menu is positioned in
+     native-studio.css (fixed, under the 55px bar). This guard is the last word
+     for the case CSS cannot express — a menu whose own height cannot fit from
+     the bar's bottom edge to the shipbar band. Then it is capped, never lifted:
+     the 4px gap under the trigger is the anchor, and the sheet below the canvas
+     keeps the rest. Desktop and any width without the phone class are left
+     exactly as the stylesheet authored them. One rAF, only while a menu is open;
+     the observer that already re-arms the dock sweep drives it, so no second
+     observer and no polling loop is added. */
+  var moreMenuClampTimer = 0;
+  var clampStudioMoreMenu = function () {
+    if (moreMenuClampTimer) return;
+    moreMenuClampTimer = setTimeout(function () {
+      moreMenuClampTimer = 0;
+      var root = document.documentElement;
+      if (!root.classList.contains('ce-phone')) return;
+      var details = document.querySelector('.studio-topbar .studio-more-actions[open]');
+      if (!details) return;
+      var menu = details.querySelector('.studio-more-menu');
+      if (!menu) return;
+      var bar = details.closest('.studio-topbar');
+      var cs = bar ? getComputedStyle(bar) : null;
+      var top = (bar ? bar.getBoundingClientRect().bottom : 0) + 4;
+      var bottomBound = window.innerHeight;
+      try {
+        var ship = parseFloat(getComputedStyle(root).getPropertyValue('--ce-shipbar-h')) || 0;
+        if (ship > 0) bottomBound = window.innerHeight - ship;
+      } catch (_cShip) {}
+      var gutter = parseFloat(cs && cs.getPropertyValue('--ph-gutter')) || 20;
+      /* Height measured with the CSS max-height still in force: a value that
+         already fits is left alone, so no scrollbar and no reflow appear that
+         the stylesheet did not ask for. */
+      var h = menu.getBoundingClientRect().height;
+      var avail = Math.max(120, bottomBound - top - 12);
+      menu.style.removeProperty('max-height');
+      if (h > avail) {
+        menu.style.setProperty('max-height', avail + 'px', 'important');
+        menu.style.setProperty('overflow-y', 'auto', 'important');
+      }
+      var w = menu.getBoundingClientRect().width;
+      var maxW = Math.max(120, window.innerWidth - 2 * gutter);
+      if (w > maxW) menu.style.setProperty('max-width', maxW + 'px', 'important');
+    }, 0);
+  };
+  window.__CE_CLAMP_MORE_MENU__ = clampStudioMoreMenu;
   function arm() {
     /* F-TE01 (touch-edit, 2026-09-23): Escape is registered at the ARM level,
        not inside ensureDockTools(). The dock does not exist on a poem route, so
@@ -2786,16 +2869,29 @@
       window.__CE_DOCK_TOOLS_OBSERVER__ = true;
       var target = document.body || document.documentElement;
       if (target && typeof MutationObserver === 'function') {
-        var ob = new MutationObserver(scheduleDockEnsure);
+        /* F-M103 (master-20260924): the same render signal also re-measures the
+           phone ••• menu — an [open] toggle IS a subtree mutation, so the clamp
+           rides the observer that already exists instead of growing a second
+           one. `toggle` does not bubble, hence the capture-phase listener: it is
+           the only event that fires before the menu's first paint. */
+        var onBodyMutation = function () {
+          scheduleDockEnsure();
+          clampStudioMoreMenu();
+        };
+        var ob = new MutationObserver(onBodyMutation);
         ob.observe(target, { childList: true, subtree: true });
         (window.ceTouchEdit.__ext || (window.ceTouchEdit.__ext = []))
           .push({ observer: ob });
+        document.addEventListener('toggle', clampStudioMoreMenu, true);
+        (window.ceTouchEdit.__ext || (window.ceTouchEdit.__ext = []))
+          .push({ target: document, type: 'toggle', fn: clampStudioMoreMenu, opts: true });
         /* Remember the LIVE observer so a later teardown disconnects exactly
            this one, and only this one. */
         window.__CE_DOCK_TOOLS_OBS__ = ob;
       }
     }
     ensureDockTools();
+    clampStudioMoreMenu();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arm); else arm();
 })();

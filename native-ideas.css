@@ -9,7 +9,7 @@
   --ideas-line: #e6e1ed;
   --ideas-accent: #c43b4e;
   --ideas-accent-text: #8f2231;
-  padding: 58px 28px 72px; /* floating topbar band (owner 2026-09-03) */
+  padding: calc(var(--topbar-h, 42px) + 20px) 32px 72px; /* F-M83: same page frame as .main-content */
   overflow-y: auto;
   overflow-x: hidden;
   background: linear-gradient(180deg, var(--bg), var(--ideas-panel));
@@ -388,3 +388,43 @@ body:not(.bright-theme) .ce-ideas-action.is-success { background: rgba(52, 211, 
   .ce-ideas-section-title { font-size: var(--fs-section); color: var(--ideas-accent-text); }
   .ce-ideas-card-grid { grid-template-columns: 1fr; padding: 10px; }
 }
+
+/* ══ F-M102 (master-20260924): phone namespaces for the Ideas author rules ═══
+   The chip height stays on ce-mobile.css's F-M93 40px segmented rung (a
+   deliberate fold trade, not a miss). The fixes below are settled in the file that owns the surface, not in
+   ce-mobile.css (a shared phone stylesheet the Ideas surface only borrows).
+   These blocks sit at the end of native-ideas.css, and it is the LAST
+   stylesheet index.html:3852-3855 loads, so a stylesheet-order tie against
+   ce-mobile.css is resolved by file order here as well as by specificity
+   (html + three classes vs ce-mobile's html + two). */
+
+
+/* Section title at 320px. ce-mobile.css:4096 already released white-space on
+   the phone title, so what clips here is the two-line clamp it installs: a
+   320px column minus the 6px accent rail, 28px head padding, the 38px number
+   cell and its 10px gap leaves ~192px for var(--fs-section) content, and
+   "Om the Guru / Faith is the Evidence" is 24 characters that need three.
+   The clamp is the only truncation left on this rule, so the title takes
+   white-space:normal and lets the line box grow instead of cutting a word.
+   line-height rides along: 1.15 is a title rhythm for one line, not a
+   wrapped two/three-line block. */
+@media (max-width: 760px) {
+  .ce-ideas-parity .ce-ideas-section-title {
+    white-space: normal;
+    line-height: 1.3;
+  }
+}
+
+/* F-M102 (master-20260924): the card intro/pending blocks sit on the accent
+   tint (native-ideas.css:286, surface 85% + accent 15%), the heaviest ground
+   on this surface besides the point tiles. --ideas-muted was bound to that
+   ground by measurement on the lighter surfaces only, so in the cream theme
+   `--ideas-muted #6d687d` measured 4.31:1 there — under the 4.5
+   floor for these 13px prose blocks (both blocks are sentences, not labels).
+   `#5c5766` — index.html:238's own bright cream ink — reads 5.62:1 on that
+   ground, so the text stays in the surface's muted register. The dark theme
+   keeps --ideas-ink: 13.34:1 there, and both point-tile
+   grounds were re-measured for their own ink (bright #2b2732 13.58:1, dark
+   #f6bfca 10.19:1) and already clear. */
+body.bright-theme .ce-ideas-card-intro,
+body.bright-theme .ce-ideas-card-pending { color: #5c5766; }

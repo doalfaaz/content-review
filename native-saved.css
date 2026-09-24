@@ -362,7 +362,7 @@
 
 /* ── Saved Bank Workspace View ── */
 .ce-saved-workspace {
-  padding: 24px 32px 64px;
+  padding: 0 0 64px; /* F-M83: the view owns the frame */
   width: 100%;
   max-width: none;
   margin: 0;
@@ -421,14 +421,27 @@
   scrollbar-width: none;
 }
 .ce-saved-subtabs::-webkit-scrollbar { display: none; }
+/* F-M81 (master-20260923, DESKTOP_SURFACES D4): every Saved chip/pill row on
+   desktop is one control box — min-height var(--h-ctl) 28px, padding-block 0,
+   padding-inline 12px, gap 6px, var(--fs-secondary) label. Before this the tab
+   strip authored 6/14 padding at no floor and the type-filter pill authored
+   24px, so two rows of the same filter-chip component measured 24px and 44px
+   on one line. Token-bound, never redeclared: --h-ctl / --r-ctl / --r-pill.
+   The phone floor (44px) is owned by html.ce-phone in ce-mobile.css and is
+   untouched here. */
 .ce-saved-tab-btn {
   background: transparent;
   border: none;
   color: var(--muted);
   font-size: var(--fs-secondary);
   font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 7px;
+  /* F-M81 (master-20260923): the tab segment is a control, not a chip card —
+     one measured height with the type pills, --r-ctl radius for a segment. */
+  min-height: var(--h-ctl);
+  box-sizing: border-box;
+  padding-block: 0;
+  padding-inline: 12px;
+  border-radius: var(--r-ctl);
   cursor: pointer;
   /* F-SV01 (saved-css, 2026-09-23): a tab that can shrink is a tab whose label
      can break mid-word, so tabs never flex and never wrap their own text. */
@@ -477,19 +490,19 @@
      at 11px, so the pill grew without becoming more readable. */
   font-size: var(--fs-secondary);
   font-weight: 600;
-  /* F-M50 (master-20260923, PHONE_LIBRARY_SAVED W-02): the shelf pills in this
-     same column author 6x14 (6x11 at <=408px), so 4x10 read as a second, smaller
-     control family. One inset for both — the pill shell is shared, so its
-     padding is shared. The desktop box was already 24px on both sides from the
-     min-height floor; this aligns the label inset, it does not resize the pill. */
-  padding: 6px 14px;
-  /* F-A3-DESK (cloud/ce-ui): measured 23px tall — 1px under the WCAG 2.2
-     SC 2.5.8 24px floor (all four pills, both desktop widths). */
-  min-height: 24px;
+  /* F-M81 (master-20260923): this pill yields to the row contract — the 24px
+     F-A3-DESK floor and the F-M50 6x14 inset are both retired in favour of the
+     shared chip box (var(--h-ctl) high, 0/12 padding), which is what makes the
+     type pills and the tab segments above measure one height instead of
+     24px against 44px. F-A3-DESK's readable arm (var(--fs-secondary)) survives
+     in font-size above. */
+  min-height: var(--h-ctl);
+  padding-block: 0;
+  padding-inline: 12px;
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   cursor: pointer;
   transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s, border-color 0.15s, background-color 0.15s ease;
 }
@@ -599,7 +612,10 @@ html.ce-phone .ce-saved-type-note { text-align: left; }
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  /* F-M81 (master-20260923): 3px was the lone non-6px gap in this file — the
+     chip-row gap is one value (6px) across the strip, the type filters, the
+     caption/hook rows and this action cluster. */
+  gap: 6px;
   transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s, border-color 0.15s, background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   backdrop-filter: blur(8px);
 }
@@ -861,9 +877,13 @@ html.ce-phone .ce-saved-type-note { text-align: left; }
   background: var(--surface, rgba(255,255,255,0.04)); color: var(--ink, inherit);
   /* F-SV08 (saved-css, 2026-09-23): caption and hook chips are selectable
      values a finger has to hit on a wrapped row; 11px text in a ~24px pill
-     failed both the readable floor and the target floor. */
-  border-radius:999px; padding:6px 12px; font-size:var(--fs-secondary); font-weight:600; cursor:pointer;
-  min-height:32px; display:inline-flex; align-items:center;
+     failed both the readable floor and the target floor. F-M81 (master-20260923):
+     the 32px arm of that fix is superseded — the row contract is one chip box,
+     var(--h-ctl) high. */
+  border-radius:var(--r-pill); padding-block:0; padding-inline:12px;
+  font-size:var(--fs-secondary); font-weight:600; cursor:pointer;
+  min-height:var(--h-ctl); box-sizing:border-box;
+  display:inline-flex; align-items:center;
 }
 .ce-cap-chip:hover, .ce-hook-chip:hover { border-color: var(--accent); }
 .ce-cap-chip.is-active, .ce-hook-chip.is-active { background: var(--accent); border-color: var(--accent); color:#fff; }
@@ -916,9 +936,17 @@ html.ce-phone .ce-saved-type-note { text-align: left; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 44px;                 /* the app's phone touch law */
-  padding: 6px 14px;
-  border-radius: 999px;
+  /* F-M81 (master-20260923, DESKTOP_SURFACES D4): the 44px authored here was
+     the phone touch law applied to a row that is desktop chrome —
+     #ce-shelf-switch above is display:none outside html.ce-phone — and it is
+     what made the shelf row double the type-pill row on one line. The desktop
+     shelf pill now carries the shared chip box; the 44px phone floor is owned
+     by html.ce-phone in ce-mobile.css and is not touched from this file. */
+  min-height: var(--h-ctl);
+  box-sizing: border-box;
+  padding-block: 0;
+  padding-inline: 12px;
+  border-radius: var(--r-pill);
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--muted);

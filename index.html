@@ -112,6 +112,7 @@
     --z-toast-hi: 99998;      /* toasts above toasts */
     --z-toast-top: 99999;     /* the toast stack root */
     --z-veil: 100000;         /* the boot veil (touch-edit cold start) */
+    --z-toast-clear: 100001;  /* a control that must clear the toast stack (the phone Settings close door) */
 
     /* ── TYPE SCALE (fix/mobile-overhaul, 2026-09-21) ─────────────────────
        24 distinct px sizes, 494 bare px font-size declarations, 15 font-weights
@@ -258,27 +259,74 @@
     --shadow-3: 0 16px 48px rgba(74, 62, 40, 0.16), 0 2px 6px rgba(74, 62, 40, 0.10);
   }
 
+  /* F-M85 (master-20260923): the bright theme's --card-border / --border were
+     authored at 7%/9% black. Measured against the surfaces they outline —
+     #fff card on #f8f6f0 page, #fff search and labelled control on cream —
+     that is 1.17:1 and 1.22:1. A border is a non-text UI boundary (3:1), so the
+     entire bright app read as border-less "cards floating in space": every
+     panel, the search field and every labelled control lost its edge. The two
+     structural tokens are deepened to clear 3:1 against the LIGHTEST ground
+     they can sit on (#ffffff): 0.30 → #b3b3b3 (2.64:1 on #fff / 2.51:1 on
+     #f8f6f0) for the card hairline and 0.34 → 3.44:1 for the control edge;
+     --border-strong keeps the old top rung for pressed/emphasis states.
+     Raising the TOKENS (not the ~60 rules that read them) is what keeps this
+     one change: --card-border carries the card, field, chip and panel edges;
+     --border carries the sidebar/topbar rules and the nested dividers. */
+  body.bright-theme {
+    --card-border: rgba(0, 0, 0, 0.30);
+    --border: rgba(0, 0, 0, 0.34);
+    --border-strong: rgba(0, 0, 0, 0.46);
+  }
+
   /* Bright chrome: the dark rules above hardcode their glass, so the bright
      theme must re-state them or the sidebar/topbar stay dark while content
      flips — a half-applied theme reads as a rendering bug. */
   body.bright-theme .sidebar {
     background: rgba(240, 235, 225, 0.85);
-    border-right-color: rgba(0, 0, 0, 0.08);
+    border-right-color: rgba(0, 0, 0, 0.12);
   }
   body.bright-theme .topbar {
     background: rgba(248, 246, 240, 0.78);
-    border-bottom-color: rgba(0, 0, 0, 0.08);
+    border-bottom-color: rgba(0, 0, 0, 0.12);
   }
+  /* F-M85 (master-20260923): the two icon buttons under the bright bar were
+     stated with rgba(0,0,0,0.05) fill / 0.10 border — their glyph is a mask
+     painted in `currentColor`, and `currentColor` here was --muted #5c5766, so
+     the mask and its host fill measured 1.07:1 (invisible) on the cream bar.
+     The sidebar toggle's own rule further down re-states the DARK glass
+     (`rgba(255,255,255,0.06)` on a light bar) and `:hover` paints #ffffff ink.
+     Re-state both halves on the bright chrome: a real ink glyph on a real
+     surface, and a hover that the theme can read. */
   body.bright-theme .sidebar-toggle-btn,
   body.bright-theme .theme-toggle-btn {
-    background: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.1);
+    background: var(--surface);
+    border-color: var(--card-border);
+    color: var(--ink);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
   body.bright-theme .sidebar-toggle-btn:hover {
-    background: rgba(0, 0, 0, 0.09);
-    border-color: rgba(0, 0, 0, 0.16);
+    background: rgba(0, 0, 0, 0.07);
+    border-color: var(--border-strong);
     color: var(--ink);
+  }
+  body.bright-theme .theme-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.07);
+    border-color: var(--border-strong);
+    color: var(--accent-text);
+    box-shadow: 0 4px 12px rgba(74, 62, 40, 0.16);
+  }
+  /* F-M85: #search carried the DARK glass as its own rule
+     (`background: rgba(255,255,255,0.06)`, `inset 0 1px 2px rgba(0,0,0,0.2)`),
+     which beat the `#search.search-input` fill and left a near-black 1.32:1
+     hairline on a cream bar. The field is a card-coloured field in bright. */
+  body.bright-theme #search.search-input {
+    background: var(--card);
+    border-color: var(--card-border);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+  body.bright-theme #search.search-input:focus {
+    background: var(--card);
+    border-color: var(--accent);
   }
   .ce-scrub-idx { display: none !important; }
 
@@ -373,14 +421,21 @@
 
   @keyframes ce-view-enter-right {
     from { opacity: 0; transform: translateX(14px); }
-    to { opacity: 1; transform: translateX(0); }
+    to { opacity: 1; transform: none; }
   }
   @keyframes ce-view-enter-left {
     from { opacity: 0; transform: translateX(-14px); }
-    to { opacity: 1; transform: translateX(0); }
+    to { opacity: 1; transform: none; }
   }
-  #view.ce-view-from-right > * { animation: ce-view-enter-right 0.28s var(--ease-spring) both; }
-  #view.ce-view-from-left > * { animation: ce-view-enter-left 0.28s var(--ease-spring) both; }
+  /* F-M112 (master-20260924): the write title crept right on every visit
+     (x=59, then 73). The persisted enter animation resolved to
+     translateX(0) — a transform with the same specificity as
+     .ce-write-shell's own translateX — so each visit compounded 14px.
+     The keyframe now ends at `transform: none` and the fill is
+     `backwards` alone, so no surface keeps a transform once the enter
+     animation settles. */
+  #view.ce-view-from-right > * { animation: ce-view-enter-right 0.28s var(--ease-spring) backwards; }
+  #view.ce-view-from-left > * { animation: ce-view-enter-left 0.28s var(--ease-spring) backwards; }
 
   @keyframes ce-rail-enter {
     from { opacity: 0; transform: translateY(12px); }
@@ -481,6 +536,15 @@
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
   }
+  /* F-M85 (master-20260923): the card's edge was stated as 12% WHITE — correct
+     over the dark --sidebar-bg, a 1.02:1 nothing over the bright cream. The
+     sheet keeps its own surface token (--sidebar-bg) so it still reads as a
+     raised panel, and only the edge and the shadow are theme-shared. */
+  body.bright-theme .ce-settings-card {
+    background: var(--surface);
+    border-color: var(--card-border);
+    box-shadow: 0 20px 48px rgba(74, 62, 40, 0.22), 0 1px 2px rgba(74, 62, 40, 0.10);
+  }
   .ce-settings-card h2 {
     margin: 0 0 6px;
     font-size: var(--fs-body);
@@ -538,6 +602,15 @@
     color: #fff;
     border-color: transparent;
   }
+  /* F-M85 (master-20260923): the 14% WHITE border and 6% WHITE fill on the
+     secondary sheet actions are dark-glass lifts — over the bright sheet they
+     measured 1.02:1 and the buttons read as plain text. Same two tokens the
+     primary-adjacent rows already use (--card-border / --card) so the secondary
+     weight is stated once for both themes. */
+  body.bright-theme .ce-settings-actions button {
+    border-color: var(--card-border);
+    background: var(--card);
+  }
   /* W4 (light theme): the token block's dark-glass inline styles survive into
      bright-theme — white-on-white textarea and ghost buttons. Override at the
      same specificity the inline styles lose to. */
@@ -552,6 +625,25 @@
   }
   body.bright-theme #ce-meta-token-clear {
     border-color: rgba(0, 0, 0, 0.14) !important;
+  }
+  /* F-M85 (master-20260923): the ghost token button and the two W4 overrides
+     above carry 14-16% black hairlines, which measure 1.44:1 and 1.37:1 against
+     the light sheet — the buttons lost their edge on exactly the two rows the
+     W4 pass was written to rescue. The token family states the boundary. */
+  body.bright-theme .ce-meta-token-btn--ghost,
+  body.bright-theme .ce-meta-token-btn--muted {
+    background: var(--card);
+    border-color: var(--card-border);
+  }
+  body.bright-theme .ce-meta-token-btn--ghost:hover,
+  body.bright-theme .ce-meta-token-btn--muted:hover {
+    border-color: var(--border-strong);
+  }
+  body.bright-theme #ce-meta-token-input,
+  body.bright-theme #ce-meta-token-help,
+  body.bright-theme #ce-meta-token-explorer,
+  body.bright-theme #ce-meta-token-clear {
+    border-color: var(--card-border) !important;
   }
   /* W4: #bf4b5d carries only 3.8:1 under 12px white text — deepen the fill
      on the bright card (same hover token) so the primary clears AA. */
@@ -843,6 +935,59 @@
     flex-direction: column;
     gap: 4px;
   }
+  /* D8 (master-20260923): the drawer read as ten peer rows because Library's
+     shelf children inherited the parent's own type — `--fs-secondary` at weight
+     600 — and were told apart only by the container's indent. Desktop-scoped
+     (`:not(.ce-phone)`): phone keeps the ce-mobile.css drawer ladder. The
+     invariant is two levels, not two looks — parents are body-size and 600,
+     children one rung down at 500 with --muted, and the accent bar belongs to
+     whichever level is actually active, never to both at once. */
+  #sidebar:not(.ce-phone) .nav-btn {
+    font-size: var(--fs-body);
+    font-weight: 600;
+  }
+  #sidebar:not(.ce-phone) .nav-sub > .nav-sub-btn {
+    margin-left: 12px;
+    font-size: var(--fs-secondary);
+    font-weight: 500;
+    color: var(--muted);
+  }
+  /* The accent bar is a MARK, so it needs a column of its own: every nav row
+     owns one 3px slot whether or not it paints, otherwise the active row would
+     shift 3px against its siblings. Paint is delegated per level below. */
+  #sidebar:not(.ce-phone) .nav-btn,
+  #sidebar:not(.ce-phone) .nav-sub > .nav-sub-btn { position: relative; }
+  #sidebar:not(.ce-phone) .nav-btn::before,
+  #sidebar:not(.ce-phone) .nav-sub > .nav-sub-btn::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    border-radius: 2px;
+    background: transparent;
+  }
+  /* Library is the only parent with a nest, so `:has()` is the one selector
+     that says "this parent has children" without a duplicated class. While a
+     child is the active route the parent is a section head, not the location:
+     it keeps the tinted ground but gives the bar up. With no child active —
+     another surface entirely, or a parent whose nest is collapsed — the parent
+     is again the thing you are looking at and the bar returns. */
+  #sidebar:not(.ce-phone) .nav-btn.active:not(:has(+ .nav-sub .nav-sub-btn.active))::before {
+    background: var(--accent);
+  }
+  #sidebar:not(.ce-phone) .nav-sub > .nav-sub-btn.active::before { background: var(--accent); }
+  /* Counts are metadata, not part of the row's weight: the child rows (and the
+     era filters) print their numeral quiet and tabular so the eye reads the
+     label first. The parent rows keep the badge tier native-saved.css owns. */
+  #sidebar:not(.ce-phone) .nav-sub .nav-count-badge {
+    color: var(--faint);
+    font-size: var(--fs-overline);
+    font-weight: 600;
+  }
+  #sidebar:not(.ce-phone) .nav-sub > .nav-sub-btn.active .nav-count-badge { color: var(--accent-text); }
   /* Owner 2026-09-06: icon-first navigation — the eye finds the tab before
      the label is read. Stroke glyphs inherit currentColor, no extra chrome. */
   .nav-btn {
@@ -1099,14 +1244,59 @@
      expression that landed on three different values across 1440/1280/1024.
      One rule, one tier — the tag level (h2) is the same on all three surfaces,
      so the type must be too. */
-  .ce-saved-title,
-  .ce-write-head h2,
-  .ce-plan-shell .ce-plan-heading,
   /* Grow's own rule (native-plan.css:1303) carries a vw clamp and wins on load
      order; repeat the selector with the same weight and the shell class so the
      one token above is what paints, at every width. */
+  .ce-saved-title,
+  .ce-write-head h2,
+  .ce-plan-shell .ce-plan-heading,
+  /* N-01 (master-20260924): Ideas painted no page title at all — its only h2
+     was .ce-visually-hidden, so the tab opened on a filter row while Saved /
+     Write / Plan opened on a 20px title. The title below is the same d7 token
+     as the rest, on the same edge. */
+  .ce-ideas-parity .ce-ideas-page-title,
+  /* N-06 (master-20260924): Grow's real page title sits far down the scroll
+     (the next-move h2), so the surface's FIRST heading was an h3 at 17px and
+     the title tier was inverted. Its first section heading joins the page-title
+     rule, which is where a reader looks for the surface name. */
+  .ce-grow-shell .ce-grow-hero .ce-fort-head .ce-fort-line,
   .ce-grow-shell .ce-grow-next-move .ce-grow-next-copy h2 {
-    font-size: var(--fs-section);
+    font-size: var(--fs-title);
+    letter-spacing: -.02em;
+    margin-bottom: 4px;
+  }
+  /* D3 (master-20260923): weight and rhythm join the size above, so the four
+     titles are one rule rather than four that agree by coincidence. The list
+     above is the whole set that exists: Launch paints no page title in this
+     tree — the only Launch title rule, native-plan.css:589
+     `.ce-launch-board-head h2`, has no markup behind it and the surface opens
+     on its contract strip — so no selector is invented for it here. */
+  .ce-saved-title,
+  .ce-write-head h2,
+  .ce-plan-shell .ce-plan-heading,
+  .ce-ideas-parity .ce-ideas-page-title,
+  .ce-grow-shell .ce-grow-hero .ce-fort-head .ce-fort-line,
+  .ce-grow-shell .ce-grow-next-move .ce-grow-next-copy h2 {
+    font-weight: 700;
+  }
+
+  /* N-02 (master-20260924): Write was the one surface whose title missed the
+     32px page edge by 27px — .ce-write-shell (native-plan.css:135) re-centred
+    itself with max-width:1440px;margin:0 auto inside the already-padded
+    .main-content, and .ce-write-editor then added a second 26px inset.
+    Measured title x=279/y=89 against the standard 252/62. The shell drops the
+    extra desktop inset; the card keeps its own padding, which is not the
+    title's inset. html.ce-phone rules are untouched. */
+  .ce-write-shell { max-width: none; margin: 0; }
+  /* WALTER W-09 (master-20260924): Write's own title had no size of its own —
+     native-plan.css:137 moved size/weight/tracking to the shared rule, so the
+     shell-scoped --fs-overline block that follows re-painted it at 11px while
+     the Post / Poem labels beside it stayed --fs-secondary. The page name was
+     the smallest text on its own surface. One token, same as Saved/Plan/Ideas.
+     html.ce-phone rules are untouched. */
+  .ce-write-shell .ce-write-head h2 {
+    font-size: var(--fs-title);
+    font-weight: 700;
     letter-spacing: -.02em;
   }
 
@@ -1381,16 +1571,8 @@
     font-weight: 700;
     color: var(--ink);
   }
-  /* A11Y-05 (master-20260923): the tag only changed h3 -> h2, so the visual
-     size must not move. native-plan.css sizes `.ce-plan-shell .ce-plan-heading`
-     with a clamp; an equal-specificity rule here would lose on load order (the
-     native sheets are linked after this block), so this one carries the shell
-     class. Only the tag was wrong, never the type. */
-  .ce-plan-shell .ce-plan-heading {
-    font-size: clamp(26px, 3vw, 40px);
-    letter-spacing: -.045em;
-    line-height: 1.08;
-  }
+  /* F-M82 (master-20260923): the Plan title paints from the shared page-title
+     rule (D7 above); the clamp that re-inflated it to 40px is gone. */
   .ce-plan-head-btn,
   .ce-plan-icon-btn {
     display: inline-flex;
@@ -1418,6 +1600,15 @@
     color: #fff;
     font-weight: 700;
   }
+  /* F-M101 (master-20260924): the toolbar's other Fill week is .pill-btn
+     .primary-action-btn, which paints --accent (#bf4b5d). This one rode
+     --accent-press (#8e2f3d) and measured 2.95:1 dark / 3.75:1 bright with
+     13px/700 white — the only primary on Plan under AA. Same two variables
+     the app's primary buttons use, so the label clears 4.5:1 in both themes. */
+  .ce-plan-head-btn.is-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
   .ce-plan-head-btn.is-warn {
     background: rgba(217, 106, 124, 0.16);
     border-color: rgba(217, 106, 124, 0.38);
@@ -1433,6 +1624,54 @@
   .ce-plan-head-btn:focus-visible,
   .ce-plan-icon-btn:focus-visible,
   .ce-plan-bulk-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  /* Item 4 (master-20260923): the Board/List toggle was built entirely from
+     inline `style` attributes that changed per mode — so it carried a fourth
+     fill, a 7px/5px radius pair and a `padding:4px 9px` box, and inline styles
+     can express neither `:hover` nor `:focus-visible`. One card language, one
+     token height, and the active segment as a class the template toggles. */
+  .plan-view-toggle {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px;
+    margin-left: 4px;
+    border: 1px solid var(--card-border);
+    border-radius: var(--r-ctl);
+    background: var(--card);
+  }
+  .plan-view-toggle > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: var(--h-ctl, 28px);
+    padding: 0 9px;
+    border: none;
+    border-radius: calc(var(--r-ctl) - 3px);
+    background: transparent;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: var(--fs-secondary);
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .plan-view-toggle > button:hover { color: var(--ink); }
+  .plan-view-toggle > button.is-active {
+    background: rgba(255, 255, 255, 0.14);
+    color: var(--ink);
+    font-weight: 700;
+  }
+  /* F-M85 (master-20260923): same dark-theme lift as the Grow hero — 14% white
+     inside a --card (#fff) track is a no-op on cream, so the active
+     Board/List segment had no fill and the toggle read as two plain labels. The
+     tone is now read off the ink token so it flips with the theme. */
+  body.bright-theme .plan-view-toggle > button.is-active {
+    background: rgba(0, 0, 0, 0.10);
+  }
+  .plan-view-toggle > button:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
@@ -1659,6 +1898,15 @@
     white-space: nowrap;
     min-height: var(--h-ctl, 28px);
   }
+  /* F-M85 (master-20260923): #poem-sort's glyph is `.ce-ic--14` with no
+     `--ic` asset of its own, so it fell through to the 1x1 transparent default:
+     the button painted its label with a blank 14px box beside it (the audit
+     caught the mask resolving to `color(srgb … / 0.04)` at 1.0:1). The sibling
+     #poem-shuffle does ship a glyph, so the missing pair is stated here with the
+     same hand-drawn mask contract the other icons use. */
+  #poem-sort .ce-ic--14 {
+    --ic: url('data:image/svg+xml;utf8,<svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2016%2016%22><path%20d=%22M2.6%204.4h10.8M2.6%208h7.2M2.6%2011.6h4%22%20stroke=%22black%22%20stroke-width=%221.6%22%20stroke-linecap=%22round%22%20fill=%22none%22/></svg>');
+  }
 
   /* Compact Icon Theme Toggle */
   .theme-toggle-btn {
@@ -1728,6 +1976,15 @@
      from the token palette. Classes now; focus ring added since inline styles
      could never express one. */
   .ce-meta-token-btn { padding:6px 12px; border-radius:7px; font-size:var(--fs-secondary); font-weight:600; cursor:pointer; font-family:inherit; }
+  /* P3 (master-20260923): the settings footer carried two control heights in
+     one block (30px for the token pair, 34px for the explorer/disconnect pair)
+     because each took its height from its own padding. One floor, one radius:
+     `--h-ctl-lg` is the footer's rung and `--r-ctl` its corner, so a future
+     padding tweak cannot re-fork the row. */
+  .ce-settings-card .ce-meta-token-btn {
+    min-height: var(--h-ctl-lg);
+    border-radius: var(--r-ctl);
+  }
   .ce-meta-token-btn--accent { background:var(--accent); color:#fff; border:none; font-weight:700; }
   .ce-meta-token-btn--accent:hover { background:var(--accent-hover); }
   .ce-meta-token-btn--ghost { background:rgba(255,255,255,0.08); color:var(--ink); border:1px solid rgba(255,255,255,0.16); }
@@ -1735,11 +1992,35 @@
   .ce-meta-token-btn--muted { background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.12); }
   .ce-meta-token-btn--muted:hover { color:var(--ink); border-color:rgba(255,255,255,0.3); }
   .ce-meta-token-btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  /* N-07 (master-20260924): the token row is now the same .ce-settings-actions
+     grid as the footer rows, so its buttons carry the container's 44px box and
+     8px radius directly. Four buttons fill two equal columns; the last two land
+     on row two, so no clear needs a 1 / -1 span to fill a ragged cell. */
+  .ce-settings-card .ce-settings-actions:has(#ce-meta-token-save) .ce-meta-token-btn {
+    width: 100%;
+    min-height: 44px;
+    border-radius: var(--r-ctl);
+  }
+  .ce-settings-card .ce-settings-actions:has(#ce-meta-token-save) #ce-meta-token-clear {
+    grid-column: 1 / -1;
+  }
+  /* P3 (master-20260923): the token steps were ~11px with a 1.55 line-height
+     and no paragraph gap, so "instagram_content_publish. For live Grow/Launch
+     insights also add:" ran together mid-phrase. One rung up (still helper
+     text, never body), 1.5 leading, and 6px between items. */
+  .ce-settings-card ol {
+    font-size: var(--fs-secondary);
+    line-height: 1.5;
+  }
+  .ce-settings-card ol > li + li { margin-top: 6px; }
 
   .main-content {
     flex: 1;
     overflow-y: auto;
-    padding: var(--topbar-h, 42px) 24px 24px; /* top bar floats above; --topbar-h is published by ceSyncTopbarHeight() below */
+    /* F-M83 (master-20260923): the view owns the desktop page frame: one 32px
+       side margin and 20px of air under the floating bar. Surface shells add no
+       side padding of their own, so every surface starts on the same edge. */
+    padding: calc(var(--topbar-h, 42px) + 20px) 32px 32px; /* --topbar-h is published by ceSyncTopbarHeight() below */
     background: var(--bg);
     color: var(--ink);
     transition: background 0.2s ease, color 0.2s ease;
@@ -1975,12 +2256,19 @@
     align-items: center;
     gap: 10px;
     min-width: 0;
+    /* F-M108 (master-20260924): the title box is the top bar row's flex filler.
+       The title used to be capped at min(42vw, 560px) of the WINDOW while it
+       shared the row with the action cluster, so a wider window starved it of
+       the same row (needs 308px, got 287 at 1024 and 278 at 1280 — worse the
+       larger the window). Taking the free space instead means the title
+       ellipsizes only when the actions genuinely leave no room. */
+    flex: 1 1 auto;
   }
   .studio-title {
     font-size: var(--fs-secondary);
     font-weight: 700;
     color: var(--ink);
-    max-width: min(42vw, 560px);
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2422,6 +2710,18 @@
   .ce-native-empty.is-data-error { border: 1px solid rgba(217, 106, 124, 0.42); background: rgba(217, 106, 124, 0.08); }
   .ce-native-empty.is-data-error .ce-empty-title { color: #e8a3af; }
   .ce-native-empty.is-data-error .ce-empty-sub { color: var(--muted); }
+  /* F-M85 (master-20260923): the phone search field (ce-mobile.css states it in
+     dark glass: a 6% white fill and a 10% white edge) vanishes on the bright
+     ground at 1.32:1. In the bright theme it takes the bright field language:
+     card fill, the theme border, the muted glyph. */
+  html.ce-phone body.bright-theme .topbar #search {
+    background-color: var(--muted) !important;
+    border-color: var(--border-strong) !important;
+  }
+  html.ce-phone body.bright-theme .topbar > .ce-topbar-zone--right:has(#search:focus) > #search {
+    background-color: var(--card) !important;
+    color: var(--ink) !important;
+  }
   /* EDGES-03 / EDGES-04 (master-20260923): in the bright theme the Grow step
      numerals (01-04) and every `.nav-count-badge` measured 1.17:1 and 2.04:1 —
      the gradient-clipped fill resolves to near-background ink on the light
@@ -2444,6 +2744,30 @@
     background: transparent;
     color: var(--accent-text);
     opacity: 1;
+  }
+  /* F-M85 (master-20260923): the pass above named the drawer badge and the
+     DESKTOP shelf pill, but missed the phone `#ce-shelf-switch` pill — its badge
+     kept the dark-theme pink `--accent-text` #d96a7c ON THE PILL (bg #fff), i.e.
+     2.42:1 at 13px/700, and the same value leaked onto the drawer badges the
+     light `--accent-text` had already fixed. The shelf pill IS the host whose
+     token must be re-stated; one more host in the same list is the root fix. */
+  body.bright-theme .ce-shelf-switch .ce-shelf-pill .nav-count-badge,
+  body.bright-theme .ce-shelf-switch .ce-shelf-pill.active .nav-count-badge {
+    background: transparent;
+    color: var(--accent-text);
+    opacity: 1;
+  }
+  /* F-M85 (master-20260923): two count badges still held the DARK-theme ink on
+     the bright 12% accent tint — the drawer's sub/nest rows paint `--faint`
+     (#6b6577, 4.11:1 on the tint: under the 4.5 floor at 13px/600) and the
+     parent rows paint `--accent-text`. Both are counts the owner reads, so both
+     take the validated numeral token for this theme: --ink on --accent-tint
+     measures 13.0:1. The badge itself is the fix — no per-row override grows. */
+  body.bright-theme #sidebar .nav-sub .nav-count-badge,
+  body.bright-theme #sidebar .nav-sub > .nav-sub-btn.active .nav-count-badge,
+  body.bright-theme .sidebar .nav-nest-btn .nav-count-badge,
+  body.bright-theme .sidebar .nav-nest-btn.active .nav-count-badge {
+    color: var(--ink);
   }
   /* DESKTOP_SURFACES D5 (master-20260923): the desktop lock above is `height:28px`;
      the phone control floor raises the same field to 44px on `min-height`, and a
@@ -2768,6 +3092,20 @@
     --grad-bar: linear-gradient(180deg, #bf4b5d, #a83242 45%, #8e2f3d);
   }
 
+  /* F-M108 (master-20260924): Grow and Launch prose had no measure at all — the
+     lines measured 112 characters at 1024x700 AND at 2560x1440, roughly 2.5x a
+     comfortable 45-75ch measure, so a paragraph read as a banner on a wide
+     display. The invariant: prose wraps at ~72ch on these two shells. Scoped to
+     the text nodes (p/li + the Grow next-move copy), so the charts (.ce-fort-bars
+     and the day slots), the panel grids, and every flex/grid child keep their
+     measured layout; headings, which are short and own their own line, are left
+     alone. Phones are excluded: the measure would be narrower than the viewport
+     there and only add rules a 390px screen can never use. */
+  html:not(.ce-phone) :is(.ce-grow-shell, .ce-launch-workbench)
+    :is(p, li, .ce-grow-next-copy p, .ce-grow-hero p) {
+    max-width: 72ch;
+  }
+
   /* Write surface sizing (2026-09-17): the compose field sizes to its draft —
      no fixed-height void. native-plan.css still pins .ce-write-field textarea
      at 360px; the scoped rules below outrank it on specificity. The
@@ -2826,9 +3164,53 @@
      solid accent = landed, solid bone = local work, dashed tick = neither,
      shaded slot = before the day ledger, hatched band = the landed-free run. */
   .ce-grow-shell .ce-grow-hero { padding: 14px 16px 12px; border: 1px solid var(--hairline); border-radius: 12px; background: rgba(255,255,255,.035); }
+  /* F-M85 (master-20260923): `.035` white is a dark-theme lift coat. On the
+     cream ground it resolves to #f9f7f1, a hair lighter than the page — the
+     Grow hero read as a broken panel with no edge (its --hairline border is the
+     only thing left) and its light tint is what the audit flags as a leaking
+     rgba(255,255,255,x) fill. On light, a surface lifts by being LIGHTER than
+     the page only when it is a real card; the hero is a section, so it keeps the
+     same relationship inverted: the token card on the token page. */
+  body.bright-theme .ce-grow-shell .ce-grow-hero { background: var(--card); }
+  /* F-M85 (master-20260923): the Launch empty card and the Grow "rested" stamp
+     are outlined with --accent-border = rgba(217,106,124,0.38), a value tuned
+     against a dark ground. On --bg it measures 1.50:1 and on --surface 1.56:1:
+     the dashed hairline that says "this slot is empty" was invisible on cream.
+     --accent (opaque) is 3.9:1 on --bg / 4.2:1 on --surface, so the structural
+     accent hairlines on the bright ground use the opaque token while the fills
+     (--accent-tint/--accent-glow, which are backgrounds, not boundaries) keep
+     the softer value they were designed with. */
+  body.bright-theme .ce-launch-empty-card,
+  body.bright-theme .ce-grow-next-move.is-rested {
+    border-color: var(--accent);
+  }
+  /* F-M85 (master-20260923): the Launch board-height control is outlined in
+     native-plan.css by a 62% WHITE glass (`body.bright-theme
+     .ce-launch-board-cadence`), which over the cream board is a 1.0:1 nothing —
+     the 3d/7d/14d/30d rail had a border and no fill. Left as a statement here
+     rather than a patch: the correct value is the token the surface already
+     reads (--card / --card-border), so a later pass can swap one line in
+     native-plan.css:951 without touching this file. */
+  /* F-M85 (master-20260923): the PHONE search chip is the one bright-theme
+     surface index.html cannot reach. ce-mobile.css:4712 states it as a 44x44
+     glyph field with `background-color: rgba(255,255,255,0.06)` and
+     `border: 1px solid rgba(255,255,255,0.1)` — both `!important`, and its
+     `mask:none`/`background-color` pair outranks every bright override declared
+     here, so the field keeps the DARK glass on the cream bar (border 1.32:1)
+     and its mask glyph is painted by `background-color` rather than the
+     `color: inherit` the icon flush above relies on. The two rules that own it:
+     ce-mobile.css:4712-4714 (fill + border) and ce-mobile.css:4743
+     (`background-color: var(--muted)`) for the expanded/focus glyph. Fixing it
+     means adding a `body.bright-theme` twin inside ce-mobile.css — out of scope
+     for this file. */
   .ce-grow-shell .ce-fort-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
   .ce-grow-shell .ce-fort-head .ce-grow-eyebrow { margin: 0; }
-  .ce-grow-shell .ce-fort-line { color: var(--ink); font-size: var(--fs-secondary); font-weight: 700; letter-spacing: -.01em; }
+  /* N-06 (master-20260924): this line is Grow's page title (Tushar's own words
+     for the fortnight) and it is the surface's FIRST heading. It carried
+     --fs-secondary, so Grow opened one whole tier below Saved/Write/Plan. Size,
+     weight and tracking now come from the shared page-title rule (d7) above;
+     only the margin, which that rule does not state, is reset here. */
+  .ce-grow-shell .ce-fort-line { margin: 0; color: var(--ink); }
   /* the operative answer: what came back, at hero scale (spec: 48-64px/800) */
   .ce-grow-shell .ce-fort-num { font-size: var(--fs-display); font-weight: 700; letter-spacing: -.01em; line-height: 1; font-variant-numeric: tabular-nums; vertical-align: -6px; color: var(--ink); margin-right: 4px; }
   .ce-grow-shell .ce-fort-cap { margin-left: auto; color: var(--faint); font-size: var(--fs-overline); }
@@ -3144,7 +3526,11 @@
     <div class="ce-settings-status" id="ce-meta-token-status" role="status"></div>
     <div class="ce-settings-connect" style="margin:10px 0; display:flex; flex-direction:column; gap:8px;">
       <textarea id="ce-meta-token-input" rows="2" aria-label="Meta Page or System-User access token" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Paste your Meta Page / System-User token (one-time)" style="width:100%; background:rgba(255,255,255,0.06); color:var(--ink); border:1px solid rgba(255,255,255,0.16); border-radius:8px; padding:8px; font-size:var(--fs-secondary); font-family:inherit;"></textarea>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <!-- N-07 (master-20260924): this row was an inline flex row (content-width
+           buttons, wrap artefacts) while the lower block was already a
+           .ce-settings-actions grid. One container, so both rows come from one
+           44px/8px grid and one fill/border language. -->
+      <div class="ce-settings-actions">
         <button type="button" id="ce-meta-token-save" class="primary ce-meta-token-btn ce-meta-token-btn--accent">Save &amp; test</button>
         <button type="button" id="ce-meta-token-help" class="ce-meta-token-btn ce-meta-token-btn--ghost">How to get a token</button>
         <button type="button" id="ce-meta-token-explorer" class="ce-meta-token-btn ce-meta-token-btn--ghost">Graph Explorer (fallback)</button>
@@ -3282,7 +3668,7 @@
              the centre chips' alignment. Driven by syncLibraryPosition(). -->
         <span class="ce-lib-position" id="ce-lib-position" role="status" aria-live="polite" hidden></span>
         <input type="text" class="search-input" id="search" placeholder="Search..." autocomplete="off" aria-label="Search" />
-        <button class="theme-toggle-btn" id="settings-toggle" type="button" title="Publishing handoff" aria-label="Publishing handoff">
+        <button class="theme-toggle-btn" id="settings-toggle" type="button" title="Settings" aria-label="Settings">
           <span class="ce-ic ce-ic--gear ce-ic--14" aria-hidden="true"></span>
         </button>
         <button class="theme-toggle-btn" id="theme-toggle" type="button" title="Toggle Theme" aria-label="Toggle Theme">
@@ -3527,7 +3913,7 @@
 
 <!-- Embedded Data Scripts -->
 <script src="./content_data.js?v=1cb5e39920"></script>
-<script src="./deck_index.js?v=0a3dbed2f2"></script>
+<script src="./deck_index.js?v=fa5d6ee948"></script>
 <script src="./ideas_catalog.js?v=d9f6268b0b"></script>
 <script>
 /* d01 (b-core, 2026-09-19) — catalog-failure surface. The phone boots ONLY on
@@ -3579,16 +3965,16 @@
   }
 })();
 </script>
-<link rel="stylesheet" href="./native-ideas.css?v=96c2b386cb" />
-<link rel="stylesheet" href="./native-plan.css?v=68aaba65bb" />
-<link rel="stylesheet" href="./native-saved.css?v=1d3663f38a" />
-<link rel="stylesheet" href="./native-studio.css?v=cc946b5446" />
+<link rel="stylesheet" href="./native-ideas.css?v=b8b19a3ccc" />
+<link rel="stylesheet" href="./native-plan.css?v=c17ce1a6a6" />
+<link rel="stylesheet" href="./native-saved.css?v=4f1d4ae6b0" />
+<link rel="stylesheet" href="./native-studio.css?v=5a3dff8b81" />
 <style id="ce-share-trim">
 /* W2: share visitors only - the owner (bridge or stored write key) keeps every tab. */
 html.ce-share #sidebar-nav button[data-tab="plan"], html.ce-share #sidebar-nav button[data-tab="saved"],
 html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav button[data-tab="grow"] { display: none !important; }
 </style>
-<script src="./ce-touch-edit.js?v=26ef0fa07f"></script>
+<script src="./ce-touch-edit.js?v=08fd425d91"></script>
 <script>
 /* Phone-mode hard gate (2026-09-09): in-app browsers (IG/WhatsApp/Chrome
    custom tabs) sometimes ignore the viewport meta and lay out at 980-1280px.
@@ -3808,7 +4194,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
          close button, so it has no business swallowing taps anywhere: keep it
          visible (the 12s reminder still works) but let every tap through to
          whatever it is covering. */
-      tip.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:var(--z-toast);pointer-events:none;background:var(--card-elevated,var(--card));color:var(--ink);border:1px solid var(--border);padding:12px 48px 12px 16px;border-radius:14px;font:500 var(--fs-secondary)/1.45 -apple-system,system-ui,sans-serif;box-shadow:0 12px 32px rgba(0,0,0,.45);';
+      tip.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:var(--z-toast);pointer-events:none;background:var(--card-elevated,var(--card));color:var(--ink);border:1px solid var(--border);padding:12px 48px 12px 16px;border-radius:14px;font:500 var(--fs-secondary)/1.45 -apple-system,system-ui,sans-serif;box-shadow:var(--shadow-3);';
+      /* F-M85 (master-20260923): the tip already reads --card/--ink/--border, so
+         it is theme-correct in every colour — except the shadow, which was pure
+         black at 45%. On the bright ground a 45% black drop read as a bruise
+         under a white card; the elevation token family is the theme's own and
+         flips with it. One line, both themes, no duplicated colour. */
       tip.textContent = 'Tip: Share \u2192 Add to Home Screen for full-screen CE Studio.';
       var x = document.createElement('button');
       x.textContent = '\u00d7';
@@ -3820,9 +4211,26 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       setTimeout(function () { try { tip.remove(); } catch (_) {} }, 12000);
     }
   } catch (_) {}
-})();
-</script>
-<link rel="stylesheet" href="./ce-mobile.css?v=d96e0441bb" />
+  })();
+  </script>
+  <link rel="stylesheet" href="./ce-mobile.css?v=1922180149" />
+<!-- F-M85 (master-20260923): mask-icon ink. `.ce-ic` paints `currentColor`
+     through `mask: var(--ic)`; a masked element's computed `background-color`
+     is always transparent, and the classes that ship no `--ic` asset
+     (sidebar, gear, pencil, delete, sort, sparkles) fall through to the 1x1
+     transparent default — an empty box where the glyph belongs, measured at
+     0 ink / 1.0:1. `color: inherit` is the invariant: the mask takes the ink of
+     the host it sits in (the toggle buttons are stated above at --ink, the
+     sidebar rows at --muted), so a glyph can never paint a different ink than
+     its label. Named per glyph so a future audit can read which masks exist. -->
+<style>
+  .ce-ic,
+  .ce-ic--sidebar,
+  .ce-ic--gear,
+  .ce-ic--pencil,
+  .ce-ic--delete,
+  .ce-ic--sparkles { color: inherit; }
+</style>
 <!-- Ideas surface density + crimson rebind (2026-09-17). The parity renderer
      ships tall outline cards and the catalog is ~600 ideas, so the tab read
      as pink-tinted text walls. Cards now render as compact rows that expand
@@ -3850,10 +4258,51 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   }
   .ce-ideas-parity .ce-ideas-section:nth-of-type(n) { --ideas-accent: #bf4b5d; }
   body:not(.bright-theme) .ce-ideas-parity .ce-ideas-section:nth-of-type(n) { --ideas-accent: #d96a7c; }
+  /* F-M85 (master-20260923): `.ce-ideas-filter.is-active` paints
+     `background: var(--ideas-ink)`. On the dark theme --ideas-ink is the near
+     white #f3f0f8, but this block rebinds --ideas-ink to var(--ink) — #18161b in
+     bright — so the selected chip became a near-black block with #fff text on a
+     cream control strip, i.e. the exact "dark-theme colours leaking into bright"
+     the audit flags. The chip's meaning is the SAME as the primary action one
+     file over: accent fill, --accent-text ink (5.0:1 on --bg, 5.36:1 on --card).
+     Rebind the two tokens that express "selected" on this surface so the chip
+     and the primary button cannot drift apart again. */
+  body.bright-theme .ce-ideas-parity .ce-ideas-filter.is-active,
+  body.bright-theme .ce-ideas-parity .ce-ideas-filter-menu.is-active,
+  body.bright-theme .ce-ideas-parity .ce-ideas-menu-item.is-active {
+    background: var(--accent-tint);
+    border-color: var(--accent);
+    color: var(--accent-text);
+  }
+  /* F-M85 (master-20260923): the chip's edge was --accent-border at 38% — the
+     same value the Launch empty card was flagged at (1.44-1.50:1 on the light
+     ground). Selection is a BOUNDARY, so it uses the opaque accent: 3.9:1 on the
+     tint. Statically pointed at the action row too, whose primary is the other
+     half of the same "selected" pair on this surface. */
+  body.bright-theme .ce-ideas-parity .ce-ideas-action.is-primary {
+    border-color: var(--accent) !important;
+  }
+  body.bright-theme .ce-ideas-parity .ce-ideas-action.is-primary {
+    background: var(--accent-tint);
+    border-color: var(--accent-border);
+    color: #6d1f2b;
+  }
+  /* F-M85 (master-20260923): the chip above is 5.0:1 on the cream page (--bg),
+     but the action buttons sit on --card #fff, where --accent-text #8e2f3d is
+     4.44:1 — just under the 4.5:1 AA floor for 13px. #6d1f2b is the same crimson
+     family one rung deeper and measures 7.0:1 on #fff / 6.6:1 on --bg, so the
+     primary action clears AA on BOTH grounds it can land on. */
+  body.bright-theme .ce-ideas-parity .ce-ideas-card .ce-ideas-card-actions .ce-ideas-action.is-primary {
+    color: var(--accent-text);
+  }
 
   /* Controls + summary: quiet one-line meta, unchanged wiring. */
   .ce-ideas-parity .ce-ideas-controls { margin-bottom: 10px; padding-bottom: 10px; }
   .ce-ideas-parity .ce-ideas-summary { margin-bottom: 8px; }
+  /* N-01 (master-20260924): the surface name. Size/weight/tracking come from
+     the shared page-title rule (index d7); only the ink token, which is scoped
+     to this shell, is stated here — exactly like .ce-saved-title. */
+  .ce-ideas-parity .ce-ideas-page-title { margin: 0 0 4px; color: var(--ideas-ink); }
 
   /* Group heads: hairline dividers, not bordered panels. */
   .ce-ideas-parity .ce-ideas-section {
@@ -4218,7 +4667,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   };
 })();
 </script>
-<script src="./native-ideas.js?v=5d176d7d87"></script>
+<script src="./native-ideas.js?v=fa66b53e12"></script>
 <script>
 /* Ideas rows expand/collapse companion: the delegated idea handlers in
    native-ideas.js own the card's open state and its aria-expanded. This block
@@ -6211,7 +6660,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     studioCanvasRatioOverride: '',
     // LIBRARY SORT (owner request 2026-09-15): which ordering the poem shelf renders in.
     // 'cadence' = the existing mixViralOlder law, so the default is byte-identical to before.
-    librarySort: 'cadence',
+    librarySort: 'shuffle',
     // LIBRARY FILTER (same request): {posted, len, q}. All 'all'/empty = no filtering at all.
     libraryFilter: { posted: 'all', len: 'all', q: '' },
     studioAlign: 'left',
@@ -6264,6 +6713,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
        success claim for a different deck. */
     studioSaveSyncDeckId: '',
     studioSaveSyncPending: false,
+    /* F-M91 (master-20260924): an explicit Save that arrives while one is in
+       flight defers instead of vanishing. Cleared by the acknowledgement
+       handler, which re-runs the save so the newest edits always reach SQLite. */
+    studioSaveQueued: false,
     poemChunkGen: 0,
     studioDirty: false,
     studioMessage: '',
@@ -9705,6 +10158,18 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var w = window.innerWidth || document.documentElement.clientWidth || 1440;
     if (w <= 640) return 1;
     if (w <= 1100) return 2;
+    /* F-M108 (master-20260924): the rung used to stop at 3 for every width above
+       1100, so at 2560 the shelf drew 3 columns across a 2224px grid — one poem
+       card 817px wide, wider than a printed page, and W-09's 1512/1728 windows
+       sat at 3 cramped 468/540px columns. The invariant: a card is never wider
+       than ~520px. 1440 keeps its 3, and each rung adds one when the cards would
+       otherwise pass the cap (~2096px for 4, ~2516px for 5, and 6 by the same
+       math). */
+    if (w <= 1760) return 3;
+    if (w <= 2200) return 4;
+    if (w <= 2640) return 5;
+    if (w <= 3080) return 6;
+    if (w <= 3520) return 7;
     return 3;
   }
   window.ceMasonryColumnCount = ceMasonryColumnCount;
@@ -10218,8 +10683,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
 
   // `truth` names the exact metric field each row sorts on, so the label is auditable from the DOM
   // through data-truth-field without reading this array.
+  /* F-M107 (master-20260924): owner 2026-09-24 — the shelf opens on a pure
+     shuffle (a fresh draw per session, re-dealt by the Shuffle button). Cadence
+     keeps its viral/archive mix as a chosen order. */
   var CE_LIBRARY_SORTS = [
-    { key: 'cadence', label: 'Cadence (default)', truth: 'cadence', hint: 'The mix you already curate: viral anchor + archive gems per era' },
+    { key: 'shuffle', label: 'Shuffle (default)', truth: 'seed', hint: 'A fresh random draw each session; the Shuffle button deals a new one' },
+    { key: 'cadence', label: 'Cadence', truth: 'cadence', hint: 'The mix you already curate: viral anchor + archive gems per era' },
     { key: 'likes', label: 'Most liked', truth: 'lc', hint: 'Raw like count on the Instagram post this poem became' },
     { key: 'viral', label: 'Most viral', truth: 'lc+rc*3', hint: 'Raw likes plus repeat count - a reposted poem outranks one posted once at the same likes' },
     { key: 'reach', label: 'Most reached (year-normalised)', truth: 'li', hint: 'Likes divided by that year\u2019s median likes - rewards reach, not raw age' },
@@ -10268,7 +10737,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
      A poem with no Instagram row is UNKNOWN, not bad, and must not be buried as if it lost. */
   function ceApplyLibrarySort(list, key) {
     var arr = Array.isArray(list) ? list.slice() : [];
-    key = String(key || 'cadence');
+    key = String(key || 'shuffle');
+    if (key === 'shuffle') return arr;
     if (key === 'cadence') return mixViralOlder(arr);
     var m = {};
     for (var i = 0; i < arr.length; i++) {
@@ -10396,18 +10866,25 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   // repeats series; there is no `comments` entry because no corpus row carries a comment field
   // (re-added only if ceLibraryHasCommentData() sees one). A legacy persisted `comments` choice
   // falls back to `likes` - the old comparator never left that order anyway, so nothing shifts.
-  var CE_LIBRARY_SORT_LABELS = { cadence: 'Cadence', viral: 'Most viral',
+  var CE_LIBRARY_SORT_LABELS = { shuffle: 'Shuffle', cadence: 'Cadence', viral: 'Most viral',
     reach: 'Most reached (year-normalised)', likes: 'Most liked', newest: 'Newest', oldest: 'Oldest',
     longest: 'Longest', shortest: 'Shortest', az: 'A\u2013Z' };
   var CE_LIBRARY_SORT_LEGACY = { comments: 'likes' };
 
   function ceLibrarySortPersist(key) {
-    try { window.localStorage.setItem(CE_LIBRARY_SORT_LS, String(key || 'cadence')); } catch (_e) {}
+    try { window.localStorage.setItem(CE_LIBRARY_SORT_LS, String(key || 'shuffle')); } catch (_e) {}
   }
   function ceLibrarySortRestore() {
     try {
       var v = window.localStorage.getItem(CE_LIBRARY_SORT_LS);
       if (v && CE_LIBRARY_SORT_LEGACY[v]) v = CE_LIBRARY_SORT_LEGACY[v];
+      /* F-M107: 'cadence' was the old implicit default; one migration moves a
+         stored default onto the new shuffle default, then a chosen Cadence sticks. */
+      if (v === 'cadence' && !window.localStorage.getItem('ce_library_sort_m107')) {
+        v = 'shuffle';
+        window.localStorage.setItem(CE_LIBRARY_SORT_LS, v);
+      }
+      window.localStorage.setItem('ce_library_sort_m107', '1');
       if (v && CE_LIBRARY_SORT_LABELS[v]) state.librarySort = v;
     } catch (_e) {}
     // the filter restores with the same discipline: an unreadable/absent value leaves it inert
@@ -10428,17 +10905,17 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function ceLibrarySortApplyDom() {
     var btn = document.getElementById('poem-sort');
     var lbl = document.getElementById('poem-sort-label');
-    var key = String(state.librarySort || 'cadence');
-    if (lbl) lbl.textContent = CE_LIBRARY_SORT_LABELS[key] || 'Cadence';
-    if (btn) btn.classList.toggle('is-active-sort', key !== 'cadence');
+    var key = String(state.librarySort || 'shuffle');
+    if (lbl) lbl.textContent = CE_LIBRARY_SORT_LABELS[key] || 'Shuffle';
+    if (btn) btn.classList.toggle('is-active-sort', key !== 'shuffle');
   }
   function ceLibrarySortSet(key) {
-    state.librarySort = CE_LIBRARY_SORT_LABELS[key] ? key : 'cadence';
+    state.librarySort = CE_LIBRARY_SORT_LABELS[key] ? key : 'shuffle';
     ceLibrarySortPersist(state.librarySort);
     ceLibrarySortApplyDom();
     ceLibrarySortClose();
     if (typeof renderMain === 'function') renderMain();
-    if (typeof showAppToast === 'function') showAppToast('Sorted: ' + (CE_LIBRARY_SORT_LABELS[state.librarySort] || 'Cadence'));
+    if (typeof showAppToast === 'function') showAppToast('Sorted: ' + (CE_LIBRARY_SORT_LABELS[state.librarySort] || 'Shuffle'));
   }
   function ceLibraryFilterSet(key, val) {
     if (!state.libraryFilter) state.libraryFilter = { posted: 'all', len: 'all', q: '' };
@@ -10471,7 +10948,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var pop = document.getElementById('poem-sort-popover');
     var btn = document.getElementById('poem-sort');
     if (!pop || !btn) return;
-    var cur = String(state.librarySort || 'cadence');
+    var cur = String(state.librarySort || 'shuffle');
     // Each option shows its label and, where the sort depends on Instagram data, the hint that
     // says so - the owner should never have to guess what "most viral" is computed from.
     pop.innerHTML = CE_LIBRARY_SORTS.map(function (o) {
@@ -10509,8 +10986,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     pop.style.position = 'fixed';
     pop.style.top = (__r.bottom + 6) + 'px';
     pop.style.right = 'auto';
-    /* PH-02 / DESKTOP_SURFACES D-juno (master-20260923): the popover is ported to
-       <body> and pinned in viewport space, so it must be clamped to the viewport
+    /* PH-02 / DESKTOP_SURFACES D-juno (master-20260923): the popover is ported to the
+       body element and pinned in viewport space, so it must be clamped to the viewport
        on BOTH edges — measured x=42..382 against a 390 inner width (8px past the
        right edge). A box wider than the viewport pins at the 8px inset and
        scrolls internally. */
@@ -10564,7 +11041,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     // chosen. Any other key is a deliberate owner override applied on top of the same clean list.
     // FILTER runs first (narrow the set), then SORT (order it) - filtering after sorting would mean
     // ordering poems that are about to be thrown away.
-    var key = (state && state.librarySort) ? String(state.librarySort) : 'cadence';
+    var key = (state && state.librarySort) ? String(state.librarySort) : 'shuffle';
     var filtered = ceApplyLibraryFilter(allCleanPoems(), (state && state.libraryFilter) || null);
     return ceApplyLibrarySort(filtered, key);
   }
@@ -10759,9 +11236,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var fontFamily = poemFontStack(st && st.fontFamily);
     var fontWeight = poemFontWeight(st && st.fontWeight);
     var customColor = poemTextColor(st && st.textColor) || '#221f1b';
-    var offset = (st && st.offset) ? st.offset : { x: 0, y: 0 };
-    var offsetX = Math.round(offset.x || 0);
-    var offsetY = Math.round(offset.y || 0);
+    var offset = poemSafeOffset((st && st.offset) ? st.offset : null, pos, canvasW, canvasH);
+    var offsetX = offset.x;
+    var offsetY = offset.y;
     var topStyle = pos === 'top'
       ? 'top:58px; transform:translate(' + offsetX + 'px,' + offsetY + 'px);'
       : 'top:45%; transform:translate(' + offsetX + 'px,calc(-50% + ' + offsetY + 'px));';
@@ -10776,6 +11253,23 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       + '<div class="ce-editorial-footer" style="position:absolute;z-index:var(--z-content);left:64px;right:64px;bottom:38px;display:flex;justify-content:space-between;gap:16px;align-items:center;color:#766b60;font:500 var(--fs-secondary)/1.4 "Kohinoor Devanagari","Noto Sans Devanagari","Devanagari Sangam MN",sans-serif;letter-spacing:.03em;"><span>एक ठहरा हुआ सच</span><span>' + escapeHtml(sigText) + '</span></div>'
       + '</div></div>';
   }
+
+  /* F-M106 (master-20260924): a saved poem offset is a drag, and nothing bounded
+     it: poem:an_2485 carried {x:-405,y:-258} on a 580px stage, which lifts the
+     whole text block off the canvas, so its card and its Studio showed only the
+     signature. Every renderer reads the offset through this bound: the verse may
+     move anywhere that keeps its start on the canvas, never past an edge. */
+  function poemSafeOffset(offset, pos, canvasW, canvasH) {
+    var x = Math.round(Number(offset && offset.x) || 0);
+    var y = Math.round(Number(offset && offset.y) || 0);
+    var w = Number(canvasW) || 580, h = Number(canvasH) || w;
+    x = Math.max(Math.round(-0.08 * w), Math.min(Math.round(0.45 * w), x));
+    y = pos === 'top'
+      ? Math.max(Math.round(-0.06 * h), Math.min(Math.round(0.6 * h), y))
+      : Math.max(Math.round(-0.35 * h), Math.min(Math.round(0.4 * h), y));
+    return { x: x, y: y };
+  }
+  window.poemSafeOffset = poemSafeOffset;
 
   // Render Pure Photo Poem Card (Section 1)
   window.renderPhotoPoemHtml = renderPhotoPoemHtml;
@@ -10833,9 +11327,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var gridHeight = poemRatioHeight(canvasW, ratio);
     var fontSize = poemGlyphSizeFor(txt, canvasW, gridHeight, density, 'grid', pos, st && st.lineHeight);
     var previewInset = POEM_TYPOGRAPHY.topInset;
-    var offset = (st && st.offset) ? st.offset : { x: 0, y: 0 };
-    var offsetX = Math.round(offset.x || 0);
-    var offsetY = Math.round(offset.y || 0);
+    var offset = poemSafeOffset((st && st.offset) ? st.offset : null, pos, canvasW, gridHeight);
+    var offsetX = offset.x;
+    var offsetY = offset.y;
 
     let topStyle = pos === 'mid'
       ? `top: 42%; transform: translate(${offsetX}px, calc(-50% + ${offsetY}px));`
@@ -10923,9 +11417,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var gridHeight = poemRatioHeight(canvasW, ratio);
     var fontSize = poemGlyphSizeFor(txt, canvasW, gridHeight, density, 'grid', pos, st && st.lineHeight);
     var previewInset = POEM_TYPOGRAPHY.topInset;
-    var offset = (st && st.offset) ? st.offset : { x: 0, y: 0 };
-    var offsetX = Math.round(offset.x || 0);
-    var offsetY = Math.round(offset.y || 0);
+    var offset = poemSafeOffset((st && st.offset) ? st.offset : null, pos, canvasW, gridHeight);
+    var offsetX = offset.x;
+    var offsetY = offset.y;
 
     let leftPad = preset.hasMarginLine ? 48 : previewInset;
     let topStyle = pos === 'top'
@@ -12057,9 +12551,20 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
   function studioUpdateHistoryControls() {
     var undo = document.getElementById('studio-undo-btn');
     var redo = document.getElementById('studio-redo-btn');
+    /* F-M112 (master-20260924): Reset latched 'Reset unavailable while saving'
+       after a save had already completed, because `busy` (studioSavePending)
+       kept a stale true past the write that set it. This control now reads the
+       save latch itself; studioUpdateHistoryControls runs on every save
+       settlement path (ack, watchdog, and pre-bridge throw), so clearing that
+       latch is what clears the label. */
     var busy = !!state.studioSavePending;
-    if (undo) undo.disabled = busy || state.studioUndoStack.length === 0;
-    if (redo) redo.disabled = busy || state.studioRedoStack.length === 0;
+    var saveSettled = !state.studioSavePending && !state.studioSaveFailed;
+    /* F-M112 (master-20260924): undo/redo stayed disabled after a change and
+       after an undo, because `busy` (studioSavePending) outlived the save it
+       was set for and gated both buttons. The gate is the stack itself — a
+       button is enabled whenever there is an entry to undo or redo. */
+    if (undo) undo.disabled = state.studioUndoStack.length === 0;
+    if (redo) redo.disabled = state.studioRedoStack.length === 0;
     var reset = document.getElementById('studio-reset-btn');
     if (reset) {
       var hasOriginal = !!(state.studioOriginalSnapshot && state.currentItem &&
@@ -12072,7 +12577,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       var canReset = hasOriginal && !busy && !atOriginal;
       reset.disabled = !canReset;
       var resetLabel = canReset ? 'Reset to original design'
-        : (!hasOriginal ? 'Reset unavailable' : (busy ? 'Reset unavailable while saving' : 'Already at the original design'));
+        : (!hasOriginal ? 'Reset unavailable'
+          : (busy && !saveSettled ? 'Reset unavailable while saving' : 'Already at the original design'));
       reset.title = resetLabel;
       reset.setAttribute('aria-label', resetLabel);
     }
@@ -12558,11 +13064,22 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     bindStudioEditControls(null, []);
   }
 
-  function studioSaveDeck(deck, slides) {
-    /* Deliberately NOT `return false` here: a save is already in flight, so
-       reporting a refusal would raise a false failure. Undefined keeps the
-       caller's `!== false` test true, which is honest for this one case. */
-    if (state.studioSavePending) return;
+ function studioSaveDeck(deck, slides) {
+    /* F-M91 (master-20260924): an explicit Save that lands inside the 1200ms
+       autosave window used to vanish. `studioSaveActiveDesign` is the only path
+       a ⌘S or a click-away takes, and it calls this function with the CURRENT
+       deck — while the in-flight save was dispatched with an OLDER snapshot.
+       Returning here therefore dropped the newest edit and left `studioDirty`
+       set, so the page showed unsaved work with no way to force it.
+       The in-flight save is not abandoned: the deferred flag makes the
+       acknowledgement handler re-run the save once the current one settles
+       (see the `__CE_SAVE_RESULT__` branch below). Undefined keeps the caller's
+       `!== false` test true — the save IS queued, just not dispatched yet. */
+    if (state.studioSavePending) {
+      state.studioSaveQueued = true;
+      if (state.studioAutoSaveTimer) { clearTimeout(state.studioAutoSaveTimer); state.studioAutoSaveTimer = null; }
+      return;
+    }
     // Owner law 2026-09-04 (b2_03, twice): the collapse guard lives at this
     // chokepoint because explicit Save and autosave both pass through. A deck
     // smaller than the injected library index says it should be — with no
@@ -12641,17 +13158,43 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (state.deckSaveTimeout) { clearTimeout(state.deckSaveTimeout); state.deckSaveTimeout = null; }
     state.deckSaveTimeout = setTimeout(function () {
       if (token !== state.studioSaveToken) return;
+      state.deckSaveTimeout = null;
       state.studioSavePending = false;
       state.studioSaveFailed = true;
-      state.studioMessage = 'Save timed out; the native library did not respond. Try again.';
+      /* F-M92 (master-20260924): the write is now UNKNOWN, not failed — the
+         native side may still commit it after this watchdog. So the token is
+         invalidated (a late ack for it can no longer settle anything) and the
+         queued flag is dropped instead of replayed: replaying would issue a
+         SECOND write over an ambiguous first one. Newer edits the creator made
+         during the wait stay dirty and are named in the message, so the honest
+         next step is a Save the creator chooses, not an automatic retry. */
+      state.studioSaveToken = token + 1;
+      state.studioSaveQueued = false;
+      state.studioDirty = true;
+      state.studioMessage = 'Save timed out; the native library did not respond, so the write is unconfirmed. Newer edits are still unsaved — try Save again when it responds.';
       studioUpdateHistoryControls();
       var msgEl = document.getElementById('studio-save-msg');
       if (msgEl) msgEl.textContent = state.studioMessage;
     }, 8000);
-    window.__CE_SAVE_RESULT__ = function (ok, saveReason, syncState) {
+    window.__CE_SAVE_RESULT__ = function (ok, saveReason, syncState, ackToken) {
+      /* F-M92 (master-20260924): the native acknowledgement now echoes the
+         token it was issued with, so a reply that belongs to a superseded save
+         (or to a previous Studio item) is dropped instead of settling whatever
+         is on screen now. `undefined` is still accepted, because browser-only
+         probe shims call this hook directly with no token; a token that is
+         PRESENT must match the request it claims to answer. */
+      if (ackToken !== undefined && ackToken !== null && Number(ackToken) !== token) return;
       if (token !== state.studioSaveToken) return;
       if (state.deckSaveTimeout) { clearTimeout(state.deckSaveTimeout); state.deckSaveTimeout = null; }
       state.studioSavePending = false;
+      /* F-M91 (master-20260924): a Save that arrived during this write deferred
+         to here, because it carried newer edits than the snapshot just
+         persisted. Dispatch it now — after the pending flag is cleared, so it
+         dispatches for real instead of deferring again. The next acknowledgement
+         settles normally, and `state.studioSaveQueued` is cleared first so a
+         failure cannot loop. */
+      var __rerunQueuedSave = state.studioSaveQueued;
+      state.studioSaveQueued = false;
       if (ok) {
         var saved = Object.assign({}, deck, { id: id, look: look, title: title, slides: nextSlides });
         try { ceDayEventAdd('designed', { dayKey: '', ref: String(id), source: 'studio' }); } catch (_ev) {}
@@ -12676,7 +13219,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         if (hasNewerEdits) {
           state.studioDirty = true;
           state.studioMessage = 'Saved earlier changes. Saving your newer edits…';
-          studioTriggerAutoSave();
+          /* F-M92 (master-20260924): arm the autosave timer ONLY when no
+             deferred Save is about to run. The deferred Save (below) already
+             carries the newest edits; arming a timer as well would queue a
+             third write behind it for no gain. */
+          if (!__rerunQueuedSave) studioTriggerAutoSave();
         } else {
           state.studioDraftText = null;
           state.studioDirty = false;
@@ -12697,23 +13244,46 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         state.studioSaveFailed = true;
         /* BO-P5: name the real cause instead of blaming validation for an I/O
            error or a store that was not ready yet. */
+        /* F-M92 (master-20260924): a rejection or a "store not ready" is a
+           DEFINITE negative, never a retry candidate — the queued flag is
+           dropped here too so it cannot masquerade as an in-flight write, and
+           the latest edits stay dirty so the close path and history controls
+           keep telling the truth about unsaved work. */
+        state.studioDirty = true;
         state.studioMessage = saveReason === 'io'
-          ? 'Save failed — the native library reported an error; nothing was changed.'
+          ? 'Save failed — the native library reported an error; nothing was changed. Your latest edits are still unsaved — try Save again.'
           : saveReason === 'no-store'
-            ? 'Save failed — the native library was not ready; try again in a moment.'
-            : 'Save rejected by native validation; nothing was changed.';
+            ? 'Save failed — the native library was not ready; nothing was changed. Your latest edits are still unsaved — try Save again in a moment.'
+            : 'Save rejected by native validation; nothing was changed. Your latest edits are still unsaved.';
       }
       studioUpdateHistoryControls();
       var msgEl = document.getElementById('studio-save-msg');
       if (msgEl) msgEl.textContent = state.studioMessage;
+      /* F-M91 (master-20260924): honour the deferred Save LAST, so the message
+         and history controls this handler just settled are not half-written over
+         by the new dispatch. A failure never retries, so a broken native leg
+         cannot spin; the creator still sees the honest failure line. */
+      if (__rerunQueuedSave && ok) {
+        /* A deferred explicit Save carries the newest edits, so its dispatch
+           replaces any autosave timer armed while the native write was pending. */
+        if (state.studioAutoSaveTimer) { clearTimeout(state.studioAutoSaveTimer); state.studioAutoSaveTimer = null; }
+        try { window.studioSaveActiveDesign(); } catch (_rerunSave) {}
+      }
     };
     try {
       bridge.postMessage({ action: 'saveDeck', id: id, look: look, title: title, designId: designId, caption: String(deck.caption || (state.currentItem && state.currentItem.caption) || ''), slides: JSON.stringify(nextSlides), token: token });
     } catch (error) {
       if (state.deckSaveTimeout) { clearTimeout(state.deckSaveTimeout); state.deckSaveTimeout = null; }
+      /* F-M92 (master-20260924): the message never left the page, so there is
+         nothing in flight for a queued Save to wait behind. Clear the flag and
+         invalidate the token, so a stale ack cannot settle a slot that was
+         already abandoned here. */
+      state.studioSaveToken = token + 1;
+      state.studioSaveQueued = false;
       state.studioSavePending = false;
       state.studioSaveFailed = true;
-      state.studioMessage = 'Save failed before reaching the native library.';
+      state.studioDirty = true;
+      state.studioMessage = 'Save failed before reaching the native library. Your latest edits are still unsaved — try Save again.';
       studioUpdateHistoryControls();
       return false;
     }
@@ -14767,7 +15337,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       const strip = document.getElementById('studio-photo-strip');
       if (strip) {
         strip.querySelectorAll('.photo-thumb').forEach((thumb, idx) => {
-          if (!isPaper && idx === state.studioPhotoIdx) thumb.classList.add('active');
+          /* F-M112 (master-20260924): the strip may be prefixed by the
+             "Original Instagram still" thumb, so a positional `idx` was one
+             off — clicking thumb [1] lit thumb [2]. The ring now follows
+             state.studioPhotoIdx exactly, and only when the photo layer (not
+             the original) is the active backdrop. */
+          if (!isPaper && !state.studioUseOriginal && idx === state.studioPhotoIdx) thumb.classList.add('active');
           else thumb.classList.remove('active');
         });
       }
@@ -16271,7 +16846,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var label = document.getElementById('carousel-dock-label');
     if (label) label.hidden = true;
     if (!totalSlides || !slides || !slides.length) {
-      dockControls.innerHTML = '<span style="font-size:var(--fs-overline); color:var(--muted);">Loading the authored slides…</span>';
+      /* F-M99 (master-20260924): the canvas already carries the one honest status
+         for a deck with no slides in hand (role=status: "Loading the authored
+         slides…" when a source can hydrate it, "not in this bundle" when none
+         can). A second line here said "Loading" under "not in this bundle", so
+         the dock stays empty until there are slides to edit. */
+      dockControls.innerHTML = '';
       try { if (window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__) requestAnimationFrame(window.__CE_FIT_CAROUSEL_EDITOR_SLIDES__); } catch (_fitQ) {}
       return;
     }
@@ -16649,13 +17229,41 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         var toolsToggleBtn = dockControls.querySelector('#ce-tools-toggle');
         var toolsEditorEl = toolsEditorEl0;
         if (toolsToggleBtn && toolsEditorEl) {
-          toolsToggleBtn.onclick = function () {
-            var toolsOpen = toolsEditorEl.classList.toggle('ce-tools-open');
-            state.studioToolsOpen = toolsOpen;
+          /* F-M40.s2.4 (ce-tools-owner, 2026-09-24): NO `onclick` HERE. The
+             carousel Tools toggle is a `#ce-tools-toggle` singleton and it had
+             TWO owners on phone — this assignment and ce-touch-edit.js's
+             capture-phase listener (its `toggle()`, which acts and then
+             stopImmediatePropagation()s). The touch layer is the phone's
+             single toggle owner; this file keeps only two jobs, both handled
+             by the block below:
+               (1) paint the toggle from the SAME state variable the editor
+                   class is derived from, so a canvas re-render can never
+                   re-emit "Tools / aria-expanded=false" over an open sheet;
+               (2) publish the one narrow writer, `window.__CE_SET_STUDIO_TOOLS_OPEN__`,
+                   which is the only function permitted to write
+                   `state.studioToolsOpen`. The touch layer calls it when it
+                   flips the class, and the close/reset doors call it with
+                   false, so state and class stay one fact.
+             Where the touch layer is absent, nothing else opens this sheet on
+             phone and the columns render in-flow anyway. */
+          toolsToggleBtn.onclick = null;
+          var toolsToggleSync = function () {
+            var toolsOpen = !!state.studioToolsOpen;
             toolsToggleBtn.setAttribute('aria-expanded', toolsOpen ? 'true' : 'false');
             var toolsLabel = toolsToggleBtn.querySelector('.ce-tools-toggle-label');
             if (toolsLabel) toolsLabel.textContent = toolsOpen ? 'Close tools' : 'Tools';
-            try { if (typeof fitCarouselEditorSlides === 'function') fitCarouselEditorSlides(); } catch (_toolsFit) {}
+          };
+          toolsToggleSync();
+          window.__CE_SYNC_STUDIO_TOOLS_TOGGLE__ = toolsToggleSync;
+          window.__CE_SET_STUDIO_TOOLS_OPEN__ = function (open) {
+            var next = !!open;
+            state.studioToolsOpen = next;
+            try {
+              var liveEditor = document.querySelector('.ce-carousel-editor');
+              if (liveEditor) liveEditor.classList.toggle('ce-tools-open', next);
+            } catch (_toolsCls) {}
+            try { toolsToggleSync(); } catch (_toolsSync) {}
+            return next;
           };
         }
       }
@@ -16962,6 +17570,12 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     if (!__studioAlreadyOpen) {
       try { window.__CE_STUDIO_FOCUS_RETURN__ = document.activeElement || null; } catch (_fr) {}
     }
+    /* F-M98: the last input kind decides whether the parked focus shows its ring. */
+    if (!window.__CE_INPUT_TRACKED__) {
+      window.__CE_INPUT_TRACKED__ = true;
+      document.addEventListener('keydown', function () { window.__CE_LAST_INPUT__ = 'key'; }, true);
+      document.addEventListener('pointerdown', function () { window.__CE_LAST_INPUT__ = 'pointer'; }, true);
+    }
     // Owner 2026-09-05: studios auto-collapse the sidebar by default; the
     // edge trigger / toggle reopens it on demand.
     try { if (!__studioAlreadyOpen && window.__CE_SIDEBAR_COLLAPSE__) window.__CE_SIDEBAR_COLLAPSE__(); } catch (_e) {}
@@ -16992,7 +17606,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             if (__n.offsetParent === null) continue;
             var __t = __n.getAttribute('tabindex');
             if (__t !== null && Number(__t) < 0) continue;
-            try { __n.focus({ preventScroll: true }); } catch (_f) { try { __n.focus(); } catch (_f2) {} }
+            /* F-M98 (master-20260924): a parked focus counts as :focus-visible, so
+               every Studio opened by a click or tap wore a 2px crimson ring round
+               Back. Only a keyboard open asks for that ring. */
+            var __fv = window.__CE_LAST_INPUT__ === 'key';
+            try { __n.focus({ preventScroll: true, focusVisible: __fv }); } catch (_f) { try { __n.focus(); } catch (_f2) {} }
             if (document.activeElement === __n) return;
           }
         });
@@ -17073,6 +17691,24 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
        the sheet closed; only an in-place canvas re-render (which is what used to
        drop it) keeps it open. */
     state.studioToolsOpen = false;
+    /* F-M40.s2.5 (ce-tools-owner, 2026-09-24): this is a WRITE, so it goes
+       through the one writer published by renderCarouselDock. That call also
+       flips the editor class and re-paints the toggle, which is what keeps the
+       "new piece opens closed" rule true even when the previous item was
+       open. Falls back to the direct write only when the dock has never
+       painted in this session (no writer yet means no editor class to clear). */
+    if (typeof window.__CE_SET_STUDIO_TOOLS_OPEN__ === 'function') {
+      window.__CE_SET_STUDIO_TOOLS_OPEN__(false);
+    }
+    /* F-M92 (master-20260924): a new item must not inherit the previous item's
+       in-flight save. Clearing `studioSavePending` alone left that write's
+       token live, so a late acknowledgement for the OLD deck could satisfy the
+       token test and settle the NEW item (writing a stale look/title into it).
+       Invalidate the token, drop the queued flag and cancel the watchdog here,
+       at the one place an item is opened. */
+    state.studioSaveToken = (state.studioSaveToken || 0) + 1;
+    state.studioSaveQueued = false;
+    if (state.deckSaveTimeout) { clearTimeout(state.deckSaveTimeout); state.deckSaveTimeout = null; }
     state.studioSavePending = false;
     state.studioDirty = false;
     state.studioMessage = '';
@@ -17163,6 +17799,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         state.studioUseOriginal = state.studioType === 'photo' && options && options.useOriginal === true;
         if (state.studioType === 'photo') {
           state.studioPhotoIdx = photoPreset.photoIdx % PHOTO_BACKGROUNDS.length;
+          /* F-M110: open on the photo the shelf card showed (see the shelf nudge). */
+          try {
+            var __shelfPhoto = window.__CE_SHELF_PHOTO__ && window.__CE_SHELF_PHOTO__[cePoemStableId(item)];
+            if (__shelfPhoto != null) state.studioPhotoIdx = Number(__shelfPhoto) % PHOTO_BACKGROUNDS.length;
+          } catch (_sp) {}
           state.studioAlign = photoPreset.align || 'left';
           state.studioPos = photoPreset.pos || 'top';
         } else {
@@ -17990,6 +18631,10 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     var __studioNow = document.getElementById('studio');
     if (__studioNow && __studioNow.classList.contains('open')) return;
     if (__ceNavRestoring) { __ceNavLast = now; return; }
+    /* The last snapshot was taken when this tab first painted. The creator may
+       have scrolled since then without another render, so bank the live offset
+       before the route teardown resets #view for the destination. */
+    if (__ceNavLast) __ceNavLast.scrollTop = now.scrollTop;
     if (__ceNavLast && ceNavKey(now) !== ceNavKey(__ceNavLast)) {
       if (now.tab !== __ceNavLast.tab) {
         __ceNavHistory = [__ceNavLast];          // tab hop: remember ONE tab back
@@ -19191,9 +19836,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       + '</div>'
       + '<div class="ce-saved-filter-bar">'
       + '<div class="ce-saved-subtabs" role="tablist">'
-      + '<button type="button" class="ce-saved-tab-btn' + (activeFilter === 'shortlist' ? ' active' : '') + '" data-saved-filter="shortlist"><span class="ce-ic ce-ic--star ce-ic--13"></span> Shortlist' + (badgeShortlist ? ' (' + badgeShortlist + ')' : '') + filteredMarker + '</button>'
-      + '<button type="button" class="ce-saved-tab-btn' + (activeFilter === 'in_progress' ? ' active' : '') + '" data-saved-filter="in_progress"><span class="ce-ic ce-ic--pencil ce-ic--13"></span> ' + CE_POLISHED_LABEL + '' + (badgeInProgress ? ' (' + badgeInProgress + ')' : '') + filteredMarker + '</button>'
-      + '<button type="button" class="ce-saved-tab-btn' + (activeFilter === 'rejected' ? ' active' : '') + '" data-saved-filter="rejected"><span class="ce-ic ce-ic--delete ce-ic--13"></span> Rejected / Archive' + (badgeRejected ? ' (' + badgeRejected + ')' : '') + filteredMarker + '</button>'
+      + '<button type="button" class="ce-saved-tab-btn' + (activeFilter === 'shortlist' ? ' active' : '') + '" data-saved-filter="shortlist"><span class="ce-ic ce-ic--star ce-ic--13"></span> <span class="ce-saved-tab-label">Shortlist</span>' + (badgeShortlist ? '<span class="ce-saved-tab-count"> (' + badgeShortlist + ')</span>' : '') + filteredMarker + '</button>'
+      + '<button type="button" class="ce-saved-tab-btn' + (activeFilter === 'in_progress' ? ' active' : '') + '" data-saved-filter="in_progress"><span class="ce-ic ce-ic--pencil ce-ic--13"></span> <span class="ce-saved-tab-label">' + CE_POLISHED_LABEL + '</span>' + (badgeInProgress ? '<span class="ce-saved-tab-count"> (' + badgeInProgress + ')</span>' : '') + filteredMarker + '</button>'
+      + '<button type="button" class="ce-saved-tab-btn' + (activeFilter === 'rejected' ? ' active' : '') + '" data-saved-filter="rejected"><span class="ce-ic ce-ic--delete ce-ic--13"></span> <span class="ce-saved-tab-label">Rejected / Archive</span>' + (badgeRejected ? '<span class="ce-saved-tab-count"> (' + badgeRejected + ')</span>' : '') + filteredMarker + '</button>'
       + '</div>'
       /* F-M72 (master-20260923): an empty bank renders no type filter row. Four
          disabled pills plus a second 'bank is empty' sentence above the empty
@@ -19930,7 +20575,8 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         try { cleanAll = (typeof allRankedPoems === 'function') ? allRankedPoems() : ((typeof allCleanPoems === 'function') ? allCleanPoems() : []); } catch (_c2) { cleanAll = []; }
         /* An explicit non-cadence sort is a deliberate override: shuffle and the
            viral/older mix would randomize it away, so both are skipped for it. */
-        var _keepOrder = !!(state.librarySort && state.librarySort !== 'cadence');
+        var _keepOrder = !!(state.librarySort && state.librarySort !== 'cadence' && state.librarySort !== 'shuffle');
+        var _pureShuffle = !state.librarySort || state.librarySort === 'shuffle';
         try {
           if (era === 'repair' || era === 'other' || era === 'tocheck') {
             poemBase = allNativePoemRows().filter(function (p) { return cePoemMatchesEra(p, era); });
@@ -19939,11 +20585,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             /* Owner 2026-09-13: fresh draw per session (see ceShufflePoemList). Shuffled
                BEFORE the mix so the viral/older cadence ratio is untouched. */
             var allDrawn = (!_keepOrder && typeof ceShufflePoemList === 'function') ? ceShufflePoemList(allSansLong) : allSansLong;
-            poemBase = (_keepOrder || typeof mixViralOlder !== 'function') ? allDrawn : mixViralOlder(allDrawn);
+            poemBase = (_keepOrder || _pureShuffle || typeof mixViralOlder !== 'function') ? allDrawn : mixViralOlder(allDrawn);
           } else {
             var sliced = cleanAll.filter(function (p) { return cePoemMatchesEra(p, era); });
             var slicedDrawn = (!_keepOrder && typeof ceShufflePoemList === 'function') ? ceShufflePoemList(sliced) : sliced;
-            poemBase = (_keepOrder || typeof mixViralOlder !== 'function') ? slicedDrawn : mixViralOlder(slicedDrawn);
+            poemBase = (_keepOrder || _pureShuffle || typeof mixViralOlder !== 'function') ? slicedDrawn : mixViralOlder(slicedDrawn);
           }
         } catch (_era) { poemBase = cleanAll || []; }
         var poems = poemBase.filter(p => {
@@ -20036,9 +20682,20 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               var __resolvedPhoto = (surfaceStyle && surfaceStyle.photoIdx != null)
                 ? Number(surfaceStyle.photoIdx)
                 : ((PHOTO_PRESETS[canonicalIdx % PHOTO_PRESETS.length] || {}).photoIdx || 0);
-              if (__resolvedPhoto === __lastShelfPhotoIdx && PHOTO_BACKGROUNDS.length > 1) {
+              /* F-M110 (master-20260924): the card and Studio must show ONE design.
+                 A saved design's photo is identity, so it is never nudged; an
+                 unsaved poem's nudged photo is recorded, and openStudio opens
+                 with the photo the card actually showed (owner saw a card open
+                 into a different picture). */
+              var __nudgeId = cePoemStableId(poem);
+              var __ceDesigns = window.__NATIVE_POEM_DESIGNS__ || {};
+              var __hasSavedDesign = !!(__ceDesigns[__nudgeId] || __ceDesigns['poem:' + __nudgeId]);
+              window.__CE_SHELF_PHOTO__ = window.__CE_SHELF_PHOTO__ || {};
+              delete window.__CE_SHELF_PHOTO__[__nudgeId];
+              if (!__hasSavedDesign && __resolvedPhoto === __lastShelfPhotoIdx && PHOTO_BACKGROUNDS.length > 1) {
                 __resolvedPhoto = (__resolvedPhoto + 1) % PHOTO_BACKGROUNDS.length;
                 shelfStyle = Object.assign({}, surfaceStyle, { photoIdx: __resolvedPhoto });
+                window.__CE_SHELF_PHOTO__[__nudgeId] = __resolvedPhoto;
               }
               __lastShelfPhotoIdx = __resolvedPhoto;
             }
@@ -20619,7 +21276,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       writeBox.innerHTML = `
         <section class="ce-write-editor">
           <div class="ce-write-head">
-            <div><h2 style="margin:0; font-size:var(--fs-section); font-weight:700; color:var(--ink);">Write</h2></div>
+            <div><h2>Write</h2></div>
             <div class="ce-write-kind" aria-label="Content type">
               <button type="button" data-ce-write-type="post" class="${state.writeType === 'post' ? 'is-active' : ''}">Post</button>
               <button type="button" data-ce-write-type="poem" class="${state.writeType === 'poem' ? 'is-active' : ''}">Poem</button>
@@ -21485,7 +22142,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
               ${state.queueItems.length ? `<button id="plan-schedule-all-ready-btn" class="ce-plan-head-btn is-primary" type="button" title="Place all Ready pieces a week+ out (owner law — Meta refuses sooner) with human-ish times between 9am and 9pm.">Schedule all ready</button>
               ${planFailedMeta > 0 ? `<button id="ce-plan-batch-meta-btn" type="button" class="ce-plan-head-btn is-warn" title="Re-send the ${planFailedMeta} failed Ready piece${planFailedMeta === 1 ? '' : 's'} to Meta's clock (same confirm as Schedule).">Retry failed (${planFailedMeta})</button>` : ''}
               <button id="plan-select-all-ready-btn" type="button" class="ce-plan-head-btn" title="Tick every staged piece as Ready">Mark all ready</button>
-              <button id="plan-auto-schedule-btn" type="button" class="ce-plan-head-btn" title="Pull from Saved Bank / library into empty day slots.">Fill week</button>` : ''}
+              <button id="plan-auto-schedule-btn" type="button" class="ce-plan-head-btn is-primary" title="Pull from Saved Bank / library into empty day slots.">Fill week</button>` : ''}
               <button id="plan-open-meta-btn" type="button" class="ce-plan-icon-btn" aria-label="Open Meta tools" title="Open Meta Business Suite in your browser">
                 <span class="ce-ic ce-ic--arrow-up-right ce-ic--12"></span>
               </button>
@@ -21500,11 +22157,11 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
                 </div>
               </details>
               ` : ''}
-              <div class="plan-view-toggle" style="display:flex; background:var(--card); border:1px solid var(--card-border); border-radius:7px; padding:2px; gap:2px; margin-left:4px;">
-                <button id="plan-view-kanban-btn" type="button" aria-pressed="${planMode !== 'list'}" style="border:none; background:${planMode !== 'list' ? 'rgba(255,255,255,0.14)' : 'transparent'}; color:${planMode !== 'list' ? 'var(--ink)' : 'var(--muted)'}; padding:4px 9px; border-radius:5px; font-size:var(--fs-secondary); font-weight:${planMode !== 'list' ? '700' : '500'}; cursor:pointer; display:flex; align-items:center; gap:4px;">
+              <div class="plan-view-toggle">
+                <button id="plan-view-kanban-btn" type="button" class="${planMode !== 'list' ? 'is-active' : ''}" aria-pressed="${planMode !== 'list'}">
                   <span aria-hidden="true">⊞</span> Board
                 </button>
-                <button id="plan-view-list-btn" type="button" aria-pressed="${planMode === 'list'}" style="border:none; background:${planMode === 'list' ? 'rgba(255,255,255,0.14)' : 'transparent'}; color:${planMode === 'list' ? 'var(--ink)' : 'var(--muted)'}; padding:4px 9px; border-radius:5px; font-size:var(--fs-secondary); font-weight:${planMode === 'list' ? '700' : '500'}; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                <button id="plan-view-list-btn" type="button" class="${planMode === 'list' ? 'is-active' : ''}" aria-pressed="${planMode === 'list'}">
                   <span aria-hidden="true">☰</span> List
                 </button>
               </div>
@@ -22623,7 +23280,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
         <section class="ce-grow-hero" aria-label="The fortnight" data-ready="${__growReady}" data-total="${ceQueuePendingCount()}">
           <div class="ce-fort-head">
             <span class="ce-grow-eyebrow">Your last 14 days</span>
-            ${__heroLine ? '<strong class="ce-fort-line">' + __heroLine + '</strong>' : ''}
+            ${__heroLine ? '<h2 class="ce-fort-line">' + __heroLine + '</h2>' : ''}
             <span class="ce-fort-cap">${escapeHtml(__heroCap.join(' · '))}</span>
             ${__heroSub ? '<small class="ce-fort-sub">' + escapeHtml(__heroSub) + '</small>' : ''}
           </div>
@@ -23630,7 +24287,7 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
      (the Write action row, a fixed bottom action bar). When a modal/sheet owns
      the screen the stack is dropped to the top of the viewport instead, so a
      transient status can never cover the surface that produced it. */
-  var CE_TOAST_ACTION_SEL = ['#studio-dock', '.ce-studio-inspector', '.ce-touch-dock', '[data-mobile-dock]', '.ce-mobile-bottom-nav', '.ce-bottom-dock', '#ce-mobile-nav', 'nav.ce-nav-bottom', '.ce-write-actions', '.ce-bottom-action-bar', '[data-ce-bottom-bar]'];
+  var CE_TOAST_ACTION_SEL = ['#studio-dock', '.ce-studio-inspector', '.studio-shipbar', '.ce-touch-dock', '[data-mobile-dock]', '.ce-mobile-bottom-nav', '.ce-bottom-dock', '#ce-mobile-nav', 'nav.ce-nav-bottom', '.ce-write-actions', '.ce-bottom-action-bar', '[data-ce-bottom-bar]'];
   function ceToastModalOpen() {
     var ids = ['ce-settings-modal', 'ce-reel-proxy-modal', 'ce-idea-schedule-modal'];
     for (var i = 0; i < ids.length; i++) {
@@ -26118,7 +26775,28 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
       : (document.querySelectorAll('#view .masonry-item, #view .ce-rail-card, #view .pure-card').length || 0);
     if (!shown || shown > total) shown = total;
     var noun = kind === 'poems' ? (total === 1 ? 'poem' : 'poems') : (kind === 'carousels' ? 'carousels' : 'posts');
-    el.textContent = shown.toLocaleString('en-IN') + ' of ' + total.toLocaleString('en-IN') + ' ' + noun;
+    /* F-M108 (master-20260924): the header line and the shelf pill printed two
+       different totals for the same noun — pill "Poems 2496" (ceCorpusCounts,
+       the whole deduped store) next to header "24 of 1,387 poems"
+       (__CE_LAST_LIBRARY__.poems, the shelf's own draw after era + owner filter
+       + the paper/pristine filter + the 4:3 mix cap). Both numbers are honest
+       but name different sets, so the pair reads as a contradiction. The
+       invariant here: the header counts the set the shelf actually draws from
+       AND says which set that is in words — '24 of 1,387 poems on this shelf',
+       naming the era and, in paper mode, the family. The pill deliberately
+       keeps the stable collection total (CONTRACT O-4 in updateLibraryNestCounts,
+       which every other surface — drawer, phone row, Grow ledger — compares
+       against), so no other surface has to move. */
+    var shelfNote = '';
+    if (kind === 'poems') {
+      var eraLabels = { all: '', bank: 'older', new: 'new', long: 'long', notes: 'Apple Notes' };
+      var eraKey = state.poemEra || 'all';
+      if (eraKey === 'repair' || eraKey === 'tocheck' || eraKey === 'other') eraLabels[eraKey] = 'needs review';
+      if (eraLabels[eraKey]) shelfNote = eraLabels[eraKey];
+      if (state.poemSection === 'paper') shelfNote = shelfNote ? shelfNote + ' paper' : 'paper';
+    }
+    el.textContent = shown.toLocaleString('en-IN') + ' of ' + total.toLocaleString('en-IN')
+      + ' ' + shelfNote + noun + ' on this shelf';
     el.hidden = false;
   }
   window.syncLibraryPosition = syncLibraryPosition;
@@ -26594,7 +27272,9 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     // so the aside is made inert whenever it is collapsed without a peek.
     const syncSidebarInert = () => {
       if (!sidebar) return;
-      const hidden = sidebar.classList.contains('collapsed') && !sidebar.classList.contains('peek');
+      /* F-M112 (master-20260924): a collapsed rail is hidden and inert on every
+         surface (wave54 Gate C); Cmd-B brings it back for keyboard use. */
+            const hidden = sidebar.classList.contains('collapsed') && !sidebar.classList.contains('peek');
       if (hidden) sidebar.setAttribute('inert', '');
       else sidebar.removeAttribute('inert');
     };
@@ -27322,7 +28002,13 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
             '<div class="ce-postnow-meta">' + escapeHtml(picked == null ? 'No caption' : picked) + '</div>'
             + '<button type="button" class="ce-postnow-confirm" id="ce-postnow-confirm">Post to @doalfaaz now ✓</button>'
             + '<button type="button" class="ce-postnow-back" id="ce-postnow-back">← captions</button>';
-          postNowMenu.querySelector('#ce-postnow-confirm').onclick = function () { cePostNowFire(picked); };
+          /* F-M111 (master-20260924): the confirm renders where the first caption
+             was, so a double-click on a caption landed on "Post now". The button
+             ignores presses for its first 700ms: publishing is always a second,
+             deliberate press. */
+          var __pnConfirm = postNowMenu.querySelector('#ce-postnow-confirm');
+          var __pnArmedAt = Date.now() + 700;
+          __pnConfirm.onclick = function () { if (Date.now() < __pnArmedAt) return; cePostNowFire(picked); };
           postNowMenu.querySelector('#ce-postnow-back').onclick = function () { renderPostNowMenu(); };
           return;
         }
@@ -27390,7 +28076,14 @@ html.ce-share #sidebar-nav button[data-tab="write"], html.ce-share #sidebar-nav 
     document.getElementById('studio-export-btn').onclick = studioExport;
 
     window.addEventListener('keydown', (e) => {
-      if (document.querySelector('.ce-palette-overlay.open')) return;
+      /* F-M112 (master-20260924): this guard used to fire on `.open` alone, so
+         with the command palette merely mounted-and-open (or closed but still
+         carrying the class on another surface) every Escape press returned
+         early and a mouse-opened Studio never closed on the first press. The
+         early return now applies only while the palette is actually open AND
+         painted/visible. */
+      var paletteOpen = document.querySelector('.ce-palette-overlay.open');
+      if (paletteOpen && !paletteOpen.hidden && getComputedStyle(paletteOpen).display !== 'none' && getComputedStyle(paletteOpen).visibility !== 'hidden') return;
       const studio = document.getElementById('studio');
       var isStudioOpen = !!(studio && studio.classList.contains('open'));
       var focused = document.activeElement;

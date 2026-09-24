@@ -177,6 +177,14 @@
 .studio-topbar {
   min-height: 54px;
   height: 54px;
+  /* F-M88 (master-20260923): the bar is one 54px row and every control in it is
+     centre-aligned by this pair. It was implied, not stated, so the topbar's
+     controls depended on each control's own margin to land on the one baseline.
+     Declaring it is the invariant the measured baseline (all topbar centre-y 26.5)
+     was already asserting. */
+  --studio-topbar-h: 54px;
+  display: flex;
+  align-items: center;
   gap: 12px;
   padding: 0 20px 0 38px;
   background: rgba(14, 16, 22, 0.75);
@@ -420,6 +428,21 @@
   min-width: 44px;
   min-height: 44px;
 }
+/* F-M88 (master-20260923): the tap floor above is a HIT-AREA floor, not a paint
+   height. It forced every control to paint 44px tall, and the post's hook-variation
+   rows (whose .ce-dock-group is a flex column with no stretch) then collapsed to
+   their own min-height and rendered as 44x1px slivers — the "duplicated glyph rows"
+   the audit kept flagging in the Studio. Controls in a column or grid are sized by
+   their own height token; the 44px target survives through the ::before slop below,
+   so nothing loses reach and the slivers get their authored box back. */
+.studio-dock .dock-section > .ce-dock-group:not(.ce-typography-toolbar):not(.ce-tool-cluster),
+.studio-dock .dock-section > .ce-dock-group:not(.ce-typography-toolbar):not(.ce-tool-cluster) > * {
+  flex: 0 0 auto;
+}
+.studio-dock button {
+  min-width: 0;
+  min-height: var(--h-ctl-lg);
+}
 /* Tap-slop expander for anything the floor above cannot reach (carousel-mode
    compact strips, icon glyphs): an empty ::before stretched to a centred
    44x44 box. ::after is taken (studio icon glyph layer), so ::before carries
@@ -450,8 +473,8 @@
 .ce-poem-ratio-pills { align-items: stretch; }
 
 .studio-icon-btn {
-  width: 32px;
-  height: 32px;
+  width: var(--h-ctl-lg);
+  height: var(--h-ctl-lg);
   display: grid;
   place-items: center;
   border: 1px solid var(--border);
@@ -460,6 +483,14 @@
   background: var(--surface);
   font: 700 var(--fs-section)/1 system-ui, sans-serif;
   cursor: pointer;
+}
+/* F-M88 (master-20260923): .studio-more-actions > summary is the same "one glyph
+   in a bordered square" control as .studio-icon-btn — the ••• topbar button — but
+   was authored 32px against a bare literal while the icon button read the token,
+   so the topbar showed two square-control heights. One family, one pair of tokens. */
+.studio-more-actions > summary {
+  width: var(--h-ctl-lg);
+  height: var(--h-ctl-lg);
 }
 
 .studio-icon-btn:hover:not(:disabled) {
@@ -511,14 +542,32 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 16px 18px 24px;
-  gap: 16px;
+  /* F-M88 (master-20260923): ONE dock rhythm, declared once. The Studio has two
+     side docks (this one and .studio-left-rail, the post canvas's) and the same
+     three literals were written twice, so they could drift apart. Sections sit at
+     the 16px section gap, controls inside a section at the 8px control gap, and the
+     dock's own inset is one pair. Tokens only — the paint is unchanged. */
+  --dock-pad: 16px 18px 24px;
+  --dock-gap-section: 16px;
+  --dock-gap-ctl: 8px;
+  padding: var(--dock-pad);
+  gap: var(--dock-gap-section);
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
   box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.03);
   z-index: var(--z-dock);
+}
+
+/* F-M88 (master-20260923): the two dock stacks and .ce-poem-tool-grid all authored
+   6px/7px between controls; the brief and the file's own rule ("16px section gaps,
+   8px control gaps") name 8px. This is the whole control rhythm of the dock in one
+   place instead of four literals. */
+.ce-poem-tool-grid,
+.ce-poem-typography-panel,
+.ce-template-grid {
+  gap: var(--dock-gap-ctl);
 }
 
 /* The poem dock is a vertical scroll surface. Its sections must keep their
@@ -530,6 +579,79 @@
   min-height: 0;
 }
 
+/* F-M88 (master-20260923): the right dock's vertical rhythm only agreed at the
+   column — the dock is `gap:16px`, but every `.dock-section` is its own flex
+   column with `gap:6px` (index.html:2247), so a header sat 6px off its body
+   while bodies sat 16px off each other, and the two hairline separators counted
+   as extra gaps (6+1+16 around each seam). Two rungs, set once here so the
+   desktop dock is one rhythm and every future dock section inherits it:
+   section-to-section 16px (the dock's own column gap), header-to-body 8px (the
+   house control gap). The separators collapse to 0 so seams measure 16px, not
+   22-23px. Desktop scope only: the phone dock is a different surface and keeps
+   its authored spacing. */
+html:not(.ce-phone) .studio-dock {
+  --dock-gap-section: 20px;
+  --dock-gap-ctl: 8px;
+}
+html:not(.ce-phone) .studio-dock > .dock-section,
+html:not(.ce-phone) .studio-dock .ce-poem-caption-panel,
+html:not(.ce-phone) .studio-dock .ce-studio-inspector {
+  gap: var(--dock-gap-ctl, 8px);
+}
+html:not(.ce-phone) .studio-dock > #dock-sep-1,
+html:not(.ce-phone) .studio-dock > #dock-sep-2 {
+  display: none;
+}
+
+/* F-M88 (master-20260923): the section rung must not be `gap`, because the two
+   1px separator divs still participate in the flex layout — a collapsed
+   (display:none) separator moves the dock's own gap AND breaks at the seam, so a
+   gap:16px column measures 16/16/32/16. `gap` is zeroed and every sibling
+   carries a uniform top margin, so the first section is flush to the dock's
+   padding and the rhythm between sections never depends on what sits between
+   them. The margin keeps this dock's existing section-to-section distance, so
+   the gesture stays and only the agreement is new. */
+html:not(.ce-phone) .studio-dock {
+  gap: 0;
+}
+html:not(.ce-phone) .studio-dock > .dock-section + .dock-section,
+html:not(.ce-phone) .studio-dock > [id^="dock-sep-"] + .dock-section {
+  margin-top: calc(var(--dock-gap-section, 20px) - 3px);
+}
+html:not(.ce-phone) .studio-dock > .dock-section:first-of-type,
+html:not(.ce-phone) .studio-dock > #dock-sep-1:first-child {
+  margin-top: 0;
+}
+
+/* F-M88 (master-20260923): the dock's two control-height families had drifted
+   1.3px apart inside one section — `.ce-icon-tool` resolved to 44x44 against
+   the 44px tap floor while `.photo-thumb` was an aspect-ratio box that settled
+   at 44.8x44.8, so the Backdrop strip and the Text grid read as two systems.
+   The thumb keeps its square preview but takes the authored control height, so
+   both rows in the same dock section are the same height and radii stay on the
+   8px --r-ctl family. (The 44px floor is a hit-target law, not a paint law; the
+   ::before tap slop above still gives every thumb a full 44px target.) */
+html:not(.ce-phone) .studio-dock .photo-thumb {
+  height: 44px;
+  aspect-ratio: auto;
+}
+
+/* F-M88 (master-20260923): the right dock is a 336px column, so every authored
+   width written for the wide carousel inspector landed here as horizontal
+   overflow. One clamp for the family, so a dock panel can never be wider than
+   the dock that owns it; the slider keeps its label / value rails but they may
+   now yield instead of pushing the track out of the column. */
+html:not(.ce-phone) .studio-dock .ce-inspector-pinned,
+html:not(.ce-phone) .studio-dock .ce-typo-slider,
+html:not(.ce-phone) .studio-dock .ce-tool-strip,
+html:not(.ce-phone) .studio-dock .ce-tool-strip > * {
+  max-width: 100%;
+  min-width: 0;
+}
+html:not(.ce-phone) .studio-dock .ce-typo-slider {
+  grid-template-columns: minmax(0, 52px) minmax(0, 1fr) minmax(0, 52px);
+}
+
 /* Studio inspector primitives: compact, visual, and shared by every authoring
    surface. Visible labels describe groups; individual controls use native SF
    Symbol masks plus title/aria text, so capability does not become a wall of
@@ -537,8 +659,15 @@
 .ce-poem-tool-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
   width: 100%;
+}
+/* F-M88 (master-20260923): section headers of the Studio's two docks are
+   .ce-inspector-label — the same element in both — but the post rail wrote 11px
+   against the dock's 13px, so one Studio showed two section-header sizes. The dock
+   rung is the one the file declares (--fs-secondary). */
+.studio-left-rail .ce-inspector-label,
+.studio-dock .ce-inspector-label {
+  font-size: var(--fs-secondary);
 }
 
 .ce-tool-cluster,
@@ -554,10 +683,10 @@
 
 .ce-icon-tool,
 .ce-compact-tool {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: var(--h-ctl-lg);
+  height: var(--h-ctl-lg);
+  min-width: var(--h-ctl-lg);
+  min-height: var(--h-ctl-lg);
   display: inline-grid;
   place-items: center;
   padding: 0;
@@ -724,7 +853,45 @@
   border-radius: var(--r-ctl);
   color: var(--ink);
   background: var(--card);
-  font: 600 var(--fs-overline)/1 system-ui, sans-serif;
+  /* F-M88 (master-20260923): the Font value is a control VALUE the owner reads
+     ("Kohinoor"), not a micro label, and it is the only input in this panel set
+     at the overline rung — the Weight segments and the Line-spacing output
+     beside it both read at var(--fs-secondary). A select's rendered text is its
+     selected option, so 11px made the one control carrying content smaller than
+     the three buttons that carry none. `--fs-overline` stays for the label
+     above it, which is what that rung is for. */
+  font: 600 var(--fs-secondary)/1 system-ui, sans-serif;
+}
+/* F-M88 (master-20260923): this was the last DEFAULT-BROWSER control in the dock.
+   `.ce-poem-ratio-pill` next to it is `appearance:none`; the select was not, so
+   WebKit painted its own native chevron and system box over the card surface and
+   it read as an unstyled form element. appearance:none plus the dock's own chevron
+   as a background mask keeps the control in the app's language, and the height
+   reads --h-ctl-lg so the row's control heights still line up. */
+.ce-poem-field select,
+.ce-typography-toolbar select,
+.ce-dock-group select {
+  appearance: none;
+  -webkit-appearance: none;
+  height: var(--h-ctl-lg);
+  max-width: 100%;
+  padding-right: calc(var(--h-ctl-lg) - var(--icon-ctl) / 2);
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+.ce-poem-field select:hover,
+.ce-typography-toolbar select:hover,
+.ce-dock-group select:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+.ce-poem-field select:focus-visible,
+.ce-typography-toolbar select:focus-visible,
+.ce-dock-group select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 82%, white 18%);
+  outline-offset: 2px;
 }
 
 .ce-poem-segments,
@@ -787,7 +954,6 @@
   position: relative;
   width: 100%;
   min-width: 0;
-  aspect-ratio: 4 / 3;
   padding: 0;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -795,6 +961,23 @@
   color: inherit;
   background: #0b0b0d;
   box-shadow: none;
+}
+/* F-M88 (master-20260923) collapsed this swatch to `height: var(--h-ctl-lg)`
+   (32px) so the whole dock control family shared one height. That traded away
+   the control's only job: a STYLE swatch is a thumbnail of the authored 4:3
+   face, and a 95x32 letterbox cannot show a face at all (measured 2026-09-24 on
+   the desktop gate: every `btn-type-*` preview was 95x32 against the 80x55
+   minimum the preview law requires).
+   The family rhythm is kept the other way round: the swatch keeps its authored
+   ratio and takes its HEIGHT from the dock's own large-control token plus the
+   label band, so one token still drives the family and the preview is a real
+   thumbnail. The absolutely-inset preview frame fills whatever box this
+   produces, so no authored ratio is rewritten — 4:3 at 32+24 = 56px tall reads
+   as a face, which is what the swatch is for. */
+#dock-canvas-section .ce-template-swatch {
+  aspect-ratio: 4 / 3;
+  height: auto;
+  min-height: calc(var(--h-ctl-lg) + 24px);
 }
 
 #dock-canvas-section .ce-template-swatch:hover {
@@ -900,6 +1083,16 @@
   max-height: 100%;
   max-width: 100%;
   border-radius: 16px;
+}
+/* F-M88 (master-20260923): the poem canvas is a flex item with max-height:100% but
+   NO max-width, so it kept its authored 960px width and overflowed a 944px stage —
+   the stage clipped it (overflow:hidden) and the left margin ate the difference
+   (l 0 / r 64), which is the uneven "canvas not centred" read. The rule above gives
+   the stage symmetric 20px padding; this keeps the canvas inside the same even box
+   on the width axis. Height still drives the fit, so no authored ratio changes. */
+.studio-stage > .studio-canvas-wrap {
+  max-width: calc(100% - 40px);
+  flex: 0 1 auto;
 }
 /* H01-1 (CE-A1, 2026-09-15): the fit pass floors at authored scale, so a tall
    ratio on a short stage keeps its 580px authored width and centres instead of
@@ -1540,11 +1733,11 @@
 }
 .studio-history-btn {
   width: auto;
-  min-width: 32px;
-  height: 32px;
+  min-width: var(--h-ctl-lg);
+  height: var(--h-ctl-lg);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--dock-gap-ctl, 8px);
   padding: 0 10px;
   font-weight: 600; font-size: var(--fs-secondary); line-height: 1; font-family: system-ui, sans-serif;
 }
@@ -2086,6 +2279,54 @@
   }
 }
 
+/* F-M109 (master-20260924): the Studio inspector was a fixed 336px at every Mac
+   window (`.studio-dock` below, width/min/max all 336px), so at a 1024x700 window
+   the stage kept 714px and the poem canvas measured 634x476 — the dock, not the
+   artwork, was eating the window. The dock now tracks the window
+   (`clamp(280px, 24vw, 336px)`): it yields 56px to the canvas at 1024-1279 and
+   is untouched at 1440+, where 24vw is already past the 336px ceiling. Same
+   reasoning the dock's own `.is-carousel-mode` rule below already uses when it
+   clears `min-width`, so the rail may be narrower than its authored width.
+   Desktop only — the phone dock is a different surface and keeps its authored
+   width. */
+html:not(.ce-phone) .studio-dock {
+  width: clamp(280px, 24vw, 336px);
+  min-width: 0;
+  max-width: clamp(280px, 24vw, 336px);
+}
+/* F-M109 (master-20260924): the 1080px rung above narrowed the dock to 310px but
+   both widths can match at once, so which one wins was source order and not
+   intent. The clamp owns the shrink now; the rung is neutralised on desktop. */
+@media (max-width: 1080px) {
+  html:not(.ce-phone) .studio-dock {
+    width: clamp(280px, 24vw, 336px);
+    min-width: 0;
+    max-width: clamp(280px, 24vw, 336px);
+  }
+}
+
+/* F-M109 (master-20260924): the inspector's controls were authored against a
+   336px dock, so 280px is where the rows must shed their fixed insets instead of
+   clipping. The 16px/18px dock inset leaves a 244px content box; the Style
+   swatch grid and the Canvas ratio pills (1fr tracks holding real labels) cannot
+   shrink, only give up gap. Keyed to the window — 1100px is exactly where 24vw
+   leaves the 336px ceiling — so it cannot fire while the dock is still full
+   width. */
+@media (max-width: 1100px) {
+  html:not(.ce-phone) .studio-dock {
+    --dock-pad: 16px 12px 24px;
+  }
+  html:not(.ce-phone) .studio-dock .ce-template-grid {
+    gap: 6px;
+  }
+  html:not(.ce-phone) .studio-dock .ce-poem-ratio-pills {
+    gap: 3px;
+  }
+  html:not(.ce-phone) .studio-dock .ce-poem-ratio-pill {
+    padding: 4px 4px;
+  }
+}
+
 /* ==========================================================================
    Carousel Studio Refined Mode: Full-Width Stage & Horizontal Bottom Dock
    ========================================================================== */
@@ -2135,12 +2376,34 @@
   width: 100% !important;
   height: 100% !important;
   max-height: 100% !important;
-  padding: 0 !important;
+  /* F-M88 (master-20260923): the carousel stage had padding:0 while the canvas
+     kept its own 20px inset, so the fit box ran the full viewport width and the
+     canvas sat at l 0 / r 40 — the one Studio whose hero was not centred in its
+     stage. The stage now carries the same symmetric inset the other two variants
+     get, so the canvas is even on both axes and the filmstrip still owns the
+     bottom band. */
+  padding: 20px 20px 0 !important;
+  box-sizing: border-box !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
   justify-content: stretch !important;
+}
+
+/* F-M88 (master-20260923): `.studio-stage > .studio-canvas-wrap` caps the card at
+   calc(100% - 40px) so the docked variants keep a 40px gutter against the dock's
+   inner edge. Carousel mode is the one variant where the wrap is a bare
+   `studio-canvas-wrap` child of the stage (the post/poem wraps carry their own
+   --post/--carousel class and are never matched by this branch). Restating the
+   cap against the stage's own 20px inset keeps that variant honest, while the
+   docked variants below keep their calc() gutter untouched — an unconditional
+   width here silently shrank the poem canvas from its authored 960px to 720px.
+   Scoped to the carousel stage precisely so it cannot reach them. */
+.studio-workspace.is-carousel-mode .studio-stage > .studio-canvas-wrap {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .studio-workspace.is-carousel-mode .studio-canvas-wrap.ce-studio-canvas-wrap--carousel {
@@ -2183,10 +2446,30 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 20px !important;
-  padding: 24px !important;
+  /* F-M88 (master-20260923): the ghost-nav pair is positioned absolutely, so it
+     never consumed a flex slot — yet this zone padded 24px on every side, and the
+     generic .studio-canvas-wrap flex:0 1 auto still resolved to a 100%-width box.
+     The hero card therefore sat 44px from the left rule and 84px from the right
+     one. This zone now owns ONE horizontal inset (the stage supplies the matching
+     outer inset) and the card is capped to the box it is actually in. */
+  padding: 0 !important;
   box-sizing: border-box !important;
   position: relative !important;
   background: radial-gradient(circle at center, rgba(255, 255, 255, 0.025) 0%, rgba(0, 0, 0, 0.35) 100%), #0c0d12 !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-carousel-hero-zone > .studio-canvas-wrap {
+  flex: 0 1 auto !important;
+  width: auto !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.studio-workspace.is-carousel-mode .ce-carousel-hero-zone > .studio-canvas-wrap,
+.studio-workspace.is-carousel-mode .ce-carousel-hero-zone > .ce-carousel-hero-card {
+  align-self: center !important;
+  margin-inline: auto !important;
 }
 
 .studio-workspace.is-carousel-mode .ce-carousel-ghost-nav {
@@ -3726,6 +4009,19 @@
   gap: 6px;
   min-width: 0;
 }
+/* F-M88 (master-20260923): the caption groups are the dock's other selectable-value
+   row and .ce-cap-pick opted ITSELF out of the pill family with a bare 8px literal,
+   so one wrapped row showed two chip radii. The pill radius is the family's own
+   --r-pill; the row gaps read the one control gap. */
+.ce-caption-group-row,
+.ce-caption-pick-row,
+.ce-hook-chip-row {
+  gap: var(--dock-gap-ctl, 8px);
+}
+.ce-cap-chip.ce-cap-pick,
+.ce-cap-pick {
+  border-radius: var(--r-pill);
+}
 .ce-hook-chip {
   max-width: 100%;
   overflow: hidden;
@@ -4707,16 +5003,29 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
    (F-S13 audit 2026-09-22: a bare negative literal is unreadable against the rungs).
    Photo family only — paper/editorial faces are ink-on-light and a dark scrim
    would hurt them. */
+/* F-M105 (master-20260924): the renderer writes `overflow:hidden` inline on the
+   text block (it caps a long poem at the card), and that clip cut both the shade
+   below and the verse's own 14px text-shadow at the block's rectangle. On the Mac
+   shelf every photo card read as a hard-edged dark box laid over the picture.
+   The block now reaches one bleed further on each side and pads back by the same
+   amount: the letters sit exactly where they did, and the clip edge lies in the
+   photo where the shade and the shadow have already faded out. content-box keeps
+   the inline max-height measuring the verse, not the bleed. */
+.ce-poem-face[data-ce-poem-family="photo"] .ce-poem-text-block {
+  box-sizing: content-box;
+  margin: -1.1em -1.6em;
+  padding: 1.1em 1.6em;
+}
 .ce-poem-face[data-ce-poem-family="photo"] .ce-poem-text-block::before {
   content: "";
   position: absolute;
   z-index: var(--z-canvas-under);
-  inset: -0.35em -0.25em;
-  border-radius: 0.2em;
-  background: linear-gradient(180deg,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.42) 14%,
-    rgba(0, 0, 0, 0.46) 86%,
+  /* F-M105 (master-20260924): see the block rule below — the shade now fills
+     the block's padded box and fades to zero before its edge. */
+  inset: 0;
+  background: radial-gradient(ellipse 50% 50% at 50% 50%,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.36) 50%,
     rgba(0, 0, 0, 0) 100%);
   pointer-events: none;
 }
@@ -5273,6 +5582,20 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   display: none !important;
 }
 
+/* F-M88 (master-20260923): the left rail is the post canvas's own dock and carried
+   the exact same rhythm literals as .studio-dock (336/16/18/24) in a second copy,
+   so the two docks could drift. It reads the dock's rhythm from shared custom
+   properties (base values declared with .studio-dock) and keeps only its own
+   lateral width, which is layout, not rhythm. Nothing here changes the 320px rail;
+   the two-widths-on-one-page read is what the rail is for. */
+.studio-left-rail {
+  padding: var(--dock-pad);
+  gap: var(--dock-gap-section);
+}
+.studio-left-rail > .ce-dock-group {
+  flex: 0 0 auto;
+}
+
 /* Post Mode Symmetrical Centering */
 .studio-workspace.is-post-mode .studio-stage {
   flex: 1 1 0 !important;
@@ -5291,6 +5614,63 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
   aspect-ratio: 4 / 5 !important;
   box-shadow: 0 32px 80px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
   border-radius: 12px!important;
+}
+
+/* F-M88 (master-20260923): Post Studio renders the same typography inspector
+   markup as the carousel (`.ce-dock-text` -> `.ce-inspector-font-row` ->
+   `select#ce-font-family`) but that one control was styled ONLY under
+   `.is-carousel-mode`, so in Post mode the font read as the raw macOS popup
+   button: `appearance:auto`, 106x20, 0px radius, 13.3px system type, on the
+   other two shells' 44px / var(--r-ctl) / var(--fs-secondary) baseline. Same
+   markup, same control, so the rung is shared by both authoring modes rather
+   than duplicated per mode. Desktop scope only; the phone dock keeps its own
+   authored control metrics. */
+html:not(.ce-phone) .studio-workspace.is-post-mode .ce-inspector-font-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+html:not(.ce-phone) .studio-workspace.is-post-mode .ce-inspector-font-row > span {
+  font-size: var(--fs-overline);
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+html:not(.ce-phone) .studio-workspace.is-post-mode .ce-inspector-font-row select,
+html:not(.ce-phone) .studio-workspace.is-post-mode select#ce-font-family {
+  flex: 1 1 auto;
+  height: var(--h-ctl-lg);
+  min-height: var(--h-ctl-lg);
+  min-width: 0;
+  max-width: 100%;
+  padding: 0 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--r-ctl);
+  color: var(--ink);
+  font: 500 var(--fs-secondary) var(--font-ui, system-ui, sans-serif);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+html:not(.ce-phone) .studio-workspace.is-post-mode .ce-inspector-font-row select:hover:not(:disabled),
+html:not(.ce-phone) .studio-workspace.is-post-mode select#ce-font-family:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+html:not(.ce-phone) .studio-workspace.is-post-mode .ce-inspector-font-row select:focus-visible,
+html:not(.ce-phone) .studio-workspace.is-post-mode select#ce-font-family:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(196, 59, 78, 0.25);
+}
+html:not(.ce-phone) .studio-workspace.is-post-mode .ce-inspector-font-row select:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .ce-post-nav-bar,
@@ -6225,6 +6605,80 @@ body.ce-studio-moving, body.ce-studio-moving * { cursor: grabbing !important; }
    selected input[type="search"] and matched nothing. The floor is a 44px MINIMUM IN BOTH AXES. */
 html.ce-phone .search-input,
 html.ce-phone input#search { min-width: 44px !important; min-height: 44px !important; }
+
+/* F-M103 (master-20260924): the phone Studio ••• menu opened UPWARD
+   (`bottom: calc(100% + 6px)`, ce-mobile F-M87/A) into the canvas field and the
+   stage's artwork strip, so it covered the undo/redo pair and the post canvas
+   under it. An overlay never opens over the controls it was opened from. The
+   disclosure unfolds on the trigger's own edge — the bar's bottom — one control
+   gap (4px) below it: `fixed` so the containing block is the viewport and never
+   the 44px summary's own box (the form an `absolute` clamp resolves against),
+   `top` derived from the ONE published bar height (--studio-topbar-h 54px) plus
+   the safe-area inset the bar's own padding carries, and the 20px --ph-gutter
+   (ce-mobile) mirrored on the right edge. z-menu is 220 — above the canvas band
+   and below anything modal. Desktop (no html.ce-phone) keeps the authored
+   absolute menu byte-for-byte. */
+html.ce-phone .studio-topbar .studio-more-menu {
+  position: fixed !important;
+  top: calc(var(--studio-topbar-h, 54px) + env(safe-area-inset-top, 0px) + 4px) !important;
+  bottom: auto !important;
+  right: var(--ph-gutter, 20px) !important;
+  left: auto !important;
+  max-width: calc(100vw - 40px) !important;
+  max-height: calc(var(--ce-visual-viewport-height, 100dvh) - var(--studio-topbar-h, 54px) - env(safe-area-inset-top, 0px) - 24px) !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+}
+
+/* F-M103 (master-20260924): the dismiss pair (undo / redo) is a 44px target at
+   every phone width — the census floor was reachable through the ::before slop
+   only, so the PAINTED box was 32px and a thumb could miss it. The state is
+   stated on the glyph: .38 opacity, ink colour, no accent anywhere in the
+   disabled branch (a disabled control that still carries the accent reads as
+   live). */
+html.ce-phone .studio-topbar .studio-history-controls .studio-icon-btn {
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+}
+html.ce-phone .studio-topbar .studio-history-controls .studio-icon-btn:disabled,
+html.ce-phone .studio-topbar .studio-history-controls .studio-icon-btn[aria-disabled="true"] {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--ink) !important;
+  opacity: .38 !important;
+  cursor: default !important;
+}
+html.ce-phone .studio-topbar .studio-history-controls .studio-icon-btn:disabled .ce-ic,
+html.ce-phone .studio-topbar .studio-history-controls .studio-icon-btn[aria-disabled="true"] .ce-ic {
+  opacity: .38 !important;
+  color: inherit !important;
+}
+html.ce-phone .studio-topbar .studio-history-controls .studio-icon-btn:disabled:hover,
+html.ce-phone .studio-topbar .studio-history-controls .studio-icon-btn[aria-disabled="true"]:hover {
+  border-color: transparent !important;
+  background: transparent !important;
+  transform: none !important;
+}
+
+/* F-M103 (master-20260924): the phone Tools sheet's canvas-ratio pills and its
+   Style swatches share ONE 8px control radius and the 44px floor. The pill
+   radius had drifted to the pill group while the swatch family kept its own,
+   and the ratio-family buttons that are .pill-btn painted 40 against the floor
+   the rest of the sheet honours (ce-mobile's phone .pill-btn min-height). Two
+   families, one radius, one floor; scoped to the phone sheet, desktop
+   untouched. */
+html.ce-phone .ce-poem-ratio-pill,
+html.ce-phone #dock-canvas-section .ce-template-swatch,
+html.ce-phone .ce-dock-canvas-pills .pill-btn {
+  min-height: 44px !important;
+  border-radius: var(--r-ctl, 8px) !important;
+}
+html.ce-phone .ce-poem-ratio-pills,
+html.ce-phone .ce-poem-ratio-pills > .ce-poem-ratio-pill {
+  border-radius: var(--r-ctl, 8px) !important;
+}
 
 /* studio-design-system: "Carousel controls escape their section". MEASURED CHAIN (not guessed):
    section 464..735 (271px) > .ce-tool-strip 480..719 (239px, already correct and inside the

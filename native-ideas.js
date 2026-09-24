@@ -507,8 +507,16 @@
        renders), so filtering, expansion and the empty state all stay honest. */
     var topicCounts = groups.map(function (group) { return group.key; });
     var openTopicCount = topicCounts.filter(function (key) { return !!openGroups[key]; }).length;
-    var summaryCounts = visibleCount + (visibleCount === 1 ? ' idea to explore' : ' ideas to explore') +
-      (groups.length ? ' · ' + openTopicCount + ' of ' + groups.length + (groups.length === 1 ? ' topic open' : ' topics open') : '');
+    /* F-M102 (master-20260924): an empty Ideas surface printed "0 ideas to
+       explore" directly above the honest empty copy, so the same screen said
+       both "nothing here" and "here is a number". The count line is quantity
+       only: it renders when there is at least one idea to count, keeps the
+       singular for one, and stays silent at zero — messageHtml owns the zero
+       state. */
+    var summaryCounts = visibleCount
+      ? visibleCount + (visibleCount === 1 ? ' idea to explore' : ' ideas to explore') +
+        (groups.length ? ' · ' + openTopicCount + ' of ' + groups.length + (groups.length === 1 ? ' topic open' : ' topics open') : '')
+      : '';
     /* The hidden #meta topbar channel is gone (W9, 2026-09-18) — the summary
        line inside the surface below is the visible owner of the count. */
     view.className = 'view ce-ideas-parity';
@@ -519,15 +527,21 @@
        updated. Visible results are identical — the list markup is the same
        string the whole-surface write produced. */
     var list = view.querySelector('.ce-ideas-list');
-    var chromeOk = !!view.querySelector('.ce-ideas-controls') && !!view.querySelector('.ce-ideas-summary');
+    /* N-01 (master-20260924): the title now paints, so it joins the reused
+       chrome — a shell mounted before this change (or one whose title node is
+       missing) takes the full rewrite and gets it. */
+    var chromeOk = !!view.querySelector('.ce-ideas-controls') && !!view.querySelector('.ce-ideas-summary') && !!view.querySelector('.ce-ideas-page-title');
     if (!list || !chromeOk) {
-      view.innerHTML = controlsHtml() +
+      view.innerHTML =
+        /* N-01 (master-20260924): the surface name, first on the surface, on
+           the same 32px page edge and at the same --fs-title rung as Saved /
+           Write / Plan (the rule is the shared d7 page-title rule in
+           index.html). Supersedes A11Y-05's visually-hidden-only title — it is
+           still a real h2, so the h3 topic heads below keep an h2 parent and
+           the document keeps one h1. */
+        '<h2 class="ce-ideas-page-title">Ideas</h2>' +
+        controlsHtml() +
         '<div class="ce-ideas-summary"><span>' + summaryCounts + '</span>' + (structuredOnly ? '<span>structured outlines</span>' : '') + '</div>' +
-        /* A11Y-05 (master-20260923): the surface title is a real h2, so the topic
-           headers below it land at h3 with an h2 parent and the document keeps
-           one h1. Visually hidden — the shell has no painted Ideas h1, and the
-           count line is the visible owner of the surface name. */
-        '<h2 class="ce-visually-hidden">Ideas</h2>' +
         '<div class="ce-ideas-list"></div>';
       list = view.querySelector('.ce-ideas-list');
     } else {

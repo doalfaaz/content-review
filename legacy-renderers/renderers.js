@@ -685,6 +685,10 @@ CLOSERS.default = CLOSERS.teaching;
   const SLIDE_BASE_CSS = `
   .slide, .slide *{ box-sizing:border-box; }
   .slide{ width:1080px; height:1350px; padding:96px 92px 120px; display:flex; flex-direction:column; position:relative; overflow:hidden; }
+  /* F-M116 (master-20260924): text blocks keep the default flex sizing. Freezing
+     them (flex:0 0 auto) stopped the fit pass narrowing a block that sits in a
+     row-direction .mid, and 69 slides spilled horizontally (slide-fit gate). The
+     kicker row keeps its own freeze below; the headline is sized by the fit pass. */
   .hook, .body, .poem, .profile, .bubble .body, .bk-title, .bk-h, .bk-t{ overflow-wrap:break-word; }
   .pu{ white-space:nowrap; } /* v357 typeset: phrase units never break mid-phrase */
   .slide .gfx{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
@@ -695,7 +699,17 @@ CLOSERS.default = CLOSERS.teaching;
   .brand{ font-family:'Poppins'; font-weight:600; font-size:21px; letter-spacing:4px; text-align:right; }
   .pageno{ font-family:'Poppins'; font-weight:400; font-size:26px; letter-spacing:1px; }
   .arrow{ opacity:.85; }
-  .kickline{ display:flex; align-items:center; gap:22px; margin-bottom:44px; }
+  /* F-W4 (picasso/wave4, 2026-09-24): the kicker is CHROME, never a shrinking
+     flex item. The .mid flex column is capped by the fit pass with zoom and
+     max-height; with the default flex-shrink:1 the whole .kickline (and its .kt
+     glyph run and .rule) compressed toward zero inside its own box, so the kicker
+     label painted OUTSIDE the kickline box and straight through the headline below
+     it - the owner's "rule drawn through the headline" strikethrough. Its row box
+     also collapsed to ~12px on shelf cards. Chrome is sized by its content and
+     never gives volume back: flex:0 0 auto + a min-height, with the same guard on
+     both children so the rule can never be squeezed to a 0x0 sliver either. */
+  .kickline{ display:flex; align-items:center; gap:22px; margin-bottom:44px; flex:0 0 auto; min-height:34px; }
+  .kickline > .rule{ flex:0 1 auto; min-width:0; } /* F-M116: the rule gives way to the label, never the slide edge (slide-fit horizontal spill 312) */
   .num{ display:block; margin-bottom:16px; }
   .ce-render-block[style*="--ce-font-family"] > :is(.hook,.body,.poem,.profile,.bubble,.bk-title),
   .ce-render-block[style*="--ce-font-family"] .kt,

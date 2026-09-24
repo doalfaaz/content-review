@@ -104,6 +104,15 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
 @media(max-width:700px){.ce-plan-inbox{margin-inline:-2px;padding-inline:10px}.ce-plan-inbox-list{gap:10px}.ce-plan-inbox-list>.ce-kanban-card{flex-basis:min(244px,calc(100vw - 44px))}}
 .ce-idea-schedule-modal{position:fixed;inset:0;z-index:var(--z-modal-top);display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.64);backdrop-filter:blur(12px)}
 .ce-idea-schedule-card{width:min(390px,92vw);display:grid;gap:13px;padding:20px;border:1px solid var(--card-border);border-radius:16px;background:var(--sidebar-bg);box-shadow:0 24px 70px rgba(0,0,0,.42);color:var(--ink)}
+/* F-M102 (master-20260924): the modal's commit button was the one CTA in the
+   phone shell with no colour of its own — a bare 11px `#fff` on `--accent`
+   (native-plan.css:107). It measured 3.33:1 both ways (phone dark --accent
+   #d96a7c, bright #b13a4c), the exact ground the 2026-09-12 AA pass already
+   scrimmed for .ce-surface-button.is-primary — missed here because this dialog
+   is built by native-ideas.js and never carries that class. Same scrim, same
+   brand hue: 6.63:1 dark / 10.10:1 bright, hover untouched. The label also
+   leaves the 11px micro-label token; it is the dialog's commit action. */
+.ce-idea-schedule-actions button.is-primary{border-color:transparent;background-color:var(--accent);background-image:linear-gradient(135deg,rgba(0,0,0,.34),rgba(0,0,0,0)),var(--grad-accent);color:#fff;font-size:var(--fs-secondary)}
 .ce-idea-schedule-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.ce-idea-schedule-head>div{display:grid;gap:4px}.ce-idea-schedule-head strong{font-size:var(--fs-section);font-weight:700}.ce-idea-schedule-head span{color:var(--muted);font-size:var(--fs-overline);line-height:1.35}.ce-idea-schedule-head>button{width:28px;height:28px;border:0;border-radius:8px;background:rgba(255,255,255,.08);color:var(--ink);font-size:var(--fs-title);cursor:pointer}.ce-idea-schedule-note{margin:0;color:var(--muted);font-size:var(--fs-overline);line-height:1.45}.ce-idea-schedule-card>label{display:grid;gap:6px;color:var(--muted);font-size:var(--fs-overline);font-weight:700}.ce-idea-schedule-card input{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--card-border);border-radius:9px;background:rgba(255,255,255,.06);color:var(--ink);font:inherit}.ce-idea-schedule-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}.ce-idea-schedule-actions button{padding:8px 12px;border:1px solid var(--card-border);border-radius:8px;background:rgba(255,255,255,.07);color:var(--ink);font-size:var(--fs-overline);font-weight:700;cursor:pointer}.ce-idea-schedule-actions button.is-primary{border-color:var(--accent);background:var(--accent);color:#fff}
 .ce-surface-button{min-height:36px;padding:0 14px;border:1px solid var(--card-border);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer;font-size:var(--fs-overline);font-weight:700;transition:transform .15s ease,border-color .15s ease,background .15s ease}
 .ce-surface-button:hover{transform:translateY(-1px);border-color:var(--accent)}
@@ -130,9 +139,17 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
 .is-posts{background:var(--grad-accent-h)}.is-poems{background:#d96a7c}.is-carousels{background:#c43b4e}.is-ideas{background:#a9a2b7}.ce-mix-bar span{box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
 .ce-mix-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.ce-mix-legend button{display:grid;grid-template-columns:9px auto 1fr;align-items:baseline;gap:7px;min-width:0;padding:8px 4px;border:0;background:transparent;color:var(--ink);cursor:pointer;text-align:left}.ce-mix-legend button:hover small{color:var(--accent)}.ce-legend-dot{width:7px;height:7px;border-radius:50%}.ce-mix-legend strong{font-size:var(--fs-secondary)}.ce-mix-legend small{overflow:hidden;color:var(--muted);font-size:var(--fs-overline);text-overflow:ellipsis;transition:color .15s ease}
 .ce-loop-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.ce-loop-steps button{position:relative;min-height:126px;padding:18px;border:1px solid var(--card-border);border-radius:12px;background:var(--bg);color:var(--ink);cursor:pointer;text-align:left;transition:border-color .15s ease,transform .15s ease}.ce-loop-steps button:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 45%,var(--card-border));box-shadow:0 10px 28px rgba(0,0,0,.14)}
-.ce-loop-steps button:active{transform:translateY(0) scale(.98)}.ce-loop-steps span{background:var(--grad-accent-text);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-size:var(--fs-overline);font-weight:700;letter-spacing:.08em}.ce-loop-steps strong{display:block;margin-top:17px;font-size:var(--fs-secondary)}.ce-loop-steps small{display:block;margin-top:7px;color:var(--muted);font-size:var(--fs-overline);line-height:1.45}
+.ce-loop-steps button:active{transform:translateY(0) scale(.98)}.ce-loop-steps strong{display:block;margin-top:17px;font-size:var(--fs-secondary)}.ce-loop-steps small{display:block;margin-top:7px;color:var(--muted);font-size:var(--fs-overline);line-height:1.45}
+
+/* F-M102 (master-20260924): the 01-04 step counters painted --grad-accent-text
+   through background-clip:text. A clipped gradient has no single measurable ink,
+   and its orange stop landed at 3.5:1 on the --bg card the step sits on. The
+   counter is a label, so it takes the solid accent-label token this surface
+   already declares for that job (--accent-text: 4.71:1 dark / 7.4:1 bright on
+   the card). No background, no transparent fill. */
+.ce-loop-steps span{color:var(--accent-text);font-size:var(--fs-overline);font-weight:700;letter-spacing:.08em}
 .ce-launch-workbench{gap:18px;max-width:1440px;margin:0 auto}
-.ce-write-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(390px,.78fr);gap:20px;max-width:1440px;margin:0 auto}.ce-write-editor,.ce-write-preview-panel{padding:26px;border:1px solid var(--card-border);border-radius:18px;background:var(--card)}.ce-write-head{display:flex;align-items:flex-start;justify-content:space-between;gap:22px}.ce-write-head h2{margin-top:8px;color:var(--ink);font-size:var(--fs-display);line-height:1.05;letter-spacing:-.04em}.ce-write-head p{max-width:520px;margin-top:9px;color:var(--muted);font-size:var(--fs-overline);line-height:1.5}.ce-write-kind{display:flex;gap:4px;padding:4px;border:1px solid var(--card-border);border-radius:10px;background:var(--bg)}.ce-write-kind button{min-width:62px;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;font-size:var(--fs-overline);font-weight:700;padding:8px 10px}.ce-write-kind button.is-active{background:var(--card);color:var(--ink);box-shadow:0 2px 9px rgba(0,0,0,.08)}.ce-write-field{margin-top:24px;border:1px solid var(--card-border);border-radius:14px;background:var(--bg);overflow:hidden}.ce-write-field:focus-within{border-color:var(--accent-border)}.ce-write-field textarea{display:block;width:100%;padding:22px;border:0;background:transparent;color:var(--ink);font-family:'Mukta','Noto Sans Devanagari','Kohinoor Devanagari',system-ui,sans-serif;font-size:var(--fs-section);line-height:1.75;outline:none;resize:none}.ce-write-field textarea:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}.ce-write-fieldbar{display:flex;align-items:baseline;gap:10px;font-size:var(--fs-overline);padding:0 22px 14px}.ce-write-fieldbar strong{font-weight:600}.ce-write-actions{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px}.ce-write-actions>div{display:flex;gap:8px}.ce-write-actions>div:first-child button{border:1px solid var(--card-border);border-radius:9px;background:var(--bg);color:var(--muted);cursor:pointer;font-size:var(--fs-overline);font-weight:700;padding:9px 13px}.ce-write-preview-panel{min-width:0}.ce-write-preview{width:min(100%,390px);margin:20px auto 0;border-radius:14px;background:var(--bg);box-shadow:0 22px 50px rgba(0,0,0,.15);overflow:hidden}.ce-write-preview>.ce-postcore-face,.ce-write-preview>.ce-real-face{width:100%!important}.ce-write-design-label{display:flex;align-items:baseline;justify-content:space-between;margin-top:22px}.ce-write-design-label span{color:var(--ink);font-size:var(--fs-overline);font-weight:700}.ce-write-design-label small{font-size:var(--fs-overline)}.ce-write-designs{display:flex;flex-direction:column;gap:14px;margin-top:10px}.ce-write-design-group-label{color:var(--faint);font-size:var(--fs-overline);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}.ce-write-design-group-grid{display:grid;grid-template-columns:repeat(6,minmax(54px,1fr));gap:7px}.ce-write-design-group-grid>button{min-width:0;min-height:44px;padding:0;border:2px solid transparent;border-radius:9px;background:var(--bg);cursor:pointer;overflow:hidden;opacity:.76}.ce-write-design-group-grid>button.is-active{border-color:var(--accent);opacity:1;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 14%,transparent)}.ce-write-design-group-grid>button>.ce-postcore-face,.ce-write-design-group-grid>button>.ce-real-face{width:100%!important}.ce-write-design-group-grid button>div{pointer-events:none}
+.ce-write-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(390px,.78fr);gap:20px;max-width:1440px;margin:0 auto}.ce-write-editor,.ce-write-preview-panel{padding:26px;border:1px solid var(--card-border);border-radius:18px;background:var(--card)}.ce-write-head{display:flex;align-items:flex-start;justify-content:space-between;gap:22px}.ce-write-head h2{margin:0;color:var(--ink);line-height:1.05} /* F-M83: size, weight and tracking from the shared page-title rule */.ce-write-head p{max-width:520px;margin-top:9px;color:var(--muted);font-size:var(--fs-overline);line-height:1.5}.ce-write-kind{display:flex;gap:4px;padding:4px;border:1px solid var(--card-border);border-radius:10px;background:var(--bg)}.ce-write-kind button{min-width:62px;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;font-size:var(--fs-overline);font-weight:700;padding:8px 10px}.ce-write-kind button.is-active{background:var(--card);color:var(--ink);box-shadow:0 2px 9px rgba(0,0,0,.08)}.ce-write-field{margin-top:24px;border:1px solid var(--card-border);border-radius:14px;background:var(--bg);overflow:hidden}.ce-write-field:focus-within{border-color:var(--accent-border)}.ce-write-field textarea{display:block;width:100%;padding:22px;border:0;background:transparent;color:var(--ink);font-family:'Mukta','Noto Sans Devanagari','Kohinoor Devanagari',system-ui,sans-serif;font-size:var(--fs-section);line-height:1.75;outline:none;resize:none}.ce-write-field textarea:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}.ce-write-fieldbar{display:flex;align-items:baseline;gap:10px;font-size:var(--fs-overline);padding:0 22px 14px}.ce-write-fieldbar strong{font-weight:600}.ce-write-actions{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px}.ce-write-actions>div{display:flex;gap:8px}.ce-write-actions>div:first-child button{border:1px solid var(--card-border);border-radius:9px;background:var(--bg);color:var(--muted);cursor:pointer;font-size:var(--fs-overline);font-weight:700;padding:9px 13px}.ce-write-preview-panel{min-width:0}.ce-write-preview{width:min(100%,390px);margin:20px auto 0;border-radius:14px;background:var(--bg);box-shadow:0 22px 50px rgba(0,0,0,.15);overflow:hidden}.ce-write-preview>.ce-postcore-face,.ce-write-preview>.ce-real-face{width:100%!important}.ce-write-design-label{display:flex;align-items:baseline;justify-content:space-between;margin-top:22px}.ce-write-design-label span{color:var(--ink);font-size:var(--fs-overline);font-weight:700}.ce-write-design-label small{font-size:var(--fs-overline)}.ce-write-designs{display:flex;flex-direction:column;gap:14px;margin-top:10px}.ce-write-design-group-label{color:var(--faint);font-size:var(--fs-overline);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}.ce-write-design-group-grid{display:grid;grid-template-columns:repeat(6,minmax(54px,1fr));gap:7px}.ce-write-design-group-grid>button{min-width:0;min-height:44px;padding:0;border:2px solid transparent;border-radius:9px;background:var(--bg);cursor:pointer;overflow:hidden;opacity:.76}.ce-write-design-group-grid>button.is-active{border-color:var(--accent);opacity:1;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 14%,transparent)}.ce-write-design-group-grid>button>.ce-postcore-face,.ce-write-design-group-grid>button>.ce-real-face{width:100%!important}.ce-write-design-group-grid button>div{pointer-events:none}
 .ce-owner-gate{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:18px;padding:18px 22px;border:1px dashed color-mix(in srgb,var(--accent) 44%,var(--card-border));border-radius:14px}.ce-owner-gate .ce-eyebrow{margin-bottom:4px}.ce-owner-gate strong{display:block;color:var(--ink);font-size:var(--fs-secondary)}.ce-owner-gate p{margin-top:4px;color:var(--muted);font-size:var(--fs-overline)}
 @media(max-width:1040px){.ce-readiness-row{grid-template-columns:repeat(2,1fr)}.ce-readiness-row>div:nth-child(2){border-right:0}.ce-readiness-row>div:nth-child(-n+2){border-bottom:1px solid var(--card-border)}.ce-write-shell{grid-template-columns:1fr}.ce-write-preview{max-width:440px}}
 @media(max-width:700px){.ce-plan-intro{align-items:flex-start;flex-direction:column}.ce-plan-summary{justify-content:flex-start}.ce-plan-grid{grid-template-columns:1fr;gap:16px}.ce-queue-card{max-width:420px}.ce-write-head,.ce-write-actions{align-items:flex-start;flex-direction:column}.ce-write-actions>div:last-child{width:100%}.ce-write-actions .ce-surface-button{flex:1}.ce-write-design-group-grid{grid-template-columns:repeat(3,1fr)}.ce-readiness-row,.ce-mix-legend,.ce-loop-steps{grid-template-columns:1fr}.ce-readiness-row>div{border-right:0;border-bottom:1px solid var(--card-border)}.ce-readiness-row>div:last-child{border-bottom:0}.ce-section-heading,.ce-owner-gate{align-items:flex-start;flex-direction:column}.ce-data-note{line-height:1.4}}
@@ -533,7 +550,12 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
    app-wide ring the other plan controls already get; at-rest look untouched. */
 .queue-ready-topost:focus-visible { outline: 2px solid var(--accent) !important; outline-offset: 2px !important; }
 .queue-ready-topost:active { transform: scale(.94); }
-.queue-ready-topost.is-ready { border-color: var(--accent); background: var(--accent); color: #fff; box-shadow: 0 2px 8px var(--accent-glow); }
+/* F-M102 (master-20260924): same bare `#fff`-on-`--accent` failure as the two
+   controls above — 3.33:1 on the phone dark accent. This is the queue card's
+   "ready to post" state, i.e. a confirmation the owner taps, so the label
+   takes the accent-label ink (6.41:1 dark / 5.55:1 bright); the filled pill
+   itself never changes. */
+.queue-ready-topost.is-ready { border-color: var(--accent); background: var(--accent); color: var(--accent-text); box-shadow: 0 2px 8px var(--accent-glow); }
 .ce-kanban-actions {
   display: flex;
   align-items: center;
@@ -659,7 +681,15 @@ body.bright-theme .ce-queue-card{box-shadow:0 14px 36px rgba(48,40,24,.08)}
 }
 .ce-launch-day-actions button:hover { color: var(--ink); border-color: var(--accent-border); background: var(--accent-tint); }
 .ce-launch-day-actions button.is-primary { color: var(--accent-text); border-color: var(--accent-border); }
-.ce-launch-day-actions button.is-primary:hover { color: #fff; background: var(--accent); }
+/* F-M102 (master-20260924): the hover state dropped the is-primary text token
+   and put a bare `#fff` straight on `--accent`. On phone that accent is
+   #d96a7c in dark / #b13a4c in bright, where white measures 3.33:1 / 5.87:1 —
+   so the same control passed in cream and failed the moment a pointer entered
+   it in dark. The resting state's own --accent-text is the ink and already
+   clears both (6.41:1 on the phone dark ground, 5.55:1 on the bright one);
+   hover only deepens the fill, exactly like the .ce-surface-button.is-primary
+   treatment above. */
+.ce-launch-day-actions button.is-primary:hover { color: var(--accent-text); background: var(--accent); }
 .ce-launch-day-actions .is-primary { min-width: 0; }
 .ce-launch-day-more { position: relative; flex: 0 0 auto; }
 .ce-launch-day-more summary {
@@ -846,9 +876,16 @@ body.bright-theme .ce-launch-wl-row { background: rgba(0,0,0,0.02); }
   transform: scale(0.97);
 }
 .ce-plan-bulk-btn.is-primary {
+  /* F-M102 (master-20260924): the label was a bare `#fff` on `--accent`; white
+     on the phone dark accent (#d96a7c) is 3.33:1, and this is the bulk action
+     row's only primary. It takes the accent-label ink instead, the same value
+     the Plan surface already resolves for the 3.33:1 ground: 6.41:1 dark /
+     5.55:1 bright. The fill is untouched, so the primary still reads as the
+     filled one; the 2026-09-12 scrim stays scoped to .ce-surface-button.is-primary
+     (a label swap is the smaller change than re-declaring the gradient here). */
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--accent-text);
   box-shadow: 0 2px 10px rgba(196, 59, 78, 0.4);
 }
 .ce-plan-bulk-btn.is-primary:hover {
@@ -885,9 +922,14 @@ body.bright-theme .ce-launch-wl-row { background: rgba(0,0,0,0.02); }
   transform: scale(0.94);
 }
 .ce-plan-select-toggle.is-selected {
+  /* F-M102 (master-20260924): the selected state inherited `color:#fff`
+     (the resting state is deliberately white on its own near-black chip) and
+     pointed it at `--accent`; white measures 3.33:1 on the phone dark accent.
+     A selected boolean is the answer the owner just gave, so it takes the
+     accent-label ink (6.41:1 dark / 5.55:1 bright) over the same fill. */
   background: var(--accent);
   border-color: #ffffff;
-  color: #ffffff;
+  color: var(--accent-text);
   box-shadow: 0 0 12px rgba(196, 59, 78, 0.65);
   transform: scale(1.03);
 }
@@ -1172,8 +1214,9 @@ body.bright-theme .ce-launch-board-cadence {
 /* 2026-09-06 audit: collapsed Waitlist details looked like an orphaned pill — add context */
 /* Product hierarchy pass: Today is the working surface; Inbox is quiet staging. */
 .ce-plan-shell{--plan-accent:var(--accent)}
-.ce-plan-shell .ce-plan-heading{font-size:clamp(26px,3vw,40px);letter-spacing:-.045em}
-.ce-plan-shell .ce-plan-intro{padding-bottom:18px;border-bottom:1px solid var(--card-border)}
+/* F-M82: size lives in the shared page-title rule (index.html D7) */
+.ce-plan-shell .ce-plan-intro{padding-bottom:18px} /* F-M84: the queue's own top rule is the one divider; two stacked hairlines 13px apart read as a rendering fault */
+.ce-plan-icon-btn .ce-ic{width:16px;height:16px}
 .ce-plan-shell .ce-kanban-board{align-items:start;gap:12px}
 .ce-plan-shell .ce-kanban-col{border-color:var(--card-border);background:color-mix(in srgb,var(--card) 70%,transparent);box-shadow:none}
 .ce-plan-shell .ce-kanban-col:first-child{border-color:color-mix(in srgb,var(--accent) 38%,var(--card-border));box-shadow:inset 0 2px 0 var(--accent)}
@@ -1227,11 +1270,11 @@ body.bright-theme .ce-launch-board-cadence {
 }
 .ce-launch-day-art .ce-render-block-content{max-height:100%!important;overflow:hidden!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:8!important;line-height:1.35!important}
 /* Workbench hierarchy pass: one purpose per surface, quiet secondary diagnostics. */
-.ce-ops-shell{max-width:1440px;margin-top:0;padding:0 28px 64px} /* Owner 2026-09-13: same double-counted topbar clearance as the Plan shell — .main-content already reserves it. */
+.ce-ops-shell{max-width:1440px;margin-top:0;padding:0 0 64px} /* Owner 2026-09-13: same double-counted topbar clearance as the Plan shell — .main-content already reserves it. */
 .ce-readiness-row{border:1px solid var(--card-border);border-radius:14px;background:color-mix(in srgb,var(--card) 64%,transparent);box-shadow:none}
 .ce-readiness-row>div{padding:18px 20px}.ce-readiness-row strong{font-variant-numeric:tabular-nums}
 .ce-ops-panel{box-shadow:none}.ce-section-heading h3{font-size:var(--fs-section);letter-spacing:-.025em}
-.ce-launch-workbench{max-width:1440px;margin-top:0;padding:0 28px 64px} /* Owner 2026-09-13: same double-counted topbar clearance as the Plan shell — .main-content already reserves it. */.ce-launch-board-head{border-color:color-mix(in srgb,var(--accent) 28%,var(--card-border));background:linear-gradient(135deg,color-mix(in srgb,var(--card) 92%,var(--accent) 8%),var(--card));box-shadow:0 14px 34px rgba(0,0,0,.14)}
+.ce-launch-workbench{max-width:1440px;margin-top:0;padding:0 0 64px} /* Owner 2026-09-13: same double-counted topbar clearance as the Plan shell — .main-content already reserves it. */.ce-launch-board-head{border-color:color-mix(in srgb,var(--accent) 28%,var(--card-border));background:linear-gradient(135deg,color-mix(in srgb,var(--card) 92%,var(--accent) 8%),var(--card));box-shadow:0 14px 34px rgba(0,0,0,.14)}
 .ce-launch-board-cadence{margin-top:6px}
 .ce-launch-day{box-shadow:none;transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}.ce-launch-day:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.14)}.ce-launch-day:first-child{border-color:color-mix(in srgb,var(--accent) 38%,var(--card-border));box-shadow:inset 0 2px 0 var(--accent)}
 @media(max-width:700px){.ce-ops-shell,.ce-launch-workbench{margin-top:0;padding:0 14px 54px}.ce-readiness-row{grid-template-columns:repeat(2,1fr)}.ce-launch-board-head{padding:18px}.ce-launch-day{min-width:272px}}
@@ -1302,13 +1345,49 @@ body.bright-theme .ce-launch-board-cadence {
 
 /* Grow: instrument bar → one next move → readiness → merged momentum → audience → more. */
 .ce-grow-shell {
+  /* F-M102 (master-20260924): ce-mobile.css rebinds this surface's accent
+     family at shell level, so its own deep ink never reached the Grow labels
+     and the desktop tokens painted them on the shell's own --card/--bg. The
+     values the shell declares are exactly the ones index.html already gives
+     the same labels at root (--accent-text dark #d96a7c, bright #8e2f3d) —
+     the shell restated --accent-tint at its own depth, so the text/tint pair
+     the owner approved at root had drifted apart: the dark label read 4.54:1
+     on the shell's tint (under the 4.5 floor) and the bright one 3.14:1 on the
+     white card. Lighten/darken the ink only, never the tint: #f0798a holds
+     6.41:1 on the dark card / 5.47:1 on the phone tint / 5.62:1 on the plan
+     tint; #b83c4b holds 5.55:1 on the bright card and 4.60:1 on the phone
+     bright tint. Same hue family, text weight only. */
+  --accent-text: #f0798a;
+  --accent-text-bright: #b83c4b;
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) !important;
   gap: 12px !important;
-  padding: 0 28px 48px !important;
+  padding: 0 0 48px !important; /* F-M83: the view owns the side frame */
   max-width: 1440px !important;
   margin: 0 auto !important;
 }
+/* The cream-theme half of the F-M102 Grow ink above. ce-mobile.css:2664-2666
+   sets the phone bright ink at html depth; the extra class here outranks it
+   inside the shell (three classes, same !important weight as the shell's own
+   binding) so the deepened crimson reaches the labels instead of the white
+   card. */
+body.bright-theme .ce-grow-shell,
+html.ce-phone body.bright-theme .ce-grow-shell { --accent-text: var(--accent-text-bright); }
+
+/* F-M102 (master-20260924): ce-mobile.css:2642 rebinds the accent family for
+   .ce-launch-workbench at shell level too, so its accent labels — the board
+   eyebrow, the pillar chip, the active cadence period, the rail's "unmeasured"
+   mark — were painted by the desktop token on the shell's own --card/--bg. The
+   desktop dark stand-in measures 5.17:1 on that card, but its own value
+   contract is written for --accent-tint-on-card and the shell restates the
+   tint at its own depth (4.54:1 there, under the floor) while the desktop
+   bright stand-in lands at 3.14:1 on the white card. Both shell families now
+   carry the same measured inks as Grow above. Growth/launch are one surface
+   with one label grammar, so they share one pair of values. */
+.ce-launch-workbench { --accent-text: #f0798a; --accent-text-bright: #b83c4b; }
+body.bright-theme .ce-launch-workbench,
+html.ce-phone body.bright-theme .ce-launch-workbench { --accent-text: var(--accent-text-bright); }
+
 .ce-grow-shell > .ce-ops-panel,
 .ce-grow-shell > .ce-readiness-row,
 .ce-grow-shell > .ce-grow-audience-strip,
@@ -1382,7 +1461,7 @@ body.bright-theme .ce-launch-board-cadence {
 .ce-grow-more-moves .ce-loop-steps { margin: 0; padding: 0 16px 10px; }
 
 /* Launch: one today row, one snap rail, one thin intelligence strip, one disclosure. */
-.ce-launch-workbench { gap: 12px !important; padding: 0 28px 48px !important; max-width: 1440px !important; }
+.ce-launch-workbench { gap: 12px !important; padding: 0 0 48px !important; max-width: 1440px !important; } /* F-M83: the view owns the side frame */
 .ce-launch-board-head { display: flex !important; align-items: center; justify-content: space-between; gap: 14px; padding: 8px 14px !important; border-radius: 14px !important; }
 .ce-launch-board-cand--slim { min-width: 0; flex: 1 1 auto; gap: 12px; padding: 0 !important; }
 .ce-launch-board-cand--slim .ce-launch-board-open { flex: 1 1 auto; min-width: 0; }
@@ -1390,7 +1469,11 @@ body.bright-theme .ce-launch-board-cadence {
 .ce-launch-board-cand--empty strong { color: var(--muted); font-size: var(--fs-secondary); }
 .ce-launch-board-cadence { flex: 0 0 auto; margin: 0 !important; }
 .ce-launch-board-cadence button { min-height: 36px; padding: 4px 9px; }
-.ce-launch-board-cadence button.is-disabled { cursor: not-allowed; opacity: .45; }
+/* F-M114 (master-20260924): the disabled rail dimmed its SELECTED rung too, so
+   the one fact the rail states (which range is on) read at 1.24:1 dark / 1.66:1
+   bright. The selected rung keeps full strength; only the others dim. */
+.ce-launch-board-cadence button.is-disabled { cursor: not-allowed; }
+.ce-launch-board-cadence button.is-disabled:not(.is-on) { opacity: .45; }
 .ce-launch-board-strip { gap: 10px; padding: 2px 2px 8px; }
 .ce-launch-day { flex-basis: 188px; grid-template-rows: auto 1fr auto; gap: 6px; padding: 8px; }
 .ce-launch-day-art { aspect-ratio: 4 / 5; }
@@ -1529,3 +1612,11 @@ body.bright-theme .ce-launch-board-cadence {
   font-size: var(--fs-secondary) !important;
   opacity: 1 !important;
 }
+
+/* F-M89 (master-20260923): the Plan head breathes under the phone bar and its
+   two icon buttons draw their glyph at the 18px icon rung. The .ce-ic--12
+   modifier fixes both box and mask size, so both are restated here. */
+html.ce-phone .ce-plan-shell .ce-plan-intro { padding-top: 12px; }
+html.ce-phone .ce-plan-shell .ce-plan-head-group { align-items: center; }
+.ce-plan-icon-btn .ce-ic,
+.ce-plan-icon-btn .ce-ic.ce-ic--12 { width: 18px !important; height: 18px !important; -webkit-mask-size: 18px 18px !important; mask-size: 18px 18px !important; }
